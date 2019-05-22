@@ -43,11 +43,6 @@ final class MatchingResult implements MiddlewareInterface
         return $this->success;
     }
 
-    public function route(): ?Route
-    {
-        return $this->route;
-    }
-
     public function parameters(): array
     {
         return $this->parameters;
