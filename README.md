@@ -21,17 +21,9 @@ with one of the following adapter packages:
 ## General usage
 
 ```php
-$collector = new RouteCollector(
-    new Std(),
-    new GroupCountBased()
-);
 
-$router = new FastRoute(
-    $collector,
-    function ($data) {
-        return new \FastRoute\Dispatcher\GroupCountBased($data);
-    }
-);
+// for obtaining router see adapter package of choice readme
+$router = ...
 
 $router->addRoute(Route::get('/')->to(function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
     $response = $responseFactory->createResponse();
