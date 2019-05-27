@@ -217,24 +217,16 @@ class Route implements MiddlewareInterface
             $result .= implode(',', $this->methods) . ' ';
         }
         if ($this->host !== null && strrpos($this->pattern, $this->host) === false) {
-            $result .= $this->host . '/';
+            $result .= $this->host;
         }
         $result .= $this->pattern;
-
-        if ($result === '') {
-            return '/';
-        }
 
         return $result;
     }
 
     public function getName(): string
     {
-        if ($this->name === null) {
-            return implode(', ', $this->methods) . ' ' . $this->pattern;
-        }
-
-        return $this->name;
+        return $this->name ?? implode(', ', $this->methods) . ' ' . $this->pattern;
     }
 
     public function getMethods(): array
