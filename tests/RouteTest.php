@@ -158,7 +158,7 @@ class RouteTest extends TestCase
             }
          });
 
-        $response = $route->process($request, $this->getDummyRequestHandler());
+        $response = $route->process($request, $this->getRequestHandler());
         $this->assertSame(418, $response->getStatusCode());
     }
 
@@ -172,16 +172,16 @@ class RouteTest extends TestCase
           }
         );
 
-        $response = $route->process($request, $this->getDummyRequestHandler());
+        $response = $route->process($request, $this->getRequestHandler());
         $this->assertSame(418, $response->getStatusCode());
     }
 
-    private function getDummyRequestHandler(): RequestHandlerInterface
+    private function getRequestHandler(): RequestHandlerInterface
     {
         return new class implements RequestHandlerInterface {
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
-                return new Response();
+                return new Response(404);
             }
         };
     }
