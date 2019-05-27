@@ -20,14 +20,12 @@ class Router implements MiddlewareInterface
     {
         $result = $this->matcher->match($request);
 
-        if ($result === null) {
-            return $handler->handle($request);
-        }
-
         if ($result->isSuccess()) {
             foreach ($result->parameters() as $parameter => $value) {
                 $request = $request->withAttribute($parameter, $value);
             }
+        } else {
+            return $handler->handle($request);
         }
 
         return $result->process($request, $handler);
