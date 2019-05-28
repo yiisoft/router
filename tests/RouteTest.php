@@ -167,7 +167,7 @@ class RouteTest extends TestCase
         $request = new ServerRequest('GET', '/');
 
         $route = Route::get('/')->to(
-          function(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+          function(): ResponseInterface {
               return (new Response())->withStatus(418);
           }
         );
