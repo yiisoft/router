@@ -101,9 +101,9 @@ class RouteTest extends TestCase
 
     public function testPattern(): void
     {
-        $route = Route::get('/test');
+        $route = Route::get('/test')->pattern('/test2');
 
-        $this->assertSame('/test', $route->getPattern());
+        $this->assertSame('/test2', $route->getPattern());
     }
 
     public function testHost(): void

@@ -129,6 +129,13 @@ class Route implements MiddlewareInterface
         return $new;
     }
 
+    public function pattern(string $pattern): self
+    {
+        $new = clone $this;
+        $new->pattern = $pattern;
+        return $new;
+    }
+
     public function host(string $host): self
     {
         $new = clone $this;
