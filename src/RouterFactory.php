@@ -1,6 +1,8 @@
 <?php
 namespace Yiisoft\Router;
 
+use Psr\Container\ContainerInterface;
+
 class RouterFactory
 {
     private $engineFactory;
@@ -12,11 +14,11 @@ class RouterFactory
         $this->routes = $routes;
     }
 
-    public function __invoke(): RouterInterface
+    public function __invoke(ContainerInterface $container): RouterInterface
     {
         $factory = $this->engineFactory;
         /* @var $router RouterInterface */
-        $router = $factory();
+        $router = $factory($container);
         foreach ($this->routes as $route) {
             $router->addRoute($route);
         }
