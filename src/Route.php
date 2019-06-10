@@ -258,4 +258,17 @@ class Route implements MiddlewareInterface
     {
         return $this->middleware->process($request, $handler);
     }
+
+    public static function __set_state(array $properties): self
+    {
+        $new = new self();
+        $new->name = $properties['name'];
+        $new->methods = $properties['methods'];
+        $new->pattern = $properties['pattern'];
+        $new->host = $properties['host'];
+        $new->middleware = $properties['middleware'];
+        $new->parameters = $properties['parameters'];
+        $new->defaults = $properties['defaults'];
+        return $new;
+    }
 }
