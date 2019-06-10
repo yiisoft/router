@@ -22,4 +22,9 @@ class RouterFactory
         }
         return $router;
     }
+
+    public static function __set_state($properties)
+    {
+        return new self($properties['engineFactory'], $properties['routes']);
+    }
 }
