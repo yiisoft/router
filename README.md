@@ -22,8 +22,9 @@ with one of the following adapter packages:
 
 ```php
 
-// for obtaining router see adapter package of choice readme
-$router = ...
+// for obtaining router driver see adapter package of choice readme
+$driver = ...
+$router = new RouterFactory($driver);
 
 $router->addRoute(Route::get('/')->to(function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
     $response = $responseFactory->createResponse();
