@@ -70,3 +70,26 @@ $routerMiddleware = new Yiisoft\Router\Middleware\Router();
 
 In case of a route match router middleware executes a handler attached to the route. If there is no match, next
 middleware processes the request.
+
+## Creating URLs
+
+URLs could be created using `UrlGeneratorInterface::generate()`. Let's assume a route is defined like the following:
+
+```php
+$router->addRoute(Route::get('/test/{id:\w+}')->name('test')->to(function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+    $id = $request->getAttribute('id');
+
+    $response = $responseFactory->createResponse();
+    $response->getBody()->write('You are at test with param ' . $id);
+    return $response;
+}));
+```
+
+Then that is how URL could be obtained for it:
+
+```php
+function getUrl(UrlGeneratorInterface $urlGenerator, $parameters = [])
+{
+    return $urlGenerator->generate('test', $parameters);
+}
+```
