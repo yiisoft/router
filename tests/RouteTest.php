@@ -1,8 +1,5 @@
 <?php
-
-
 namespace Yiisoft\Router\Tests;
-
 
 use Nyholm\Psr7\Request;
 use Nyholm\Psr7\Response;
