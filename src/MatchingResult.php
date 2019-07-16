@@ -48,6 +48,11 @@ final class MatchingResult implements MiddlewareInterface
         return $this->parameters;
     }
 
+    public function methods(): array
+    {
+        return $this->methods;
+    }
+
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if ($this->success === false) {
