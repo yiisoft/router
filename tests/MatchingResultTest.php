@@ -12,7 +12,7 @@ use Yiisoft\Router\MatchingResult;
 use Yiisoft\Router\Method;
 use Yiisoft\Router\Route;
 
-class MatchinResultTest extends TestCase
+final class MatchingResultTest extends TestCase
 {
     public function testFromSucess(): void
     {
@@ -29,6 +29,7 @@ class MatchinResultTest extends TestCase
 
         $this->assertFalse($result->isSuccess());
         $this->assertTrue($result->isMethodFailure());
+        $this->assertSame([Method::GET, Method::HEAD], $result->methods());
     }
 
     public function testFromFailureOnNotFoundFailure(): void

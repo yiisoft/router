@@ -176,7 +176,7 @@ class Route implements MiddlewareInterface
     public function to($middleware): self
     {
         $new = clone $this;
-        if (is_callable($middleware)) {
+        if (\is_callable($middleware)) {
             $middleware = $this->wrapCallable($middleware);
         }
 

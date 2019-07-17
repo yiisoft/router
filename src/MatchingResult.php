@@ -43,6 +43,11 @@ final class MatchingResult implements MiddlewareInterface
         return $this->success;
     }
 
+    public function isMethodFailure(): bool
+    {
+        return !$this->success && $this->methods !== Method::ANY;
+    }
+
     public function parameters(): array
     {
         return $this->parameters;

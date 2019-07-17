@@ -13,7 +13,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Router\Method;
 use Yiisoft\Router\Route;
 
-class RouteTest extends TestCase
+final class RouteTest extends TestCase
 {
     public function testName(): void
     {
@@ -132,13 +132,13 @@ class RouteTest extends TestCase
             ->name('test.route')
             ->host('yiiframework.com');
 
-        $this->assertSame('[test.route] GET,POST yiiframework.com/', $route->__toString());
+        $this->assertSame('[test.route] GET,POST yiiframework.com/', (string)$route);
     }
 
     public function testInvalidTo(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        Route::get('/')->to(new \StdClass());
+        Route::get('/')->to(new \stdClass());
     }
 
     public function testToMiddleware(): void
@@ -164,7 +164,7 @@ class RouteTest extends TestCase
         $request = new ServerRequest('GET', '/');
 
         $route = Route::get('/')->to(
-          function(): ResponseInterface {
+          static function(): ResponseInterface {
               return (new Response())->withStatus(418);
           }
         );

@@ -6,7 +6,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Yiisoft\Router\Method;
 use Yiisoft\Router\UrlMatcherInterface;
 
 class Router implements MiddlewareInterface
@@ -24,19 +23,17 @@ class Router implements MiddlewareInterface
     {
         $result = $this->matcher->match($request);
 
-        if ($result->isSuccess()) {
-            foreach ($result->parameters() as $parameter => $value) {
-                $request = $request->withAttribute($parameter, $value);
-            }
-        } else {
-            // method not allowed
-            if ($result->methods() !== Method::ANY) {
-                return $this->responseFactory->createResponse(405)
-                    ->withHeader('Allow', implode(', ', $result->methods()));
-            }
+        if ($result->isMethodFailure()) {
+            return $this->responseFactory->createResponse(405)
+                ->withHeader('Allow', implode(', ', $result->methods()));
+        }
 
-            // not found
+        if (!$result->isSuccess()) {
             return $handler->handle($request);
+        }
+
+        foreach ($result->parameters() as $parameter => $value) {
+            $request = $request->withAttribute($parameter, $value);
         }
 
         return $result->process($request, $handler);
