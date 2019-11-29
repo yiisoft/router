@@ -8,4 +8,6 @@ namespace Yiisoft\Router;
 interface UrlGeneratorInterface
 {
     public function generate(string $name, array $parameters = []): string;
+    public function getUriPrefix(): string;
+    public function setUriPrefix(string $name): void;
 }
