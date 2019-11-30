@@ -26,8 +26,11 @@ class Group
      */
     public function getRoutes(): iterable
     {
-        foreach ($this->routes as $route) {
-            yield $route->pattern($this->prefix . $route->getPattern());
-        }
+        return $this->routes;
+    }
+
+    public function getPrefix(): string
+    {
+        return $this->prefix;
     }
 }
