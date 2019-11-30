@@ -16,7 +16,6 @@ class Group
 
     public function addRoute(Route $route): self
     {
-        // TODO: immutable?
         $this->routes[] = $route;
         return $this;
     }
