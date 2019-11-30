@@ -53,8 +53,7 @@ final class RouterTest extends TestCase
     {
         $middleware = $this->createRouteMiddleware();
 
-        return new class ($middleware) implements UrlMatcherInterface
-        {
+        return new class($middleware) implements UrlMatcherInterface {
             private $middleware;
 
             public function __construct(MiddlewareInterface $middleware)
@@ -99,8 +98,7 @@ final class RouterTest extends TestCase
             public function process(
               ServerRequestInterface $request,
               RequestHandlerInterface $handler
-            ): ResponseInterface
-            {
+            ): ResponseInterface {
                 return (new Response())->withStatus(201);
             }
         };
