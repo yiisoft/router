@@ -3,7 +3,6 @@
 
 namespace Yiisoft\Router\Tests;
 
-
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
@@ -17,7 +16,7 @@ use Yiisoft\Router\Route;
 
 class MatchinResultTest extends TestCase
 {
-    public function testFromSucess()
+    public function testFromSucess(): void
     {
         $route = Route::get('/{name}');
 
@@ -26,13 +25,13 @@ class MatchinResultTest extends TestCase
         $this->assertSame(['name' => 'Mehdi'], $result->parameters());
     }
 
-    public function testFromFailure()
+    public function testFromFailure(): void
     {
         $result = MatchingResult::fromFailure([Method::GET, Method::HEAD]);
         $this->assertFalse($result->isSuccess());
     }
 
-    public function testProcessSuccess()
+    public function testProcessSuccess(): void
     {
         $route = Route::post('/')->to($this->getMiddleware());
         $result = MatchingResult::fromSuccess($route, []);
@@ -42,7 +41,7 @@ class MatchinResultTest extends TestCase
         $this->assertSame(201, $response->getStatusCode());
     }
 
-    public function testProcessFailure()
+    public function testProcessFailure(): void
     {
         $request = new ServerRequest('POST', '/');
 
@@ -58,8 +57,7 @@ class MatchinResultTest extends TestCase
             public function process(
               ServerRequestInterface $request,
               RequestHandlerInterface $handler
-            ): ResponseInterface
-            {
+            ): ResponseInterface {
                 return (new Response())->withStatus(201);
             }
         };
