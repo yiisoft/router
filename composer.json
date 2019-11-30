@@ -2,7 +2,11 @@
     "name": "yiisoft/router",
     "type": "library",
     "description": "Yii router",
-    "keywords": ["web", "router", "middleware"],
+    "keywords": [
+        "web",
+        "router",
+        "middleware"
+    ],
     "homepage": "http://www.yiiframework.com/",
     "license": "BSD-3-Clause",
     "support": {
@@ -39,5 +43,8 @@
         "branch-alias": {
             "dev-master": "3.0.x-dev"
         }
+    },
+    "config": {
+        "sort-packages": true
     }
 }
