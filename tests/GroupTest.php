@@ -4,10 +4,6 @@
 namespace Yiisoft\Router\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\GroupMiddlewareInterface;
 use Yiisoft\Router\Route;
