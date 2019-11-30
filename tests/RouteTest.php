@@ -1,6 +1,4 @@
 <?php
-
-
 namespace Yiisoft\Router\Tests;
 
 use Nyholm\Psr7\Request;
@@ -15,7 +13,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Router\Method;
 use Yiisoft\Router\Route;
 
-class RouteTest extends TestCase
+final class RouteTest extends TestCase
 {
     public function testName(): void
     {
@@ -130,13 +128,13 @@ class RouteTest extends TestCase
     {
         $route = Route::methods([Method::GET, Method::POST], '/')->name('test.route')->host('yiiframework.com');
 
-        $this->assertSame('[test.route] GET,POST yiiframework.com/', $route->__toString());
+        $this->assertSame('[test.route] GET,POST yiiframework.com/', (string)$route);
     }
 
     public function testInvalidTo(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        Route::get('/')->to(new \StdClass());
+        Route::get('/')->to(new \stdClass());
     }
 
     public function testToMiddleware(): void
@@ -161,13 +159,11 @@ class RouteTest extends TestCase
     {
         $request = new ServerRequest('GET', '/');
 
-        $route = Route::get('/')->to(function (
-            ServerRequestInterface $request,
-            RequestHandlerInterface $handler
-        ): ResponseInterface {
-            return (new Response())->withStatus(418);
-        })
-        ;
+        $route = Route::get('/')->to(
+          static function(): ResponseInterface {
+              return (new Response())->withStatus(418);
+          }
+        );
 
         $response = $route->process($request, $this->getRequestHandler());
         $this->assertSame(418, $response->getStatusCode());

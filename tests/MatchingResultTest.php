@@ -1,6 +1,4 @@
 <?php
-
-
 namespace Yiisoft\Router\Tests;
 
 use Nyholm\Psr7\Response;
@@ -14,7 +12,7 @@ use Yiisoft\Router\MatchingResult;
 use Yiisoft\Router\Method;
 use Yiisoft\Router\Route;
 
-class MatchinResultTest extends TestCase
+final class MatchingResultTest extends TestCase
 {
     public function testFromSucess(): void
     {
@@ -25,10 +23,21 @@ class MatchinResultTest extends TestCase
         $this->assertSame(['name' => 'Mehdi'], $result->parameters());
     }
 
-    public function testFromFailure(): void
+    public function testFromFailureOnMethodFailure(): void
     {
         $result = MatchingResult::fromFailure([Method::GET, Method::HEAD]);
+
         $this->assertFalse($result->isSuccess());
+        $this->assertTrue($result->isMethodFailure());
+        $this->assertSame([Method::GET, Method::HEAD], $result->methods());
+    }
+
+    public function testFromFailureOnNotFoundFailure(): void
+    {
+        $result = MatchingResult::fromFailure(Method::ANY);
+
+        $this->assertFalse($result->isSuccess());
+        $this->assertFalse($result->isMethodFailure());
     }
 
     public function testProcessSuccess(): void
@@ -45,8 +54,8 @@ class MatchinResultTest extends TestCase
     {
         $request = new ServerRequest('POST', '/');
 
-        $result = MatchingResult::fromFailure([Method::GET, Method::HEAD]);
-        $response = $result->process($request, $this->getRequestHandler());
+        $response = MatchingResult::fromFailure([Method::GET, Method::HEAD])
+            ->process($request, $this->getRequestHandler());
 
         $this->assertSame(404, $response->getStatusCode());
     }

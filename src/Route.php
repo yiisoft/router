@@ -1,4 +1,5 @@
 <?php
+
 namespace Yiisoft\Router;
 
 use Psr\Http\Message\ResponseInterface;
@@ -52,81 +53,81 @@ class Route implements MiddlewareInterface
 
     public static function get(string $pattern): self
     {
-        $new = new static();
-        $new->methods = [Method::GET];
-        $new->pattern = $pattern;
-        return $new;
+        $route = new static();
+        $route->methods = [Method::GET];
+        $route->pattern = $pattern;
+        return $route;
     }
 
     public static function post(string $pattern): self
     {
-        $new = new static();
-        $new->methods = [Method::POST];
-        $new->pattern = $pattern;
-        return $new;
+        $route = new static();
+        $route->methods = [Method::POST];
+        $route->pattern = $pattern;
+        return $route;
     }
 
     public static function put(string $pattern): self
     {
-        $new = new static();
-        $new->methods = [Method::PUT];
-        $new->pattern = $pattern;
-        return $new;
+        $route = new static();
+        $route->methods = [Method::PUT];
+        $route->pattern = $pattern;
+        return $route;
     }
 
     public static function delete(string $pattern): self
     {
-        $new = new static();
-        $new->methods = [Method::DELETE];
-        $new->pattern = $pattern;
-        return $new;
+        $route = new static();
+        $route->methods = [Method::DELETE];
+        $route->pattern = $pattern;
+        return $route;
     }
 
     public static function patch(string $pattern): self
     {
-        $new = new static();
-        $new->methods = [Method::PATCH];
-        $new->pattern = $pattern;
-        return $new;
+        $route = new static();
+        $route->methods = [Method::PATCH];
+        $route->pattern = $pattern;
+        return $route;
     }
 
     public static function head(string $pattern): self
     {
-        $new = new static();
-        $new->methods = [Method::HEAD];
-        $new->pattern = $pattern;
-        return $new;
+        $route = new static();
+        $route->methods = [Method::HEAD];
+        $route->pattern = $pattern;
+        return $route;
     }
 
     public static function options(string $pattern): self
     {
-        $new = new static();
-        $new->methods = [Method::OPTIONS];
-        $new->pattern = $pattern;
-        return $new;
+        $route = new static();
+        $route->methods = [Method::OPTIONS];
+        $route->pattern = $pattern;
+        return $route;
     }
 
     public static function methods(array $methods, string $pattern): self
     {
-        $new = new static();
-        $new->methods = $methods;
-        $new->pattern = $pattern;
-        return $new;
+        $route = new static();
+        $route->methods = $methods;
+        $route->pattern = $pattern;
+        return $route;
     }
 
     public static function anyMethod(string $pattern): self
     {
-        $new = new static();
-        $new->methods = Method::ANY;
-        $new->pattern = $pattern;
-        return $new;
+        $route = new static();
+        $route->methods = Method::ANY;
+        $route->pattern = $pattern;
+        return $route;
     }
 
     public function name(string $name): self
     {
-        $new = clone $this;
-        $new->name = $name;
-        return $new;
+        $route = clone $this;
+        $route->name = $name;
+        return $route;
     }
 
     public function pattern(string $pattern): self
@@ -138,9 +139,9 @@ class Route implements MiddlewareInterface
 
     public function host(string $host): self
     {
-        $new = clone $this;
-        $new->host = rtrim($host, '/');
-        return $new;
+        $route = clone $this;
+        $route->host = rtrim($host, '/');
+        return $route;
     }
 
     /**
@@ -151,9 +152,9 @@ class Route implements MiddlewareInterface
      */
     public function parameters(array $parameters): self
     {
-        $new = clone $this;
-        $new->parameters = $parameters;
-        return $new;
+        $route = clone $this;
+        $route->parameters = $parameters;
+        return $route;
     }
 
     /**
@@ -164,9 +165,9 @@ class Route implements MiddlewareInterface
      */
     public function defaults(array $defaults): self
     {
-        $new = clone $this;
-        $new->defaults = $defaults;
-        return $new;
+        $route = clone $this;
+        $route->defaults = $defaults;
+        return $route;
     }
 
     /**
@@ -182,8 +183,8 @@ class Route implements MiddlewareInterface
      */
     public function to($middleware): self
     {
-        $new = clone $this;
-        if (is_callable($middleware)) {
+        $route = clone $this;
+        if (\is_callable($middleware)) {
             $middleware = $this->wrapCallable($middleware);
         }
 
@@ -191,8 +192,8 @@ class Route implements MiddlewareInterface
             throw new \InvalidArgumentException('Parameter should be either a PSR middleware or a callable.');
         }
 
-        $new->middleware = $middleware;
-        return $new;
+        $route->middleware = $middleware;
+        return $route;
     }
 
     private function wrapCallable(callable $callback): MiddlewareInterface

@@ -2,6 +2,7 @@
 namespace Yiisoft\Router\Tests\Middleware;
 
 use Nyholm\Psr7\Response;
+use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
@@ -14,29 +15,43 @@ use Yiisoft\Router\Middleware\Router;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\UrlMatcherInterface;
 
-class RouterTest extends TestCase
+final class RouterTest extends TestCase
 {
+    private function createRouterMiddleware(): Router
+    {
+        return new Router($this->getMatcher(), new Psr17Factory());
+    }
+
+    private function processWithRouter(ServerRequestInterface $request): ResponseInterface
+    {
+        return $this->createRouterMiddleware()->process($request, $this->createRequestHandler());
+    }
+
     public function testProcessSuccess(): void
     {
         $request = new ServerRequest('GET', '/');
-
-        $middleware = new Router($this->getMatcher());
-        $response = $middleware->process($request, $this->getRequestHandler());
-        $this->assertSame(418, $response->getStatusCode());
+        $response = $this->processWithRouter($request);
+        $this->assertSame(201, $response->getStatusCode());
     }
 
-    public function testProcessFailure(): void
+    public function testMissingRouteRespondWith404(): void
+    {
+        $request = new ServerRequest('GET', '/no-such-route');
+        $response = $this->processWithRouter($request);
+        $this->assertSame(404, $response->getStatusCode());
+    }
+
+    public function testMethodMismatchRespondWith405(): void
     {
         $request = new ServerRequest('POST', '/');
-
-        $middleware = new Router($this->getMatcher());
-        $response = $middleware->process($request, $this->getRequestHandler());
-        $this->assertSame(404, $response->getStatusCode());
+        $response = $this->processWithRouter($request);
+        $this->assertSame(405, $response->getStatusCode());
+        $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
     }
 
     private function getMatcher(): UrlMatcherInterface
     {
-        $middleware = $this->getRouteMiddleware();
+        $middleware = $this->createRouteMiddleware();
 
         return new class($middleware) implements UrlMatcherInterface {
             private $middleware;
@@ -46,8 +61,17 @@ class RouterTest extends TestCase
                 $this->middleware = $middleware;
             }
 
+            /**
+             * Emulates router with a single `GET /` route
+             * @param ServerRequestInterface $request
+             * @return MatchingResult
+             */
             public function match(ServerRequestInterface $request): MatchingResult
             {
+                if ($request->getUri()->getPath() !== '/') {
+                    return MatchingResult::fromFailure(Method::ANY);
+                }
+
                 if ($request->getMethod() === 'GET') {
                     $route = Route::get('/')->to($this->middleware);
                     return MatchingResult::fromSuccess($route, ['parameter' => 'value']);
@@ -58,7 +82,7 @@ class RouterTest extends TestCase
         };
     }
 
-    private function getRequestHandler(): RequestHandlerInterface
+    private function createRequestHandler(): RequestHandlerInterface
     {
         return new class implements RequestHandlerInterface {
             public function handle(ServerRequestInterface $request): ResponseInterface
@@ -68,14 +92,15 @@ class RouterTest extends TestCase
         };
     }
 
-    private function getRouteMiddleware(): MiddlewareInterface
+    private function createRouteMiddleware(): MiddlewareInterface
     {
         return new class implements MiddlewareInterface {
             public function process(
               ServerRequestInterface $request,
               RequestHandlerInterface $handler
-            ): ResponseInterface {
-                return (new Response())->withStatus(418);
+            ): ResponseInterface
+            {
+                return (new Response())->withStatus(201);
             }
         };
     }

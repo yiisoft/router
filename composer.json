@@ -2,17 +2,13 @@
     "name": "yiisoft/router",
     "type": "library",
     "description": "Yii router",
-    "keywords": ["web", "router", "middleware"],
+    "keywords": [
+        "web",
+        "router",
+        "middleware"
+    ],
     "homepage": "http://www.yiiframework.com/",
     "license": "BSD-3-Clause",
-    "authors": [
-        {
-            "name": "Alexander Makarov",
-            "email": "sam@rmcreative.ru",
-            "homepage": "http://rmcreative.ru/",
-            "role": "Core framework development"
-        }
-    ],
     "support": {
         "issues": "https://github.com/yiisoft/router/issues?state=open",
         "forum": "http://www.yiiframework.com/forum/",
@@ -22,12 +18,14 @@
     },
     "require": {
         "php": "^7.2",
+        "psr/container": "^1.0",
         "psr/http-server-middleware": "^1.0",
         "psr/http-message": "^1.0",
         "psr/http-server-handler": "^1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^7.2",
+        "psr/http-factory": "^1.0",
         "nyholm/psr7": "^1.0"
     },
     "autoload": {
@@ -44,5 +42,8 @@
         "branch-alias": {
             "dev-master": "3.0.x-dev"
         }
+    },
+    "config": {
+        "sort-packages": true
     }
 }
