@@ -3,7 +3,6 @@
 
 namespace Yiisoft\Router\Tests;
 
-
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;

@@ -3,7 +3,6 @@
 
 namespace Yiisoft\Router\Tests;
 
-
 use Nyholm\Psr7\Request;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
@@ -115,25 +114,21 @@ class RouteTest extends TestCase
 
     public function testParameters(): void
     {
-        $route = Route::get('/{language}')
-            ->parameters(['language' => 'en']);
+        $route = Route::get('/{language}')->parameters(['language' => 'en']);
 
         $this->assertSame(['language' => 'en'], $route->getParameters());
     }
 
     public function testDefaults(): void
     {
-        $route = Route::get('/{language}')
-                      ->defaults(['language' => 'en']);
+        $route = Route::get('/{language}')->defaults(['language' => 'en']);
 
         $this->assertSame(['language' => 'en'], $route->getDefaults());
     }
 
     public function testToString(): void
     {
-        $route = Route::methods([Method::GET, Method::POST], '/')
-            ->name('test.route')
-            ->host('yiiframework.com');
+        $route = Route::methods([Method::GET, Method::POST], '/')->name('test.route')->host('yiiframework.com');
 
         $this->assertSame('[test.route] GET,POST yiiframework.com/', $route->__toString());
     }
@@ -150,13 +145,13 @@ class RouteTest extends TestCase
 
         $route = Route::get('/')->to(new class implements MiddlewareInterface {
             public function process(
-              ServerRequestInterface $request,
-              RequestHandlerInterface $handler
-            ): ResponseInterface
-            {
+                ServerRequestInterface $request,
+                RequestHandlerInterface $handler
+            ): ResponseInterface {
                 return (new Response())->withStatus(418);
             }
-         });
+        })
+        ;
 
         $response = $route->process($request, $this->getRequestHandler());
         $this->assertSame(418, $response->getStatusCode());
@@ -166,11 +161,13 @@ class RouteTest extends TestCase
     {
         $request = new ServerRequest('GET', '/');
 
-        $route = Route::get('/')->to(
-          function(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
-              return (new Response())->withStatus(418);
-          }
-        );
+        $route = Route::get('/')->to(function (
+            ServerRequestInterface $request,
+            RequestHandlerInterface $handler
+        ): ResponseInterface {
+            return (new Response())->withStatus(418);
+        })
+        ;
 
         $response = $route->process($request, $this->getRequestHandler());
         $this->assertSame(418, $response->getStatusCode());
