@@ -2,17 +2,29 @@
 
 namespace Yiisoft\Router;
 
+use Psr\Http\Server\MiddlewareInterface;
+
 class Group
 {
     /**
      * @var Route[]
      */
     private $routes;
+
+    /**
+     * @var string
+     */
     private $prefix;
 
-    public function __construct(string $prefix)
+    /**
+     * @var MiddlewareInterface
+     */
+    private $middleware;
+
+    public function __construct(string $prefix, $middleware = null)
     {
         $this->prefix = $prefix;
+        $this->middleware = $middleware;
     }
 
     public function addRoute(Route $route): self
@@ -32,5 +44,10 @@ class Group
     public function getPrefix(): string
     {
         return $this->prefix;
+    }
+
+    public function getMiddleware(): MiddlewareInterface
+    {
+        return $this->middleware;
     }
 }
