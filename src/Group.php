@@ -20,6 +20,9 @@ class Group
         return $this;
     }
 
+    /**
+     * @return Route[]
+     */
     public function getRoutes(): iterable
     {
         foreach ($this->routes as $route) {
