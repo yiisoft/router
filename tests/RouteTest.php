@@ -1,10 +1,9 @@
 <?php
+
 namespace Yiisoft\Router\Tests;
 
-use Nyholm\Psr7\Request;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
-use Nyholm\Psr7\Uri;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -141,15 +140,16 @@ final class RouteTest extends TestCase
     {
         $request = new ServerRequest('GET', '/');
 
-        $route = Route::get('/')->to(new class implements MiddlewareInterface {
-            public function process(
-                ServerRequestInterface $request,
-                RequestHandlerInterface $handler
-            ): ResponseInterface {
-                return (new Response())->withStatus(418);
+        $route = Route::get('/')->to(
+            new class implements MiddlewareInterface {
+                public function process(
+                    ServerRequestInterface $request,
+                    RequestHandlerInterface $handler
+                ): ResponseInterface {
+                    return (new Response())->withStatus(418);
+                }
             }
-        })
-        ;
+        );
 
         $response = $route->process($request, $this->getRequestHandler());
         $this->assertSame(418, $response->getStatusCode());
@@ -160,9 +160,9 @@ final class RouteTest extends TestCase
         $request = new ServerRequest('GET', '/');
 
         $route = Route::get('/')->to(
-          static function(): ResponseInterface {
-              return (new Response())->withStatus(418);
-          }
+            static function (): ResponseInterface {
+                return (new Response())->withStatus(418);
+            }
         );
 
         $response = $route->process($request, $this->getRequestHandler());

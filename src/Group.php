@@ -1,4 +1,5 @@
 <?php
+
 namespace Yiisoft\Router;
 
 class Group

@@ -1,4 +1,5 @@
 <?php
+
 namespace Yiisoft\Router;
 
 /**
@@ -7,5 +8,6 @@ namespace Yiisoft\Router;
 interface RouterInterface extends UrlGeneratorInterface, UrlMatcherInterface
 {
     public function addRoute(Route $route): void;
+
     public function addGroup(Group $group): void;
 }

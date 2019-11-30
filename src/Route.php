@@ -206,8 +206,10 @@ class Route implements MiddlewareInterface
                 $this->callback = $callback;
             }
 
-            public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-            {
+            public function process(
+                ServerRequestInterface $request,
+                RequestHandlerInterface $handler
+            ): ResponseInterface {
                 return \call_user_func($this->callback, $request, $handler);
             }
         };
