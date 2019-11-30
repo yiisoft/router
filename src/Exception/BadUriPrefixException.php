@@ -6,7 +6,6 @@ use Yiisoft\FriendlyException\FriendlyExceptionInterface;
 
 class BadUriPrefixException extends \Exception implements FriendlyExceptionInterface
 {
-
     public function getName(): string
     {
         return 'Bad URI prefix';
