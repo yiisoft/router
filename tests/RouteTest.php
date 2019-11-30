@@ -149,11 +149,10 @@ final class RouteTest extends TestCase
             public function process(
               ServerRequestInterface $request,
               RequestHandlerInterface $handler
-            ): ResponseInterface
-            {
+            ): ResponseInterface {
                 return (new Response())->withStatus(418);
             }
-         });
+        });
 
         $response = $route->process($request, $this->getRequestHandler());
         $this->assertSame(418, $response->getStatusCode());
@@ -164,7 +163,7 @@ final class RouteTest extends TestCase
         $request = new ServerRequest('GET', '/');
 
         $route = Route::get('/')->to(
-          static function(): ResponseInterface {
+          static function (): ResponseInterface {
               return (new Response())->withStatus(418);
           }
         );

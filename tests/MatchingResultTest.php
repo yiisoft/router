@@ -66,8 +66,7 @@ final class MatchingResultTest extends TestCase
             public function process(
               ServerRequestInterface $request,
               RequestHandlerInterface $handler
-            ): ResponseInterface
-            {
+            ): ResponseInterface {
                 return (new Response())->withStatus(201);
             }
         };
