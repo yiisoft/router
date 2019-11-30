@@ -74,8 +74,7 @@ class RouterTest extends TestCase
             public function process(
               ServerRequestInterface $request,
               RequestHandlerInterface $handler
-            ): ResponseInterface
-            {
+            ): ResponseInterface {
                 return (new Response())->withStatus(418);
             }
         };
