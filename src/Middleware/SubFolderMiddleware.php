@@ -6,13 +6,17 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Yiisoft\Router\Exception\BadUriPrefixException;
 use Yiisoft\Router\UrlGeneratorInterface;
 
+/**
+ * This middleware supports routing when the project is placed in a subfolder relative to webroot
+ */
 class SubFolderMiddleware implements MiddlewareInterface
 {
-    public const PARAM_URI_PREFIX = 'uri-prefix';
+    /** @var null|string */
     public $prefix;
-    public $prefixParamName = self::PARAM_URI_PREFIX;
+    /** @var UrlGeneratorInterface */
     protected $uriGenerator;
 
     public function __construct(UrlGeneratorInterface $uriGenerator)
@@ -23,34 +27,31 @@ class SubFolderMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $uri = $request->getUri();
+        $path = $uri->getPath();
 
         if ($this->prefix === null) {
-            // check if project in subfolder
+            // automatically check that the project is in a subfolder
+            // and uri contain a prefix
             $scriptName = $request->getServerParams()['SCRIPT_NAME'];
             if (strpos($scriptName, '/', 1) !== false) {
                 $length = strrpos($scriptName, '/');
                 $prefix = substr($scriptName, 0, $length);
-                $path = $uri->getPath();
                 if (substr($path, 0, $length) === $prefix) {
                     $this->prefix = $prefix;
                     $this->uriGenerator->setUriPrefix($prefix);
-                    $request = $request->withAttribute($this->prefixParamName, $prefix)
-                                       ->withUri($uri->withPath(substr($path, $length)));
+                    $request = $request->withUri($uri->withPath(substr($path, $length)));
                 }
             }
         } elseif (strlen($this->prefix)) {
             if ($this->prefix[-1] === '/') {
-                throw new \Exception('Dad URI prefix value');
+                throw new BadUriPrefixException('Wrong URI prefix value');
             }
             $length = strlen($this->prefix);
-            $path = $uri->getPath();
-            if (substr($path, 0, $length) === $this->prefix) {
-                $this->uriGenerator->setUriPrefix($this->prefix);
-                $request = $request->withAttribute($this->prefixParamName, $this->prefix)
-                                   ->withUri($uri->withPath(substr($path, $length)));
-            } else {
-                throw new \Exception('URI prefix does not match');
+            if (substr($path, 0, $length) !== $this->prefix) {
+                throw new BadUriPrefixException('URI prefix does not match');
             }
+            $this->uriGenerator->setUriPrefix($this->prefix);
+            $request = $request->withUri($uri->withPath(substr($path, $length)));
         }
 
         return $handler->handle($request);
