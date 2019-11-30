@@ -17,7 +17,7 @@ class Group
     private $prefix;
 
     /**
-     * @var MiddlewareInterface
+     * @var GroupMiddlewareInterface
      */
     private $middleware;
 
@@ -46,7 +46,7 @@ class Group
         return $this->prefix;
     }
 
-    public function getMiddleware(): MiddlewareInterface
+    public function getMiddleware(): GroupMiddlewareInterface
     {
         return $this->middleware;
     }
