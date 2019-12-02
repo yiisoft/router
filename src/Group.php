@@ -21,7 +21,7 @@ class Group
      */
     private $middleware;
 
-    public function __construct(string $prefix, $middleware = null)
+    public function __construct(string $prefix, GroupMiddlewareInterface $middleware = null)
     {
         $this->prefix = $prefix;
         $this->middleware = $middleware;
