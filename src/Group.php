@@ -17,7 +17,7 @@ class Group
     private $prefix;
 
     /**
-     * @var GroupMiddlewareInterface
+     * @var GroupMiddlewareInterface|null
      */
     private $middleware;
 
