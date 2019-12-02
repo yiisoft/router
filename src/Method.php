@@ -1,4 +1,5 @@
 <?php
+
 namespace Yiisoft\Router;
 
 final class Method

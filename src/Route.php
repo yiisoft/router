@@ -130,6 +130,13 @@ class Route implements MiddlewareInterface
         return $route;
     }
 
+    public function pattern(string $pattern): self
+    {
+        $new = clone $this;
+        $new->pattern = $pattern;
+        return $new;
+    }
+
     public function host(string $host): self
     {
         $route = clone $this;
@@ -199,8 +206,10 @@ class Route implements MiddlewareInterface
                 $this->callback = $callback;
             }
 
-            public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-            {
+            public function process(
+                ServerRequestInterface $request,
+                RequestHandlerInterface $handler
+            ): ResponseInterface {
                 return \call_user_func($this->callback, $request, $handler);
             }
         };

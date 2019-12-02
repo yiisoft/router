@@ -1,4 +1,5 @@
 <?php
+
 namespace Yiisoft\Router\Tests\Middleware;
 
 use Nyholm\Psr7\Response;
@@ -96,8 +97,8 @@ final class RouterTest extends TestCase
     {
         return new class implements MiddlewareInterface {
             public function process(
-              ServerRequestInterface $request,
-              RequestHandlerInterface $handler
+                ServerRequestInterface $request,
+                RequestHandlerInterface $handler
             ): ResponseInterface {
                 return (new Response())->withStatus(201);
             }

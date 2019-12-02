@@ -57,6 +57,21 @@ In `to` you can either specify PSR middleware or a callback.
 
 Note that pattern specified for routes depends on the underlying routing library used.
 
+## Route groups
+
+Routes could be grouped. That is useful for API endpoints and similar cases:
+
+```php
+// for obtaining router see adapter package of choice readme
+$router = ...
+
+$apiRoutes = (new Group('/api'))
+    ->addRoute(Route::get('/posts'))
+    ->addRoute(Route::get('/comments'));
+    
+$router->addGroup($apiRoutes);
+```
+
 ## Middleware usage
 
 In order to simplify usage in PSR-middleware based application, there is a ready to use middleware provided:
