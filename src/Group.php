@@ -46,7 +46,7 @@ class Group
         return $this->prefix;
     }
 
-    public function getMiddleware(): GroupMiddlewareInterface
+    public function getMiddleware(): ?GroupMiddlewareInterface
     {
         return $this->middleware;
     }
