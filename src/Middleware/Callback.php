@@ -3,7 +3,6 @@
 
 namespace Yiisoft\Router\Middleware;
 
-
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;

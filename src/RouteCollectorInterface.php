@@ -3,7 +3,6 @@
 
 namespace Yiisoft\Router;
 
-
 use Psr\Http\Server\MiddlewareInterface;
 
 interface RouteCollectorInterface

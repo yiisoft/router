@@ -7,5 +7,4 @@ namespace Yiisoft\Router;
  */
 interface RouterInterface extends UrlGeneratorInterface, UrlMatcherInterface, RouteCollectorInterface
 {
-
 }
