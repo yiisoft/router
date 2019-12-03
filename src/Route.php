@@ -2,6 +2,7 @@
 
 namespace Yiisoft\Router;
 
+use Yiisoft\Router\Middleware\Callback;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -185,7 +186,7 @@ class Route implements MiddlewareInterface
     {
         $route = clone $this;
         if (\is_callable($middleware)) {
-            $middleware = $this->wrapCallable($middleware);
+            $middleware = new Callback($middleware);
         }
 
         if (!$middleware instanceof MiddlewareInterface) {
@@ -194,25 +195,6 @@ class Route implements MiddlewareInterface
 
         $route->middleware = $middleware;
         return $route;
-    }
-
-    private function wrapCallable(callable $callback): MiddlewareInterface
-    {
-        return new class($callback) implements MiddlewareInterface {
-            private $callback;
-
-            public function __construct(callable $callback)
-            {
-                $this->callback = $callback;
-            }
-
-            public function process(
-                ServerRequestInterface $request,
-                RequestHandlerInterface $handler
-            ): ResponseInterface {
-                return \call_user_func($this->callback, $request, $handler);
-            }
-        };
     }
 
     public function __toString()
@@ -236,7 +218,7 @@ class Route implements MiddlewareInterface
 
     public function getName(): string
     {
-        return $this->name ?? implode(', ', $this->methods) . ' ' . $this->pattern;
+        return $this->name ?? (implode(', ', $this->methods) . ' ' . $this->pattern);
     }
 
     public function getMethods(): array

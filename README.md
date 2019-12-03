@@ -62,14 +62,18 @@ Note that pattern specified for routes depends on the underlying routing library
 Routes could be grouped. That is useful for API endpoints and similar cases:
 
 ```php
-// for obtaining router see adapter package of choice readme
-$router = ...
+use \Yiisoft\Router\Route;
+use \Yiisoft\Router\RouteCollectorInterface;
 
-$apiRoutes = (new Group('/api'))
-    ->addRoute(Route::get('/posts'))
-    ->addRoute(Route::get('/comments'));
+// for obtaining router see adapter package of choice readme
+$router = ... 
     
-$router->addGroup($apiRoutes);
+$router->addGroup('/api', static function (RouteCollectorInterface $r) {
+    $r->addRoute(Route::get('/comments'));
+    $r->addGroup('/posts', static function (RouteCollectorInterface $r) {
+        $r->addRoute(Route::get('/list'));
+    });
+});
 ```
 
 ## Middleware usage
@@ -78,8 +82,9 @@ In order to simplify usage in PSR-middleware based application, there is a ready
 
 ```php
 $router = $container->get(Yiisoft\Router\UrlMatcherInterface::class);
+$responseFactory = $container->get(\Psr\Http\Message\ResponseFactoryInterface::class);
 
-$routerMiddleware = new Yiisoft\Router\Middleware\Router();
+$routerMiddleware = new Yiisoft\Router\Middleware\Router($router, $responseFactory);
 
 // add middleware to your middleware handler of choice 
 ```
@@ -92,6 +97,13 @@ middleware processes the request.
 URLs could be created using `UrlGeneratorInterface::generate()`. Let's assume a route is defined like the following:
 
 ```php
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use \Yiisoft\Router\Route;
+
+$router = $container->get(Yiisoft\Router\UrlMatcherInterface::class);
+$responseFactory = $container->get(\Psr\Http\Message\ResponseFactoryInterface::class);
+
 $router->addRoute(Route::get('/test/{id:\w+}')->name('test')->to(function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
     $id = $request->getAttribute('id');
 
@@ -104,6 +116,8 @@ $router->addRoute(Route::get('/test/{id:\w+}')->name('test')->to(function (Serve
 Then that is how URL could be obtained for it:
 
 ```php
+use Yiisoft\Router\UrlGeneratorInterface;
+
 function getUrl(UrlGeneratorInterface $urlGenerator, $parameters = [])
 {
     return $urlGenerator->generate('test', $parameters);

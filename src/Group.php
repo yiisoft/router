@@ -4,41 +4,30 @@ namespace Yiisoft\Router;
 
 use Psr\Http\Server\MiddlewareInterface;
 
-class Group
+class Group implements RouteCollectorInterface
 {
-    /**
-     * @var Route[]
-     */
-    private $routes;
+    protected $items = [];
+    protected $prefix;
+    protected $middleware;
+    protected $callback;
 
-    /**
-     * @var string
-     */
-    private $prefix;
-
-    /**
-     * @var GroupMiddlewareInterface|null
-     */
-    private $middleware;
-
-    public function __construct(string $prefix, GroupMiddlewareInterface $middleware = null)
+    public function addRoute(Route $route): void
     {
-        $this->prefix = $prefix;
-        $this->middleware = $middleware;
+        $this->items[] = $route;
     }
 
-    public function addRoute(Route $route): self
+    public function addGroup(string $prefix, callable $callback, MiddlewareInterface $middleware = null): void
     {
-        $this->routes[] = $route;
-        return $this;
+        $group = new Group();
+        $group->prefix = $prefix;
+        $group->callback = $callback;
+        $group->middleware = $middleware;
+        $this->items[] = $group;
     }
 
-    /**
-     * @return Route[]
-     */
-    public function getRoutes(): iterable
+    public function getItems(): array
     {
-        return $this->routes;
+        return $this->items;
     }
 
     public function getPrefix(): string
@@ -46,7 +35,7 @@ class Group
         return $this->prefix;
     }
 
-    public function getMiddleware(): ?GroupMiddlewareInterface
+    public function getMiddleware(): MiddlewareInterface
     {
         return $this->middleware;
     }
