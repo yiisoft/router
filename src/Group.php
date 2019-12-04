@@ -7,9 +7,9 @@ use Yiisoft\Router\Middleware\Callback;
 
 class Group implements RouteCollectorInterface
 {
-    private $items = [];
-    private $prefix;
-    private $middlewares = [];
+    protected $items = [];
+    protected $prefix;
+    protected $middlewares = [];
 
     public function __construct(string $prefix = null, callable $callback = null)
     {
