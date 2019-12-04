@@ -10,13 +10,14 @@ class Group implements RouteCollectorInterface
     private $items = [];
     private $prefix;
     private $middlewares = [];
-    private $callback;
-    private $callbackResolved = false;
 
     public function __construct(string $prefix = null, callable $callback = null)
     {
         $this->prefix = $prefix;
-        $this->callback = $callback;
+
+        if ($callback !== null) {
+            $callback($this);
+        }
     }
 
     final public function addRoute(Route $route): void
@@ -46,11 +47,6 @@ class Group implements RouteCollectorInterface
 
     final public function getItems(): array
     {
-        if (!$this->callbackResolved && $this->callback !== null) {
-            $callback = $this->callback;
-            $callback($this);
-            $this->callbackResolved = true;
-        }
         return $this->items;
     }
 
