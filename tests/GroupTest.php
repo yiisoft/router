@@ -49,7 +49,8 @@ class GroupTest extends TestCase
         $middleware1 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
         $middleware2 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
 
-        $api = (new Group())->addGroup('/api', static function (Group $group) use ($logoutRoute, $listRoute, $viewRoute, $middleware1, $middleware2) {
+        $root = new Group();
+        $root->addGroup('/api', static function (Group $group) use ($logoutRoute, $listRoute, $viewRoute, $middleware1, $middleware2) {
             $group->addRoute($logoutRoute);
             $group->addGroup('/post', static function (Group $group) use ($listRoute, $viewRoute) {
                 $group->addRoute($listRoute);
@@ -59,6 +60,9 @@ class GroupTest extends TestCase
             $group->addMiddleware($middleware1);
             $group->addMiddleware($middleware2);
         });
+
+        $this->assertCount(1, $root->getItems());
+        $api = $root->getItems()[0];
 
         $this->assertSame('/api', $api->getPrefix());
         $this->assertCount(2, $api->getItems());

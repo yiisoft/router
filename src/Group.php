@@ -24,11 +24,9 @@ class Group implements RouteCollectorInterface
         $this->items[] = $route;
     }
 
-    final public function addGroup(string $prefix, callable $callback): Group
+    final public function addGroup(string $prefix, callable $callback): void
     {
-        $group = new Group($prefix, $callback);
-        $this->items[] = $group;
-        return $group;
+        $this->items[] = new Group($prefix, $callback);
     }
 
     final public function addMiddleware($middleware): self

@@ -25,5 +25,5 @@ interface RouteCollectorInterface
      * @param string $prefix
      * @param callable $callback
      */
-    public function addGroup(string $prefix, callable $callback): Group;
+    public function addGroup(string $prefix, callable $callback): void;
 }
