@@ -12,7 +12,7 @@ use Yiisoft\Router\UrlGeneratorInterface;
 /**
  * This middleware supports routing when the project is placed in a subfolder relative to webroot
  */
-class SubFolderMiddleware implements MiddlewareInterface
+final class SubFolderMiddleware implements MiddlewareInterface
 {
     /** @var null|string */
     public $prefix;
@@ -36,18 +36,18 @@ class SubFolderMiddleware implements MiddlewareInterface
             if (strpos($scriptName, '/', 1) !== false) {
                 $length = strrpos($scriptName, '/');
                 $prefix = substr($scriptName, 0, $length);
-                if (substr($path, 0, $length) === $prefix) {
+                if (strpos($path, $prefix) === 0) {
                     $this->prefix = $prefix;
                     $this->uriGenerator->setUriPrefix($prefix);
                     $request = $request->withUri($uri->withPath(substr($path, $length)));
                 }
             }
-        } elseif (strlen($this->prefix)) {
+        } elseif ($this->prefix !== '') {
             if ($this->prefix[-1] === '/') {
                 throw new BadUriPrefixException('Wrong URI prefix value');
             }
             $length = strlen($this->prefix);
-            if (substr($path, 0, $length) !== $this->prefix) {
+            if (strpos($path, $this->prefix) !== 0) {
                 throw new BadUriPrefixException('URI prefix does not match');
             }
             $this->uriGenerator->setUriPrefix($this->prefix);
