@@ -15,7 +15,7 @@ class GroupTest extends TestCase
         $listRoute = Route::get('/');
         $viewRoute = Route::get('/{id}');
 
-        $group = new ExposedGroup();
+        $group = new Group();
         $group->addRoute($listRoute);
         $group->addRoute($viewRoute);
 
@@ -26,7 +26,7 @@ class GroupTest extends TestCase
 
     public function testAddMiddleware(): void
     {
-        $group = new ExposedGroup();
+        $group = new Group();
 
         $middleware1 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
         $middleware2 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
@@ -49,7 +49,7 @@ class GroupTest extends TestCase
         $middleware1 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
         $middleware2 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
 
-        $api = (new ExposedGroup())->addGroup('/api', static function (Group $group) use ($logoutRoute, $listRoute, $viewRoute, $middleware1, $middleware2) {
+        $api = (new Group())->addGroup('/api', static function (Group $group) use ($logoutRoute, $listRoute, $viewRoute, $middleware1, $middleware2) {
             $group->addRoute($logoutRoute);
             $group->addGroup('/post', static function (Group $group) use ($listRoute, $viewRoute) {
                 $group->addRoute($listRoute);

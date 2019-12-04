@@ -13,8 +13,10 @@ class Group implements RouteCollectorInterface
     private $callback;
     private $callbackResolved = false;
 
-    private function __construct()
+    public function __construct(string $prefix = null, callable $callback = null)
     {
+        $this->prefix = $prefix;
+        $this->callback = $callback;
     }
 
     final public function addRoute(Route $route): void
@@ -24,9 +26,7 @@ class Group implements RouteCollectorInterface
 
     final public function addGroup(string $prefix, callable $callback): Group
     {
-        $group = new Group();
-        $group->prefix = $prefix;
-        $group->callback = $callback;
+        $group = new Group($prefix, $callback);
         $this->items[] = $group;
         return $group;
     }
