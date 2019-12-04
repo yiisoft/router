@@ -3,40 +3,66 @@
 namespace Yiisoft\Router;
 
 use Psr\Http\Server\MiddlewareInterface;
+use Yiisoft\Router\Middleware\Callback;
 
 class Group implements RouteCollectorInterface
 {
-    protected $items = [];
-    protected $prefix;
-    protected $middleware;
-    protected $callback;
+    private $items = [];
+    private $prefix;
+    private $middlewares = [];
+    private $callback;
+    private $callbackResolved = false;
 
-    public function addRoute(Route $route): void
+    private function __construct()
+    {
+    }
+
+    final public function addRoute(Route $route): void
     {
         $this->items[] = $route;
     }
 
-    public function addGroup(string $prefix, callable $callback, MiddlewareInterface $middleware = null): void
+    final public function addGroup(string $prefix, callable $callback): Group
     {
         $group = new Group();
         $group->prefix = $prefix;
         $group->callback = $callback;
-        $group->middleware = $middleware;
         $this->items[] = $group;
+        return $group;
     }
 
-    public function getItems(): array
+    final public function addMiddleware($middleware): self
     {
+        if (\is_callable($middleware)) {
+            $middleware[] = new Callback($middleware);
+        }
+
+        if (!$middleware instanceof MiddlewareInterface) {
+            throw new \InvalidArgumentException('Parameter should be either a PSR middleware or a callable.');
+        }
+
+        $this->middlewares[] = $middleware;
+
+        return $this;
+    }
+
+    final public function getItems(): array
+    {
+        if (!$this->callbackResolved && $this->callback !== null) {
+            $callback = $this->callback;
+            $callback($this);
+            $this->callbackResolved = true;
+        }
         return $this->items;
     }
 
-    public function getPrefix(): string
+    final public function getPrefix(): string
     {
         return $this->prefix;
     }
 
-    public function getMiddleware(): MiddlewareInterface
+    final public function getMiddlewares(): array
     {
-        return $this->middleware;
+        return $this->middlewares;
     }
 }

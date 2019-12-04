@@ -4,7 +4,7 @@ namespace Yiisoft\Router;
 
 use Psr\Container\ContainerInterface;
 
-class RouterFactory
+final class RouterFactory
 {
     private $engineFactory;
     private $routes;

@@ -11,7 +11,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 /**
  * Route defines a mapping from URL to callback / name and vice versa
  */
-class Route implements MiddlewareInterface
+final class Route implements MiddlewareInterface, RequestHandlerInterface
 {
     /**
      * @var string
@@ -34,9 +34,9 @@ class Route implements MiddlewareInterface
     private $host;
 
     /**
-     * @var MiddlewareInterface
+     * @var array
      */
-    private $middleware;
+    private $middlewares;
 
     /**
      * @var array
@@ -47,6 +47,11 @@ class Route implements MiddlewareInterface
      * @var array
      */
     private $defaults = [];
+
+    /**
+     * @var RequestHandlerInterface
+     */
+    private $nextHandler;
 
     private function __construct()
     {
@@ -171,8 +176,21 @@ class Route implements MiddlewareInterface
         return $route;
     }
 
+    private function prepareMiddlware($middleware): MiddlewareInterface
+    {
+        if (\is_callable($middleware)) {
+            $middleware = new Callback($middleware);
+        }
+
+        if (!$middleware instanceof MiddlewareInterface) {
+            throw new \InvalidArgumentException('Parameter should be either a PSR middleware or a callable.');
+        }
+
+        return $middleware;
+    }
+
     /**
-     * Speicifes a handler that should be invoked for a matching route.
+     * Adds a handler that should be invoked for a matching route.
      * It can be either a PSR middleware or a callable with the following signature:
      *
      * ```
@@ -185,15 +203,41 @@ class Route implements MiddlewareInterface
     public function to($middleware): self
     {
         $route = clone $this;
-        if (\is_callable($middleware)) {
-            $middleware = new Callback($middleware);
-        }
+        $route->middlewares[] = $this->prepareMiddlware($middleware);
+        return $route;
+    }
 
-        if (!$middleware instanceof MiddlewareInterface) {
-            throw new \InvalidArgumentException('Parameter should be either a PSR middleware or a callable.');
-        }
+    /**
+     * Adds a handler that should be invoked for a matching route.
+     * It can be either a PSR middleware or a callable with the following signature:
+     *
+     * ```
+     * function (ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+     * ```
+     *
+     * @param MiddlewareInterface|callable $middleware
+     * @return Route
+     */
+    public function then($middleware): self
+    {
+        return $this->to($middleware);
+    }
 
-        $route->middleware = $middleware;
+    /**
+     * Prepends a handler that should be invoked for a matching route.
+     * It can be either a PSR middleware or a callable with the following signature:
+     *
+     * ```
+     * function (ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+     * ```
+     *
+     * @param MiddlewareInterface|callable $middleware
+     * @return Route
+     */
+    public function prepend($middleware): self
+    {
+        $route = clone $this;
+        array_unshift($route->middlewares, $this->prepareMiddlware($middleware));
         return $route;
     }
 
@@ -246,8 +290,37 @@ class Route implements MiddlewareInterface
         return $this->defaults;
     }
 
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    /**
+     * @internal please use {@see dispatch()} or {@see process()}
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        return $this->middleware->process($request, $handler);
+        $middleware = current($this->middlewares);
+        echo 'processing ';
+
+        next($this->middlewares);
+        if ($middleware === false) {
+            if (!$this->nextHandler !== null) {
+                return $this->nextHandler->handle($request);
+            }
+
+            throw new \LogicException('Middleware stack exhausted');
+        }
+
+        return $middleware->process($request, $this);
+    }
+
+    public function dispatch(ServerRequestInterface $request): ResponseInterface
+    {
+        reset($this->middlewares);
+        return $this->handle($request);
+    }
+
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $nextHandler): ResponseInterface
+    {
+        $this->nextHandler = $nextHandler;
+        return $this->dispatch($request);
     }
 }

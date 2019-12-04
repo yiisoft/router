@@ -4,7 +4,7 @@ namespace Yiisoft\Router;
 
 use Throwable;
 
-class RouteNotFoundException extends \RuntimeException
+final class RouteNotFoundException extends \RuntimeException
 {
     public function __construct($routeName = '', $code = 0, Throwable $previous = null)
     {

@@ -3,8 +3,6 @@
 
 namespace Yiisoft\Router;
 
-use Psr\Http\Server\MiddlewareInterface;
-
 interface RouteCollectorInterface
 {
     /**
@@ -21,11 +19,11 @@ interface RouteCollectorInterface
      * $router->addGroup('/api', function (RouteCollectorInterface $router) {
      *     $router->addRoute(...);
      *     $router->addGroup(...);
-     * });
+     * })->addMiddleware($myMiddleware);
      * ```
      *
      * @param string $prefix
      * @param callable $callback
      */
-    public function addGroup(string $prefix, callable $callback, MiddlewareInterface $middleware = null): void;
+    public function addGroup(string $prefix, callable $callback): Group;
 }
