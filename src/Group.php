@@ -50,7 +50,7 @@ class Group implements RouteCollectorInterface
         return $this->items;
     }
 
-    final public function getPrefix(): string
+    final public function getPrefix(): ?string
     {
         return $this->prefix;
     }
