@@ -297,7 +297,7 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $middleware = current($this->middlewares);
+        $middleware = \current($this->middlewares);
         next($this->middlewares);
         if ($middleware === false) {
             if (!$this->nextHandler !== null) {
