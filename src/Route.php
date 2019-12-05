@@ -312,7 +312,7 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
 
     public function dispatch(ServerRequestInterface $request): ResponseInterface
     {
-        reset($this->middlewares);
+        \reset($this->middlewares);
         return $this->handle($request);
     }
 
