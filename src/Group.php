@@ -33,7 +33,7 @@ class Group implements RouteCollectorInterface
     final public function addMiddleware($middleware): self
     {
         if (\is_callable($middleware)) {
-            $middleware[] = new Callback($middleware);
+            $middleware = new Callback($middleware);
         }
 
         if (!$middleware instanceof MiddlewareInterface) {
