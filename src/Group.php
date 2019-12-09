@@ -3,51 +3,60 @@
 namespace Yiisoft\Router;
 
 use Psr\Http\Server\MiddlewareInterface;
+use Yiisoft\Router\Middleware\Callback;
 
-class Group
+class Group implements RouteCollectorInterface
 {
-    /**
-     * @var Route[]
-     */
-    private $routes;
+    protected $items = [];
+    protected $prefix;
+    protected $middlewares = [];
 
-    /**
-     * @var string
-     */
-    private $prefix;
-
-    /**
-     * @var GroupMiddlewareInterface|null
-     */
-    private $middleware;
-
-    public function __construct(string $prefix, GroupMiddlewareInterface $middleware = null)
+    public function __construct(string $prefix = null, callable $callback = null)
     {
         $this->prefix = $prefix;
-        $this->middleware = $middleware;
+
+        if ($callback !== null) {
+            $callback($this);
+        }
     }
 
-    public function addRoute(Route $route): self
+    final public function addRoute(Route $route): void
     {
-        $this->routes[] = $route;
+        $this->items[] = $route;
+    }
+
+    final public function addGroup(string $prefix, callable $callback): void
+    {
+        $this->items[] = new Group($prefix, $callback);
+    }
+
+    final public function addMiddleware($middleware): self
+    {
+        if (\is_callable($middleware)) {
+            $middleware = new Callback($middleware);
+        }
+
+        if (!$middleware instanceof MiddlewareInterface) {
+            throw new \InvalidArgumentException('Parameter should be either a PSR middleware or a callable.');
+        }
+
+        $this->middlewares[] = $middleware;
+
         return $this;
     }
 
-    /**
-     * @return Route[]
-     */
-    public function getRoutes(): iterable
+    final public function getItems(): array
     {
-        return $this->routes;
+        return $this->items;
     }
 
-    public function getPrefix(): string
+    final public function getPrefix(): ?string
     {
         return $this->prefix;
     }
 
-    public function getMiddleware(): ?GroupMiddlewareInterface
+    final public function getMiddlewares(): array
     {
-        return $this->middleware;
+        return $this->middlewares;
     }
 }

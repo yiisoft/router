@@ -169,6 +169,48 @@ final class RouteTest extends TestCase
         $this->assertSame(418, $response->getStatusCode());
     }
 
+    public function testThen(): void
+    {
+        $request = new ServerRequest('GET', '/');
+
+        $route = Route::get('/');
+
+        $middleware1 = $this->createMock(MiddlewareInterface::class);
+        $middleware2 = $this->createMock(MiddlewareInterface::class);
+
+        $route = $route->to($middleware1)->then($middleware2);
+
+        $middleware1
+            ->expects($this->at(0))
+            ->method('process')
+            ->with($request, $route);
+
+        // TODO: test that second one is called as well
+
+        $route->process($request, $this->getRequestHandler());
+    }
+
+    public function testBefore(): void
+    {
+        $request = new ServerRequest('GET', '/');
+
+        $route = Route::get('/');
+
+        $middleware1 = $this->createMock(MiddlewareInterface::class);
+        $middleware2 = $this->createMock(MiddlewareInterface::class);
+
+        $route = $route->to($middleware1)->prepend($middleware2);
+
+        $middleware2
+            ->expects($this->at(0))
+            ->method('process')
+            ->with($request, $route);
+
+        // TODO: test that first one is called as well
+
+        $route->process($request, $this->getRequestHandler());
+    }
+
     private function getRequestHandler(): RequestHandlerInterface
     {
         return new class implements RequestHandlerInterface {

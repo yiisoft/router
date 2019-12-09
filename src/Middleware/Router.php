@@ -9,7 +9,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Router\UrlMatcherInterface;
 
-class Router implements MiddlewareInterface
+final class Router implements MiddlewareInterface
 {
     private $matcher;
     private $responseFactory;
