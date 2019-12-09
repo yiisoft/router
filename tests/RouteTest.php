@@ -1,10 +1,9 @@
 <?php
+
 namespace Yiisoft\Router\Tests;
 
-use Nyholm\Psr7\Request;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
-use Nyholm\Psr7\Uri;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -98,9 +97,9 @@ final class RouteTest extends TestCase
 
     public function testPattern(): void
     {
-        $route = Route::get('/test');
+        $route = Route::get('/test')->pattern('/test2');
 
-        $this->assertSame('/test', $route->getPattern());
+        $this->assertSame('/test2', $route->getPattern());
     }
 
     public function testHost(): void
@@ -112,25 +111,21 @@ final class RouteTest extends TestCase
 
     public function testParameters(): void
     {
-        $route = Route::get('/{language}')
-            ->parameters(['language' => 'en']);
+        $route = Route::get('/{language}')->parameters(['language' => 'en']);
 
         $this->assertSame(['language' => 'en'], $route->getParameters());
     }
 
     public function testDefaults(): void
     {
-        $route = Route::get('/{language}')
-                      ->defaults(['language' => 'en']);
+        $route = Route::get('/{language}')->defaults(['language' => 'en']);
 
         $this->assertSame(['language' => 'en'], $route->getDefaults());
     }
 
     public function testToString(): void
     {
-        $route = Route::methods([Method::GET, Method::POST], '/')
-            ->name('test.route')
-            ->host('yiiframework.com');
+        $route = Route::methods([Method::GET, Method::POST], '/')->name('test.route')->host('yiiframework.com');
 
         $this->assertSame('[test.route] GET,POST yiiframework.com/', (string)$route);
     }
@@ -145,15 +140,16 @@ final class RouteTest extends TestCase
     {
         $request = new ServerRequest('GET', '/');
 
-        $route = Route::get('/')->to(new class implements MiddlewareInterface {
-            public function process(
-              ServerRequestInterface $request,
-              RequestHandlerInterface $handler
-            ): ResponseInterface
-            {
-                return (new Response())->withStatus(418);
+        $route = Route::get('/')->to(
+            new class implements MiddlewareInterface {
+                public function process(
+                    ServerRequestInterface $request,
+                    RequestHandlerInterface $handler
+                ): ResponseInterface {
+                    return (new Response())->withStatus(418);
+                }
             }
-         });
+        );
 
         $response = $route->process($request, $this->getRequestHandler());
         $this->assertSame(418, $response->getStatusCode());
@@ -164,13 +160,55 @@ final class RouteTest extends TestCase
         $request = new ServerRequest('GET', '/');
 
         $route = Route::get('/')->to(
-          static function(): ResponseInterface {
-              return (new Response())->withStatus(418);
-          }
+            static function (): ResponseInterface {
+                return (new Response())->withStatus(418);
+            }
         );
 
         $response = $route->process($request, $this->getRequestHandler());
         $this->assertSame(418, $response->getStatusCode());
+    }
+
+    public function testThen(): void
+    {
+        $request = new ServerRequest('GET', '/');
+
+        $route = Route::get('/');
+
+        $middleware1 = $this->createMock(MiddlewareInterface::class);
+        $middleware2 = $this->createMock(MiddlewareInterface::class);
+
+        $route = $route->to($middleware1)->then($middleware2);
+
+        $middleware1
+            ->expects($this->at(0))
+            ->method('process')
+            ->with($request, $route);
+
+        // TODO: test that second one is called as well
+
+        $route->process($request, $this->getRequestHandler());
+    }
+
+    public function testBefore(): void
+    {
+        $request = new ServerRequest('GET', '/');
+
+        $route = Route::get('/');
+
+        $middleware1 = $this->createMock(MiddlewareInterface::class);
+        $middleware2 = $this->createMock(MiddlewareInterface::class);
+
+        $route = $route->to($middleware1)->prepend($middleware2);
+
+        $middleware2
+            ->expects($this->at(0))
+            ->method('process')
+            ->with($request, $route);
+
+        // TODO: test that first one is called as well
+
+        $route->process($request, $this->getRequestHandler());
     }
 
     private function getRequestHandler(): RequestHandlerInterface

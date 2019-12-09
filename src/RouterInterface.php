@@ -1,10 +1,10 @@
 <?php
+
 namespace Yiisoft\Router;
 
 /**
- * RouterInterface combiles interfaces for matching and generating URLs. Additionally it allows adding URLs.
+ * RouterInterface combines interfaces for adding routes, matching URLs and generating URLs.
  */
-interface RouterInterface extends UrlGeneratorInterface, UrlMatcherInterface
+interface RouterInterface extends UrlGeneratorInterface, UrlMatcherInterface, RouteCollectorInterface
 {
-    public function addRoute(Route $route): void;
 }

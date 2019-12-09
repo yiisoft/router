@@ -1,4 +1,5 @@
 <?php
+
 namespace Yiisoft\Router;
 
 /**
@@ -7,6 +8,14 @@ namespace Yiisoft\Router;
  */
 interface UrlGeneratorInterface
 {
+    /**
+     * Generates URL from named route and parameters
+     *
+     * @param string $name name of the route
+     * @param array $parameters parameter-value set
+     * @return string URL generated
+     * @throws RouteNotFoundException in case there is no route with the name specified
+     */
     public function generate(string $name, array $parameters = []): string;
     public function getUriPrefix(): string;
     public function setUriPrefix(string $name): void;

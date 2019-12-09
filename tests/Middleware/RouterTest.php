@@ -1,4 +1,5 @@
 <?php
+
 namespace Yiisoft\Router\Tests\Middleware;
 
 use Nyholm\Psr7\Response;
@@ -53,8 +54,7 @@ final class RouterTest extends TestCase
     {
         $middleware = $this->createRouteMiddleware();
 
-        return new class ($middleware) implements UrlMatcherInterface
-        {
+        return new class($middleware) implements UrlMatcherInterface {
             private $middleware;
 
             public function __construct(MiddlewareInterface $middleware)
@@ -97,10 +97,9 @@ final class RouterTest extends TestCase
     {
         return new class implements MiddlewareInterface {
             public function process(
-              ServerRequestInterface $request,
-              RequestHandlerInterface $handler
-            ): ResponseInterface
-            {
+                ServerRequestInterface $request,
+                RequestHandlerInterface $handler
+            ): ResponseInterface {
                 return (new Response())->withStatus(201);
             }
         };

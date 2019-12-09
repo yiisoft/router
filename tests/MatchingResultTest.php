@@ -1,4 +1,5 @@
 <?php
+
 namespace Yiisoft\Router\Tests;
 
 use Nyholm\Psr7\Response;
@@ -64,10 +65,9 @@ final class MatchingResultTest extends TestCase
     {
         return new class implements MiddlewareInterface {
             public function process(
-              ServerRequestInterface $request,
-              RequestHandlerInterface $handler
-            ): ResponseInterface
-            {
+                ServerRequestInterface $request,
+                RequestHandlerInterface $handler
+            ): ResponseInterface {
                 return (new Response())->withStatus(201);
             }
         };

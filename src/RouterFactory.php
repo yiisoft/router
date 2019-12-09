@@ -1,9 +1,10 @@
 <?php
+
 namespace Yiisoft\Router;
 
 use Psr\Container\ContainerInterface;
 
-class RouterFactory
+final class RouterFactory
 {
     private $engineFactory;
     private $routes;
@@ -20,7 +21,13 @@ class RouterFactory
         /* @var $router RouterInterface */
         $router = $factory($container);
         foreach ($this->routes as $route) {
-            $router->addRoute($route);
+            if ($route instanceof Route) {
+                $router->addRoute($route);
+            } elseif (\is_array($route) && \count($route) === 2 && \is_string($route[0]) && \is_callable($route[1])) {
+                $router->addGroup($route[0], $route[1]);
+            } else {
+                throw new \InvalidArgumentException('Routes should be eithe instances of Route or group arrays');
+            }
         }
         return $router;
     }

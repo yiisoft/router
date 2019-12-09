@@ -21,27 +21,34 @@ with one of the following adapter packages:
 ## General usage
 
 ```php
+use Yiisoft\Router\Route;
+use Yiisoft\Router\RouterFactory;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+
+$routes = [
+    Route::get('/')
+        ->to(function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+            $response = $responseFactory->createResponse();
+            $response->getBody()->write('You are at homepage.');
+            return $response;
+        }),
+    Route::get('/test/{id:\w+}')
+        ->to(function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+            $id = $request->getAttribute('id');
+    
+            $response = $responseFactory->createResponse();
+            $response->getBody()->write('You are at test with param ' . $id);
+            return $response;
+        })
+];
 
 // for obtaining router driver see adapter package of choice readme
-$driver = ...
-$router = new RouterFactory($driver);
-
-$router->addRoute(Route::get('/')->to(function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
-    $response = $responseFactory->createResponse();
-    $response->getBody()->write('You are at homepage.');
-    return $response;
-}));
-
-$router->addRoute(Route::get('/test/{id:\w+}')->to(function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
-    $id = $request->getAttribute('id');
-
-    $response = $responseFactory->createResponse();
-    $response->getBody()->write('You are at test with param ' . $id);
-    return $response;
-}));
+$driver = new FastRouteFactory();
+$router = (new RouterFactory($driver, $routes))($container);
 
 // $request is PSR-7 ServerRequestInterface
-$result = $this->matcher->match($request);
+$result = $router->match($request);
 
 if (!$result->isSuccess()) {
      // 404
@@ -53,9 +60,28 @@ if (!$result->isSuccess()) {
 $response = $result->process($request, $handler);
 ```
 
-In `to` you can either specify PSR middleware or a callback.
+In `to()` you can either specify PSR middleware or a callback. More handlers could be added via `then()`.
 
 Note that pattern specified for routes depends on the underlying routing library used.
+
+## Route groups
+
+Routes could be grouped. That is useful for API endpoints and similar cases:
+
+```php
+use \Yiisoft\Router\Route;
+use \Yiisoft\Router\RouteCollectorInterface;
+
+// for obtaining router see adapter package of choice readme
+$router = ... 
+    
+$router->addGroup('/api', static function (RouteCollectorInterface $r) {
+    $r->addRoute(Route::get('/comments'));
+    $r->addGroup('/posts', static function (RouteCollectorInterface $r) {
+        $r->addRoute(Route::get('/list'));
+    });
+});
+```
 
 ## Middleware usage
 
@@ -63,20 +89,28 @@ In order to simplify usage in PSR-middleware based application, there is a ready
 
 ```php
 $router = $container->get(Yiisoft\Router\UrlMatcherInterface::class);
+$responseFactory = $container->get(\Psr\Http\Message\ResponseFactoryInterface::class);
 
-$routerMiddleware = new Yiisoft\Router\Middleware\Router();
+$routerMiddleware = new Yiisoft\Router\Middleware\Router($router, $responseFactory);
 
 // add middleware to your middleware handler of choice 
 ```
 
-In case of a route match router middleware executes a handler attached to the route. If there is no match, next
-middleware processes the request.
+In case of a route match router middleware executes handler middleware attached to the route. If there is no match, next
+application middleware processes the request.
 
 ## Creating URLs
 
 URLs could be created using `UrlGeneratorInterface::generate()`. Let's assume a route is defined like the following:
 
 ```php
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use \Yiisoft\Router\Route;
+
+$router = $container->get(Yiisoft\Router\UrlMatcherInterface::class);
+$responseFactory = $container->get(\Psr\Http\Message\ResponseFactoryInterface::class);
+
 $router->addRoute(Route::get('/test/{id:\w+}')->name('test')->to(function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
     $id = $request->getAttribute('id');
 
@@ -89,6 +123,8 @@ $router->addRoute(Route::get('/test/{id:\w+}')->name('test')->to(function (Serve
 Then that is how URL could be obtained for it:
 
 ```php
+use Yiisoft\Router\UrlGeneratorInterface;
+
 function getUrl(UrlGeneratorInterface $urlGenerator, $parameters = [])
 {
     return $urlGenerator->generate('test', $parameters);
