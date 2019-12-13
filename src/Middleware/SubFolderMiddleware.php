@@ -6,6 +6,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Yiisoft\Aliases\Aliases;
 use Yiisoft\Router\Exception\BadUriPrefixException;
 use Yiisoft\Router\UrlGeneratorInterface;
 
@@ -14,14 +15,14 @@ use Yiisoft\Router\UrlGeneratorInterface;
  */
 final class SubFolderMiddleware implements MiddlewareInterface
 {
-    /** @var null|string */
-    public $prefix;
-    /** @var UrlGeneratorInterface */
-    protected $uriGenerator;
+    public ?string $prefix = null;
+    protected UrlGeneratorInterface $uriGenerator;
+    private Aliases $aliases;
 
-    public function __construct(UrlGeneratorInterface $uriGenerator)
+    public function __construct(UrlGeneratorInterface $uriGenerator, Aliases $aliases)
     {
         $this->uriGenerator = $uriGenerator;
+        $this->aliases = $aliases;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -53,6 +54,8 @@ final class SubFolderMiddleware implements MiddlewareInterface
             $this->uriGenerator->setUriPrefix($this->prefix);
             $request = $request->withUri($uri->withPath(substr($path, $length)));
         }
+        // rewrite alias
+        $this->aliases->set('@web', $this->prefix . '/');
 
         return $handler->handle($request);
     }
