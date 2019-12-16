@@ -17,4 +17,6 @@ interface UrlGeneratorInterface
      * @throws RouteNotFoundException in case there is no route with the name specified
      */
     public function generate(string $name, array $parameters = []): string;
+    public function getUriPrefix(): string;
+    public function setUriPrefix(string $name): void;
 }
