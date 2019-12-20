@@ -156,6 +156,10 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
         return $route;
     }
 
+    /**
+     * @param callable|MiddlewareInterface $middleware
+     * @return MiddlewareInterface
+     */
     private function prepareMiddleware($middleware): MiddlewareInterface
     {
         if (is_callable($middleware)) {

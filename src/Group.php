@@ -32,6 +32,10 @@ class Group implements RouteCollectorInterface
         $this->items[] = new Group($prefix, $callback);
     }
 
+    /**
+     * @param callable|MiddlewareInterface $middleware
+     * @return $this
+     */
     final public function addMiddleware($middleware): self
     {
         if (is_callable($middleware)) {
