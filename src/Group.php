@@ -11,7 +11,7 @@ use function is_callable;
 class Group implements RouteCollectorInterface
 {
     protected array $items = [];
-    protected string $prefix;
+    protected ?string $prefix;
     protected array $middlewares = [];
 
     public function __construct(string $prefix = null, callable $callback = null)
