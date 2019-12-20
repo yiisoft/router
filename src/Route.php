@@ -28,7 +28,7 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
     /**
      * @var MiddlewareInterface[]|callable[]
      */
-    private array $middlewares;
+    private array $middlewares = [];
     private array $parameters = [];
     private array $defaults = [];
     private RequestHandlerInterface $nextHandler;
