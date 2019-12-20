@@ -20,7 +20,7 @@ final class MatchingResult implements MiddlewareInterface
 
     public static function fromSuccess(Route $route, array $parameters): self
     {
-        $new = new static();
+        $new = new self();
         $new->success = true;
         $new->route = $route;
         $new->parameters = $parameters;
@@ -29,7 +29,7 @@ final class MatchingResult implements MiddlewareInterface
 
     public static function fromFailure(array $methods): self
     {
-        $new = new static();
+        $new = new self();
         $new->methods = $methods;
         $new->success = false;
         return $new;
