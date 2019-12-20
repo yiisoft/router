@@ -20,44 +20,17 @@ use function reset;
  */
 final class Route implements MiddlewareInterface, RequestHandlerInterface
 {
-    /**
-     * @var string
-     */
     private string $name;
-
-    /**
-     * @var array
-     */
+    /** @var string[] */
     private array $methods;
-
-    /**
-     * @var string
-     */
     private string $pattern;
-
-    /**
-     * @var string
-     */
     private string $host;
-
     /**
-     * @var array
+     * @var MiddlewareInterface[]|callable[]
      */
     private array $middlewares;
-
-    /**
-     * @var array
-     */
     private array $parameters = [];
-
-    /**
-     * @var array
-     */
     private array $defaults = [];
-
-    /**
-     * @var RequestHandlerInterface
-     */
     private RequestHandlerInterface $nextHandler;
 
     private function __construct()

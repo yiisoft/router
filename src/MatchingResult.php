@@ -9,11 +9,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 final class MatchingResult implements MiddlewareInterface
 {
-    private ?bool $success;
-
-    /**
-     * @var Route
-     */
+    private bool $success;
     private Route $route;
     private array $parameters = [];
     private array $methods;
@@ -24,7 +20,7 @@ final class MatchingResult implements MiddlewareInterface
 
     public static function fromSuccess(Route $route, array $parameters): self
     {
-        $new = new self();
+        $new = new static();
         $new->success = true;
         $new->route = $route;
         $new->parameters = $parameters;

@@ -5,7 +5,6 @@ namespace Yiisoft\Router;
 use InvalidArgumentException;
 use Psr\Http\Server\MiddlewareInterface;
 use Yiisoft\Router\Middleware\Callback;
-
 use function is_callable;
 
 class Group implements RouteCollectorInterface
@@ -14,7 +13,7 @@ class Group implements RouteCollectorInterface
     protected ?string $prefix;
     protected array $middlewares = [];
 
-    public function __construct(string $prefix = null, callable $callback = null)
+    public function __construct(?string $prefix = null, ?callable $callback = null)
     {
         $this->prefix = $prefix;
 
