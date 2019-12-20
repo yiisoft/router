@@ -9,14 +9,14 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 final class MatchingResult implements MiddlewareInterface
 {
-    private $success;
+    private ?bool $success;
 
     /**
      * @var Route
      */
-    private $route;
-    private $parameters = [];
-    private $methods;
+    private Route $route;
+    private array $parameters = [];
+    private array $methods;
 
     private function __construct()
     {
