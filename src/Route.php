@@ -233,7 +233,7 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
             $result .= '[' . $this->name . '] ';
         }
 
-        if ($this->methods !== null) {
+        if ($this->methods !== []) {
             $result .= implode(',', $this->methods) . ' ';
         }
         if ($this->host !== null && strrpos($this->pattern, $this->host) === false) {
