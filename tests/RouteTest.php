@@ -130,6 +130,13 @@ final class RouteTest extends TestCase
         $this->assertSame('[test.route] GET,POST yiiframework.com/', (string)$route);
     }
 
+    public function testToStringSimple(): void
+    {
+        $route = Route::get('/');
+
+        $this->assertSame('/', (string)$route);
+    }
+
     public function testInvalidTo(): void
     {
         $this->expectException(\InvalidArgumentException::class);
