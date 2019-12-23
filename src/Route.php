@@ -20,7 +20,7 @@ use function reset;
  */
 final class Route implements MiddlewareInterface, RequestHandlerInterface
 {
-    private string $name;
+    private ?string $name = null;
     /** @var string[] */
     private array $methods;
     private string $pattern;
