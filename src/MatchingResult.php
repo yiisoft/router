@@ -57,7 +57,7 @@ final class MatchingResult implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if ($this->success === false || $this->route === null) {
+        if ($this->success === false) {
             return $handler->handle($request);
         }
 
