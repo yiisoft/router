@@ -7,7 +7,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use function call_user_func;
 
 final class Callback implements MiddlewareInterface
 {
@@ -22,6 +21,6 @@ final class Callback implements MiddlewareInterface
         ServerRequestInterface $request,
         RequestHandlerInterface $handler
     ): ResponseInterface {
-        return call_user_func($this->callback, $request, $handler);
+        return \call_user_func($this->callback, $request, $handler);
     }
 }

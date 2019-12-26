@@ -10,11 +10,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-use function current;
-use function is_callable;
-use function next;
-use function reset;
-
 /**
  * Route defines a mapping from URL to callback / name and vice versa
  */

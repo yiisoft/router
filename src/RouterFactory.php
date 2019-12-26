@@ -5,11 +5,6 @@ namespace Yiisoft\Router;
 use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 
-use function count;
-use function is_array;
-use function is_callable;
-use function is_string;
-
 final class RouterFactory
 {
     /**
