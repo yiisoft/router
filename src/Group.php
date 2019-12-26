@@ -2,16 +2,17 @@
 
 namespace Yiisoft\Router;
 
+use InvalidArgumentException;
 use Psr\Http\Server\MiddlewareInterface;
 use Yiisoft\Router\Middleware\Callback;
 
 class Group implements RouteCollectorInterface
 {
-    protected $items = [];
-    protected $prefix;
-    protected $middlewares = [];
+    protected array $items = [];
+    protected ?string $prefix;
+    protected array $middlewares = [];
 
-    public function __construct(string $prefix = null, callable $callback = null)
+    public function __construct(?string $prefix = null, ?callable $callback = null)
     {
         $this->prefix = $prefix;
 
@@ -30,14 +31,18 @@ class Group implements RouteCollectorInterface
         $this->items[] = new Group($prefix, $callback);
     }
 
+    /**
+     * @param callable|MiddlewareInterface $middleware
+     * @return $this
+     */
     final public function addMiddleware($middleware): self
     {
-        if (\is_callable($middleware)) {
+        if (is_callable($middleware)) {
             $middleware = new Callback($middleware);
         }
 
         if (!$middleware instanceof MiddlewareInterface) {
-            throw new \InvalidArgumentException('Parameter should be either a PSR middleware or a callable.');
+            throw new InvalidArgumentException('Parameter should be either a PSR middleware or a callable.');
         }
 
         $this->middlewares[] = $middleware;

@@ -2,6 +2,8 @@
 
 namespace Yiisoft\Router;
 
+use InvalidArgumentException;
+use LogicException;
 use Yiisoft\Router\Middleware\Callback;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -13,45 +15,18 @@ use Psr\Http\Server\RequestHandlerInterface;
  */
 final class Route implements MiddlewareInterface, RequestHandlerInterface
 {
+    private ?string $name = null;
+    /** @var string[] */
+    private array $methods;
+    private string $pattern;
+    private ?string $host = null;
     /**
-     * @var string
+     * @var MiddlewareInterface[]|callable[]
      */
-    private $name;
-
-    /**
-     * @var array
-     */
-    private $methods;
-
-    /**
-     * @var string
-     */
-    private $pattern;
-
-    /**
-     * @var string
-     */
-    private $host;
-
-    /**
-     * @var array
-     */
-    private $middlewares;
-
-    /**
-     * @var array
-     */
-    private $parameters = [];
-
-    /**
-     * @var array
-     */
-    private $defaults = [];
-
-    /**
-     * @var RequestHandlerInterface
-     */
-    private $nextHandler;
+    private array $middlewares = [];
+    private array $parameters = [];
+    private array $defaults = [];
+    private RequestHandlerInterface $nextHandler;
 
     private function __construct()
     {
@@ -176,14 +151,18 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
         return $route;
     }
 
-    private function prepareMiddlware($middleware): MiddlewareInterface
+    /**
+     * @param callable|MiddlewareInterface $middleware
+     * @return MiddlewareInterface
+     */
+    private function prepareMiddleware($middleware): MiddlewareInterface
     {
-        if (\is_callable($middleware)) {
+        if (is_callable($middleware)) {
             $middleware = new Callback($middleware);
         }
 
         if (!$middleware instanceof MiddlewareInterface) {
-            throw new \InvalidArgumentException('Parameter should be either a PSR middleware or a callable.');
+            throw new InvalidArgumentException('Parameter should be either a PSR middleware or a callable.');
         }
 
         return $middleware;
@@ -203,7 +182,7 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
     public function to($middleware): self
     {
         $route = clone $this;
-        $route->middlewares[] = $this->prepareMiddlware($middleware);
+        $route->middlewares[] = $this->prepareMiddleware($middleware);
         return $route;
     }
 
@@ -237,7 +216,7 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
     public function prepend($middleware): self
     {
         $route = clone $this;
-        array_unshift($route->middlewares, $this->prepareMiddlware($middleware));
+        array_unshift($route->middlewares, $this->prepareMiddleware($middleware));
         return $route;
     }
 
@@ -249,7 +228,7 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
             $result .= '[' . $this->name . '] ';
         }
 
-        if ($this->methods !== null) {
+        if ($this->methods !== []) {
             $result .= implode(',', $this->methods) . ' ';
         }
         if ($this->host !== null && strrpos($this->pattern, $this->host) === false) {
@@ -297,14 +276,14 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $middleware = \current($this->middlewares);
-        \next($this->middlewares);
+        $middleware = current($this->middlewares);
+        next($this->middlewares);
         if ($middleware === false) {
             if (!$this->nextHandler !== null) {
                 return $this->nextHandler->handle($request);
             }
 
-            throw new \LogicException('Middleware stack exhausted');
+            throw new LogicException('Middleware stack exhausted');
         }
 
         return $middleware->process($request, $this);
@@ -312,7 +291,7 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
 
     public function dispatch(ServerRequestInterface $request): ResponseInterface
     {
-        \reset($this->middlewares);
+        reset($this->middlewares);
         return $this->handle($request);
     }
 
