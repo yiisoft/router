@@ -12,7 +12,7 @@ final class MatchingResult implements MiddlewareInterface
     private bool $success;
     private Route $route;
     private array $parameters = [];
-    private array $methods = Method::ANY;
+    private array $methods = [];
 
     private function __construct()
     {
