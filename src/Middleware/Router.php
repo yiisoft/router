@@ -11,8 +11,8 @@ use Yiisoft\Router\UrlMatcherInterface;
 
 final class Router implements MiddlewareInterface
 {
-    private $matcher;
-    private $responseFactory;
+    private UrlMatcherInterface $matcher;
+    private ResponseFactoryInterface $responseFactory;
 
     public function __construct(UrlMatcherInterface $matcher, ResponseFactoryInterface $responseFactory)
     {

@@ -9,14 +9,10 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 final class MatchingResult implements MiddlewareInterface
 {
-    private $success;
-
-    /**
-     * @var Route
-     */
-    private $route;
-    private $parameters = [];
-    private $methods;
+    private bool $success;
+    private Route $route;
+    private array $parameters = [];
+    private array $methods = [];
 
     private function __construct()
     {
@@ -33,7 +29,7 @@ final class MatchingResult implements MiddlewareInterface
 
     public static function fromFailure(array $methods): self
     {
-        $new = new static();
+        $new = new self();
         $new->methods = $methods;
         $new->success = false;
         return $new;
