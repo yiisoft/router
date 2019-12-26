@@ -17,7 +17,7 @@ final class RouterFactory
      */
     private $engineFactory;
     /**
-     * @var Route[]|array
+     * @var Route[]
      */
     private array $routes;
 
