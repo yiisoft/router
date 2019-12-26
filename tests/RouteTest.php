@@ -134,7 +134,7 @@ final class RouteTest extends TestCase
     {
         $route = Route::get('/');
 
-        $this->assertSame('/', (string)$route);
+        $this->assertSame('GET /', (string)$route);
     }
 
     public function testInvalidTo(): void
