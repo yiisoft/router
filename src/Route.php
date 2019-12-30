@@ -24,7 +24,6 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
      * @var MiddlewareInterface[]|callable[]
      */
     private array $middlewares = [];
-    private array $parameters = [];
     private array $defaults = [];
     private RequestHandlerInterface $nextHandler;
 
@@ -122,19 +121,6 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
     {
         $route = clone $this;
         $route->host = rtrim($host, '/');
-        return $route;
-    }
-
-    /**
-     * Parameter validation rules indexed by parameter names
-     *
-     * @param array $parameters
-     * @return Route
-     */
-    public function parameters(array $parameters): self
-    {
-        $route = clone $this;
-        $route->parameters = $parameters;
         return $route;
     }
 
@@ -257,11 +243,6 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
     public function getHost(): ?string
     {
         return $this->host;
-    }
-
-    public function getParameters(): array
-    {
-        return $this->parameters;
     }
 
     public function getDefaults(): array
