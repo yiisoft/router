@@ -109,13 +109,6 @@ final class RouteTest extends TestCase
         $this->assertSame('https://yiiframework.com', $route->getHost());
     }
 
-    public function testParameters(): void
-    {
-        $route = Route::get('/{language}')->parameters(['language' => 'en']);
-
-        $this->assertSame(['language' => 'en'], $route->getParameters());
-    }
-
     public function testDefaults(): void
     {
         $route = Route::get('/{language}')->defaults(['language' => 'en']);
