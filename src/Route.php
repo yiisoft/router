@@ -4,6 +4,7 @@ namespace Yiisoft\Router;
 
 use InvalidArgumentException;
 use LogicException;
+use Yiisoft\Http\Method;
 use Yiisoft\Router\Middleware\Callback;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
