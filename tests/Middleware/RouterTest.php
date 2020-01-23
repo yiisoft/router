@@ -85,7 +85,7 @@ final class RouterTest extends TestCase
 
     private function createRequestHandler(): RequestHandlerInterface
     {
-        return new class implements RequestHandlerInterface {
+        return new class() implements RequestHandlerInterface {
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
                 return new Response(404);
@@ -95,7 +95,7 @@ final class RouterTest extends TestCase
 
     private function createRouteMiddleware(): MiddlewareInterface
     {
-        return new class implements MiddlewareInterface {
+        return new class() implements MiddlewareInterface {
             public function process(
                 ServerRequestInterface $request,
                 RequestHandlerInterface $handler
