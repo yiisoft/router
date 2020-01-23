@@ -141,7 +141,7 @@ final class RouteTest extends TestCase
         $request = new ServerRequest('GET', '/');
 
         $route = Route::get('/')->to(
-            new class implements MiddlewareInterface {
+            new class() implements MiddlewareInterface {
                 public function process(
                     ServerRequestInterface $request,
                     RequestHandlerInterface $handler
@@ -213,7 +213,7 @@ final class RouteTest extends TestCase
 
     private function getRequestHandler(): RequestHandlerInterface
     {
-        return new class implements RequestHandlerInterface {
+        return new class() implements RequestHandlerInterface {
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
                 return new Response(404);
