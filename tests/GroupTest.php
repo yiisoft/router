@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Yiisoft\Router\Tests;
 
 use PHPUnit\Framework\TestCase;
