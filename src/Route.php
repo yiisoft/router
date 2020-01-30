@@ -261,7 +261,7 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
         $middleware = current($this->middlewares);
         next($this->middlewares);
         if ($middleware === false) {
-            if (!$this->nextHandler !== null) {
+            if ($this->nextHandler !== null) {
                 return $this->nextHandler->handle($request);
             }
 
