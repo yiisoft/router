@@ -3,33 +3,33 @@
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
-use LogicException;
 use Yiisoft\Http\Method;
 use Yiisoft\Router\Middleware\Callback;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Route defines a mapping from URL to callback / name and vice versa
  */
-final class Route implements MiddlewareInterface, RequestHandlerInterface
+final class Route implements MiddlewareInterface
 {
     private ?string $name = null;
     /** @var string[] */
     private array $methods;
     private string $pattern;
     private ?string $host = null;
+
     /**
      * @var MiddlewareInterface[]|callable[]
      */
-    private array $middlewares = [];
     private array $defaults = [];
-    private RequestHandlerInterface $nextHandler;
+    protected array $middlewares = [];
 
-    private function __construct()
+    public function __construct(MiddlewareInterface ...$middlewares)
     {
+        $this->middlewares = $middlewares;
     }
 
     public static function get(string $pattern): self
@@ -251,35 +251,33 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
         return $this->defaults;
     }
 
-    /**
-     * @internal please use {@see dispatch()} or {@see process()}
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     */
-    public function handle(ServerRequestInterface $request): ResponseInterface
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $middleware = current($this->middlewares);
-        next($this->middlewares);
-        if ($middleware === false) {
-            if (!$this->nextHandler !== null) {
-                return $this->nextHandler->handle($request);
+        for ($i = count($this->middlewares) - 1; $i > 0; $i--) {
+            $handler = $this->wrap($this->middlewares[$i], $handler);
+        }
+        return $this->middlewares[0]->process($request, $handler);
+    }
+
+    /**
+     * Wraps handler by middlewares
+     */
+    private function wrap(MiddlewareInterface $middleware, RequestHandlerInterface $handler): RequestHandlerInterface
+    {
+        return new class($middleware, $handler) implements RequestHandlerInterface {
+            private $middleware;
+            private $handler;
+
+            public function __construct(MiddlewareInterface $middleware, RequestHandlerInterface $handler)
+            {
+                $this->middleware = $middleware;
+                $this->handler = $handler;
             }
 
-            throw new LogicException('Middleware stack exhausted');
-        }
-
-        return $middleware->process($request, $this);
-    }
-
-    public function dispatch(ServerRequestInterface $request): ResponseInterface
-    {
-        reset($this->middlewares);
-        return $this->handle($request);
-    }
-
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $nextHandler): ResponseInterface
-    {
-        $this->nextHandler = $nextHandler;
-        return $this->dispatch($request);
+            public function handle(ServerRequestInterface $request): ResponseInterface
+            {
+                return $this->middleware->process($request, $this->handler);
+            }
+        };
     }
 }

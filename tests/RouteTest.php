@@ -10,6 +10,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Http\Method;
+use Yiisoft\Router\Middleware\Callback;
 use Yiisoft\Router\Route;
 
 final class RouteTest extends TestCase
@@ -169,46 +170,155 @@ final class RouteTest extends TestCase
         $this->assertSame(418, $response->getStatusCode());
     }
 
-    public function testThen(): void
+    public function testThenByStatusCode(): void
     {
         $request = new ServerRequest('GET', '/');
 
-        $route = Route::get('/');
+        $routeOne = Route::get('/');
 
-        $middleware1 = $this->createMock(MiddlewareInterface::class);
-        $middleware2 = $this->createMock(MiddlewareInterface::class);
+        $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+            return $handler->handle($request);
+        });
+        $middleware2 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+            return new Response(200);
+        });
 
-        $route = $route->to($middleware1)->then($middleware2);
+        $routeOne = $routeOne->to($middleware1)->then($middleware2);
 
-        $middleware1
-            ->expects($this->at(0))
-            ->method('process')
-            ->with($request, $route);
+        $response = $routeOne->process($request, $this->getRequestHandler());
+        $this->assertSame(200, $response->getStatusCode());
 
-        // TODO: test that second one is called as well
+        $routeTwo = Route::get('/');
 
-        $route->process($request, $this->getRequestHandler());
+        $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+            return new Response(404);
+        });
+        $middleware2 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+            return new Response(200);
+        });
+
+        $routeTwo = $routeTwo->to($middleware1)->then($middleware2);
+
+        $response = $routeTwo->process($request, $this->getRequestHandler());
+        $this->assertSame(404, $response->getStatusCode());
     }
 
-    public function testBefore(): void
+    public function testThenByBody(): void
     {
         $request = new ServerRequest('GET', '/');
 
-        $route = Route::get('/');
+        $routeOne = Route::get('/');
 
-        $middleware1 = $this->createMock(MiddlewareInterface::class);
-        $middleware2 = $this->createMock(MiddlewareInterface::class);
+        $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+            return $handler->handle($request);
+        });
+        $middleware2 = new Callback(function () {
+            $response = new Response(201);
+            $response->getBody()->write('middleware2');
+            return $response;
+        });
 
-        $route = $route->to($middleware1)->prepend($middleware2);
+        $routeOne = $routeOne->to($middleware1)->then($middleware2);
 
-        $middleware2
-            ->expects($this->at(0))
-            ->method('process')
-            ->with($request, $route);
+        $response = $routeOne->process($request, $this->getRequestHandler());
+        $body = $response->getBody();
+        $body->rewind();
+        $this->assertSame('middleware2', $response->getBody()->getContents());
 
-        // TODO: test that first one is called as well
+        $routeTwo = Route::get('/');
 
-        $route->process($request, $this->getRequestHandler());
+        $middleware1 = new Callback(function () {
+            $response = new Response(201);
+            $response->getBody()->write('middleware1');
+            return $response;
+        });
+        $middleware2 = new Callback(function () {
+            $response = new Response(201);
+            $response->getBody()->write('middleware2');
+            return $response;
+        });
+
+        $routeTwo = $routeTwo->to($middleware1)->then($middleware2);
+
+        $response = $routeTwo->process($request, $this->getRequestHandler());
+        $body = $response->getBody();
+        $body->rewind();
+        $this->assertSame('middleware1', $response->getBody()->getContents());
+    }
+
+    public function testBeforeByStatusCode(): void
+    {
+        $request = new ServerRequest('GET', '/');
+
+        $routeOne = Route::get('/');
+
+        $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+            return new Response(200);
+        });
+        $middleware2 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+            return $handler->handle($request);
+        });
+
+        $routeOne = $routeOne->to($middleware1)->prepend($middleware2);
+
+        $response = $routeOne->process($request, $this->getRequestHandler());
+        $this->assertSame(200, $response->getStatusCode());
+
+        $routeTwo = Route::get('/');
+
+        $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+            return new Response(404);
+        });
+        $middleware2 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+            return new Response(200);
+        });
+
+        $routeTwo = $routeTwo->to($middleware1)->then($middleware2);
+
+        $response = $routeTwo->process($request, $this->getRequestHandler());
+        $this->assertSame(404, $response->getStatusCode());
+    }
+
+    public function testBeforeByBody(): void
+    {
+        $request = new ServerRequest('GET', '/');
+
+        $routeOne = Route::get('/');
+
+        $middleware1 = new Callback(function () {
+            $response = new Response(201);
+            $response->getBody()->write('middleware1');
+            return $response;
+        });
+        $middleware2 = new Callback(function () {
+            $response = new Response(201);
+            $response->getBody()->write('middleware2');
+            return $response;
+        });
+
+        $routeOne = $routeOne->to($middleware1)->prepend($middleware2);
+
+        $response = $routeOne->process($request, $this->getRequestHandler());
+        $body = $response->getBody();
+        $body->rewind();
+        $this->assertSame('middleware2', $response->getBody()->getContents());
+
+        $middleware1 = new Callback(function () {
+            $response = new Response(201);
+            $response->getBody()->write('middleware1');
+            return $response;
+        });
+        $middleware2 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+            return $handler->handle($request);
+        });
+
+        $routeTwo = Route::get('/');
+        $routeTwo = $routeTwo->to($middleware1)->prepend($middleware2);
+
+        $response = $routeTwo->process($request, $this->getRequestHandler());
+        $body = $response->getBody();
+        $body->rewind();
+        $this->assertSame('middleware1', $response->getBody()->getContents());
     }
 
     private function getRequestHandler(): RequestHandlerInterface

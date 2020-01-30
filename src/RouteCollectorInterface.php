@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Yiisoft\Router;
 
 interface RouteCollectorInterface
