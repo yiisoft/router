@@ -63,7 +63,7 @@ final class MatchingResultTest extends TestCase
 
     private function getMiddleware(): MiddlewareInterface
     {
-        return new class implements MiddlewareInterface {
+        return new class() implements MiddlewareInterface {
             public function process(
                 ServerRequestInterface $request,
                 RequestHandlerInterface $handler
@@ -75,7 +75,7 @@ final class MatchingResultTest extends TestCase
 
     private function getRequestHandler(): RequestHandlerInterface
     {
-        return new class implements RequestHandlerInterface {
+        return new class() implements RequestHandlerInterface {
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
                 return new Response(404);
