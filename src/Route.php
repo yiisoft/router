@@ -24,13 +24,9 @@ final class Route implements MiddlewareInterface
     /**
      * @var MiddlewareInterface[]|callable[]
      */
+    private array $middlewares = [];
     private array $defaults = [];
-    protected array $middlewares = [];
 
-    public function __construct(MiddlewareInterface ...$middlewares)
-    {
-        $this->middlewares = $middlewares;
-    }
 
     public static function get(string $pattern): self
     {
