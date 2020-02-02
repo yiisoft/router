@@ -170,7 +170,7 @@ final class RouteTest extends TestCase
         $this->assertSame(418, $response->getStatusCode());
     }
 
-    public function testThenByStatusCode(): void
+    public function testThenFullStackCalled(): void
     {
         $request = new ServerRequest('GET', '/');
 
@@ -179,7 +179,7 @@ final class RouteTest extends TestCase
         $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             return $handler->handle($request);
         });
-        $middleware2 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+        $middleware2 = new Callback(function () {
             return new Response(200);
         });
 
@@ -187,13 +187,18 @@ final class RouteTest extends TestCase
 
         $response = $routeOne->process($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testThenStackInterrupted(): void
+    {
+        $request = new ServerRequest('GET', '/');
 
         $routeTwo = Route::get('/');
 
-        $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+        $middleware1 = new Callback(function () {
             return new Response(404);
         });
-        $middleware2 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+        $middleware2 = new Callback(function () {
             return new Response(200);
         });
 
@@ -203,56 +208,15 @@ final class RouteTest extends TestCase
         $this->assertSame(404, $response->getStatusCode());
     }
 
-    public function testThenByBody(): void
+
+
+    public function testBeforeFullStackCalled(): void
     {
         $request = new ServerRequest('GET', '/');
 
         $routeOne = Route::get('/');
-
-        $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
-            return $handler->handle($request);
-        });
-        $middleware2 = new Callback(function () {
-            $response = new Response(201);
-            $response->getBody()->write('middleware2');
-            return $response;
-        });
-
-        $routeOne = $routeOne->to($middleware1)->then($middleware2);
-
-        $response = $routeOne->process($request, $this->getRequestHandler());
-        $body = $response->getBody();
-        $body->rewind();
-        $this->assertSame('middleware2', $response->getBody()->getContents());
-
-        $routeTwo = Route::get('/');
 
         $middleware1 = new Callback(function () {
-            $response = new Response(201);
-            $response->getBody()->write('middleware1');
-            return $response;
-        });
-        $middleware2 = new Callback(function () {
-            $response = new Response(201);
-            $response->getBody()->write('middleware2');
-            return $response;
-        });
-
-        $routeTwo = $routeTwo->to($middleware1)->then($middleware2);
-
-        $response = $routeTwo->process($request, $this->getRequestHandler());
-        $body = $response->getBody();
-        $body->rewind();
-        $this->assertSame('middleware1', $response->getBody()->getContents());
-    }
-
-    public function testBeforeByStatusCode(): void
-    {
-        $request = new ServerRequest('GET', '/');
-
-        $routeOne = Route::get('/');
-
-        $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             return new Response(200);
         });
         $middleware2 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
@@ -263,13 +227,18 @@ final class RouteTest extends TestCase
 
         $response = $routeOne->process($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testBeforeStackInterrupted(): void
+    {
+        $request = new ServerRequest('GET', '/');
 
         $routeTwo = Route::get('/');
 
-        $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+        $middleware1 = new Callback(function () {
             return new Response(404);
         });
-        $middleware2 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+        $middleware2 = new Callback(function () {
             return new Response(200);
         });
 
@@ -277,48 +246,6 @@ final class RouteTest extends TestCase
 
         $response = $routeTwo->process($request, $this->getRequestHandler());
         $this->assertSame(404, $response->getStatusCode());
-    }
-
-    public function testBeforeByBody(): void
-    {
-        $request = new ServerRequest('GET', '/');
-
-        $routeOne = Route::get('/');
-
-        $middleware1 = new Callback(function () {
-            $response = new Response(201);
-            $response->getBody()->write('middleware1');
-            return $response;
-        });
-        $middleware2 = new Callback(function () {
-            $response = new Response(201);
-            $response->getBody()->write('middleware2');
-            return $response;
-        });
-
-        $routeOne = $routeOne->to($middleware1)->prepend($middleware2);
-
-        $response = $routeOne->process($request, $this->getRequestHandler());
-        $body = $response->getBody();
-        $body->rewind();
-        $this->assertSame('middleware2', $response->getBody()->getContents());
-
-        $middleware1 = new Callback(function () {
-            $response = new Response(201);
-            $response->getBody()->write('middleware1');
-            return $response;
-        });
-        $middleware2 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
-            return $handler->handle($request);
-        });
-
-        $routeTwo = Route::get('/');
-        $routeTwo = $routeTwo->to($middleware1)->prepend($middleware2);
-
-        $response = $routeTwo->process($request, $this->getRequestHandler());
-        $body = $response->getBody();
-        $body->rewind();
-        $this->assertSame('middleware1', $response->getBody()->getContents());
     }
 
     private function getRequestHandler(): RequestHandlerInterface
