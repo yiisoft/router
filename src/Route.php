@@ -37,41 +37,82 @@ final class Route implements MiddlewareInterface
     {
     }
 
+    /**
+     * @param string $pattern
+     * @param callable|MiddlewareInterface|null $middleware
+     * @return static
+     */
     public static function get(string $pattern, $middleware = null): self
     {
         return static::methods([Method::GET], $pattern, $middleware);
     }
 
+    /**
+     * @param string $pattern
+     * @param callable|MiddlewareInterface|null $middleware
+     * @return static
+     */
     public static function post(string $pattern, $middleware = null): self
     {
         return static::methods([Method::POST], $pattern, $middleware);
     }
 
+    /**
+     * @param string $pattern
+     * @param callable|MiddlewareInterface|null $middleware
+     * @return static
+     */
     public static function put(string $pattern, $middleware = null): self
     {
         return static::methods([Method::PUT], $pattern, $middleware);
     }
 
+    /**
+     * @param string $pattern
+     * @param callable|MiddlewareInterface|null $middleware
+     * @return static
+     */
     public static function delete(string $pattern, $middleware = null): self
     {
         return static::methods([Method::DELETE], $pattern, $middleware);
     }
 
+    /**
+     * @param string $pattern
+     * @param callable|MiddlewareInterface|null $middleware
+     * @return static
+     */
     public static function patch(string $pattern, $middleware = null): self
     {
         return static::methods([Method::PATCH], $pattern, $middleware);
     }
 
+    /**
+     * @param string $pattern
+     * @param callable|MiddlewareInterface|null $middleware
+     * @return static
+     */
     public static function head(string $pattern, $middleware = null): self
     {
         return static::methods([Method::HEAD], $pattern, $middleware);
     }
 
+    /**
+     * @param string $pattern
+     * @param callable|MiddlewareInterface|null $middleware
+     * @return static
+     */
     public static function options(string $pattern, $middleware = null): self
     {
         return static::methods([Method::OPTIONS], $pattern, $middleware);
     }
 
+    /**
+     * @param array $methods
+     * @param string $pattern
+     * @param callable|MiddlewareInterface|null $middleware
+     * @return static
+     */
     public static function methods(array $methods, string $pattern, $middleware = null): self
     {
         $route = new static();
@@ -83,6 +124,11 @@ final class Route implements MiddlewareInterface
         return $route;
     }
 
+    /**
+     * @param string $pattern
+     * @param callable|MiddlewareInterface|null $middleware
+     * @return static
+     */
     public static function anyMethod(string $pattern, $middleware = null): self
     {
         return static::methods(Method::ANY, $pattern, $middleware);
@@ -113,7 +159,7 @@ final class Route implements MiddlewareInterface
      * Parameter default values indexed by parameter names
      *
      * @param array $defaults
-     * @return Route
+     * @return self
      */
     public function defaults(array $defaults): self
     {
@@ -147,7 +193,7 @@ final class Route implements MiddlewareInterface
      * ```
      * function (ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
      * ```
-     *     * Last addded middleware will be invoked first.
+     *     * Last added middleware will be invoked first.
      *
      * @param MiddlewareInterface|callable $middleware
      * @return Route
