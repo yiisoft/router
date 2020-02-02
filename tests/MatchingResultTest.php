@@ -43,7 +43,7 @@ final class MatchingResultTest extends TestCase
 
     public function testProcessSuccess(): void
     {
-        $route = Route::post('/')->to($this->getMiddleware());
+        $route = Route::post('/')->addMiddleware($this->getMiddleware());
         $result = MatchingResult::fromSuccess($route, []);
         $request = new ServerRequest('POST', '/');
 

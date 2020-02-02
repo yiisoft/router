@@ -131,17 +131,23 @@ final class RouteTest extends TestCase
         $this->assertSame('GET /', (string)$route);
     }
 
-    public function testInvalidTo(): void
+    public function testInvalidMiddlewareMethod(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        Route::get('/')->to(new \stdClass());
+        Route::get('/', new \stdClass());
     }
 
-    public function testToMiddleware(): void
+    public function testInvalidMiddlewareAdd(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        Route::get('/')->addMiddleware(new \stdClass());
+    }
+
+    public function testAddMiddleware(): void
     {
         $request = new ServerRequest('GET', '/');
 
-        $route = Route::get('/')->to(
+        $route = Route::get('/')->addMiddleware(
             new class() implements MiddlewareInterface {
                 public function process(
                     ServerRequestInterface $request,
@@ -156,11 +162,11 @@ final class RouteTest extends TestCase
         $this->assertSame(418, $response->getStatusCode());
     }
 
-    public function testToCallable(): void
+    public function testAddCallableMiddleware(): void
     {
         $request = new ServerRequest('GET', '/');
 
-        $route = Route::get('/')->to(
+        $route = Route::get('/')->addMiddleware(
             static function (): ResponseInterface {
                 return (new Response())->withStatus(418);
             }
@@ -170,7 +176,7 @@ final class RouteTest extends TestCase
         $this->assertSame(418, $response->getStatusCode());
     }
 
-    public function testThenFullStackCalled(): void
+    public function testMiddlewareFullStackCalled(): void
     {
         $request = new ServerRequest('GET', '/');
 
@@ -183,13 +189,13 @@ final class RouteTest extends TestCase
             return new Response(200);
         });
 
-        $routeOne = $routeOne->to($middleware1)->then($middleware2);
+        $routeOne = $routeOne->addMiddleware($middleware2)->addMiddleware($middleware1);
 
         $response = $routeOne->process($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
     }
 
-    public function testThenStackInterrupted(): void
+    public function testMiddlewareStackInterrupted(): void
     {
         $request = new ServerRequest('GET', '/');
 
@@ -202,47 +208,7 @@ final class RouteTest extends TestCase
             return new Response(200);
         });
 
-        $routeTwo = $routeTwo->to($middleware1)->then($middleware2);
-
-        $response = $routeTwo->process($request, $this->getRequestHandler());
-        $this->assertSame(404, $response->getStatusCode());
-    }
-
-
-
-    public function testBeforeFullStackCalled(): void
-    {
-        $request = new ServerRequest('GET', '/');
-
-        $routeOne = Route::get('/');
-
-        $middleware1 = new Callback(function () {
-            return new Response(200);
-        });
-        $middleware2 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
-            return $handler->handle($request);
-        });
-
-        $routeOne = $routeOne->to($middleware1)->prepend($middleware2);
-
-        $response = $routeOne->process($request, $this->getRequestHandler());
-        $this->assertSame(200, $response->getStatusCode());
-    }
-
-    public function testBeforeStackInterrupted(): void
-    {
-        $request = new ServerRequest('GET', '/');
-
-        $routeTwo = Route::get('/');
-
-        $middleware1 = new Callback(function () {
-            return new Response(404);
-        });
-        $middleware2 = new Callback(function () {
-            return new Response(200);
-        });
-
-        $routeTwo = $routeTwo->to($middleware1)->then($middleware2);
+        $routeTwo = $routeTwo->addMiddleware($middleware2)->addMiddleware($middleware1);
 
         $response = $routeTwo->process($request, $this->getRequestHandler());
         $this->assertSame(404, $response->getStatusCode());
