@@ -28,6 +28,9 @@ final class Route implements MiddlewareInterface
     private array $middlewares = [];
     private array $defaults = [];
 
+    private function __construct()
+    {
+    }
 
     public static function get(string $pattern): self
     {
@@ -266,8 +269,8 @@ final class Route implements MiddlewareInterface
     private function wrap(MiddlewareInterface $middleware, RequestHandlerInterface $handler): RequestHandlerInterface
     {
         return new class($middleware, $handler) implements RequestHandlerInterface {
-            private $middleware;
-            private $handler;
+            private MiddlewareInterface $middleware;
+            private RequestHandlerInterface $handler;
 
             public function __construct(MiddlewareInterface $middleware, RequestHandlerInterface $handler)
             {
