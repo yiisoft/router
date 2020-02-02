@@ -20,6 +20,7 @@ final class Route implements MiddlewareInterface
     private array $methods;
     private string $pattern;
     private ?string $host = null;
+    private ?RequestHandlerInterface $stack = null;
 
     /**
      * @var MiddlewareInterface[]|callable[]
@@ -249,10 +250,14 @@ final class Route implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        for ($i = count($this->middlewares) - 1; $i > 0; $i--) {
-            $handler = $this->wrap($this->middlewares[$i], $handler);
+        if ($this->stack === null) {
+            for ($i = count($this->middlewares) - 1; $i >= 0; $i--) {
+                $handler = $this->wrap($this->middlewares[$i], $handler);
+            }
+            $this->stack = $handler;
         }
-        return $this->middlewares[0]->process($request, $handler);
+
+        return $this->stack->handle($request);
     }
 
     /**
