@@ -39,79 +39,37 @@ final class Route implements MiddlewareInterface
 
     public static function get(string $pattern, $middleware = null): self
     {
-        $route = new static();
-        $route->methods = [Method::GET];
-        $route->pattern = $pattern;
-        if ($middleware !== null) {
-            $route->middlewares[] = $route->prepareMiddleware($middleware);
-        }
-        return $route;
+        return static::methods([Method::GET], $pattern, $middleware);
     }
 
     public static function post(string $pattern, $middleware = null): self
     {
-        $route = new static();
-        $route->methods = [Method::POST];
-        $route->pattern = $pattern;
-        if ($middleware !== null) {
-            $route->middlewares[] = $route->prepareMiddleware($middleware);
-        }
-        return $route;
+        return static::methods([Method::POST], $pattern, $middleware);
     }
 
     public static function put(string $pattern, $middleware = null): self
     {
-        $route = new static();
-        $route->methods = [Method::PUT];
-        $route->pattern = $pattern;
-        if ($middleware !== null) {
-            $route->middlewares[] = $route->prepareMiddleware($middleware);
-        }
-        return $route;
+        return static::methods([Method::PUT], $pattern, $middleware);
     }
 
     public static function delete(string $pattern, $middleware = null): self
     {
-        $route = new static();
-        $route->methods = [Method::DELETE];
-        $route->pattern = $pattern;
-        if ($middleware !== null) {
-            $route->middlewares[] = $route->prepareMiddleware($middleware);
-        }
-        return $route;
+        return static::methods([Method::DELETE], $pattern, $middleware);
     }
 
     public static function patch(string $pattern, $middleware = null): self
     {
-        $route = new static();
-        $route->methods = [Method::PATCH];
-        $route->pattern = $pattern;
-        if ($middleware !== null) {
-            $route->middlewares[] = $route->prepareMiddleware($middleware);
-        }
-        return $route;
+        return static::methods([Method::PATCH], $pattern, $middleware);
     }
 
     public static function head(string $pattern, $middleware = null): self
     {
-        $route = new static();
-        $route->methods = [Method::HEAD];
-        $route->pattern = $pattern;
-        if ($middleware !== null) {
-            $route->middlewares[] = $route->prepareMiddleware($middleware);
-        }
-        return $route;
+        return static::methods([Method::HEAD], $pattern, $middleware);
     }
 
     public static function options(string $pattern, $middleware = null): self
     {
-        $route = new static();
-        $route->methods = [Method::OPTIONS];
-        $route->pattern = $pattern;
-        if ($middleware !== null) {
-            $route->middlewares[] = $route->prepareMiddleware($middleware);
-        }
-        return $route;
+        return static::methods([Method::OPTIONS], $pattern, $middleware);
     }
 
     public static function methods(array $methods, string $pattern, $middleware = null): self
@@ -127,13 +85,7 @@ final class Route implements MiddlewareInterface
 
     public static function anyMethod(string $pattern, $middleware = null): self
     {
-        $route = new static();
-        $route->methods = Method::ANY;
-        $route->pattern = $pattern;
-        if ($middleware !== null) {
-            $route->middlewares[] = $route->prepareMiddleware($middleware);
-        }
-        return $route;
+        return static::methods(Method::ANY, $pattern, $middleware);
     }
 
     public function name(string $name): self
