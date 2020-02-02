@@ -20,6 +20,11 @@ final class Route implements MiddlewareInterface
     private array $methods;
     private string $pattern;
     private ?string $host = null;
+    /**
+     * Contains a chain of middleware wrapped in handlers.
+     * Each handler points to the handler of middleware that will be processed next.
+     * @var RequestHandlerInterface|null stack of middleware
+     */
     private ?RequestHandlerInterface $stack = null;
 
     /**
