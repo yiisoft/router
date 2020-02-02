@@ -26,7 +26,7 @@ final class RouterFactory
     {
         $factory = $this->engineFactory;
         /* @var $router RouterInterface */
-        $router = $factory($container);
+        $router = $factory();
         foreach ($this->routes as $route) {
             if ($route instanceof Route) {
                 $router->addRoute($route);
