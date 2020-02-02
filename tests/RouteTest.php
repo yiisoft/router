@@ -10,6 +10,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Http\Method;
+use Yiisoft\Router\Middleware\Callback;
 use Yiisoft\Router\Route;
 
 final class RouteTest extends TestCase
@@ -130,17 +131,23 @@ final class RouteTest extends TestCase
         $this->assertSame('GET /', (string)$route);
     }
 
-    public function testInvalidTo(): void
+    public function testInvalidMiddlewareMethod(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        Route::get('/')->to(new \stdClass());
+        Route::get('/', new \stdClass());
     }
 
-    public function testToMiddleware(): void
+    public function testInvalidMiddlewareAdd(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        Route::get('/')->addMiddleware(new \stdClass());
+    }
+
+    public function testAddMiddleware(): void
     {
         $request = new ServerRequest('GET', '/');
 
-        $route = Route::get('/')->to(
+        $route = Route::get('/')->addMiddleware(
             new class() implements MiddlewareInterface {
                 public function process(
                     ServerRequestInterface $request,
@@ -155,11 +162,11 @@ final class RouteTest extends TestCase
         $this->assertSame(418, $response->getStatusCode());
     }
 
-    public function testToCallable(): void
+    public function testAddCallableMiddleware(): void
     {
         $request = new ServerRequest('GET', '/');
 
-        $route = Route::get('/')->to(
+        $route = Route::get('/')->addMiddleware(
             static function (): ResponseInterface {
                 return (new Response())->withStatus(418);
             }
@@ -169,46 +176,42 @@ final class RouteTest extends TestCase
         $this->assertSame(418, $response->getStatusCode());
     }
 
-    public function testThen(): void
+    public function testMiddlewareFullStackCalled(): void
     {
         $request = new ServerRequest('GET', '/');
 
-        $route = Route::get('/');
+        $routeOne = Route::get('/');
 
-        $middleware1 = $this->createMock(MiddlewareInterface::class);
-        $middleware2 = $this->createMock(MiddlewareInterface::class);
+        $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+            return $handler->handle($request);
+        });
+        $middleware2 = new Callback(function () {
+            return new Response(200);
+        });
 
-        $route = $route->to($middleware1)->then($middleware2);
+        $routeOne = $routeOne->addMiddleware($middleware2)->addMiddleware($middleware1);
 
-        $middleware1
-            ->expects($this->at(0))
-            ->method('process')
-            ->with($request, $route);
-
-        // TODO: test that second one is called as well
-
-        $route->process($request, $this->getRequestHandler());
+        $response = $routeOne->process($request, $this->getRequestHandler());
+        $this->assertSame(200, $response->getStatusCode());
     }
 
-    public function testBefore(): void
+    public function testMiddlewareStackInterrupted(): void
     {
         $request = new ServerRequest('GET', '/');
 
-        $route = Route::get('/');
+        $routeTwo = Route::get('/');
 
-        $middleware1 = $this->createMock(MiddlewareInterface::class);
-        $middleware2 = $this->createMock(MiddlewareInterface::class);
+        $middleware1 = new Callback(function () {
+            return new Response(404);
+        });
+        $middleware2 = new Callback(function () {
+            return new Response(200);
+        });
 
-        $route = $route->to($middleware1)->prepend($middleware2);
+        $routeTwo = $routeTwo->addMiddleware($middleware2)->addMiddleware($middleware1);
 
-        $middleware2
-            ->expects($this->at(0))
-            ->method('process')
-            ->with($request, $route);
-
-        // TODO: test that first one is called as well
-
-        $route->process($request, $this->getRequestHandler());
+        $response = $routeTwo->process($request, $this->getRequestHandler());
+        $this->assertSame(404, $response->getStatusCode());
     }
 
     private function getRequestHandler(): RequestHandlerInterface

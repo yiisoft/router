@@ -3,18 +3,17 @@
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
-use LogicException;
 use Yiisoft\Http\Method;
 use Yiisoft\Router\Middleware\Callback;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Route defines a mapping from URL to callback / name and vice versa
  */
-final class Route implements MiddlewareInterface, RequestHandlerInterface
+final class Route implements MiddlewareInterface
 {
     private ?string $name = null;
     /** @var string[] */
@@ -22,86 +21,117 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
     private string $pattern;
     private ?string $host = null;
     /**
+     * Contains a chain of middleware wrapped in handlers.
+     * Each handler points to the handler of middleware that will be processed next.
+     * @var RequestHandlerInterface|null stack of middleware
+     */
+    private ?RequestHandlerInterface $stack = null;
+
+    /**
      * @var MiddlewareInterface[]|callable[]
      */
     private array $middlewares = [];
     private array $defaults = [];
-    private RequestHandlerInterface $nextHandler;
 
     private function __construct()
     {
     }
 
-    public static function get(string $pattern): self
+    /**
+     * @param string $pattern
+     * @param callable|MiddlewareInterface|null $middleware
+     * @return static
+     */
+    public static function get(string $pattern, $middleware = null): self
     {
-        $route = new static();
-        $route->methods = [Method::GET];
-        $route->pattern = $pattern;
-        return $route;
+        return static::methods([Method::GET], $pattern, $middleware);
     }
 
-    public static function post(string $pattern): self
+    /**
+     * @param string $pattern
+     * @param callable|MiddlewareInterface|null $middleware
+     * @return static
+     */
+    public static function post(string $pattern, $middleware = null): self
     {
-        $route = new static();
-        $route->methods = [Method::POST];
-        $route->pattern = $pattern;
-        return $route;
+        return static::methods([Method::POST], $pattern, $middleware);
     }
 
-    public static function put(string $pattern): self
+    /**
+     * @param string $pattern
+     * @param callable|MiddlewareInterface|null $middleware
+     * @return static
+     */
+    public static function put(string $pattern, $middleware = null): self
     {
-        $route = new static();
-        $route->methods = [Method::PUT];
-        $route->pattern = $pattern;
-        return $route;
+        return static::methods([Method::PUT], $pattern, $middleware);
     }
 
-    public static function delete(string $pattern): self
+    /**
+     * @param string $pattern
+     * @param callable|MiddlewareInterface|null $middleware
+     * @return static
+     */
+    public static function delete(string $pattern, $middleware = null): self
     {
-        $route = new static();
-        $route->methods = [Method::DELETE];
-        $route->pattern = $pattern;
-        return $route;
+        return static::methods([Method::DELETE], $pattern, $middleware);
     }
 
-    public static function patch(string $pattern): self
+    /**
+     * @param string $pattern
+     * @param callable|MiddlewareInterface|null $middleware
+     * @return static
+     */
+    public static function patch(string $pattern, $middleware = null): self
     {
-        $route = new static();
-        $route->methods = [Method::PATCH];
-        $route->pattern = $pattern;
-        return $route;
+        return static::methods([Method::PATCH], $pattern, $middleware);
     }
 
-    public static function head(string $pattern): self
+    /**
+     * @param string $pattern
+     * @param callable|MiddlewareInterface|null $middleware
+     * @return static
+     */
+    public static function head(string $pattern, $middleware = null): self
     {
-        $route = new static();
-        $route->methods = [Method::HEAD];
-        $route->pattern = $pattern;
-        return $route;
+        return static::methods([Method::HEAD], $pattern, $middleware);
     }
 
-    public static function options(string $pattern): self
+    /**
+     * @param string $pattern
+     * @param callable|MiddlewareInterface|null $middleware
+     * @return static
+     */
+    public static function options(string $pattern, $middleware = null): self
     {
-        $route = new static();
-        $route->methods = [Method::OPTIONS];
-        $route->pattern = $pattern;
-        return $route;
+        return static::methods([Method::OPTIONS], $pattern, $middleware);
     }
 
-    public static function methods(array $methods, string $pattern): self
+    /**
+     * @param array $methods
+     * @param string $pattern
+     * @param callable|MiddlewareInterface|null $middleware
+     * @return static
+     */
+    public static function methods(array $methods, string $pattern, $middleware = null): self
     {
         $route = new static();
         $route->methods = $methods;
         $route->pattern = $pattern;
+        if ($middleware !== null) {
+            $route->middlewares[] = $route->prepareMiddleware($middleware);
+        }
         return $route;
     }
 
-    public static function anyMethod(string $pattern): self
+    /**
+     * @param string $pattern
+     * @param callable|MiddlewareInterface|null $middleware
+     * @return static
+     */
+    public static function anyMethod(string $pattern, $middleware = null): self
     {
-        $route = new static();
-        $route->methods = Method::ANY;
-        $route->pattern = $pattern;
-        return $route;
+        return static::methods(Method::ANY, $pattern, $middleware);
     }
 
     public function name(string $name): self
@@ -129,7 +159,7 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
      * Parameter default values indexed by parameter names
      *
      * @param array $defaults
-     * @return Route
+     * @return self
      */
     public function defaults(array $defaults): self
     {
@@ -156,51 +186,19 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
     }
 
     /**
-     * Adds a handler that should be invoked for a matching route.
-     * It can be either a PSR middleware or a callable with the following signature:
-     *
-     * ```
-     * function (ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
-     * ```
-     *
-     * @param MiddlewareInterface|callable $middleware
-     * @return Route
-     */
-    public function to($middleware): self
-    {
-        $route = clone $this;
-        $route->middlewares[] = $this->prepareMiddleware($middleware);
-        return $route;
-    }
-
-    /**
-     * Adds a handler that should be invoked for a matching route.
-     * It can be either a PSR middleware or a callable with the following signature:
-     *
-     * ```
-     * function (ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
-     * ```
-     *
-     * @param MiddlewareInterface|callable $middleware
-     * @return Route
-     */
-    public function then($middleware): self
-    {
-        return $this->to($middleware);
-    }
-
-    /**
      * Prepends a handler that should be invoked for a matching route.
+     * Last added handler will be invoked first.
      * It can be either a PSR middleware or a callable with the following signature:
      *
      * ```
      * function (ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
      * ```
+     *     * Last added middleware will be invoked first.
      *
      * @param MiddlewareInterface|callable $middleware
      * @return Route
      */
-    public function prepend($middleware): self
+    public function addMiddleware($middleware): self
     {
         $route = clone $this;
         array_unshift($route->middlewares, $this->prepareMiddleware($middleware));
@@ -251,35 +249,37 @@ final class Route implements MiddlewareInterface, RequestHandlerInterface
         return $this->defaults;
     }
 
-    /**
-     * @internal please use {@see dispatch()} or {@see process()}
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     */
-    public function handle(ServerRequestInterface $request): ResponseInterface
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $middleware = current($this->middlewares);
-        next($this->middlewares);
-        if ($middleware === false) {
-            if ($this->nextHandler !== null) {
-                return $this->nextHandler->handle($request);
+        if ($this->stack === null) {
+            for ($i = count($this->middlewares) - 1; $i >= 0; $i--) {
+                $handler = $this->wrap($this->middlewares[$i], $handler);
             }
-
-            throw new LogicException('Middleware stack exhausted');
+            $this->stack = $handler;
         }
 
-        return $middleware->process($request, $this);
+        return $this->stack->handle($request);
     }
 
-    public function dispatch(ServerRequestInterface $request): ResponseInterface
+    /**
+     * Wraps handler by middlewares
+     */
+    private function wrap(MiddlewareInterface $middleware, RequestHandlerInterface $handler): RequestHandlerInterface
     {
-        reset($this->middlewares);
-        return $this->handle($request);
-    }
+        return new class($middleware, $handler) implements RequestHandlerInterface {
+            private MiddlewareInterface $middleware;
+            private RequestHandlerInterface $handler;
 
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $nextHandler): ResponseInterface
-    {
-        $this->nextHandler = $nextHandler;
-        return $this->dispatch($request);
+            public function __construct(MiddlewareInterface $middleware, RequestHandlerInterface $handler)
+            {
+                $this->middleware = $middleware;
+                $this->handler = $handler;
+            }
+
+            public function handle(ServerRequestInterface $request): ResponseInterface
+            {
+                return $this->middleware->process($request, $this->handler);
+            }
+        };
     }
 }
