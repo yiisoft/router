@@ -111,13 +111,13 @@ use \Yiisoft\Router\Route;
 $router = $container->get(Yiisoft\Router\UrlMatcherInterface::class);
 $responseFactory = $container->get(\Psr\Http\Message\ResponseFactoryInterface::class);
 
-$router->addRoute(Route::get('/test/{id:\w+}')->name('test')->to(function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
-    $id = $request->getAttribute('id');
+$router->addRoute(Route::get('/test/{id:\w+}', function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+   $id = $request->getAttribute('id');
 
-    $response = $responseFactory->createResponse();
-    $response->getBody()->write('You are at test with param ' . $id);
-    return $response;
-}));
+   $response = $responseFactory->createResponse();
+   $response->getBody()->write('You are at test with param ' . $id);
+   return $response;
+})->name('test'));
 ```
 
 Then that is how URL could be obtained for it:
