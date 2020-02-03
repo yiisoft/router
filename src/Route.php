@@ -193,7 +193,6 @@ final class Route implements MiddlewareInterface
      * ```
      * function (ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
      * ```
-     *     * Last added middleware will be invoked first.
      *
      * @param MiddlewareInterface|callable $middleware
      * @return Route
