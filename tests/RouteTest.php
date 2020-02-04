@@ -5,11 +5,14 @@ namespace Yiisoft\Router\Tests;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Http\Method;
+use Yiisoft\Router\Tests\Support\TestController;
+use Yiisoft\Router\Tests\Support\TestMiddleware;
 use Yiisoft\Router\Middleware\Callback;
 use Yiisoft\Router\Route;
 
@@ -214,6 +217,96 @@ final class RouteTest extends TestCase
 
         $response = $routeTwo->process($request, $this->getRequestHandler());
         $this->assertSame(403, $response->getStatusCode());
+    }
+
+    public function testInvalidMiddlewareAddWrongStringLL()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        Route::get('/', 'test');
+    }
+
+    public function testInvalidMiddlewareAddWrongStringClassLL()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Parameter should be either a PSR middleware or a callable.');
+        Route::get('/', TestController::class);
+    }
+
+    public function testInvalidMiddlewareAddWrongStringContainerLL()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Route container must not be null for lazy loaded middleware.');
+        Route::get('/', TestMiddleware::class);
+    }
+
+    public function testMiddlewareAddSuccessStringLL()
+    {
+        $container = new class() implements ContainerInterface {
+            public function get($id)
+            {
+            }
+            public function has($id)
+            {
+            }
+        };
+        $route = Route::get('/', TestMiddleware::class, $container);
+        $this->assertInstanceOf(Route::class, $route);
+    }
+
+    public function testInvalidMiddlewareAddWrongArraySizeLL()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        Route::get('/', ['test']);
+    }
+
+    public function testInvalidMiddlewareAddWrongArrayClassLL()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        Route::get('/', ['class', 'test']);
+    }
+
+    public function testInvalidMiddlewareAddWrongArrayTypeLL()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        Route::get('/', ['class' => TestController::class, 'index']);
+    }
+
+    public function testInvalidMiddlewareAddWrongArrayContainerLL()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Route container must not be null for lazy loaded middleware.');
+        Route::get('/', [TestController::class, 'index']);
+    }
+
+    public function testMiddlewareAddSuccessArrayLL()
+    {
+        $container = new class() implements ContainerInterface {
+            public function get($id)
+            {
+            }
+            public function has($id)
+            {
+            }
+        };
+        $route = Route::get('/', [TestController::class, 'index'], $container);
+        $this->assertInstanceOf(Route::class, $route);
+    }
+
+    public function testMiddlewareCallSuccessArrayLL()
+    {
+        $request = new ServerRequest('GET', '/');
+        $container = new class() implements ContainerInterface {
+            public function get($id)
+            {
+                return new TestController();
+            }
+            public function has($id)
+            {
+            }
+        };
+        $route = Route::get('/', [TestController::class, 'index'], $container);
+        $response = $route->process($request, $this->getRequestHandler());
+        $this->assertSame(200, $response->getStatusCode());
     }
 
     private function getRequestHandler(): RequestHandlerInterface
