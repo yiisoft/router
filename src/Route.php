@@ -44,6 +44,7 @@ final class Route implements MiddlewareInterface
     /**
      * @param string $pattern
      * @param callable|MiddlewareInterface|null $middleware
+     * @param ContainerInterface $container
      * @return static
      */
     public static function get(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
@@ -54,6 +55,7 @@ final class Route implements MiddlewareInterface
     /**
      * @param string $pattern
      * @param callable|MiddlewareInterface|null $middleware
+     * @param ContainerInterface $container
      * @return static
      */
     public static function post(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
@@ -74,6 +76,7 @@ final class Route implements MiddlewareInterface
     /**
      * @param string $pattern
      * @param callable|MiddlewareInterface|null $middleware
+     * @param ContainerInterface $container
      * @return static
      */
     public static function delete(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
@@ -84,6 +87,7 @@ final class Route implements MiddlewareInterface
     /**
      * @param string $pattern
      * @param callable|MiddlewareInterface|null $middleware
+     * @param ContainerInterface $container
      * @return static
      */
     public static function patch(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
@@ -94,6 +98,7 @@ final class Route implements MiddlewareInterface
     /**
      * @param string $pattern
      * @param callable|MiddlewareInterface|null $middleware
+     * @param ContainerInterface $container
      * @return static
      */
     public static function head(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
@@ -104,6 +109,7 @@ final class Route implements MiddlewareInterface
     /**
      * @param string $pattern
      * @param callable|MiddlewareInterface|null $middleware
+     * @param ContainerInterface $container
      * @return static
      */
     public static function options(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
@@ -115,6 +121,7 @@ final class Route implements MiddlewareInterface
      * @param array $methods
      * @param string $pattern
      * @param callable|MiddlewareInterface|null $middleware
+     * @param ContainerInterface $container
      * @return static
      */
     public static function methods(array $methods, string $pattern, $middleware = null, ?ContainerInterface $container = null): self
@@ -131,6 +138,7 @@ final class Route implements MiddlewareInterface
     /**
      * @param string $pattern
      * @param callable|MiddlewareInterface|null $middleware
+     * @param ContainerInterface $container
      * @return static
      */
     public static function anyMethod(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
@@ -203,7 +211,7 @@ final class Route implements MiddlewareInterface
         }
 
         if (!$middleware instanceof MiddlewareInterface) {
-            throw new InvalidArgumentException('Parameter should be either a PSR middleware or a callable.');
+            throw new InvalidArgumentException('Parameter should be either a PSR middleware or a callable or a middleware class name.');
         }
 
         return $middleware;

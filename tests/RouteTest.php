@@ -228,7 +228,7 @@ final class RouteTest extends TestCase
     public function testInvalidMiddlewareAddWrongStringClassLL()
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Parameter should be either a PSR middleware or a callable.');
+        $this->expectExceptionMessage('Parameter should be either a PSR middleware or a callable or a middleware class name.');
         Route::get('/', TestController::class);
     }
 

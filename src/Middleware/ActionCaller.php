@@ -17,8 +17,8 @@ use Yiisoft\Injector\Injector;
  */
 final class ActionCaller implements MiddlewareInterface
 {
-    private $class;
-    private $method;
+    private string $class;
+    private string $method;
     private ContainerInterface $container;
 
     public function __construct(string $class, string $method, ContainerInterface $container)
