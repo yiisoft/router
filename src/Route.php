@@ -22,7 +22,7 @@ final class Route implements MiddlewareInterface
     private array $methods;
     private string $pattern;
     private ?string $host = null;
-    private $container;
+    private ?ContainerInterface $container;
     /**
      * Contains a chain of middleware wrapped in handlers.
      * Each handler points to the handler of middleware that will be processed next.
@@ -46,7 +46,7 @@ final class Route implements MiddlewareInterface
      * @param callable|MiddlewareInterface|null $middleware
      * @return static
      */
-    public static function get(string $pattern, $middleware = null, $container = null): self
+    public static function get(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
     {
         return static::methods([Method::GET], $pattern, $middleware, $container);
     }
@@ -56,7 +56,7 @@ final class Route implements MiddlewareInterface
      * @param callable|MiddlewareInterface|null $middleware
      * @return static
      */
-    public static function post(string $pattern, $middleware = null, $container = null): self
+    public static function post(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
     {
         return static::methods([Method::POST], $pattern, $middleware, $container);
     }
@@ -66,7 +66,7 @@ final class Route implements MiddlewareInterface
      * @param callable|MiddlewareInterface|null $middleware
      * @return static
      */
-    public static function put(string $pattern, $middleware = null, $container = null): self
+    public static function put(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
     {
         return static::methods([Method::PUT], $pattern, $middleware, $container);
     }
@@ -76,7 +76,7 @@ final class Route implements MiddlewareInterface
      * @param callable|MiddlewareInterface|null $middleware
      * @return static
      */
-    public static function delete(string $pattern, $middleware = null, $container = null): self
+    public static function delete(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
     {
         return static::methods([Method::DELETE], $pattern, $middleware, $container);
     }
@@ -86,7 +86,7 @@ final class Route implements MiddlewareInterface
      * @param callable|MiddlewareInterface|null $middleware
      * @return static
      */
-    public static function patch(string $pattern, $middleware = null, $container = null): self
+    public static function patch(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
     {
         return static::methods([Method::PATCH], $pattern, $middleware, $container);
     }
@@ -96,7 +96,7 @@ final class Route implements MiddlewareInterface
      * @param callable|MiddlewareInterface|null $middleware
      * @return static
      */
-    public static function head(string $pattern, $middleware = null, $container = null): self
+    public static function head(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
     {
         return static::methods([Method::HEAD], $pattern, $middleware, $container);
     }
@@ -106,7 +106,7 @@ final class Route implements MiddlewareInterface
      * @param callable|MiddlewareInterface|null $middleware
      * @return static
      */
-    public static function options(string $pattern, $middleware = null, $container = null): self
+    public static function options(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
     {
         return static::methods([Method::OPTIONS], $pattern, $middleware, $container);
     }
@@ -117,7 +117,7 @@ final class Route implements MiddlewareInterface
      * @param callable|MiddlewareInterface|null $middleware
      * @return static
      */
-    public static function methods(array $methods, string $pattern, $middleware = null, $container = null): self
+    public static function methods(array $methods, string $pattern, $middleware = null, ?ContainerInterface $container = null): self
     {
         $route = new static($container);
         $route->methods = $methods;
@@ -133,7 +133,7 @@ final class Route implements MiddlewareInterface
      * @param callable|MiddlewareInterface|null $middleware
      * @return static
      */
-    public static function anyMethod(string $pattern, $middleware = null, $container = null): self
+    public static function anyMethod(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
     {
         return static::methods(Method::ANY, $pattern, $middleware, $container);
     }
@@ -179,8 +179,7 @@ final class Route implements MiddlewareInterface
     private function prepareMiddleware($middleware)
     {
         if (
-            is_string($middleware) && class_exists($middleware)
-            && in_array(MiddlewareInterface::class, class_implements($middleware))
+            is_string($middleware) && is_subclass_of($middleware, MiddlewareInterface::class)
         ) {
             if ($this->container === null) {
                 throw new InvalidArgumentException('Route container must not be null for lazy loaded middleware.');
@@ -190,7 +189,7 @@ final class Route implements MiddlewareInterface
 
         if (
             is_array($middleware) && count($middleware) === 2
-            && isset($middleware[0]) && isset($middleware[1])
+            && isset($middleware[0], $middleware[1])
             && is_string($middleware[1]) && is_string($middleware[0]) && class_exists($middleware[0])
         ) {
             if ($this->container === null) {

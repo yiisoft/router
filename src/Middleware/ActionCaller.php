@@ -19,7 +19,7 @@ final class ActionCaller implements MiddlewareInterface
 {
     private $class;
     private $method;
-    private $container;
+    private ContainerInterface $container;
 
     public function __construct(string $class, string $method, ContainerInterface $container)
     {
