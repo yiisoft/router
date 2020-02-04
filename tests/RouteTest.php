@@ -183,16 +183,18 @@ final class RouteTest extends TestCase
         $routeOne = Route::get('/');
 
         $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+            $request = $request->withAttribute('middleware', 'middleware1');
             return $handler->handle($request);
         });
-        $middleware2 = new Callback(function () {
-            return new Response(200);
+        $middleware2 = new Callback(function (ServerRequestInterface $request) {
+            return new Response(200, [], null, '1.1', implode($request->getAttributes()));
         });
 
         $routeOne = $routeOne->addMiddleware($middleware2)->addMiddleware($middleware1);
 
         $response = $routeOne->process($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('middleware1', $response->getReasonPhrase());
     }
 
     public function testMiddlewareStackInterrupted(): void
@@ -202,7 +204,7 @@ final class RouteTest extends TestCase
         $routeTwo = Route::get('/');
 
         $middleware1 = new Callback(function () {
-            return new Response(404);
+            return new Response(403);
         });
         $middleware2 = new Callback(function () {
             return new Response(200);
@@ -211,7 +213,7 @@ final class RouteTest extends TestCase
         $routeTwo = $routeTwo->addMiddleware($middleware2)->addMiddleware($middleware1);
 
         $response = $routeTwo->process($request, $this->getRequestHandler());
-        $this->assertSame(404, $response->getStatusCode());
+        $this->assertSame(403, $response->getStatusCode());
     }
 
     private function getRequestHandler(): RequestHandlerInterface
