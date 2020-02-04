@@ -30,6 +30,8 @@ final class RouterFactory
         foreach ($this->routes as $route) {
             if ($route instanceof Route) {
                 $router->addRoute($route);
+            } elseif ($route instanceof Group) {
+                $router->addGroupInstance($route);
             } elseif (is_array($route) && count($route) === 2 && is_string($route[0]) && is_callable($route[1])) {
                 $router->addGroup($route[0], $route[1]);
             } else {

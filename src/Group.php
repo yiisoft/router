@@ -21,6 +21,13 @@ class Group implements RouteCollectorInterface
         }
     }
 
+    final public static function create(?string $prefix, array $routes = [])
+    {
+        $factory = new GroupFactory();
+
+        return $factory($prefix, $routes);
+    }
+
     final public function addRoute(Route $route): void
     {
         $this->items[] = $route;
@@ -29,6 +36,11 @@ class Group implements RouteCollectorInterface
     final public function addGroup(string $prefix, callable $callback): void
     {
         $this->items[] = new Group($prefix, $callback);
+    }
+
+    final public function addGroupInstance(Group $group): void
+    {
+        $this->items[] = $group;
     }
 
     /**
@@ -45,7 +57,7 @@ class Group implements RouteCollectorInterface
             throw new InvalidArgumentException('Parameter should be either a PSR middleware or a callable.');
         }
 
-        $this->middlewares[] = $middleware;
+        array_unshift($this->middlewares, $middleware);
 
         return $this;
     }
