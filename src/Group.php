@@ -3,6 +3,7 @@
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Yiisoft\Router\Middleware\Callback;
 
@@ -11,9 +12,11 @@ class Group implements RouteCollectorInterface
     protected array $items = [];
     protected ?string $prefix;
     protected array $middlewares = [];
+    private ?ContainerInterface $container;
 
-    public function __construct(?string $prefix = null, ?callable $callback = null)
+    public function __construct(?string $prefix = null, ?callable $callback = null, ContainerInterface $container = null)
     {
+        $this->container = $container;
         $this->prefix = $prefix;
 
         if ($callback !== null) {
@@ -21,9 +24,9 @@ class Group implements RouteCollectorInterface
         }
     }
 
-    final public static function create(?string $prefix, array $routes = [])
+    final public static function create(?string $prefix, array $routes = [], ContainerInterface $container = null)
     {
-        $factory = new GroupFactory();
+        $factory = new GroupFactory($container);
 
         return $factory($prefix, $routes);
     }
@@ -50,7 +53,7 @@ class Group implements RouteCollectorInterface
     final public function addMiddleware($middleware): self
     {
         if (is_callable($middleware)) {
-            $middleware = new Callback($middleware);
+            $middleware = new Callback($middleware, $this->container);
         }
 
         if (!$middleware instanceof MiddlewareInterface) {
