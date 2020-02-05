@@ -247,13 +247,6 @@ final class RouteTest extends TestCase
         Route::get('/', TestController::class);
     }
 
-    public function testInvalidMiddlewareAddWrongStringContainerLL(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Route container must not be null for lazy loaded middleware.');
-        Route::get('/', TestMiddleware::class);
-    }
-
     public function testMiddlewareAddSuccessStringLL(): void
     {
         $route = Route::get('/', TestMiddleware::class, $this->getContainer());
@@ -278,13 +271,6 @@ final class RouteTest extends TestCase
         Route::get('/', ['class' => TestController::class, 'index']);
     }
 
-    public function testInvalidMiddlewareAddWrongArrayContainerLL(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Route container must not be null for handler action.');
-        Route::get('/', [TestController::class, 'index']);
-    }
-
     public function testMiddlewareAddSuccessArrayLL(): void
     {
         $route = Route::get('/', [TestController::class, 'index'], $this->getContainer());
@@ -298,6 +284,18 @@ final class RouteTest extends TestCase
             TestController::class => new TestController(),
         ]);
         $route = Route::get('/', [TestController::class, 'index'], $container);
+        $response = $route->process($request, $this->getRequestHandler());
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testMiddlewareCallSuccessArrayWithoutContainerLL(): void
+    {
+        $request = new ServerRequest('GET', '/');
+        $container = $this->getContainer([
+            TestController::class => new TestController(),
+        ]);
+        $route = Route::get('/', [TestController::class, 'index']);
+        $route = $route->setContainer($container);
         $response = $route->process($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
     }

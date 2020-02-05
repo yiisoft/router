@@ -29,6 +29,9 @@ final class RouterFactory
         $router = $factory();
         foreach ($this->routes as $route) {
             if ($route instanceof Route) {
+                if (!$route->hasContainer()) {
+                    $route = $route->setContainer($container);
+                }
                 $router->addRoute($route);
             } elseif ($route instanceof Group) {
                 $router->addGroupInstance($route);

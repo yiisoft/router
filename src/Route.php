@@ -41,6 +41,18 @@ final class Route implements MiddlewareInterface
         $this->container = $container;
     }
 
+    public function setContainer(ContainerInterface $container)
+    {
+        $route = clone $this;
+        $route->container = $container;
+        return $route;
+    }
+
+    public function hasContainer()
+    {
+        return $this->container !== null;
+    }
+
     /**
      * @param string $pattern
      * @param MiddlewareInterface|callable|string|array|null $middleware primary route handler {@see addMiddleware()}
@@ -190,9 +202,6 @@ final class Route implements MiddlewareInterface
         if (
             is_string($middleware) && is_subclass_of($middleware, MiddlewareInterface::class)
         ) {
-            if ($this->container === null) {
-                throw new InvalidArgumentException('Route container must not be null for lazy loaded middleware.');
-            }
             return;
         }
 
@@ -201,16 +210,10 @@ final class Route implements MiddlewareInterface
             && isset($middleware[0], $middleware[1])
             && is_string($middleware[1]) && is_string($middleware[0]) && class_exists($middleware[0])
         ) {
-            if ($this->container === null) {
-                throw new InvalidArgumentException('Route container must not be null for handler action.');
-            }
             return;
         }
 
         if (is_callable($middleware)) {
-            if ($this->container === null) {
-                throw new InvalidArgumentException('Route container must not be null for callable.');
-            }
             return;
         }
 
@@ -226,14 +229,23 @@ final class Route implements MiddlewareInterface
     private function prepareMiddleware($middleware)
     {
         if (is_string($middleware)) {
+            if ($this->container === null) {
+                throw new InvalidArgumentException('Route container must not be null for lazy loaded middleware.');
+            }
             return $this->container->get($middleware);
         }
 
         if (is_array($middleware) && !is_object($middleware[0])) {
+            if ($this->container === null) {
+                throw new InvalidArgumentException('Route container must not be null for handler action.');
+            }
             return new ActionCaller($middleware[0], $middleware[1], $this->container);
         }
 
         if (is_callable($middleware)) {
+            if ($this->container === null) {
+                throw new InvalidArgumentException('Route container must not be null for callable.');
+            }
             return new Callback($middleware, $this->container);
         }
 

@@ -33,6 +33,9 @@ class Group implements RouteCollectorInterface
 
     final public function addRoute(Route $route): void
     {
+        if (!$route->hasContainer() && $this->container !== null) {
+            $route = $route->setContainer($this->container);
+        }
         $this->items[] = $route;
     }
 
