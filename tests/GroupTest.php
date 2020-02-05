@@ -5,6 +5,7 @@ namespace Yiisoft\Router\Tests;
 use Nyholm\Psr7\ServerRequest;
 use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -14,6 +15,7 @@ use Yiisoft\Router\Middleware\Callback;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollectorInterface;
+use Yiisoft\Router\Tests\Support\Container;
 
 class GroupTest extends TestCase
 {
@@ -59,10 +61,10 @@ class GroupTest extends TestCase
         $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             $request = $request->withAttribute('middleware', 'middleware1');
             return $handler->handle($request);
-        });
+        }, $this->getContainer());
         $middleware2 = new Callback(function (ServerRequestInterface $request) {
             return new Response(200, [], null, '1.1', implode($request->getAttributes()));
-        });
+        }, $this->getContainer());
 
         $group->addMiddleware($middleware2)->addMiddleware($middleware1);
 
@@ -84,10 +86,10 @@ class GroupTest extends TestCase
         $request = new ServerRequest('GET', '/group/test1');
         $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             return new Response(403);
-        });
+        }, $this->getContainer());
         $middleware2 = new Callback(function (ServerRequestInterface $request) {
             return new Response(200);
-        });
+        }, $this->getContainer());
 
         $group->addMiddleware($middleware2)->addMiddleware($middleware1);
 
@@ -187,5 +189,10 @@ class GroupTest extends TestCase
                 return new Response(404);
             }
         };
+    }
+
+    private function getContainer(array $instances = []): ContainerInterface
+    {
+        return new Container($instances);
     }
 }
