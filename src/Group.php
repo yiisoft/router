@@ -12,7 +12,7 @@ class Group implements RouteCollectorInterface
     protected array $items = [];
     protected ?string $prefix;
     protected array $middlewares = [];
-    private ?ContainerInterface $container;
+    private ?ContainerInterface $container = null;
 
     public function __construct(?string $prefix = null, ?callable $callback = null, ContainerInterface $container = null)
     {

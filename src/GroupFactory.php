@@ -7,7 +7,7 @@ use Psr\Container\ContainerInterface;
 
 final class GroupFactory
 {
-    private $container;
+    private ?ContainerInterface $container = null;
 
     public function __construct(ContainerInterface $container = null)
     {
