@@ -181,6 +181,17 @@ final class RouteTest extends TestCase
         $this->assertSame(418, $response->getStatusCode());
     }
 
+    public function testAddCallableArrayMiddleware(): void
+    {
+        $request = new ServerRequest('GET', '/');
+
+        $controller = new TestController();
+        $route = Route::get('/', null, $this->getContainer())->addMiddleware([$controller, 'index']);
+
+        $response = $route->process($request, $this->getRequestHandler());
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
     public function testMiddlewareFullStackCalled(): void
     {
         $container = $this->getContainer();

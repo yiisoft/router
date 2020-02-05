@@ -229,7 +229,7 @@ final class Route implements MiddlewareInterface
             return $this->container->get($middleware);
         }
 
-        if (is_array($middleware)) {
+        if (is_array($middleware) && !is_object($middleware[0])) {
             return new ActionCaller($middleware[0], $middleware[1], $this->container);
         }
 
