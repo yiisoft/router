@@ -36,7 +36,7 @@ final class Route implements MiddlewareInterface
     private array $middlewares = [];
     private array $defaults = [];
 
-    private function __construct(?ContainerInterface $container)
+    private function __construct(?ContainerInterface $container = null)
     {
         $this->container = $container;
     }
