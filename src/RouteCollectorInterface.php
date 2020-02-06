@@ -2,6 +2,8 @@
 
 namespace Yiisoft\Router;
 
+use Psr\Container\ContainerInterface;
+
 interface RouteCollectorInterface
 {
     /**
@@ -25,4 +27,8 @@ interface RouteCollectorInterface
      * @param Group $group
      */
     public function addGroup(Group $group): void;
+
+    public function withContainer(ContainerInterface $container);
+
+    public function hasContainer(): bool;
 }

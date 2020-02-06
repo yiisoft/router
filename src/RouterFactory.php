@@ -28,7 +28,7 @@ final class RouterFactory
         /* @var $router RouterInterface */
         $router = $factory();
         if (!$router->hasContainer()) {
-            $router = $router->setContainer($container);
+            $router = $router->withContainer($container);
         }
         foreach ($this->routes as $route) {
             if ($route instanceof Route) {

@@ -298,16 +298,14 @@ final class RouteTest extends TestCase
             TestController::class => new TestController(),
         ]);
         $route = Route::get('/', [TestController::class, 'index']);
-        $route = $route->setContainer($container);
+        $route = $route->withContainer($container);
         $response = $route->process($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
     }
 
     public function testContainerAutoInjectionByGroupFactory()
     {
-        $container = $this->getContainer([
-            TestController::class => new TestController(),
-        ]);
+        $container = $this->getContainer();
 
         $apiGroup = Group::create('/api', [
             Route::get('/info')->name('api-info'),
@@ -355,9 +353,7 @@ final class RouteTest extends TestCase
 
     public function testContainerAutoInjectionByGroup()
     {
-        $container = $this->getContainer([
-            TestController::class => new TestController(),
-        ]);
+        $container = $this->getContainer();
 
         $apiGroup = new Group('/api', function (Group $group) {
             $group->addRoute(Route::get('/info')->name('api-info'));
@@ -405,9 +401,7 @@ final class RouteTest extends TestCase
 
     public function testContainerAutoInjectionByRouterFactory()
     {
-        $container = $this->getContainer([
-            TestController::class => new TestController(),
-        ]);
+        $container = $this->getContainer();
 
         $routes = [
             Route::get('/info')->name('api-info'),

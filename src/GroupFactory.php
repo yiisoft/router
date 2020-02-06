@@ -19,8 +19,14 @@ final class GroupFactory
         $group = new Group($prefix, function (Group $group) use ($routes) {
             foreach ($routes as $route) {
                 if ($route instanceof Route) {
+                    if (!$route->hasContainer() && $this->container !== null) {
+                        $route = $route->withContainer($this->container);
+                    }
                     $group->addRoute($route);
                 } elseif ($route instanceof Group) {
+                    if (!$route->hasContainer() && $this->container !== null) {
+                        $route = $route->withContainer($this->container);
+                    }
                     $group->addGroup($route);
                 } else {
                     throw new InvalidArgumentException('Routes should be either instances of Route or Group');
