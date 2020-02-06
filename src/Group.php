@@ -53,20 +53,22 @@ class Group implements RouteCollectorInterface
         return $this->container !== null;
     }
 
-    final public function addRoute(Route $route): void
+    final public function addRoute(Route $route): self
     {
         if (!$route->hasContainer() && $this->hasContainer()) {
             $route = $route->withContainer($this->container);
         }
         $this->items[] = $route;
+        return $this;
     }
 
-    final public function addGroup(Group $group): void
+    final public function addGroup(Group $group): self
     {
         if (!$group->hasContainer() && $this->hasContainer()) {
             $group = $group->withContainer($this->container);
         }
         $this->items[] = $group;
+        return $this;
     }
 
     /**

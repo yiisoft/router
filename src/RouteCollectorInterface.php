@@ -11,7 +11,7 @@ interface RouteCollectorInterface
      *
      * @param Route $route
      */
-    public function addRoute(Route $route): void;
+    public function addRoute(Route $route): self;
 
     /**
      * Add a group of routes
@@ -25,7 +25,7 @@ interface RouteCollectorInterface
      * ```
      * @param Group $group a group to add
      */
-    public function addGroup(Group $group): void;
+    public function addGroup(Group $group): self;
 
     /**
      * Return a clone with container specified.
