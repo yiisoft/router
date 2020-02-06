@@ -344,11 +344,8 @@ final class RouteTest extends TestCase
         $items = $apiGroup->getItems();
 
         $func = function ($item) use (&$func) {
-            if ($item instanceof Route) {
-                $this->assertSame(true, $item->hasContainer());
-            }
+            $this->assertSame(true, $item->hasContainer());
             if ($item instanceof Group) {
-                $this->assertSame(true, $item->hasContainer());
                 $items = $item->getItems();
                 array_walk($items, $func);
             }
@@ -397,11 +394,8 @@ final class RouteTest extends TestCase
         $items = $apiGroup->getItems();
 
         $func = function ($item) use (&$func) {
-            if ($item instanceof Route) {
-                $this->assertSame(true, $item->hasContainer());
-            }
+            $this->assertSame(true, $item->hasContainer());
             if ($item instanceof Group) {
-                $this->assertSame(true, $item->hasContainer());
                 $items = $item->getItems();
                 array_walk($items, $func);
             }
@@ -452,11 +446,8 @@ final class RouteTest extends TestCase
         $items = $router->getItems();
 
         $func = function ($item) use (&$func) {
-            if ($item instanceof Route) {
-                $this->assertSame(true, $item->hasContainer());
-            }
+            $this->assertSame(true, $item->hasContainer());
             if ($item instanceof Group) {
-                $this->assertSame(true, $item->hasContainer());
                 $items = $item->getItems();
                 array_walk($items, $func);
             }
