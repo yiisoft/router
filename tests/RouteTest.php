@@ -11,15 +11,11 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Http\Method;
-use Yiisoft\Router\RouterFactory;
-use Yiisoft\Router\RouterInterface;
 use Yiisoft\Router\Tests\Support\Container;
 use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware;
 use Yiisoft\Router\Middleware\Callback;
 use Yiisoft\Router\Route;
-use Yiisoft\Router\Group;
-use Yiisoft\Router\MatchingResult;
 
 final class RouteTest extends TestCase
 {
