@@ -181,6 +181,73 @@ class GroupTest extends TestCase
         $this->assertEmpty($postGroup->getMiddlewares());
     }
 
+    public function testContainerInjected(): void
+    {
+        $container = $this->getContainer();
+
+        $apiGroup = new Group(
+            '/api', static function (Group $group) {
+            $group->addRoute(Route::get('/info')->name('api-info'));
+            $group->addGroup(
+                new Group(
+                    '/v1', static function (Group $group) {
+                    $group->addRoute(Route::get('/user')->name('api-v1-user/index'));
+                    $group->addRoute(Route::get('/user/{id}')->name('api-v1-user/view'));
+                    $group->addGroup(
+                        new Group(
+                            '/news', static function (Group $group) {
+                            $group->addRoute(Route::get('/post')->name('api-v1-news-post/index'));
+                            $group->addRoute(Route::get('/post/{id}')->name('api-v1-news-post/view'));
+                        }
+                        )
+                    );
+                    $group->addGroup(
+                        new Group(
+                            '/blog', static function (Group $group) {
+                            $group->addRoute(Route::get('/post')->name('api-v1-blog-post/index'));
+                            $group->addRoute(Route::get('/post/{id}')->name('api-v1-blog-post/view'));
+                        }
+                        )
+                    );
+                    $group->addRoute(Route::get('/note')->name('api-v1-note/index'));
+                    $group->addRoute(Route::get('/note/{id}')->name('api-v1-note/view'));
+                }
+                )
+            );
+            $group->addGroup(
+                new Group(
+                    '/v2', static function (Group $group) {
+                    $group->addRoute(Route::get('/user')->name('api-v2-user/index'));
+                    $group->addRoute(Route::get('/user/{id}')->name('api-v2-user/view'));
+                    $group->addGroup(
+                        new Group(
+                            '/news', static function (Group $group) {
+                            $group->addRoute(Route::get('/post')->name('api-v2-news-post/index'));
+                            $group->addRoute(Route::get('/post/{id}')->name('api-v2-news-post/view'));
+                        }
+                        )
+                    );
+                    $group->addGroup(
+                        new Group(
+                            '/blog', static function (Group $group) {
+                            $group->addRoute(Route::get('/post')->name('api-v2-blog-post/index'));
+                            $group->addRoute(Route::get('/post/{id}')->name('api-v2-blog-post/view'));
+                        }
+                        )
+                    );
+                    $group->addRoute(Route::get('/note')->name('api-v2-note/index'));
+                    $group->addRoute(Route::get('/note/{id}')->name('api-v2-note/view'));
+                }
+                )
+            );
+        }, $container
+        );
+
+        $items = $apiGroup->getItems();
+
+        $this->assertAllRoutesAndGroupsHaveContainer($items);
+    }
+
     private function getRequestHandler(): RequestHandlerInterface
     {
         return new class() implements RequestHandlerInterface {
@@ -194,5 +261,17 @@ class GroupTest extends TestCase
     private function getContainer(array $instances = []): ContainerInterface
     {
         return new Container($instances);
+    }
+
+    private function assertAllRoutesAndGroupsHaveContainer(array $items): void
+    {
+        $func = function ($item) use (&$func) {
+            $this->assertTrue($item->hasContainer());
+            if ($item instanceof Group) {
+                $items = $item->getItems();
+                array_walk($items, $func);
+            }
+        };
+        array_walk($items, $func);
     }
 }

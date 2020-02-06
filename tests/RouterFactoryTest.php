@@ -16,137 +16,7 @@ use Yiisoft\Router\Tests\Support\Container;
 
 final class RouterFactoryTest extends TestCase
 {
-    public function testContainerAutoInjectionByGroupFactory(): void
-    {
-        $container = $this->getContainer();
-
-        $apiGroup = Group::create(
-            '/api',
-            [
-                Route::get('/info')->name('api-info'),
-                Group::create(
-                    '/v2',
-                    [
-                        Route::get('/user')->name('api-v2-user/index'),
-                        Route::get('/user/{id}')->name('api-v2-user/view'),
-                        Group::create(
-                            '/news',
-                            [
-                                Route::get('/post')->name('api-v2-news-post/index'),
-                                Route::get('/post/{id}')->name('api-v2-news-post/view'),
-                            ]
-                        ),
-                        Group::create(
-                            '/blog',
-                            [
-                                Route::get('/post')->name('api-v2-blog-post/index'),
-                                Route::get('/post/{id}')->name('api-v2-blog-post/view'),
-                            ]
-                        ),
-                        Route::get('/note')->name('api-v2-note/index'),
-                        Route::get('/note/{id}')->name('api-v2-note/view'),
-                    ]
-                ),
-                Group::create(
-                    '/v2',
-                    [
-                        Route::get('/user')->name('api-v2-user/index'),
-                        Route::get('/user/{id}')->name('api-v2-user/view'),
-                        Group::create(
-                            '/news',
-                            [
-                                Route::get('/post')->name('api-v2-news-post/index'),
-                                Route::get('/post/{id}')->name('api-v2-news-post/view'),
-                            ]
-                        ),
-                        Group::create(
-                            '/blog',
-                            [
-                                Route::get('/post')->name('api-v2-blog-post/index'),
-                                Route::get('/post/{id}')->name('api-v2-blog-post/view'),
-                            ]
-                        ),
-                        Route::get('/note')->name('api-v2-note/index'),
-                        Route::get('/note/{id}')->name('api-v2-note/view'),
-                    ]
-                )
-            ],
-            $container
-        );
-
-        $items = $apiGroup->getItems();
-
-        $this->assertAllRoutesAndGroupsHaveContainer($items);
-    }
-
-    public function testContainerAutoInjectionByGroup(): void
-    {
-        $container = $this->getContainer();
-
-        $apiGroup = new Group(
-            '/api', function (Group $group) {
-            $group->addRoute(Route::get('/info')->name('api-info'));
-            $group->addGroup(
-                new Group(
-                    '/v1', function (Group $group) {
-                    $group->addRoute(Route::get('/user')->name('api-v1-user/index'));
-                    $group->addRoute(Route::get('/user/{id}')->name('api-v1-user/view'));
-                    $group->addGroup(
-                        new Group(
-                            '/news', function (Group $group) {
-                            $group->addRoute(Route::get('/post')->name('api-v1-news-post/index'));
-                            $group->addRoute(Route::get('/post/{id}')->name('api-v1-news-post/view'));
-                        }
-                        )
-                    );
-                    $group->addGroup(
-                        new Group(
-                            '/blog', function (Group $group) {
-                            $group->addRoute(Route::get('/post')->name('api-v1-blog-post/index'));
-                            $group->addRoute(Route::get('/post/{id}')->name('api-v1-blog-post/view'));
-                        }
-                        )
-                    );
-                    $group->addRoute(Route::get('/note')->name('api-v1-note/index'));
-                    $group->addRoute(Route::get('/note/{id}')->name('api-v1-note/view'));
-                }
-                )
-            );
-            $group->addGroup(
-                new Group(
-                    '/v2', function (Group $group) {
-                    $group->addRoute(Route::get('/user')->name('api-v2-user/index'));
-                    $group->addRoute(Route::get('/user/{id}')->name('api-v2-user/view'));
-                    $group->addGroup(
-                        new Group(
-                            '/news', function (Group $group) {
-                            $group->addRoute(Route::get('/post')->name('api-v2-news-post/index'));
-                            $group->addRoute(Route::get('/post/{id}')->name('api-v2-news-post/view'));
-                        }
-                        )
-                    );
-                    $group->addGroup(
-                        new Group(
-                            '/blog', function (Group $group) {
-                            $group->addRoute(Route::get('/post')->name('api-v2-blog-post/index'));
-                            $group->addRoute(Route::get('/post/{id}')->name('api-v2-blog-post/view'));
-                        }
-                        )
-                    );
-                    $group->addRoute(Route::get('/note')->name('api-v2-note/index'));
-                    $group->addRoute(Route::get('/note/{id}')->name('api-v2-note/view'));
-                }
-                )
-            );
-        }, $container
-        );
-
-        $items = $apiGroup->getItems();
-
-        $this->assertAllRoutesAndGroupsHaveContainer($items);
-    }
-
-    public function testContainerAutoInjectionByRouterFactory(): void
+    public function testContainerInjected(): void
     {
         $container = $this->getContainer();
 
@@ -207,7 +77,7 @@ final class RouterFactoryTest extends TestCase
         $this->assertAllRoutesAndGroupsHaveContainer($items);
     }
 
-    private function assertAllRoutesAndGroupsHaveContainer($items): void
+    private function assertAllRoutesAndGroupsHaveContainer(array $items): void
     {
         $func = function ($item) use (&$func) {
             $this->assertTrue($item->hasContainer());
