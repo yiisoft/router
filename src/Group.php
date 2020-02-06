@@ -9,6 +9,9 @@ use Yiisoft\Router\Middleware\Callback;
 
 class Group implements RouteCollectorInterface
 {
+    /**
+     * @var Group[]|Route[]
+     */
     protected array $items = [];
     protected ?string $prefix;
     protected array $middlewares = [];
@@ -24,14 +27,14 @@ class Group implements RouteCollectorInterface
         }
     }
 
-    final public static function create(?string $prefix, array $routes = [], ContainerInterface $container = null)
+    final public static function create(?string $prefix, array $routes = [], ContainerInterface $container = null): self
     {
         $factory = new GroupFactory($container);
 
         return $factory($prefix, $routes);
     }
 
-    final public function withContainer(ContainerInterface $container): Group
+    final public function withContainer(ContainerInterface $container): self
     {
         $group = clone $this;
         $group->container = $container;

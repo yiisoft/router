@@ -16,7 +16,7 @@ final class GroupFactory
 
     public function __invoke(?string $prefix = null, array $routes = []): Group
     {
-        $group = new Group($prefix, function (Group $group) use ($routes) {
+        return new Group($prefix, static function (Group $group) use ($routes) {
             foreach ($routes as $route) {
                 if ($route instanceof Route) {
                     $group->addRoute($route);
@@ -27,7 +27,5 @@ final class GroupFactory
                 }
             }
         }, $this->container);
-
-        return $group;
     }
 }

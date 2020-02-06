@@ -23,12 +23,21 @@ interface RouteCollectorInterface
      * ])->addMiddleware($myMiddleware);
      * $router->addGroupInstance($group);
      * ```
-     *
-     * @param Group $group
+     * @param Group $group a group to add
      */
     public function addGroup(Group $group): void;
 
-    public function withContainer(ContainerInterface $container);
+    /**
+     * Return a clone with container specified.
+     * The container is be used to resolve dependencies in callback or action caller middleware.
+     *
+     * @param ContainerInterface $container container instance
+     * @return RouteCollectorInterface
+     */
+    public function withContainer(ContainerInterface $container): self;
 
+    /**
+     * @return bool if there is container specified
+     */
     public function hasContainer(): bool;
 }
