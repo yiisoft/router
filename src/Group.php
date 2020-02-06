@@ -9,6 +9,9 @@ use Yiisoft\Router\Middleware\Callback;
 
 class Group implements RouteCollectorInterface
 {
+    /**
+     * @var Group[]|Route[]
+     */
     protected array $items = [];
     protected ?string $prefix;
     protected array $middlewares = [];
@@ -24,29 +27,48 @@ class Group implements RouteCollectorInterface
         }
     }
 
-    final public static function create(?string $prefix, array $routes = [], ContainerInterface $container = null)
+    final public static function create(?string $prefix, array $routes = [], ContainerInterface $container = null): self
     {
         $factory = new GroupFactory($container);
 
         return $factory($prefix, $routes);
     }
 
-    final public function addRoute(Route $route): void
+    final public function withContainer(ContainerInterface $container): self
     {
-        if (!$route->hasContainer() && $this->container !== null) {
-            $route = $route->setContainer($this->container);
+        $group = clone $this;
+        $group->container = $container;
+        foreach ($group->items as $index => $item) {
+            if (!$item->hasContainer()) {
+                $item = $item->withContainer($container);
+                $group->items[$index] = $item;
+            }
+        }
+
+        return $group;
+    }
+
+    final public function hasContainer(): bool
+    {
+        return $this->container !== null;
+    }
+
+    final public function addRoute(Route $route): self
+    {
+        if (!$route->hasContainer() && $this->hasContainer()) {
+            $route = $route->withContainer($this->container);
         }
         $this->items[] = $route;
+        return $this;
     }
 
-    final public function addGroup(string $prefix, callable $callback): void
+    final public function addGroup(Group $group): self
     {
-        $this->items[] = new Group($prefix, $callback);
-    }
-
-    final public function addGroupInstance(Group $group): void
-    {
+        if (!$group->hasContainer() && $this->hasContainer()) {
+            $group = $group->withContainer($this->container);
+        }
         $this->items[] = $group;
+        return $this;
     }
 
     /**
