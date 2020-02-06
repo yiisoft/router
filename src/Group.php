@@ -33,22 +33,19 @@ class Group implements RouteCollectorInterface
 
     final public function setContainer(ContainerInterface $container): Group
     {
-        $this->container = $container;
-        foreach ($this->items as $index => $item) {
+        $group = clone $this;
+        $group->container = $container;
+        foreach ($group->items as $index => $item) {
             if (!$item->hasContainer() && $container !== null) {
-                if ($item instanceof Route) {
-                    $item = $item->setContainer($container);
-                } else {
-                    $item->setContainer($container);
-                }
-                $this->items[$index] = $item;
+                $item = $item->setContainer($container);
+                $group->items[$index] = $item;
             }
         }
 
-        return $this;
+        return $group;
     }
 
-    public function hasContainer(): bool
+    final public function hasContainer(): bool
     {
         return $this->container !== null;
     }
