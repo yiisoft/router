@@ -52,7 +52,7 @@ class Group implements RouteCollectorInterface
 
     final public function addRoute(Route $route): void
     {
-        if (!$route->hasContainer() && $this->container !== null) {
+        if (!$route->hasContainer() && $this->hasContainer()) {
             $route = $route->withContainer($this->container);
         }
         $this->items[] = $route;
@@ -60,7 +60,7 @@ class Group implements RouteCollectorInterface
 
     final public function addGroup(Group $group): void
     {
-        if (!$group->hasContainer() && $this->container !== null) {
+        if (!$group->hasContainer() && $this->hasContainer()) {
             $group = $group->withContainer($this->container);
         }
         $this->items[] = $group;
