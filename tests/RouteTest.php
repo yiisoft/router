@@ -341,14 +341,7 @@ final class RouteTest extends TestCase
 
         $items = $apiGroup->getItems();
 
-        $func = function ($item) use (&$func) {
-            $this->assertSame(true, $item->hasContainer());
-            if ($item instanceof Group) {
-                $items = $item->getItems();
-                array_walk($items, $func);
-            }
-        };
-        array_walk($items, $func);
+        $this->assertAllRoutesAndGroupsHaveContainer($items);
     }
 
     public function testContainerAutoInjectionByGroup()
@@ -389,14 +382,7 @@ final class RouteTest extends TestCase
 
         $items = $apiGroup->getItems();
 
-        $func = function ($item) use (&$func) {
-            $this->assertSame(true, $item->hasContainer());
-            if ($item instanceof Group) {
-                $items = $item->getItems();
-                array_walk($items, $func);
-            }
-        };
-        array_walk($items, $func);
+        $this->assertAllRoutesAndGroupsHaveContainer($items);
     }
 
     public function testContainerAutoInjectionByRouterFactory()
@@ -439,8 +425,13 @@ final class RouteTest extends TestCase
         $router = $factory($container);
         $items = $router->getItems();
 
+        $this->assertAllRoutesAndGroupsHaveContainer($items);
+    }
+
+    private function assertAllRoutesAndGroupsHaveContainer($items)
+    {
         $func = function ($item) use (&$func) {
-            $this->assertSame(true, $item->hasContainer());
+            $this->assertTrue($item->hasContainer());
             if ($item instanceof Group) {
                 $items = $item->getItems();
                 array_walk($items, $func);
