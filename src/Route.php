@@ -41,7 +41,7 @@ final class Route implements MiddlewareInterface
         $this->container = $container;
     }
 
-    public function setContainer(ContainerInterface $container)
+    public function withContainer(ContainerInterface $container)
     {
         $route = clone $this;
         $route->container = $container;

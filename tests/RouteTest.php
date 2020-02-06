@@ -6,7 +6,6 @@ use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -295,7 +294,7 @@ final class RouteTest extends TestCase
             TestController::class => new TestController(),
         ]);
         $route = Route::get('/', [TestController::class, 'index']);
-        $route = $route->setContainer($container);
+        $route = $route->withContainer($container);
         $response = $route->process($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
     }

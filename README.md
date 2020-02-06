@@ -27,14 +27,12 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 $routes = [
-    Route::get('/')
-        ->to(function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+    Route::get('/', function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
             $response = $responseFactory->createResponse();
             $response->getBody()->write('You are at homepage.');
             return $response;
         }),
-    Route::get('/test/{id:\w+}')
-        ->to(function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+    Route::get('/test/{id:\w+}', function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
             $id = $request->getAttribute('id');
     
             $response = $responseFactory->createResponse();
@@ -75,12 +73,12 @@ use \Yiisoft\Router\RouteCollectorInterface;
 // for obtaining router see adapter package of choice readme
 $router = ... 
     
-$router->addGroup('/api', static function (RouteCollectorInterface $r) {
+$router->addGroup(new Group('/api', static function (RouteCollectorInterface $r) {
     $r->addRoute(Route::get('/comments'));
-    $r->addGroup('/posts', static function (RouteCollectorInterface $r) {
+    $r->addGroup(new Group('/posts', static function (RouteCollectorInterface $r) {
         $r->addRoute(Route::get('/list'));
-    });
-});
+    }));
+}));
 ```
 
 ## Middleware usage

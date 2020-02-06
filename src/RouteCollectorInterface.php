@@ -2,6 +2,8 @@
 
 namespace Yiisoft\Router;
 
+use Psr\Container\ContainerInterface;
+
 interface RouteCollectorInterface
 {
     /**
@@ -9,23 +11,7 @@ interface RouteCollectorInterface
      *
      * @param Route $route
      */
-    public function addRoute(Route $route): void;
-
-    /**
-     * Add a prefix for a group of routes
-     *
-     * ```php
-     * $router->addGroup('/api', function (Group $group) {
-     *     $group->addRoute(Route::get('/users', function () {}));
-     *     $group->addGroup(Route::get('/contacts', function () {}));
-     *     $group->addMiddleware($myMiddleware);
-     * });
-     * ```
-     *
-     * @param string $prefix
-     * @param callable $callback
-     */
-    public function addGroup(string $prefix, callable $callback): void;
+    public function addRoute(Route $route): self;
 
     /**
      * Add a group of routes
@@ -37,8 +23,21 @@ interface RouteCollectorInterface
      * ])->addMiddleware($myMiddleware);
      * $router->addGroupInstance($group);
      * ```
-     *
-     * @param Group $group
+     * @param Group $group a group to add
      */
-    public function addGroupInstance(Group $group): void;
+    public function addGroup(Group $group): self;
+
+    /**
+     * Return a clone with container specified.
+     * The container is be used to resolve dependencies in callback or action caller middleware.
+     *
+     * @param ContainerInterface $container container instance
+     * @return RouteCollectorInterface
+     */
+    public function withContainer(ContainerInterface $container): self;
+
+    /**
+     * @return bool if there is container specified
+     */
+    public function hasContainer(): bool;
 }
