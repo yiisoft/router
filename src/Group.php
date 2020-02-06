@@ -31,6 +31,28 @@ class Group implements RouteCollectorInterface
         return $factory($prefix, $routes);
     }
 
+    final public function setContainer(ContainerInterface $container): Group
+    {
+        $this->container = $container;
+        foreach ($this->items as $index => $item) {
+            if (!$item->hasContainer() && $container !== null) {
+                if ($item instanceof Route) {
+                    $item = $item->setContainer($container);
+                } else {
+                    $item->setContainer($container);
+                }
+                $this->items[$index] = $item;
+            }
+        }
+
+        return $this;
+    }
+
+    public function hasContainer(): bool
+    {
+        return $this->container !== null;
+    }
+
     final public function addRoute(Route $route): void
     {
         if (!$route->hasContainer() && $this->container !== null) {
@@ -39,13 +61,11 @@ class Group implements RouteCollectorInterface
         $this->items[] = $route;
     }
 
-    final public function addGroup(string $prefix, callable $callback): void
+    final public function addGroup(Group $group): void
     {
-        $this->items[] = new Group($prefix, $callback);
-    }
-
-    final public function addGroupInstance(Group $group): void
-    {
+        if (!$group->hasContainer() && $this->container !== null) {
+            $group = $group->setContainer($this->container);
+        }
         $this->items[] = $group;
     }
 

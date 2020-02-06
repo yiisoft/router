@@ -27,18 +27,16 @@ final class RouterFactory
         $factory = $this->engineFactory;
         /* @var $router RouterInterface */
         $router = $factory();
+        if (!$router->hasContainer()) {
+            $router = $router->setContainer($container);
+        }
         foreach ($this->routes as $route) {
             if ($route instanceof Route) {
-                if (!$route->hasContainer()) {
-                    $route = $route->setContainer($container);
-                }
                 $router->addRoute($route);
             } elseif ($route instanceof Group) {
-                $router->addGroupInstance($route);
-            } elseif (is_array($route) && count($route) === 2 && is_string($route[0]) && is_callable($route[1])) {
-                $router->addGroup($route[0], $route[1]);
+                $router->addGroup($route);
             } else {
-                throw new InvalidArgumentException('Routes should be either instances of Route or group arrays');
+                throw new InvalidArgumentException('Routes should be either instances of Route or Group');
             }
         }
         return $router;

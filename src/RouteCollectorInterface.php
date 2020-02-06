@@ -12,22 +12,6 @@ interface RouteCollectorInterface
     public function addRoute(Route $route): void;
 
     /**
-     * Add a prefix for a group of routes
-     *
-     * ```php
-     * $router->addGroup('/api', function (Group $group) {
-     *     $group->addRoute(Route::get('/users', function () {}));
-     *     $group->addGroup(Route::get('/contacts', function () {}));
-     *     $group->addMiddleware($myMiddleware);
-     * });
-     * ```
-     *
-     * @param string $prefix
-     * @param callable $callback
-     */
-    public function addGroup(string $prefix, callable $callback): void;
-
-    /**
      * Add a group of routes
      *
      * ```php
@@ -40,5 +24,5 @@ interface RouteCollectorInterface
      *
      * @param Group $group
      */
-    public function addGroupInstance(Group $group): void;
+    public function addGroup(Group $group): void;
 }

@@ -68,7 +68,7 @@ class GroupTest extends TestCase
 
         $group->addMiddleware($middleware2)->addMiddleware($middleware1);
 
-        $router->addGroupInstance($group);
+        $router->addGroup($group);
         $result = $router->match($request);
         $response = $result->process($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
@@ -93,7 +93,7 @@ class GroupTest extends TestCase
 
         $group->addMiddleware($middleware2)->addMiddleware($middleware1);
 
-        $router->addGroupInstance($group);
+        $router->addGroup($group);
         $result = $router->match($request);
         $response = $result->process($request, $this->getRequestHandler());
         $this->assertSame(403, $response->getStatusCode());
@@ -109,16 +109,16 @@ class GroupTest extends TestCase
         $middleware2 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
 
         $root = new Group();
-        $root->addGroup('/api', static function (Group $group) use ($logoutRoute, $listRoute, $viewRoute, $middleware1, $middleware2) {
+        $root->addGroup(new Group('/api', static function (Group $group) use ($logoutRoute, $listRoute, $viewRoute, $middleware1, $middleware2) {
             $group->addRoute($logoutRoute);
-            $group->addGroup('/post', static function (Group $group) use ($listRoute, $viewRoute) {
+            $group->addGroup(new Group('/post', static function (Group $group) use ($listRoute, $viewRoute) {
                 $group->addRoute($listRoute);
                 $group->addRoute($viewRoute);
-            });
+            }));
 
             $group->addMiddleware($middleware1);
             $group->addMiddleware($middleware2);
-        });
+        }));
 
         $this->assertCount(1, $root->getItems());
         $api = $root->getItems()[0];
