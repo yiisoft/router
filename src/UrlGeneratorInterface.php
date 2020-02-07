@@ -29,27 +29,6 @@ interface UrlGeneratorInterface
      */
     public function generateAbsolute(string $name, array $parameters = [], string $host = null): string;
 
-    /**
-     * Normalize URL by ensuring that it use specified scheme.
-     *
-     * If URL is relative or scheme is null, normalization is skipped.
-     *
-     * @param string $url the URL to process
-     * @param string $scheme the URI scheme used in URL (e.g. `http` or `https`). Use empty string to
-     * create protocol-relative URL (e.g. `//example.com/path`)
-     * @return string the processed URL
-     * @since 2.0.11
-     */
-    public function ensureScheme(string $url, ?string $scheme): string;
-
-    /**
-     * Returns a value indicating whether a URL is relative.
-     * A relative URL does not have host info part.
-     * @param string $url the URL to be checked
-     * @return bool whether the URL is relative
-     */
-    public function isRelative(string $url): bool;
-
     public function getUriPrefix(): string;
 
     public function setUriPrefix(string $name): void;
