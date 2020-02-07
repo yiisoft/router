@@ -103,6 +103,10 @@ final class RouterFactoryTest extends TestCase
                     {
                     }
 
+                    public function generateAbsolute(string $name, array $parameters = [], string $scheme = null, string $host = null): string
+                    {
+                    }
+
                     public function generate(string $name, array $parameters = []): string
                     {
                     }
