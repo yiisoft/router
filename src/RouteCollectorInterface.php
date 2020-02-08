@@ -21,7 +21,7 @@ interface RouteCollectorInterface
      *     Route::get('/users', function () {}),
      *     Route::get('/contacts', function () {}),
      * ])->addMiddleware($myMiddleware);
-     * $router->addGroupInstance($group);
+     * $router->addGroup($group);
      * ```
      * @param Group $group a group to add
      */
