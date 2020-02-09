@@ -11,11 +11,11 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Http\Method;
+use Yiisoft\Router\Middleware\Callback;
+use Yiisoft\Router\Route;
 use Yiisoft\Router\Tests\Support\Container;
 use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware;
-use Yiisoft\Router\Middleware\Callback;
-use Yiisoft\Router\Route;
 
 final class RouteTest extends TestCase
 {
@@ -299,6 +299,35 @@ final class RouteTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
     }
 
+    /**
+     * @dataProvider getRoutesWithContainer()
+     * @param \Yiisoft\Router\Route $route
+     */
+    public function testHasContainer(Route $route): void
+    {
+        $this->assertTrue($route->hasContainer());
+    }
+
+    /**
+     * @dataProvider getRoutesWithoutContainer()
+     * @param \Yiisoft\Router\Route $route
+     */
+    public function testEmptyContainer(Route $route): void
+    {
+        $this->assertFalse($route->hasContainer());
+    }
+
+    /**
+     * @dataProvider getRoutesWithoutContainer()
+     * @param \Yiisoft\Router\Route $route
+     */
+    public function testSetContainer(Route $route): void
+    {
+        $newRoute = $route->withContainer($this->getContainer());
+        $this->assertFalse($route->hasContainer());
+        $this->assertTrue($newRoute->hasContainer());
+    }
+
     private function getRequestHandler(): RequestHandlerInterface
     {
         return new class() implements RequestHandlerInterface {
@@ -312,5 +341,35 @@ final class RouteTest extends TestCase
     private function getContainer(array $instances = []): ContainerInterface
     {
         return new Container($instances);
+    }
+
+    public function getRoutesWithContainer(): array
+    {
+        return [
+            [Route::anyMethod('/', null, $this->getContainer())],
+            [Route::get('/', null, $this->getContainer())],
+            [Route::post('/', null, $this->getContainer())],
+            [Route::delete('/', null, $this->getContainer())],
+            [Route::patch('/', null, $this->getContainer())],
+            [Route::put('/', null, $this->getContainer())],
+            [Route::options('/', null, $this->getContainer())],
+            [Route::head('/', null, $this->getContainer())],
+            [Route::methods(['get', 'post'], '/', null, $this->getContainer())],
+        ];
+    }
+
+    public function getRoutesWithoutContainer(): array
+    {
+        return [
+            [Route::anyMethod('/')],
+            [Route::get('/')],
+            [Route::post('/')],
+            [Route::delete('/')],
+            [Route::patch('/')],
+            [Route::put('/')],
+            [Route::options('/')],
+            [Route::head('/')],
+            [Route::methods(['get', 'post'], '/')],
+        ];
     }
 }
