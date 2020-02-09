@@ -2,17 +2,17 @@
 
 namespace Yiisoft\Router\Tests;
 
-use Nyholm\Psr7\ServerRequest;
 use Nyholm\Psr7\Response;
+use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Router\FastRoute\FastRouteFactory;
-use Yiisoft\Router\Middleware\Callback;
 use Yiisoft\Router\Group;
+use Yiisoft\Router\Middleware\Callback;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollectorInterface;
 use Yiisoft\Router\Tests\Support\Container;
@@ -181,71 +181,64 @@ class GroupTest extends TestCase
         $this->assertEmpty($postGroup->getMiddlewares());
     }
 
-    public function testContainerInjected(): void
+    public function testContainerInjectedInRoutes(): void
     {
-        $container = $this->getContainer();
-
-        $apiGroup = new Group(
-            '/api', static function (Group $group) {
-                $group->addRoute(Route::get('/info')->name('api-info'));
-                $group->addGroup(
-                new Group(
-                    '/v1', static function (Group $group) {
-                        $group->addRoute(Route::get('/user')->name('api-v1-user/index'));
-                        $group->addRoute(Route::get('/user/{id}')->name('api-v1-user/view'));
-                        $group->addGroup(
-                        new Group(
-                            '/news', static function (Group $group) {
-                                $group->addRoute(Route::get('/post')->name('api-v1-news-post/index'));
-                                $group->addRoute(Route::get('/post/{id}')->name('api-v1-news-post/view'));
-                            }
-                        )
-                    );
-                        $group->addGroup(
-                        new Group(
-                            '/blog', static function (Group $group) {
-                                $group->addRoute(Route::get('/post')->name('api-v1-blog-post/index'));
-                                $group->addRoute(Route::get('/post/{id}')->name('api-v1-blog-post/view'));
-                            }
-                        )
-                    );
-                        $group->addRoute(Route::get('/note')->name('api-v1-note/index'));
-                        $group->addRoute(Route::get('/note/{id}')->name('api-v1-note/view'));
-                    }
-                )
-            );
-                $group->addGroup(
-                new Group(
-                    '/v2', static function (Group $group) {
-                        $group->addRoute(Route::get('/user')->name('api-v2-user/index'));
-                        $group->addRoute(Route::get('/user/{id}')->name('api-v2-user/view'));
-                        $group->addGroup(
-                        new Group(
-                            '/news', static function (Group $group) {
-                                $group->addRoute(Route::get('/post')->name('api-v2-news-post/index'));
-                                $group->addRoute(Route::get('/post/{id}')->name('api-v2-news-post/view'));
-                            }
-                        )
-                    );
-                        $group->addGroup(
-                        new Group(
-                            '/blog', static function (Group $group) {
-                                $group->addRoute(Route::get('/post')->name('api-v2-blog-post/index'));
-                                $group->addRoute(Route::get('/post/{id}')->name('api-v2-blog-post/view'));
-                            }
-                        )
-                    );
-                        $group->addRoute(Route::get('/note')->name('api-v2-note/index'));
-                        $group->addRoute(Route::get('/note/{id}')->name('api-v2-note/view'));
-                    }
-                )
-            );
-            }, $container
+        $routes = [
+            Route::get(''),
+            Route::post(''),
+            Route::delete(''),
+            Route::patch(''),
+            Route::put(''),
+            Route::head(''),
+            Route::options(''),
+            Route::anyMethod(''),
+        ];
+        $group = new Group(
+            '',
+            static function (Group $group) use ($routes) {
+                array_map( fn(Route $route) => $group->addRoute($route),$routes);
+            },
+            $this->getContainer()
         );
 
-        $items = $apiGroup->getItems();
+        array_map(fn(Route $route) => $this->assertFalse($route->hasContainer()), $routes);
+        array_map(fn(Route $route) => $this->assertTrue($route->hasContainer()), $group->getItems());
+    }
 
-        $this->assertAllRoutesAndGroupsHaveContainer($items);
+    public function testContainerInjectedInGroups(): void
+    {
+        $groups = [
+            new Group(''),
+            Group::create(''),
+        ];
+        $group = new Group(
+            '/api',
+            static function (Group $group) use ($groups) {
+                array_map(fn(Group $item) => $group->addGroup($item), $groups);
+            },
+            $this->getContainer()
+        );
+
+        array_map(fn(Group $group) => $this->assertFalse($group->hasContainer()), $groups);
+        array_map(fn(Group $group) => $this->assertTrue($group->hasContainer()), $group->getItems());
+    }
+
+    /**
+     * @dataProvider getGroupsWithoutContainer()
+     * @param \Yiisoft\Router\Group $group
+     */
+    public function testEmptyContainer(Group $group): void
+    {
+        $this->assertFalse($group->hasContainer());
+    }
+
+    /**
+     * @dataProvider getGroupsWithContainer()
+     * @param \Yiisoft\Router\Group $group
+     */
+    public function testHasContainer(Group $group): void
+    {
+        $this->assertTrue($group->hasContainer());
     }
 
     private function getRequestHandler(): RequestHandlerInterface
@@ -263,15 +256,19 @@ class GroupTest extends TestCase
         return new Container($instances);
     }
 
-    private function assertAllRoutesAndGroupsHaveContainer(array $items): void
+    public function getGroupsWithContainer(): array
     {
-        $func = function ($item) use (&$func) {
-            $this->assertTrue($item->hasContainer());
-            if ($item instanceof Group) {
-                $items = $item->getItems();
-                array_walk($items, $func);
-            }
-        };
-        array_walk($items, $func);
+        return [
+            [Group::create('/', [], $this->getContainer())],
+            [new Group('/', fn() => [], $this->getContainer())],
+        ];
+    }
+
+    public function getGroupsWithoutContainer(): array
+    {
+        return [
+            [Group::create('/', [])],
+            [new Group('/', fn() => [])],
+        ];
     }
 }
