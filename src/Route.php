@@ -205,14 +205,6 @@ final class Route implements MiddlewareInterface
             return;
         }
 
-        if (
-            is_array($middleware) && count($middleware) === 2
-            && isset($middleware[0], $middleware[1])
-            && is_string($middleware[1]) && is_string($middleware[0]) && class_exists($middleware[0])
-        ) {
-            return;
-        }
-
         if (is_callable($middleware)) {
             return;
         }
