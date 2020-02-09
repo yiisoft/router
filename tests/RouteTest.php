@@ -321,7 +321,7 @@ final class RouteTest extends TestCase
      * @dataProvider getRoutesWithoutContainer()
      * @param \Yiisoft\Router\Route $route
      */
-    public function testSetContainer(Route $route): void
+    public function testWithContainerMethod(Route $route): void
     {
         $newRoute = $route->withContainer($this->getContainer());
         $this->assertFalse($route->hasContainer());
