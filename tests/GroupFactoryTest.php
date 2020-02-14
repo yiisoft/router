@@ -15,9 +15,8 @@ final class GroupFactoryTest extends TestCase
     public function testContainerInjected(): void
     {
         $container = $this->getContainer();
-        $factory = new GroupFactory($container);
 
-        $apiGroup = $factory(
+        $apiGroup = Group::create(
             '/api',
             [
                 Route::get('/info')->name('api-info'),
@@ -67,8 +66,7 @@ final class GroupFactoryTest extends TestCase
                         Route::get('/note/{id}')->name('api-v2-note/view'),
                     ]
                 )
-            ]
-        );
+            ], $container);
 
         $items = $apiGroup->getItems();
 
