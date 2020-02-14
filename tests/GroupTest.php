@@ -196,7 +196,7 @@ class GroupTest extends TestCase
         $group = new Group(
             '',
             static function (Group $group) use ($routes) {
-                array_map( fn (Route $route) => $group->addRoute($route),$routes);
+                array_map(fn (Route $route) => $group->addRoute($route),$routes);
             },
             $this->getContainer()
         );
