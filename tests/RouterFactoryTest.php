@@ -21,7 +21,7 @@ final class RouterFactoryTest extends TestCase
             ->expects($this->once())
             ->method('hasContainer');
 
-        $factory = new RouterFactory(fn() => $router);
+        $factory = new RouterFactory(fn () => $router);
         $newRouter = $factory($this->getContainer());
         $this->assertNotSame($router, $newRouter);
     }
@@ -37,7 +37,7 @@ final class RouterFactoryTest extends TestCase
             ->method('hasContainer')
             ->willReturn(true);
 
-        $factory = new RouterFactory(fn() => $router);
+        $factory = new RouterFactory(fn () => $router);
         $newRouter = $factory($this->getContainer());
         $this->assertSame($router, $newRouter);
     }

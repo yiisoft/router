@@ -196,13 +196,13 @@ class GroupTest extends TestCase
         $group = new Group(
             '',
             static function (Group $group) use ($routes) {
-                array_map( fn(Route $route) => $group->addRoute($route),$routes);
+                array_map( fn (Route $route) => $group->addRoute($route),$routes);
             },
             $this->getContainer()
         );
 
-        array_map(fn(Route $route) => $this->assertFalse($route->hasContainer()), $routes);
-        array_map(fn(Route $route) => $this->assertTrue($route->hasContainer()), $group->getItems());
+        array_map(fn (Route $route) => $this->assertFalse($route->hasContainer()), $routes);
+        array_map(fn (Route $route) => $this->assertTrue($route->hasContainer()), $group->getItems());
     }
 
     public function testContainerInjectedInGroups(): void
@@ -214,13 +214,13 @@ class GroupTest extends TestCase
         $group = new Group(
             '/api',
             static function (Group $group) use ($groups) {
-                array_map(fn(Group $item) => $group->addGroup($item), $groups);
+                array_map(fn (Group $item) => $group->addGroup($item), $groups);
             },
             $this->getContainer()
         );
 
-        array_map(fn(Group $group) => $this->assertFalse($group->hasContainer()), $groups);
-        array_map(fn(Group $group) => $this->assertTrue($group->hasContainer()), $group->getItems());
+        array_map(fn (Group $group) => $this->assertFalse($group->hasContainer()), $groups);
+        array_map(fn (Group $group) => $this->assertTrue($group->hasContainer()), $group->getItems());
     }
 
     /**
@@ -260,7 +260,7 @@ class GroupTest extends TestCase
     {
         return [
             [Group::create('/', [], $this->getContainer())],
-            [new Group('/', fn() => [], $this->getContainer())],
+            [new Group('/', fn () => [], $this->getContainer())],
         ];
     }
 
@@ -268,7 +268,7 @@ class GroupTest extends TestCase
     {
         return [
             [Group::create('/', [])],
-            [new Group('/', fn() => [])],
+            [new Group('/', fn () => [])],
         ];
     }
 }
