@@ -74,11 +74,12 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * Returns routes tree array
      *
+     * @param bool $routeAsString
      * @return array
      */
-    public function getRouteTree(): array
+    public function getRouteTree(bool $routeAsString = true): array
     {
-        return $this->buildTree($this->items);
+        return $this->buildTree($this->items, $routeAsString);
     }
 
     /**
@@ -154,16 +155,17 @@ final class RouteCollection implements RouteCollectionInterface
      * Builds route tree from items
      *
      * @param array $items
+     * @param bool $routeAsString
      * @return array
      */
-    private function buildTree(array $items): array
+    private function buildTree(array $items, bool $routeAsString): array
     {
         $tree = [];
         foreach ($items as $key => $item) {
             if (is_array($item)) {
-                $tree[$key] = $this->buildTree($items[$key]);
+                $tree[$key] = $this->buildTree($items[$key], $routeAsString);
             } else {
-                $tree[] = (string)$this->getRoute($item);
+                $tree[] = $routeAsString ? (string)$this->getRoute($item) : $this->getRoute($item);
             }
         }
         return $tree;
