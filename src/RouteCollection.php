@@ -32,14 +32,6 @@ final class RouteCollection implements RouteCollectionInterface
     }
 
     /**
-     * @return string
-     */
-    public function getPrefix(): string
-    {
-        return $this->prefix;
-    }
-
-    /**
      * @return Route|RouteCollection[]
      */
     public function getItems(): array
