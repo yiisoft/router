@@ -121,7 +121,6 @@ final class RouteCollection implements RouteCollectionInterface
         $items = $group->getItems();
         foreach ($items as $index => $item) {
             if ($item instanceof Group) {
-
                 if (empty($item->getPrefix())) {
                     $newCollection = $collection;
                 } else {
