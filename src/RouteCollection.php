@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
-use Yiisoft\Router\Group;
-use Yiisoft\Router\Route;
-use Yiisoft\Router\RouteCollectorInterface;
-use Yiisoft\Router\RouteNotFoundException;
+use InvalidArgumentException;
 
 final class RouteCollection implements RouteCollectionInterface
 {
@@ -73,7 +70,11 @@ final class RouteCollection implements RouteCollectionInterface
                 $modifiedItem = $modifiedItem->addMiddleware(current($groupMiddlewares));
             }
 
-            $this->routes[$modifiedItem->getName()] = $modifiedItem;
+            $routeName = $modifiedItem->getName();
+            if (isset($this->routes[$routeName])) {
+                throw new InvalidArgumentException("A route with name '$routeName' already exists.");
+            }
+            $this->routes[$routeName] = $modifiedItem;
         }
     }
 
