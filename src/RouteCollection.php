@@ -32,14 +32,6 @@ final class RouteCollection implements RouteCollectionInterface
     }
 
     /**
-     * @return Route|RouteCollection[]
-     */
-    public function getItems(): array
-    {
-        return $this->items;
-    }
-
-    /**
      * @return Route[]
      */
     public function getRoutes(): array

@@ -9,11 +9,6 @@ interface RouteCollectionInterface
     /**
      * @return array
      */
-    public function getItems(): array;
-
-    /**
-     * @return array
-     */
     public function getRoutes(): array;
 
     /**
