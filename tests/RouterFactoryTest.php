@@ -118,6 +118,11 @@ final class RouterFactoryTest extends TestCase
                     public function setUriPrefix(string $name): void
                     {
                     }
+
+                    public function getCurrentRoute(): ?Route
+                    {
+                        // TODO: Implement getCurrentRoute() method.
+                    }
                 };
             }
         };

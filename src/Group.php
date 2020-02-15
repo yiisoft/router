@@ -98,6 +98,9 @@ class Group implements RouteCollectorInterface
         return $this;
     }
 
+    /**
+     * @return Route|Group[]
+     */
     final public function getItems(): array
     {
         return $this->items;

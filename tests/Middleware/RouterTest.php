@@ -62,6 +62,11 @@ final class RouterTest extends TestCase
                 $this->middleware = $middleware;
             }
 
+            public function getCurrentRoute(): ?Route
+            {
+                // TODO: Implement getCurrentRoute() method.
+            }
+
             /**
              * Emulates router with a single `GET /` route
              * @param ServerRequestInterface $request
