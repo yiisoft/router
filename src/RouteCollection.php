@@ -8,8 +8,6 @@ use InvalidArgumentException;
 
 final class RouteCollection implements RouteCollectionInterface
 {
-    private ?string $prefix = null;
-
     /**
      * @var array
      */
@@ -28,9 +26,8 @@ final class RouteCollection implements RouteCollectionInterface
      * @param string $prefix
      * @param bool $buildRoutes
      */
-    public function __construct(RouteCollectorInterface $collector, string $prefix = null)
+    public function __construct(RouteCollectorInterface $collector)
     {
-        $this->prefix = $prefix;
         $this->injectItems([$collector]);
     }
 
