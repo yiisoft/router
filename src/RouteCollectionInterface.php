@@ -21,4 +21,11 @@ interface RouteCollectionInterface
      * @return Route
      */
     public function getRoute(string $name): Route;
+
+    /**
+     * Returns routes tree array
+     *
+     * @return array
+     */
+    public function getRouteTree(): array;
 }

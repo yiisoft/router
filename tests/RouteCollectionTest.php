@@ -7,7 +7,6 @@ use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
 
-
 class RouteCollectionTest extends TestCase
 {
     public function testAddRouteWithDuplicateName(): void
@@ -22,4 +21,3 @@ class RouteCollectionTest extends TestCase
         new RouteCollection($group);
     }
 }
-

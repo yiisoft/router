@@ -8,7 +8,12 @@ use InvalidArgumentException;
 
 final class RouteCollection implements RouteCollectionInterface
 {
-    private $items = [];
+    private ?string $prefix = null;
+
+    /**
+     * @var array
+     */
+    private array $items = [];
 
     /**
      * All attached routes as Route instances
@@ -17,75 +22,38 @@ final class RouteCollection implements RouteCollectionInterface
      */
     private array $routes = [];
 
-    public function __construct(RouteCollectorInterface $collector)
-    {
-        $this->items[] = $collector;
-        $this->injectItems();
-    }
-
     /**
-     * Inject queued items into the underlying router
+     * RouteCollection constructor.
+     * @param RouteCollectorInterface $collector
+     * @param string $prefix
+     * @param bool $buildRoutes
      */
-    private function injectItems(): void
+    public function __construct(?RouteCollectorInterface $collector, string $prefix = null, bool $buildRoutes = true)
     {
-        foreach ($this->items as $index => $item) {
-            $this->injectItem($item);
+        $this->prefix = $prefix;
+        if ($collector !== null) {
+            $this->injectItems([$collector], $buildRoutes);
         }
     }
 
     /**
-     * Inject an item into the underlying router
-     * @param Route|Group $route
+     * @return string
      */
-    private function injectItem($route): void
+    public function getPrefix(): string
     {
-        if ($route instanceof Group) {
-            $this->injectGroup($route);
-            return;
-        }
-
-        $this->routes[$route->getName()] = $route;
+        return $this->prefix;
     }
 
     /**
-     * Inject a Group instance into the underlying router.
+     * @return Route|RouteCollection[]
      */
-    private function injectGroup(Group $group, string $prefix = ''): void
-    {
-        $prefix .= $group->getPrefix();
-        /** @var $items Group[]|Route[] */
-        $items = $group->getItems();
-        foreach ($items as $index => $item) {
-            if ($item instanceof Group) {
-                $this->injectGroup($item, $prefix);
-                continue;
-            }
-
-            /** @var Route $modifiedItem */
-            $modifiedItem = $item->pattern($prefix . $item->getPattern());
-
-            $groupMiddlewares = $group->getMiddlewares();
-
-            for (end($groupMiddlewares); key($groupMiddlewares) !== null; prev($groupMiddlewares)) {
-                $modifiedItem = $modifiedItem->addMiddleware(current($groupMiddlewares));
-            }
-
-            $routeName = $modifiedItem->getName();
-            if (isset($this->routes[$routeName])) {
-                throw new InvalidArgumentException("A route with name '$routeName' already exists.");
-            }
-            $this->routes[$routeName] = $modifiedItem;
-        }
-    }
-
     public function getItems(): array
     {
-        //TODO make immutable collection
         return $this->items;
     }
 
     /**
-     * @return array
+     * @return Route[]
      */
     public function getRoutes(): array
     {
@@ -103,5 +71,108 @@ final class RouteCollection implements RouteCollectionInterface
         }
 
         return $this->routes[$name];
+    }
+
+    /**
+     * Returns routes tree array
+     *
+     * @return array
+     */
+    public function getRouteTree(): array
+    {
+        return $this->buildRouteTree($this);
+    }
+
+    /**
+     * Build routes array
+     *
+     * @param Route|Group[] $items
+     */
+    private function injectItems(array $items, bool $buildRoutes): void
+    {
+        foreach ($items as $index => $item) {
+            $this->injectItem($item, $buildRoutes);
+        }
+    }
+
+    /**
+     * Add an item into routes array
+     * @param Route|Group $route
+     */
+    private function injectItem($route, bool $buildRoutes): void
+    {
+        if ($route instanceof Group) {
+            $this->injectGroup($route, $buildRoutes, $this);
+            return;
+        }
+        $this->items[] = $route;
+        if ($buildRoutes) {
+            $this->routes[$route->getName()] = $route;
+        }
+    }
+
+    /**
+     * Inject a Group instance into route and item arrays.
+     */
+    private function injectGroup(Group $group, bool $buildRoutes, ?RouteCollection $collection, string $prefix = ''): void
+    {
+        $prefix .= $group->getPrefix();
+        /** @var $items Group[]|Route[] */
+        $items = $group->getItems();
+        foreach ($items as $index => $item) {
+            if ($item instanceof Group) {
+
+                if (empty($item->getPrefix())) {
+                    $newCollection = $collection;
+                } else {
+                    $newCollection = new self(null, $item->getPrefix(), false);
+                    $collection->items[] = $newCollection;
+                }
+
+                $this->injectGroup($item, $buildRoutes, $newCollection, $prefix);
+                continue;
+            }
+
+            $collection->items[] = $item;
+            if (!$buildRoutes) {
+                continue;
+            }
+            /** @var Route $modifiedItem */
+            $modifiedItem = $item->pattern($prefix . $item->getPattern());
+
+            $groupMiddlewares = $group->getMiddlewares();
+
+            for (end($groupMiddlewares); key($groupMiddlewares) !== null; prev($groupMiddlewares)) {
+                $modifiedItem = $modifiedItem->addMiddleware(current($groupMiddlewares));
+            }
+
+            $routeName = $modifiedItem->getName();
+            if (isset($this->routes[$routeName])) {
+                throw new InvalidArgumentException("A route with name '$routeName' already exists.");
+            }
+            $this->routes[$routeName] = $modifiedItem;
+        }
+    }
+
+    /**
+     * Builds route tree from collection recursive
+     *
+     * @param RouteCollection $collection
+     * @return array
+     */
+    private function buildRouteTree(RouteCollection $collection): array
+    {
+        $tree = [];
+        $items = $collection->getItems();
+        foreach ($items as $item) {
+            if ($item instanceof Route) {
+                $tree[] = (string)$item;
+            }
+            if ($item instanceof RouteCollection) {
+                $tree[$item->getPrefix()] = $this->buildRouteTree($item);
+            }
+        }
+
+        return $tree;
     }
 }
