@@ -28,7 +28,10 @@ final class RouteCollection implements RouteCollectionInterface
      */
     public function __construct(RouteCollectorInterface $collector)
     {
-        $this->injectItems([$collector]);
+        if ($collector instanceof Group && count($collector->getMiddlewares()) > 0) {
+            throw new InvalidArgumentException('Collector can\'t have middlewares');
+        }
+        $this->injectItems($collector->getItems());
     }
 
     /**
@@ -66,7 +69,7 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * Build routes array
      *
-     * @param Route[]|Group[]|RouteCollectorInterface[] $items
+     * @param Route[]|Group[] $items
      */
     private function injectItems(array $items): void
     {
@@ -87,7 +90,11 @@ final class RouteCollection implements RouteCollectionInterface
         }
 
         $this->items[] = $route->getName();
-        $this->routes[$route->getName()] = $route;
+        $routeName = $route->getName();
+        if (isset($this->routes[$routeName])) {
+            throw new InvalidArgumentException("A route with name '$routeName' already exists.");
+        }
+        $this->routes[$routeName] = $route;
     }
 
     /**
