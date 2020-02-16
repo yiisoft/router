@@ -94,7 +94,7 @@ final class RouteCollection implements RouteCollectionInterface
         if (isset($this->routes[$routeName])) {
             throw new InvalidArgumentException("A route with name '$routeName' already exists.");
         }
-        $this->routes[$route->getName()] = $route;
+        $this->routes[$routeName] = $route;
     }
 
     /**
