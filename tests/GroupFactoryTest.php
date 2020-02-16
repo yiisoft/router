@@ -15,33 +15,32 @@ final class GroupFactoryTest extends TestCase
     public function testContainerInjected(): void
     {
         $container = $this->getContainer();
-        $factory = new GroupFactory($container);
 
-        $apiGroup = $factory(
+        $apiGroup = Group::create(
             '/api',
             [
                 Route::get('/info')->name('api-info'),
                 Group::create(
-                    '/v2',
+                    '/v1',
                     [
-                        Route::get('/user')->name('api-v2-user/index'),
-                        Route::get('/user/{id}')->name('api-v2-user/view'),
+                        Route::get('/user')->name('api-v1-user/index'),
+                        Route::get('/user/{id}')->name('api-v1-user/view'),
                         Group::create(
                             '/news',
                             [
-                                Route::get('/post')->name('api-v2-news-post/index'),
-                                Route::get('/post/{id}')->name('api-v2-news-post/view'),
+                                Route::get('/post')->name('api-v1-news-post/index'),
+                                Route::get('/post/{id}')->name('api-v1-news-post/view'),
                             ]
                         ),
                         Group::create(
                             '/blog',
                             [
-                                Route::get('/post')->name('api-v2-blog-post/index'),
-                                Route::get('/post/{id}')->name('api-v2-blog-post/view'),
+                                Route::get('/post')->name('api-v1-blog-post/index'),
+                                Route::get('/post/{id}')->name('api-v1-blog-post/view'),
                             ]
                         ),
-                        Route::get('/note')->name('api-v2-note/index'),
-                        Route::get('/note/{id}')->name('api-v2-note/view'),
+                        Route::get('/note')->name('api-v1-note/index'),
+                        Route::get('/note/{id}')->name('api-v1-note/view'),
                     ]
                 ),
                 Group::create(
@@ -67,8 +66,7 @@ final class GroupFactoryTest extends TestCase
                         Route::get('/note/{id}')->name('api-v2-note/view'),
                     ]
                 )
-            ]
-        );
+            ], $container);
 
         $items = $apiGroup->getItems();
 

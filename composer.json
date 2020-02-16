@@ -28,8 +28,7 @@
     "require-dev": {
         "phpunit/phpunit": "^8.4",
         "psr/http-factory": "^1.0",
-        "nyholm/psr7": "^1.0",
-        "yiisoft/router-fastroute": "^3.0@dev"
+        "nyholm/psr7": "^1.0"
     },
     "autoload": {
         "psr-4": {

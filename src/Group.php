@@ -29,9 +29,17 @@ class Group implements RouteCollectorInterface
 
     final public static function create(?string $prefix, array $routes = [], ContainerInterface $container = null): self
     {
-        $factory = new GroupFactory($container);
-
-        return $factory($prefix, $routes);
+        return new self($prefix, static function (Group $group) use ($routes) {
+            foreach ($routes as $route) {
+                if ($route instanceof Route) {
+                    $group->addRoute($route);
+                } elseif ($route instanceof Group) {
+                    $group->addGroup($route);
+                } else {
+                    throw new InvalidArgumentException('Routes should be either instances of Route or Group');
+                }
+            }
+        }, $container);
     }
 
     final public function withContainer(ContainerInterface $container): self
@@ -90,6 +98,9 @@ class Group implements RouteCollectorInterface
         return $this;
     }
 
+    /**
+     * @return Route|Group[]
+     */
     final public function getItems(): array
     {
         return $this->items;

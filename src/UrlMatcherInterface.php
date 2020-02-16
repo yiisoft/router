@@ -11,4 +11,10 @@ use Psr\Http\Message\ServerRequestInterface;
 interface UrlMatcherInterface
 {
     public function match(ServerRequestInterface $request): MatchingResult;
+
+    /**
+     * Returns the current Route object
+     * @return Route|null current route
+     */
+    public function getCurrentRoute(): ?Route;
 }
