@@ -66,7 +66,7 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * Build routes array
      *
-     * @param Route|Group[] $items
+     * @param Route[]|Group[]|RouteCollectorInterface[] $items
      */
     private function injectItems(array $items): void
     {

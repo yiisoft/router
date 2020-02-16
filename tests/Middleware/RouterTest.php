@@ -64,7 +64,6 @@ final class RouterTest extends TestCase
 
             public function getCurrentRoute(): ?Route
             {
-                // TODO: Implement getCurrentRoute() method.
             }
 
             /**

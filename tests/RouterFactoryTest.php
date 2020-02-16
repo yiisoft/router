@@ -121,7 +121,6 @@ final class RouterFactoryTest extends TestCase
 
                     public function getCurrentRoute(): ?Route
                     {
-                        // TODO: Implement getCurrentRoute() method.
                     }
                 };
             }
