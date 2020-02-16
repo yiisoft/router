@@ -29,7 +29,7 @@ final class RouteCollection implements RouteCollectionInterface
     public function __construct(RouteCollectorInterface $collector)
     {
         if ($collector instanceof Group && count($collector->getMiddlewares()) > 0) {
-            throw new  InvalidArgumentException('Collector can\'t have middlewares.');
+            throw new InvalidArgumentException('Collector can\'t have middlewares');
         }
         $this->injectItems($collector->getItems());
     }
