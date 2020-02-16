@@ -65,8 +65,10 @@ class GroupTest extends TestCase
         }, $this->getContainer());
 
         $group->addMiddleware($middleware2)->addMiddleware($middleware1);
+        $collector = new Group();
+        $collector->addGroup($group);
 
-        $routeCollection = new RouteCollection($group);
+        $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
         $response = $route->process($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
@@ -88,8 +90,10 @@ class GroupTest extends TestCase
         }, $this->getContainer());
 
         $group->addMiddleware($middleware2)->addMiddleware($middleware1);
+        $collector = new Group();
+        $collector->addGroup($group);
 
-        $routeCollection = new RouteCollection($group);
+        $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
         $response = $route->process($request, $this->getRequestHandler());
         $this->assertSame(403, $response->getStatusCode());
