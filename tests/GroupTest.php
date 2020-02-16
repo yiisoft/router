@@ -10,10 +10,10 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Yiisoft\Router\FastRoute\FastRouteFactory;
 use Yiisoft\Router\Middleware\Callback;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
+use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectorInterface;
 use Yiisoft\Router\Tests\Support\Container;
 
@@ -51,8 +51,6 @@ class GroupTest extends TestCase
 
     public function testGroupMiddlewareFullStackCalled(): void
     {
-        $factory = new FastRouteFactory();
-        $router = $factory();
         $group = new Group('/group', function (RouteCollectorInterface $r) {
             $r->addRoute(Route::get('/test1')->name('request1'));
         });
@@ -68,34 +66,32 @@ class GroupTest extends TestCase
 
         $group->addMiddleware($middleware2)->addMiddleware($middleware1);
 
-        $router->addGroup($group);
-        $result = $router->match($request);
-        $response = $result->process($request, $this->getRequestHandler());
+        $routeCollection = new RouteCollection($group);
+        $route = $routeCollection->getRoute('request1');
+        $response = $route->process($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('middleware1', $response->getReasonPhrase());
     }
 
     public function testGroupMiddlewareStackInterrupted(): void
     {
-        $factory = new FastRouteFactory();
-        $router = $factory();
         $group = new Group('/group', function (RouteCollectorInterface $r) {
             $r->addRoute(Route::get('/test1')->name('request1'));
         });
 
         $request = new ServerRequest('GET', '/group/test1');
-        $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+        $middleware1 = new Callback(function () {
             return new Response(403);
         }, $this->getContainer());
-        $middleware2 = new Callback(function (ServerRequestInterface $request) {
+        $middleware2 = new Callback(function () {
             return new Response(200);
         }, $this->getContainer());
 
         $group->addMiddleware($middleware2)->addMiddleware($middleware1);
 
-        $router->addGroup($group);
-        $result = $router->match($request);
-        $response = $result->process($request, $this->getRequestHandler());
+        $routeCollection = new RouteCollection($group);
+        $route = $routeCollection->getRoute('request1');
+        $response = $route->process($request, $this->getRequestHandler());
         $this->assertSame(403, $response->getStatusCode());
     }
 

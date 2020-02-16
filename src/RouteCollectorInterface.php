@@ -40,4 +40,9 @@ interface RouteCollectorInterface
      * @return bool if there is container specified
      */
     public function hasContainer(): bool;
+
+    /**
+     * @return Route|Group[]
+     */
+    public function getItems(): array;
 }
