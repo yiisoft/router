@@ -14,6 +14,8 @@ use Yiisoft\Router\MatchingResult;
 use Yiisoft\Http\Method;
 use Yiisoft\Router\Middleware\Router;
 use Yiisoft\Router\Route;
+use Yiisoft\Router\Group;
+use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectionInterface;
 use Yiisoft\Router\UrlMatcherInterface;
 
@@ -73,6 +75,8 @@ final class RouterTest extends TestCase
 
             public function getRouteCollection(): RouteCollectionInterface
             {
+                $collector = new Group();
+                return new RouteCollection($collector);
             }
 
             /**
