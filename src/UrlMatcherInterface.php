@@ -17,4 +17,16 @@ interface UrlMatcherInterface
      * @return Route|null current route
      */
     public function getCurrentRoute(): ?Route;
+
+    /**
+     * Returns last matched Request
+     * @return ServerRequestInterface|null current route
+     */
+    public function getLastMatchedRequest(): ?ServerRequestInterface;
+
+    /**
+     * Returns UrlMatcher current route collection
+     * @return RouteCollectionInterface collection of routes
+     */
+    public function getRouteCollection(): RouteCollectionInterface;
 }
