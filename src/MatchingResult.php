@@ -2,6 +2,7 @@
 
 namespace Yiisoft\Router;
 
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -14,9 +15,17 @@ final class MatchingResult implements MiddlewareInterface
     private Route $route;
     private array $parameters = [];
     private array $methods = [];
+    private ?ContainerInterface $container = null;
 
     private function __construct()
     {
+    }
+
+    public function withContainer(ContainerInterface $container): self
+    {
+        $new = clone $this;
+        $new->container = $container;
+        return $new;
     }
 
     public static function fromSuccess(Route $route, array $parameters): self
@@ -61,7 +70,11 @@ final class MatchingResult implements MiddlewareInterface
         if ($this->success === false) {
             return $handler->handle($request);
         }
+        $route = $this->route;
+        if ($this->container !== null && !$route->hasContainer()) {
+            $route = $route->withContainer($this->container);
+        }
 
-        return $this->route->process($request, $handler);
+        return $route->process($request, $handler);
     }
 }
