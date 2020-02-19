@@ -39,8 +39,7 @@ final class Router implements MiddlewareInterface
         foreach ($result->parameters() as $parameter => $value) {
             $request = $request->withAttribute($parameter, $value);
         }
-        $result->setContainer($this->container);
 
-        return $result->process($request, $handler);
+        return $result->withContainer($this->container)->process($request, $handler);
     }
 }

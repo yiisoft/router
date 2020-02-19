@@ -21,9 +21,11 @@ final class MatchingResult implements MiddlewareInterface
     {
     }
 
-    public function setContainer(ContainerInterface $container): void
+    public function withContainer(ContainerInterface $container): self
     {
-        $this->container = $container;
+        $new = clone $this;
+        $new->container = $container;
+        return $new;
     }
 
     public static function fromSuccess(Route $route, array $parameters): self
