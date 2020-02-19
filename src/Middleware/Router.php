@@ -2,6 +2,7 @@
 
 namespace Yiisoft\Router\Middleware;
 
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -13,11 +14,13 @@ final class Router implements MiddlewareInterface
 {
     private UrlMatcherInterface $matcher;
     private ResponseFactoryInterface $responseFactory;
+    private ContainerInterface $container;
 
-    public function __construct(UrlMatcherInterface $matcher, ResponseFactoryInterface $responseFactory)
+    public function __construct(UrlMatcherInterface $matcher, ResponseFactoryInterface $responseFactory, ContainerInterface $container)
     {
         $this->matcher = $matcher;
         $this->responseFactory = $responseFactory;
+        $this->container = $container;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -37,6 +40,6 @@ final class Router implements MiddlewareInterface
             $request = $request->withAttribute($parameter, $value);
         }
 
-        return $result->process($request, $handler);
+        return $result->withContainer($this->container)->process($request, $handler);
     }
 }

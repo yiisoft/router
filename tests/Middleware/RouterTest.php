@@ -6,6 +6,7 @@ use Nyholm\Psr7\Response;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -23,7 +24,8 @@ final class RouterTest extends TestCase
 {
     private function createRouterMiddleware(): Router
     {
-        return new Router($this->getMatcher(), new Psr17Factory());
+        $container = $this->createMock(ContainerInterface::class);
+        return new Router($this->getMatcher(), new Psr17Factory(), $container);
     }
 
     private function processWithRouter(ServerRequestInterface $request): ResponseInterface
