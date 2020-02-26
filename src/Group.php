@@ -7,7 +7,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Yiisoft\Router\Middleware\Callback;
 
-class Group implements RouteCollectorInterface
+final class Group implements RouteCollectorInterface
 {
     /**
      * @var Group[]|Route[]
@@ -42,7 +42,7 @@ class Group implements RouteCollectorInterface
         }, $container);
     }
 
-    final public function withContainer(ContainerInterface $container): self
+    final public function withContainer(ContainerInterface $container): RouteCollectorInterface
     {
         $group = clone $this;
         $group->container = $container;
@@ -61,7 +61,7 @@ class Group implements RouteCollectorInterface
         return $this->container !== null;
     }
 
-    final public function addRoute(Route $route): self
+    final public function addRoute(Route $route): RouteCollectorInterface
     {
         if (!$route->hasContainer() && $this->hasContainer()) {
             $route = $route->withContainer($this->container);
@@ -70,7 +70,7 @@ class Group implements RouteCollectorInterface
         return $this;
     }
 
-    final public function addGroup(Group $group): self
+    final public function addGroup(Group $group): RouteCollectorInterface
     {
         if (!$group->hasContainer() && $this->hasContainer()) {
             $group = $group->withContainer($this->container);
