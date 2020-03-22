@@ -17,7 +17,7 @@ class Group implements RouteCollectorInterface
     protected array $middlewares = [];
     private ?ContainerInterface $container = null;
 
-    public function __construct(?string $prefix = null, ?callable $callback = null, ContainerInterface $container = null)
+    private function __construct(?string $prefix = null, ?callable $callback = null, ContainerInterface $container = null)
     {
         $this->container = $container;
         $this->prefix = $prefix;
@@ -27,19 +27,34 @@ class Group implements RouteCollectorInterface
         }
     }
 
-    final public static function create(?string $prefix, array $routes = [], ContainerInterface $container = null): self
+    /**
+     * Create a new instance
+     *
+     * @param string prefix
+     * @param callable|string router
+     * @param container
+     *
+     * @return self
+     */
+    final public static function create(?string $prefix = null, $routes = [], ContainerInterface $container = null) : self
     {
-        return new self($prefix, static function (Group $group) use ($routes) {
-            foreach ($routes as $route) {
-                if ($route instanceof Route) {
-                    $group->addRoute($route);
-                } elseif ($route instanceof Group) {
-                    $group->addGroup($route);
-                } else {
-                    throw new InvalidArgumentException('Routes should be either instances of Route or Group');
+        if (\is_callable($routes)) {
+            $func = $routes;
+        } else {
+            $func = static function (Group $group) use ($routes) {
+                foreach ($routes as $route) {
+                    if ($route instanceof Route) {
+                        $group->addRoute($route);
+                    } elseif ($route instanceof Group) {
+                        $group->addGroup($route);
+                    } else {
+                        throw new InvalidArgumentException('Routes should be either instances of Route or Group');
+                    }
                 }
-            }
-        }, $container);
+            };
+        }
+
+        return new self($prefix, $func, $container);
     }
 
     final public function withContainer(ContainerInterface $container): self
