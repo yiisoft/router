@@ -9,6 +9,6 @@ final class GroupFactory
 {
     public function __invoke(ContainerInterface $container): Group
     {
-        return new Group(null, null, $container);
+        return Group::create(null, null, $container);
     }
 }

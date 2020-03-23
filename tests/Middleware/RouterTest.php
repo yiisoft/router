@@ -77,7 +77,7 @@ final class RouterTest extends TestCase
 
             public function getRouteCollection(): RouteCollectionInterface
             {
-                $collector = new Group();
+                $collector = Group::create();
                 return new RouteCollection($collector);
             }
 
