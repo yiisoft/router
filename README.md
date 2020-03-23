@@ -69,14 +69,15 @@ Routes could be grouped. That is useful for API endpoints and similar cases:
 
 ```php
 use \Yiisoft\Router\Route;
+use \Yiisoft\Router\Group;
 use \Yiisoft\Router\RouteCollectorInterface;
 
 // for obtaining router see adapter package of choice readme
 $router = ... 
     
-$router->addGroup(new Group('/api', static function (RouteCollectorInterface $r) {
+$router->addGroup(Group::create('/api', static function (RouteCollectorInterface $r) {
     $r->addRoute(Route::get('/comments'));
-    $r->addGroup(new Group('/posts', static function (RouteCollectorInterface $r) {
+    $r->addGroup(Group::create('/posts', static function (RouteCollectorInterface $r) {
         $r->addRoute(Route::get('/list'));
     }));
 }));
@@ -110,7 +111,7 @@ use \Yiisoft\Router\Route;
 $router = $container->get(Yiisoft\Router\UrlMatcherInterface::class);
 $responseFactory = $container->get(\Psr\Http\Message\ResponseFactoryInterface::class);
 
-$router->addRoute(Route::get('/test/{id:\w+}', function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+$router->addRoute(Route::get('/test/{id:\w+}', static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
    $id = $request->getAttribute('id');
 
    $response = $responseFactory->createResponse();
