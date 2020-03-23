@@ -42,7 +42,7 @@ class Group implements RouteCollectorInterface
     {
         if (\is_callable($routes)) {
             $callback = $routes;
-        } else {
+        } elseif (is_array($routes)) {
             $callback = static function (Group $group) use (&$routes) {
                 foreach ($routes as $route) {
                     if ($route instanceof Route) {
@@ -54,6 +54,8 @@ class Group implements RouteCollectorInterface
                     }
                 }
             };
+        } else {
+            $callback = null;
         }
 
         return new self($prefix, $callback, $container);
