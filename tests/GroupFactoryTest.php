@@ -66,7 +66,9 @@ final class GroupFactoryTest extends TestCase
                         Route::get('/note/{id}')->name('api-v2-note/view'),
                     ]
                 )
-            ], $container);
+            ],
+            $container
+        );
 
         $items = $apiGroup->getItems();
 

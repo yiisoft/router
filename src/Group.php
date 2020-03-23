@@ -38,7 +38,7 @@ class Group implements RouteCollectorInterface
      *
      * @return self
      */
-    final public static function create(?string $prefix = null, $routes = [], ContainerInterface $container = null) : self
+    final public static function create(?string $prefix = null, $routes = [], ContainerInterface $container = null): self
     {
         if (\is_callable($routes)) {
             $callback = $routes;
