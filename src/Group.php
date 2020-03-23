@@ -30,9 +30,9 @@ class Group implements RouteCollectorInterface
     /**
      * Create a new instance
      *
-     * @param string prefix
-     * @param callable|string router
-     * @param container
+     * @param string $prefix
+     * @param callable|string $router
+     * @param ContainerInterface $container
      *
      * @return self
      */
@@ -41,7 +41,7 @@ class Group implements RouteCollectorInterface
         if (\is_callable($routes)) {
             $func = $routes;
         } else {
-            $func = static function (Group $group) use ($routes) {
+            $func = static function (Group $group) use (&$routes) {
                 foreach ($routes as $route) {
                     if ($route instanceof Route) {
                         $group->addRoute($route);
