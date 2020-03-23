@@ -24,7 +24,7 @@ class GroupTest extends TestCase
         $listRoute = Route::get('/');
         $viewRoute = Route::get('/{id}');
 
-        $group = new Group();
+        $group = Group::create();
         $group->addRoute($listRoute);
         $group->addRoute($viewRoute);
 
@@ -35,7 +35,7 @@ class GroupTest extends TestCase
 
     public function testAddMiddleware(): void
     {
-        $group = new Group();
+        $group = Group::create();
 
         $middleware1 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
         $middleware2 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
@@ -51,7 +51,7 @@ class GroupTest extends TestCase
 
     public function testGroupMiddlewareFullStackCalled(): void
     {
-        $group = new Group('/group', function (RouteCollectorInterface $r) {
+        $group = Group::create('/group', function (RouteCollectorInterface $r) {
             $r->addRoute(Route::get('/test1')->name('request1'));
         });
 
@@ -65,7 +65,7 @@ class GroupTest extends TestCase
         }, $this->getContainer());
 
         $group->addMiddleware($middleware2)->addMiddleware($middleware1);
-        $collector = new Group();
+        $collector = Group::create();
         $collector->addGroup($group);
 
         $routeCollection = new RouteCollection($collector);
@@ -77,7 +77,7 @@ class GroupTest extends TestCase
 
     public function testGroupMiddlewareStackInterrupted(): void
     {
-        $group = new Group('/group', function (RouteCollectorInterface $r) {
+        $group = Group::create('/group', function (RouteCollectorInterface $r) {
             $r->addRoute(Route::get('/test1')->name('request1'));
         });
 
@@ -90,7 +90,7 @@ class GroupTest extends TestCase
         }, $this->getContainer());
 
         $group->addMiddleware($middleware2)->addMiddleware($middleware1);
-        $collector = new Group();
+        $collector = Group::create();
         $collector->addGroup($group);
 
         $routeCollection = new RouteCollection($collector);
@@ -108,10 +108,10 @@ class GroupTest extends TestCase
         $middleware1 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
         $middleware2 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
 
-        $root = new Group();
-        $root->addGroup(new Group('/api', static function (Group $group) use ($logoutRoute, $listRoute, $viewRoute, $middleware1, $middleware2) {
+        $root = Group::create();
+        $root->addGroup(Group::create('/api', static function (Group $group) use ($logoutRoute, $listRoute, $viewRoute, $middleware1, $middleware2) {
             $group->addRoute($logoutRoute);
-            $group->addGroup(new Group('/post', static function (Group $group) use ($listRoute, $viewRoute) {
+            $group->addGroup(Group::create('/post', static function (Group $group) use ($listRoute, $viewRoute) {
                 $group->addRoute($listRoute);
                 $group->addRoute($viewRoute);
             }));
@@ -185,16 +185,16 @@ class GroupTest extends TestCase
     {
         $container = $this->getContainer();
 
-        $apiGroup = new Group(
+        $apiGroup = Group::create(
             '/api', static function (Group $group) {
                 $group->addRoute(Route::get('/info')->name('api-info'));
                 $group->addGroup(
-                new Group(
+                Group::create(
                     '/v1', static function (Group $group) {
                         $group->addRoute(Route::get('/user')->name('api-v1-user/index'));
                         $group->addRoute(Route::get('/user/{id}')->name('api-v1-user/view'));
                         $group->addGroup(
-                        new Group(
+                        Group::create(
                             '/news', static function (Group $group) {
                                 $group->addRoute(Route::get('/post')->name('api-v1-news-post/index'));
                                 $group->addRoute(Route::get('/post/{id}')->name('api-v1-news-post/view'));
@@ -202,7 +202,7 @@ class GroupTest extends TestCase
                         )
                     );
                         $group->addGroup(
-                        new Group(
+                        Group::create(
                             '/blog', static function (Group $group) {
                                 $group->addRoute(Route::get('/post')->name('api-v1-blog-post/index'));
                                 $group->addRoute(Route::get('/post/{id}')->name('api-v1-blog-post/view'));
@@ -215,12 +215,12 @@ class GroupTest extends TestCase
                 )
             );
                 $group->addGroup(
-                new Group(
+                Group::create(
                     '/v2', static function (Group $group) {
                         $group->addRoute(Route::get('/user')->name('api-v2-user/index'));
                         $group->addRoute(Route::get('/user/{id}')->name('api-v2-user/view'));
                         $group->addGroup(
-                        new Group(
+                        Group::create(
                             '/news', static function (Group $group) {
                                 $group->addRoute(Route::get('/post')->name('api-v2-news-post/index'));
                                 $group->addRoute(Route::get('/post/{id}')->name('api-v2-news-post/view'));
@@ -228,7 +228,7 @@ class GroupTest extends TestCase
                         )
                     );
                         $group->addGroup(
-                        new Group(
+                        Group::create(
                             '/blog', static function (Group $group) {
                                 $group->addRoute(Route::get('/post')->name('api-v2-blog-post/index'));
                                 $group->addRoute(Route::get('/post/{id}')->name('api-v2-blog-post/view'));
