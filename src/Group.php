@@ -33,7 +33,7 @@ class Group implements RouteCollectorInterface
      * Create a new instance
      *
      * @param string $prefix
-     * @param callable|string $router
+     * @param callable|array $routes
      * @param ContainerInterface $container
      *
      * @return self
@@ -41,22 +41,22 @@ class Group implements RouteCollectorInterface
     final public static function create(?string $prefix = null, $routes = [], ContainerInterface $container = null) : self
     {
         if (\is_callable($routes)) {
-            $func = $routes;
+            $callback = $routes;
         } else {
-            $func = static function (Group $group) use (&$routes) {
+            $callback = static function (Group $group) use (&$routes) {
                 foreach ($routes as $route) {
                     if ($route instanceof Route) {
                         $group->addRoute($route);
                     } elseif ($route instanceof Group) {
                         $group->addGroup($route);
                     } else {
-                        throw new InvalidArgumentException('Routes should be either instances of Route or Group');
+                        throw new InvalidArgumentException('Route should be either instance of Route or Group.');
                     }
                 }
             };
         }
 
-        return new self($prefix, $func, $container);
+        return new self($prefix, $callback, $container);
     }
 
     final public function withContainer(ContainerInterface $container): self
