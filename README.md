@@ -22,32 +22,35 @@ with one of the following adapter packages:
 ## General usage
 
 ```php
+use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
-use Yiisoft\Router\RouterFactory;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Yiisoft\Router\RouteCollection;
+use Yiisoft\Router\RouteCollectorInterface;
 
 $routes = [
-    Route::get('/', function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
-            $response = $responseFactory->createResponse();
-            $response->getBody()->write('You are at homepage.');
-            return $response;
-        }),
-    Route::get('/test/{id:\w+}', function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
-            $id = $request->getAttribute('id');
-    
-            $response = $responseFactory->createResponse();
-            $response->getBody()->write('You are at test with param ' . $id);
-            return $response;
-        })
+    Route::get('/', static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+        $response = $responseFactory->createResponse();
+        $response->getBody()->write('You are at homepage.');
+        return $response;
+    }),
+    Route::get('/test/{id:\w+}', static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+        $id = $request->getAttribute('id');
+
+        $response = $responseFactory->createResponse();
+        $response->getBody()->write('You are at test with param ' . $id);
+        return $response;
+    })
 ];
 
-// for obtaining router driver see adapter package of choice readme
-$driver = new FastRouteFactory();
-$router = (new RouterFactory($driver, $routes))($container);
+$collector = $container->get(RouteCollectorInterface::class);
+$collector->addGroup(Group::create(null, $routes));
+
+$urlMatcher = new UrlMatcher(new RouteCollection($collector));
 
 // $request is PSR-7 ServerRequestInterface
-$result = $router->match($request);
+$result = $urlMatcher->match($request);
 
 if (!$result->isSuccess()) {
      // 404
@@ -58,6 +61,9 @@ if (!$result->isSuccess()) {
 // run middleware assigned to a route found 
 $response = $result->process($request, $handler);
 ```
+
+`RouteCollectorInterface` and `UrlMatcher` are specific to adapter package used. See its readme on how to properly
+configure it.
 
 In `to()` you can either specify PSR middleware or a callback. More handlers could be added via `then()`.
 
