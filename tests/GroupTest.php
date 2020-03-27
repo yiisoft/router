@@ -53,11 +53,12 @@ class GroupTest extends TestCase
     {
         $request = new ServerRequest('GET', '/outergroup/innergroup/test1');
 
-        $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+        $middleware1 = new Callback(static function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             $request = $request->withAttribute('middleware', 'middleware1');
             return $handler->handle($request);
         }, $this->getContainer());
-        $middleware2 = new Callback(function (ServerRequestInterface $request) {
+
+        $middleware2 = new Callback(static function (ServerRequestInterface $request) {
             return new Response(200, [], null, '1.1', implode($request->getAttributes()));
         }, $this->getContainer());
 
