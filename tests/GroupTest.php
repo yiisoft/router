@@ -49,6 +49,34 @@ class GroupTest extends TestCase
         $this->assertSame($middleware2, $group->getMiddlewares()[0]);
     }
 
+    public function testAddNestedMiddleware(): void
+    {
+        $request = new ServerRequest('GET', '/outergroup/innergroup/test1');
+
+        $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+            $request = $request->withAttribute('middleware', 'middleware1');
+            return $handler->handle($request);
+        }, $this->getContainer());
+        $middleware2 = new Callback(function (ServerRequestInterface $request) {
+            return new Response(200, [], null, '1.1', implode($request->getAttributes()));
+        }, $this->getContainer());
+
+        $group = Group::create('/outergroup', [
+            Group::create('/innergroup', [
+                Route::get('/test1')->name('request1')
+            ])->addMiddleware($middleware2),
+        ])->addMiddleware($middleware1);
+
+        $collector = Group::create();
+        $collector->addGroup($group);
+
+        $routeCollection = new RouteCollection($collector);
+        $route = $routeCollection->getRoute('request1');
+        $response = $route->process($request, $this->getRequestHandler());
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('middleware1', $response->getReasonPhrase());
+    }
+
     public function testGroupMiddlewareFullStackCalled(): void
     {
         $group = Group::create('/group', function (RouteCollectorInterface $r) {
