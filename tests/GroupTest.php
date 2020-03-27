@@ -49,6 +49,35 @@ class GroupTest extends TestCase
         $this->assertSame($middleware2, $group->getMiddlewares()[0]);
     }
 
+    public function testAddNestedMiddleware(): void
+    {
+        $request = new ServerRequest('GET', '/outergroup/innergroup/test1');
+
+        $middleware1 = new Callback(static function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+            $request = $request->withAttribute('middleware', 'middleware1');
+            return $handler->handle($request);
+        }, $this->getContainer());
+
+        $middleware2 = new Callback(static function (ServerRequestInterface $request) {
+            return new Response(200, [], null, '1.1', implode($request->getAttributes()));
+        }, $this->getContainer());
+
+        $group = Group::create('/outergroup', [
+            Group::create('/innergroup', [
+                Route::get('/test1')->name('request1')
+            ])->addMiddleware($middleware2),
+        ])->addMiddleware($middleware1);
+
+        $collector = Group::create();
+        $collector->addGroup($group);
+
+        $routeCollection = new RouteCollection($collector);
+        $route = $routeCollection->getRoute('request1');
+        $response = $route->process($request, $this->getRequestHandler());
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('middleware1', $response->getReasonPhrase());
+    }
+
     public function testGroupMiddlewareFullStackCalled(): void
     {
         $group = Group::create('/group', function (RouteCollectorInterface $r) {
@@ -191,61 +220,61 @@ class GroupTest extends TestCase
                 $group->addRoute(Route::get('/info')->name('api-info'));
                 $group->addGroup(
                     Group::create(
-                    '/v1',
-                    static function (Group $group) {
-                        $group->addRoute(Route::get('/user')->name('api-v1-user/index'));
-                        $group->addRoute(Route::get('/user/{id}')->name('api-v1-user/view'));
-                        $group->addGroup(
-                            Group::create(
-                            '/news',
-                            static function (Group $group) {
-                                $group->addRoute(Route::get('/post')->name('api-v1-news-post/index'));
-                                $group->addRoute(Route::get('/post/{id}')->name('api-v1-news-post/view'));
-                            }
-                        )
-                        );
-                        $group->addGroup(
-                            Group::create(
-                            '/blog',
-                            static function (Group $group) {
-                                $group->addRoute(Route::get('/post')->name('api-v1-blog-post/index'));
-                                $group->addRoute(Route::get('/post/{id}')->name('api-v1-blog-post/view'));
-                            }
-                        )
-                        );
-                        $group->addRoute(Route::get('/note')->name('api-v1-note/index'));
-                        $group->addRoute(Route::get('/note/{id}')->name('api-v1-note/view'));
-                    }
-                )
+                        '/v1',
+                        static function (Group $group) {
+                            $group->addRoute(Route::get('/user')->name('api-v1-user/index'));
+                            $group->addRoute(Route::get('/user/{id}')->name('api-v1-user/view'));
+                            $group->addGroup(
+                                Group::create(
+                                    '/news',
+                                    static function (Group $group) {
+                                        $group->addRoute(Route::get('/post')->name('api-v1-news-post/index'));
+                                        $group->addRoute(Route::get('/post/{id}')->name('api-v1-news-post/view'));
+                                    }
+                                )
+                            );
+                            $group->addGroup(
+                                Group::create(
+                                    '/blog',
+                                    static function (Group $group) {
+                                        $group->addRoute(Route::get('/post')->name('api-v1-blog-post/index'));
+                                        $group->addRoute(Route::get('/post/{id}')->name('api-v1-blog-post/view'));
+                                    }
+                                )
+                            );
+                            $group->addRoute(Route::get('/note')->name('api-v1-note/index'));
+                            $group->addRoute(Route::get('/note/{id}')->name('api-v1-note/view'));
+                        }
+                    )
                 );
                 $group->addGroup(
                     Group::create(
-                    '/v2',
-                    static function (Group $group) {
-                        $group->addRoute(Route::get('/user')->name('api-v2-user/index'));
-                        $group->addRoute(Route::get('/user/{id}')->name('api-v2-user/view'));
-                        $group->addGroup(
-                            Group::create(
-                            '/news',
-                            static function (Group $group) {
-                                $group->addRoute(Route::get('/post')->name('api-v2-news-post/index'));
-                                $group->addRoute(Route::get('/post/{id}')->name('api-v2-news-post/view'));
-                            }
-                        )
-                        );
-                        $group->addGroup(
-                            Group::create(
-                            '/blog',
-                            static function (Group $group) {
-                                $group->addRoute(Route::get('/post')->name('api-v2-blog-post/index'));
-                                $group->addRoute(Route::get('/post/{id}')->name('api-v2-blog-post/view'));
-                            }
-                        )
-                        );
-                        $group->addRoute(Route::get('/note')->name('api-v2-note/index'));
-                        $group->addRoute(Route::get('/note/{id}')->name('api-v2-note/view'));
-                    }
-                )
+                        '/v2',
+                        static function (Group $group) {
+                            $group->addRoute(Route::get('/user')->name('api-v2-user/index'));
+                            $group->addRoute(Route::get('/user/{id}')->name('api-v2-user/view'));
+                            $group->addGroup(
+                                Group::create(
+                                    '/news',
+                                    static function (Group $group) {
+                                        $group->addRoute(Route::get('/post')->name('api-v2-news-post/index'));
+                                        $group->addRoute(Route::get('/post/{id}')->name('api-v2-news-post/view'));
+                                    }
+                                )
+                            );
+                            $group->addGroup(
+                                Group::create(
+                                    '/blog',
+                                    static function (Group $group) {
+                                        $group->addRoute(Route::get('/post')->name('api-v2-blog-post/index'));
+                                        $group->addRoute(Route::get('/post/{id}')->name('api-v2-blog-post/view'));
+                                    }
+                                )
+                            );
+                            $group->addRoute(Route::get('/note')->name('api-v2-note/index'));
+                            $group->addRoute(Route::get('/note/{id}')->name('api-v2-note/view'));
+                        }
+                    )
                 );
             },
             $container

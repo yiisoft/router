@@ -9,7 +9,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Yiisoft\Router\Middleware\Callback;
 
-class Group implements RouteCollectorInterface
+final class Group implements RouteCollectorInterface
 {
     /**
      * @var Group[]|Route[]
