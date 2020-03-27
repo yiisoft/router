@@ -106,6 +106,11 @@ final class RouteCollection implements RouteCollectionInterface
         /** @var $items Group[]|Route[] */
         $items = $group->getItems();
         foreach ($items as $index => $item) {
+            $groupMiddlewares = $group->getMiddlewares();
+            for (end($groupMiddlewares); key($groupMiddlewares) !== null; prev($groupMiddlewares)) {
+                $item = $item->addMiddleware(current($groupMiddlewares));
+            }
+
             if ($item instanceof Group) {
                 if (empty($item->getPrefix())) {
                     $this->injectGroup($item, $tree, $prefix);
@@ -124,12 +129,6 @@ final class RouteCollection implements RouteCollectionInterface
 
             /** @var Route $modifiedItem */
             $modifiedItem = $item->pattern($prefix . $item->getPattern());
-
-            $groupMiddlewares = $group->getMiddlewares();
-
-            for (end($groupMiddlewares); key($groupMiddlewares) !== null; prev($groupMiddlewares)) {
-                $modifiedItem = $modifiedItem->addMiddleware(current($groupMiddlewares));
-            }
 
             $routeName = $modifiedItem->getName();
             if (isset($this->routes[$routeName])) {
