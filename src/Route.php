@@ -5,8 +5,6 @@ namespace Yiisoft\Router;
 use InvalidArgumentException;
 use Yiisoft\Http\Method;
 use Yiisoft\Injector\Injector;
-use Yiisoft\Router\Middleware\Callback;
-use Yiisoft\Router\Middleware\ActionCaller;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;

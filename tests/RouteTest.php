@@ -14,7 +14,6 @@ use Yiisoft\Http\Method;
 use Yiisoft\Router\Tests\Support\Container;
 use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware;
-use Yiisoft\Router\Middleware\Callback;
 use Yiisoft\Router\Route;
 
 final class RouteTest extends TestCase
