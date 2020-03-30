@@ -56,77 +56,77 @@ final class Route implements MiddlewareInterface
      * @param string $pattern
      * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
      * @param ContainerInterface $container|null
-     * @return static
+     * @return self
      */
     public static function get(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
     {
-        return static::methods([Method::GET], $pattern, $middleware, $container);
+        return self::methods([Method::GET], $pattern, $middleware, $container);
     }
 
     /**
      * @param string $pattern
      * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
      * @param ContainerInterface|null $container
-     * @return static
+     * @return self
      */
     public static function post(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
     {
-        return static::methods([Method::POST], $pattern, $middleware, $container);
+        return self::methods([Method::POST], $pattern, $middleware, $container);
     }
 
     /**
      * @param string $pattern
      * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
      * @param ContainerInterface|null $container
-     * @return static
+     * @return self
      */
     public static function put(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
     {
-        return static::methods([Method::PUT], $pattern, $middleware, $container);
+        return self::methods([Method::PUT], $pattern, $middleware, $container);
     }
 
     /**
      * @param string $pattern
      * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
      * @param ContainerInterface|null $container
-     * @return static
+     * @return self
      */
     public static function delete(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
     {
-        return static::methods([Method::DELETE], $pattern, $middleware, $container);
+        return self::methods([Method::DELETE], $pattern, $middleware, $container);
     }
 
     /**
      * @param string $pattern
      * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
      * @param ContainerInterface|null $container
-     * @return static
+     * @return self
      */
     public static function patch(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
     {
-        return static::methods([Method::PATCH], $pattern, $middleware, $container);
+        return self::methods([Method::PATCH], $pattern, $middleware, $container);
     }
 
     /**
      * @param string $pattern
      * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
      * @param ContainerInterface|null $container
-     * @return static
+     * @return self
      */
     public static function head(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
     {
-        return static::methods([Method::HEAD], $pattern, $middleware, $container);
+        return self::methods([Method::HEAD], $pattern, $middleware, $container);
     }
 
     /**
      * @param string $pattern
      * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
      * @param ContainerInterface|null $container
-     * @return static
+     * @return self
      */
     public static function options(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
     {
-        return static::methods([Method::OPTIONS], $pattern, $middleware, $container);
+        return self::methods([Method::OPTIONS], $pattern, $middleware, $container);
     }
 
     /**
@@ -134,11 +134,11 @@ final class Route implements MiddlewareInterface
      * @param string $pattern
      * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
      * @param ContainerInterface|null $container
-     * @return static
+     * @return self
      */
     public static function methods(array $methods, string $pattern, $middleware = null, ?ContainerInterface $container = null): self
     {
-        $route = new static($container);
+        $route = new self($container);
         $route->methods = $methods;
         $route->pattern = $pattern;
         if ($middleware !== null) {
@@ -152,11 +152,11 @@ final class Route implements MiddlewareInterface
      * @param string $pattern
      * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
      * @param ContainerInterface|null $container
-     * @return static
+     * @return self
      */
     public static function anyMethod(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
     {
-        return static::methods(Method::ANY, $pattern, $middleware, $container);
+        return self::methods(Method::ANY, $pattern, $middleware, $container);
     }
 
     public function name(string $name): self
