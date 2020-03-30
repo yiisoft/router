@@ -265,7 +265,7 @@ final class Route implements MiddlewareInterface
         $this->validateMiddleware($middleware);
 
         $route = clone $this;
-        array_unshift($route->middlewares, $middleware);
+        $route->middlewares[] = $middleware;
         return $route;
     }
 
@@ -316,8 +316,8 @@ final class Route implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if ($this->stack === null) {
-            for ($i = count($this->middlewares) - 1; $i >= 0; $i--) {
-                $handler = $this->wrap($this->prepareMiddleware($this->middlewares[$i]), $handler);
+            foreach ($this->middlewares as $middleware) {
+                $handler = $this->wrap($this->prepareMiddleware($middleware), $handler);
             }
             $this->stack = $handler;
         }

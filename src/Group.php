@@ -99,20 +99,33 @@ final class Group implements RouteCollectorInterface
     }
 
     /**
+     * @param MiddlewareInterface|callable|string|array $middleware
+     */
+    private function validateMiddleware($middleware): void
+    {
+        if (
+            is_string($middleware) && is_subclass_of($middleware, MiddlewareInterface::class)
+        ) {
+            return;
+        }
+
+        if (is_callable($middleware)) {
+            return;
+        }
+
+        if (!$middleware instanceof MiddlewareInterface) {
+            throw new InvalidArgumentException('Parameter should be either PSR middleware instance, PSR middleware class name, handler action or a callable.');
+        }
+    }
+
+    /**
      * @param callable|MiddlewareInterface $middleware
      * @return $this
      */
     final public function addMiddleware($middleware): self
     {
-        if (is_callable($middleware)) {
-            $middleware = new Callback($middleware, $this->container);
-        }
-
-        if (!$middleware instanceof MiddlewareInterface) {
-            throw new InvalidArgumentException('Parameter should be either a PSR middleware or a callable.');
-        }
-
-        array_unshift($this->middlewares, $middleware);
+        $this->validateMiddleware($middleware);
+        $this->middlewares[] = $middleware;
 
         return $this;
     }
