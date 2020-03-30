@@ -8,9 +8,8 @@ use InvalidArgumentException;
 
 final class RouteCollection implements RouteCollectionInterface
 {
-    /**
-     * @var array
-     */
+    private RouteCollectorInterface $collector;
+
     private array $items = [];
 
     /**
@@ -31,7 +30,7 @@ final class RouteCollection implements RouteCollectionInterface
         if ($collector instanceof Group && count($collector->getMiddlewares()) > 0) {
             throw new InvalidArgumentException('Collector can\'t have middlewares');
         }
-        $this->injectItems($collector->getItems());
+        $this->collector = $collector;
     }
 
     /**
@@ -39,6 +38,7 @@ final class RouteCollection implements RouteCollectionInterface
      */
     public function getRoutes(): array
     {
+        $this->ensureItemsInjected();
         return $this->routes;
     }
 
@@ -48,6 +48,7 @@ final class RouteCollection implements RouteCollectionInterface
      */
     public function getRoute(string $name): Route
     {
+        $this->ensureItemsInjected();
         if (!array_key_exists($name, $this->routes)) {
             throw new RouteNotFoundException($name);
         }
@@ -63,7 +64,15 @@ final class RouteCollection implements RouteCollectionInterface
      */
     public function getRouteTree(bool $routeAsString = true): array
     {
+        $this->ensureItemsInjected();
         return $this->buildTree($this->items, $routeAsString);
+    }
+
+    private function ensureItemsInjected(): void
+    {
+        if ($this->items === []) {
+            $this->injectItems($this->collector->getItems());
+        }
     }
 
     /**
