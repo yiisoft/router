@@ -149,16 +149,12 @@ final class RouteTest extends TestCase
 
     public function testAddMiddleware(): void
     {
+        $container = $this->createMock(ContainerInterface::class);
         $request = new ServerRequest('GET', '/');
 
-        $route = Route::get('/')->addMiddleware(
-            new class() implements MiddlewareInterface {
-                public function process(
-                    ServerRequestInterface $request,
-                    RequestHandlerInterface $handler
-                ): ResponseInterface {
-                    return (new Response())->withStatus(418);
-                }
+        $route = Route::get('/', null, $container)->addMiddleware(
+            function () {
+                return new Response(418);
             }
         );
 
@@ -242,7 +238,7 @@ final class RouteTest extends TestCase
     public function testInvalidMiddlewareAddWrongStringClassLL(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Parameter should be either PSR middleware instance, PSR middleware class name, handler action or a callable.');
+        $this->expectExceptionMessage('Parameter should be either PSR middleware class name, handler action or a callable.');
         Route::get('/', TestController::class);
     }
 

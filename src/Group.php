@@ -113,9 +113,7 @@ final class Group implements RouteCollectorInterface
             return;
         }
 
-        if (!$middleware instanceof MiddlewareInterface) {
-            throw new InvalidArgumentException('Parameter should be either PSR middleware instance, PSR middleware class name, handler action or a callable.');
-        }
+        throw new InvalidArgumentException('Parameter should be either PSR middleware instance, PSR middleware class name, handler action or a callable.');
     }
 
     /**

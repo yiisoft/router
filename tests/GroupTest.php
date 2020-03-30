@@ -37,8 +37,12 @@ class GroupTest extends TestCase
     {
         $group = Group::create();
 
-        $middleware1 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
-        $middleware2 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
+        $middleware1 = static function () {
+            return new Response();
+        };
+        $middleware2 = static function () {
+            return new Response();
+        };
 
         $group
             ->addMiddleware($middleware1)
@@ -134,8 +138,12 @@ class GroupTest extends TestCase
         $listRoute = Route::get('/');
         $viewRoute = Route::get('/{id}');
 
-        $middleware1 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
-        $middleware2 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
+        $middleware1 = static function () {
+            return new Response();
+        };
+        $middleware2 = static function () {
+            return new Response();
+        };
 
         $root = Group::create();
         $root->addGroup(Group::create('/api', static function (Group $group) use ($logoutRoute, $listRoute, $viewRoute, $middleware1, $middleware2) {
@@ -176,8 +184,12 @@ class GroupTest extends TestCase
         $listRoute = Route::get('/');
         $viewRoute = Route::get('/{id}');
 
-        $middleware1 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
-        $middleware2 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
+        $middleware1 = static function () {
+            return new Response();
+        };
+        $middleware2 = static function () {
+            return new Response();
+        };
 
         $root = Group::create(null, [
             Group::create('/api', [
