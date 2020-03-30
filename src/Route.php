@@ -5,8 +5,6 @@ namespace Yiisoft\Router;
 use InvalidArgumentException;
 use Yiisoft\Http\Method;
 use Yiisoft\Injector\Injector;
-use Yiisoft\Router\Middleware\Callback;
-use Yiisoft\Router\Middleware\ActionCaller;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -25,7 +23,7 @@ final class Route implements MiddlewareInterface
     private ?string $host = null;
     private ?ContainerInterface $container = null;
     /**
-     * Contains a chain of middleware wrapped in handlers.
+     * Contains a stack of middleware wrapped in handlers.
      * Each handler points to the handler of middleware that will be processed next.
      * @var RequestHandlerInterface|null stack of middleware
      */
