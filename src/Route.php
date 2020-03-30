@@ -4,6 +4,7 @@ namespace Yiisoft\Router;
 
 use InvalidArgumentException;
 use Yiisoft\Http\Method;
+use Yiisoft\Injector\Injector;
 use Yiisoft\Router\Middleware\Callback;
 use Yiisoft\Router\Middleware\ActionCaller;
 use Psr\Container\ContainerInterface;
@@ -231,14 +232,14 @@ final class Route implements MiddlewareInterface
             if ($this->container === null) {
                 throw new InvalidArgumentException('Route container must not be null for handler action.');
             }
-            return new ActionCaller($middleware[0], $middleware[1], $this->container);
+            return $this->wrapCallable($middleware);
         }
 
         if (is_callable($middleware)) {
             if ($this->container === null) {
                 throw new InvalidArgumentException('Route container must not be null for callable.');
             }
-            return new Callback($middleware, $this->container);
+            return $this->wrapCallable($middleware);
         }
 
         return $middleware;
@@ -265,7 +266,7 @@ final class Route implements MiddlewareInterface
         $this->validateMiddleware($middleware);
 
         $route = clone $this;
-        array_unshift($route->middlewares, $middleware);
+        $route->middlewares[] = $middleware;
         return $route;
     }
 
@@ -316,8 +317,8 @@ final class Route implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if ($this->stack === null) {
-            for ($i = count($this->middlewares) - 1; $i >= 0; $i--) {
-                $handler = $this->wrap($this->prepareMiddleware($this->middlewares[$i]), $handler);
+            foreach ($this->middlewares as $middleware) {
+                $handler = $this->wrap($this->prepareMiddleware($middleware), $handler);
             }
             $this->stack = $handler;
         }
@@ -343,6 +344,47 @@ final class Route implements MiddlewareInterface
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
                 return $this->middleware->process($request, $this->handler);
+            }
+        };
+    }
+
+    private function wrapCallable($callback): MiddlewareInterface
+    {
+        if (is_array($callback) && !is_object($callback[0])) {
+            [$controller, $action] = $callback;
+            return new class($controller, $action, $this->container) implements MiddlewareInterface {
+                private string $class;
+                private string $method;
+                private ContainerInterface $container;
+
+                public function __construct(string $class, string $method, ContainerInterface $container)
+                {
+                    $this->class = $class;
+                    $this->method = $method;
+                    $this->container = $container;
+                }
+
+                public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+                {
+                    $controller = $this->container->get($this->class);
+                    return (new Injector($this->container))->invoke([$controller, $this->method], [$request, $handler]);
+                }
+            };
+        }
+
+        return new class($callback, $this->container) implements MiddlewareInterface {
+            private ContainerInterface $container;
+            private $callback;
+
+            public function __construct(callable $callback, ContainerInterface $container)
+            {
+                $this->callback = $callback;
+                $this->container = $container;
+            }
+
+            public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+            {
+                return (new Injector($this->container))->invoke($this->callback, [$request, $handler]);
             }
         };
     }

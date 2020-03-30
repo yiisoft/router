@@ -107,8 +107,8 @@ final class RouteCollection implements RouteCollectionInterface
         $items = $group->getItems();
         foreach ($items as $index => $item) {
             $groupMiddlewares = $group->getMiddlewares();
-            for (end($groupMiddlewares); key($groupMiddlewares) !== null; prev($groupMiddlewares)) {
-                $item = $item->addMiddleware(current($groupMiddlewares));
+            foreach ($groupMiddlewares as $middleware) {
+                $item = $item->addMiddleware($middleware);
             }
 
             if ($item instanceof Group) {

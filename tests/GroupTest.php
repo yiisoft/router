@@ -45,28 +45,28 @@ class GroupTest extends TestCase
             ->addMiddleware($middleware2);
 
         $this->assertCount(2, $group->getMiddlewares());
-        $this->assertSame($middleware1, $group->getMiddlewares()[1]);
-        $this->assertSame($middleware2, $group->getMiddlewares()[0]);
+        $this->assertSame($middleware1, $group->getMiddlewares()[0]);
+        $this->assertSame($middleware2, $group->getMiddlewares()[1]);
     }
 
     public function testAddNestedMiddleware(): void
     {
         $request = new ServerRequest('GET', '/outergroup/innergroup/test1');
 
-        $middleware1 = new Callback(static function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+        $middleware1 = static function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             $request = $request->withAttribute('middleware', 'middleware1');
             return $handler->handle($request);
-        }, $this->getContainer());
+        };
 
-        $middleware2 = new Callback(static function (ServerRequestInterface $request) {
+        $middleware2 = static function (ServerRequestInterface $request) {
             return new Response(200, [], null, '1.1', implode($request->getAttributes()));
-        }, $this->getContainer());
+        };
 
         $group = Group::create('/outergroup', [
             Group::create('/innergroup', [
                 Route::get('/test1')->name('request1')
             ])->addMiddleware($middleware2),
-        ])->addMiddleware($middleware1);
+        ], $this->getContainer())->addMiddleware($middleware1);
 
         $collector = Group::create();
         $collector->addGroup($group);
@@ -82,16 +82,16 @@ class GroupTest extends TestCase
     {
         $group = Group::create('/group', function (RouteCollectorInterface $r) {
             $r->addRoute(Route::get('/test1')->name('request1'));
-        });
+        }, $this->getContainer());
 
         $request = new ServerRequest('GET', '/group/test1');
-        $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+        $middleware1 = function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             $request = $request->withAttribute('middleware', 'middleware1');
             return $handler->handle($request);
-        }, $this->getContainer());
-        $middleware2 = new Callback(function (ServerRequestInterface $request) {
+        };
+        $middleware2 = function (ServerRequestInterface $request) {
             return new Response(200, [], null, '1.1', implode($request->getAttributes()));
-        }, $this->getContainer());
+        };
 
         $group->addMiddleware($middleware2)->addMiddleware($middleware1);
         $collector = Group::create();
@@ -108,15 +108,15 @@ class GroupTest extends TestCase
     {
         $group = Group::create('/group', function (RouteCollectorInterface $r) {
             $r->addRoute(Route::get('/test1')->name('request1'));
-        });
+        }, $this->getContainer());
 
         $request = new ServerRequest('GET', '/group/test1');
-        $middleware1 = new Callback(function () {
+        $middleware1 = function () {
             return new Response(403);
-        }, $this->getContainer());
-        $middleware2 = new Callback(function () {
+        };
+        $middleware2 = function () {
             return new Response(200);
-        }, $this->getContainer());
+        };
 
         $group->addMiddleware($middleware2)->addMiddleware($middleware1);
         $collector = Group::create();
@@ -160,8 +160,8 @@ class GroupTest extends TestCase
         $postGroup = $api->getItems()[1];
         $this->assertInstanceOf(Group::class, $postGroup);
         $this->assertCount(2, $api->getMiddlewares());
-        $this->assertSame($middleware1, $api->getMiddlewares()[1]);
-        $this->assertSame($middleware2, $api->getMiddlewares()[0]);
+        $this->assertSame($middleware1, $api->getMiddlewares()[0]);
+        $this->assertSame($middleware2, $api->getMiddlewares()[1]);
 
         $this->assertSame('/post', $postGroup->getPrefix());
         $this->assertCount(2, $postGroup->getItems());
@@ -200,8 +200,8 @@ class GroupTest extends TestCase
         $postGroup = $api->getItems()[1];
         $this->assertInstanceOf(Group::class, $postGroup);
         $this->assertCount(2, $api->getMiddlewares());
-        $this->assertSame($middleware1, $api->getMiddlewares()[1]);
-        $this->assertSame($middleware2, $api->getMiddlewares()[0]);
+        $this->assertSame($middleware1, $api->getMiddlewares()[0]);
+        $this->assertSame($middleware2, $api->getMiddlewares()[1]);
 
         $this->assertSame('/post', $postGroup->getPrefix());
         $this->assertCount(2, $postGroup->getItems());

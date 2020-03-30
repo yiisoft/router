@@ -196,15 +196,15 @@ final class RouteTest extends TestCase
         $container = $this->getContainer();
         $request = new ServerRequest('GET', '/');
 
-        $routeOne = Route::get('/');
+        $routeOne = Route::get('/', null, $container);
 
-        $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+        $middleware1 = function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             $request = $request->withAttribute('middleware', 'middleware1');
             return $handler->handle($request);
-        }, $container);
-        $middleware2 = new Callback(function (ServerRequestInterface $request) {
+        };
+        $middleware2 = function (ServerRequestInterface $request) {
             return new Response(200, [], null, '1.1', implode($request->getAttributes()));
-        }, $container);
+        };
 
         $routeOne = $routeOne->addMiddleware($middleware2)->addMiddleware($middleware1);
 
@@ -218,14 +218,14 @@ final class RouteTest extends TestCase
         $container = $this->getContainer();
         $request = new ServerRequest('GET', '/');
 
-        $routeTwo = Route::get('/');
+        $routeTwo = Route::get('/', null, $container);
 
-        $middleware1 = new Callback(function () {
+        $middleware1 = function () {
             return new Response(403);
-        }, $container);
-        $middleware2 = new Callback(function () {
+        };
+        $middleware2 = function () {
             return new Response(200);
-        }, $container);
+        };
 
         $routeTwo = $routeTwo->addMiddleware($middleware2)->addMiddleware($middleware1);
 
