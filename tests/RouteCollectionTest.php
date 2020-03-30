@@ -18,6 +18,7 @@ class RouteCollectionTest extends TestCase
         $group->addRoute($listRoute);
         $group->addRoute($viewRoute);
         $this->expectExceptionMessage("A route with name 'my-route' already exists.");
-        new RouteCollection($group);
+        $routeCollection = new RouteCollection($group);
+        $routeCollection->getRoutes();
     }
 }
