@@ -10,7 +10,6 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Yiisoft\Router\Middleware\Callback;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
@@ -37,8 +36,12 @@ class GroupTest extends TestCase
     {
         $group = Group::create();
 
-        $middleware1 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
-        $middleware2 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
+        $middleware1 = static function () {
+            return new Response();
+        };
+        $middleware2 = static function () {
+            return new Response();
+        };
 
         $group
             ->addMiddleware($middleware1)
@@ -53,20 +56,20 @@ class GroupTest extends TestCase
     {
         $request = new ServerRequest('GET', '/outergroup/innergroup/test1');
 
-        $middleware1 = new Callback(static function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+        $middleware1 = static function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             $request = $request->withAttribute('middleware', 'middleware1');
             return $handler->handle($request);
-        }, $this->getContainer());
+        };
 
-        $middleware2 = new Callback(static function (ServerRequestInterface $request) {
+        $middleware2 = static function (ServerRequestInterface $request) {
             return new Response(200, [], null, '1.1', implode($request->getAttributes()));
-        }, $this->getContainer());
+        };
 
         $group = Group::create('/outergroup', [
             Group::create('/innergroup', [
                 Route::get('/test1')->name('request1')
             ])->addMiddleware($middleware2),
-        ])->addMiddleware($middleware1);
+        ], $this->getContainer())->addMiddleware($middleware1);
 
         $collector = Group::create();
         $collector->addGroup($group);
@@ -82,16 +85,16 @@ class GroupTest extends TestCase
     {
         $group = Group::create('/group', function (RouteCollectorInterface $r) {
             $r->addRoute(Route::get('/test1')->name('request1'));
-        });
+        }, $this->getContainer());
 
         $request = new ServerRequest('GET', '/group/test1');
-        $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+        $middleware1 = function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             $request = $request->withAttribute('middleware', 'middleware1');
             return $handler->handle($request);
-        }, $this->getContainer());
-        $middleware2 = new Callback(function (ServerRequestInterface $request) {
+        };
+        $middleware2 = function (ServerRequestInterface $request) {
             return new Response(200, [], null, '1.1', implode($request->getAttributes()));
-        }, $this->getContainer());
+        };
 
         $group->addMiddleware($middleware2)->addMiddleware($middleware1);
         $collector = Group::create();
@@ -108,15 +111,15 @@ class GroupTest extends TestCase
     {
         $group = Group::create('/group', function (RouteCollectorInterface $r) {
             $r->addRoute(Route::get('/test1')->name('request1'));
-        });
+        }, $this->getContainer());
 
         $request = new ServerRequest('GET', '/group/test1');
-        $middleware1 = new Callback(function () {
+        $middleware1 = function () {
             return new Response(403);
-        }, $this->getContainer());
-        $middleware2 = new Callback(function () {
+        };
+        $middleware2 = function () {
             return new Response(200);
-        }, $this->getContainer());
+        };
 
         $group->addMiddleware($middleware2)->addMiddleware($middleware1);
         $collector = Group::create();
@@ -134,8 +137,12 @@ class GroupTest extends TestCase
         $listRoute = Route::get('/');
         $viewRoute = Route::get('/{id}');
 
-        $middleware1 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
-        $middleware2 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
+        $middleware1 = static function () {
+            return new Response();
+        };
+        $middleware2 = static function () {
+            return new Response();
+        };
 
         $root = Group::create();
         $root->addGroup(Group::create('/api', static function (Group $group) use ($logoutRoute, $listRoute, $viewRoute, $middleware1, $middleware2) {
@@ -176,8 +183,12 @@ class GroupTest extends TestCase
         $listRoute = Route::get('/');
         $viewRoute = Route::get('/{id}');
 
-        $middleware1 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
-        $middleware2 = $this->getMockBuilder(MiddlewareInterface::class)->getMock();
+        $middleware1 = static function () {
+            return new Response();
+        };
+        $middleware2 = static function () {
+            return new Response();
+        };
 
         $root = Group::create(null, [
             Group::create('/api', [

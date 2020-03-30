@@ -5,6 +5,7 @@ namespace Yiisoft\Router\Tests;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -43,7 +44,8 @@ final class MatchingResultTest extends TestCase
 
     public function testProcessSuccess(): void
     {
-        $route = Route::post('/')->addMiddleware($this->getMiddleware());
+        $container = $this->createMock(ContainerInterface::class);
+        $route = Route::post('/', null, $container)->addMiddleware($this->getMiddleware());
         $result = MatchingResult::fromSuccess($route, []);
         $request = new ServerRequest('POST', '/');
 
@@ -61,15 +63,10 @@ final class MatchingResultTest extends TestCase
         $this->assertSame(404, $response->getStatusCode());
     }
 
-    private function getMiddleware(): MiddlewareInterface
+    private function getMiddleware()
     {
-        return new class() implements MiddlewareInterface {
-            public function process(
-                ServerRequestInterface $request,
-                RequestHandlerInterface $handler
-            ): ResponseInterface {
-                return (new Response())->withStatus(201);
-            }
+        return static function () {
+            return new Response(201);
         };
     }
 

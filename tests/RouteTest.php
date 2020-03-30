@@ -14,7 +14,6 @@ use Yiisoft\Http\Method;
 use Yiisoft\Router\Tests\Support\Container;
 use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware;
-use Yiisoft\Router\Middleware\Callback;
 use Yiisoft\Router\Route;
 
 final class RouteTest extends TestCase
@@ -149,16 +148,12 @@ final class RouteTest extends TestCase
 
     public function testAddMiddleware(): void
     {
+        $container = $this->createMock(ContainerInterface::class);
         $request = new ServerRequest('GET', '/');
 
-        $route = Route::get('/')->addMiddleware(
-            new class() implements MiddlewareInterface {
-                public function process(
-                    ServerRequestInterface $request,
-                    RequestHandlerInterface $handler
-                ): ResponseInterface {
-                    return (new Response())->withStatus(418);
-                }
+        $route = Route::get('/', null, $container)->addMiddleware(
+            function () {
+                return new Response(418);
             }
         );
 
@@ -196,15 +191,15 @@ final class RouteTest extends TestCase
         $container = $this->getContainer();
         $request = new ServerRequest('GET', '/');
 
-        $routeOne = Route::get('/');
+        $routeOne = Route::get('/', null, $container);
 
-        $middleware1 = new Callback(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+        $middleware1 = function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             $request = $request->withAttribute('middleware', 'middleware1');
             return $handler->handle($request);
-        }, $container);
-        $middleware2 = new Callback(function (ServerRequestInterface $request) {
+        };
+        $middleware2 = function (ServerRequestInterface $request) {
             return new Response(200, [], null, '1.1', implode($request->getAttributes()));
-        }, $container);
+        };
 
         $routeOne = $routeOne->addMiddleware($middleware2)->addMiddleware($middleware1);
 
@@ -218,14 +213,14 @@ final class RouteTest extends TestCase
         $container = $this->getContainer();
         $request = new ServerRequest('GET', '/');
 
-        $routeTwo = Route::get('/');
+        $routeTwo = Route::get('/', null, $container);
 
-        $middleware1 = new Callback(function () {
+        $middleware1 = function () {
             return new Response(403);
-        }, $container);
-        $middleware2 = new Callback(function () {
+        };
+        $middleware2 = function () {
             return new Response(200);
-        }, $container);
+        };
 
         $routeTwo = $routeTwo->addMiddleware($middleware2)->addMiddleware($middleware1);
 
@@ -242,7 +237,7 @@ final class RouteTest extends TestCase
     public function testInvalidMiddlewareAddWrongStringClassLL(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Parameter should be either PSR middleware instance, PSR middleware class name, handler action or a callable.');
+        $this->expectExceptionMessage('Parameter should be either PSR middleware class name, handler action or a callable.');
         Route::get('/', TestController::class);
     }
 
