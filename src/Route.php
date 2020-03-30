@@ -30,7 +30,7 @@ final class Route implements MiddlewareInterface
     private ?RequestHandlerInterface $stack = null;
 
     /**
-     * @var MiddlewareInterface[]|callable[]|string[]|array[]
+     * @var callable[]|string[]|array[]
      */
     private array $middlewares = [];
     private array $defaults = [];
@@ -54,7 +54,7 @@ final class Route implements MiddlewareInterface
 
     /**
      * @param string $pattern
-     * @param MiddlewareInterface|callable|string|array|null $middleware primary route handler {@see addMiddleware()}
+     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
      * @param ContainerInterface $container|null
      * @return static
      */
@@ -65,7 +65,7 @@ final class Route implements MiddlewareInterface
 
     /**
      * @param string $pattern
-     * @param MiddlewareInterface|callable|string|array|null $middleware primary route handler {@see addMiddleware()}
+     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
      * @param ContainerInterface|null $container
      * @return static
      */
@@ -76,7 +76,7 @@ final class Route implements MiddlewareInterface
 
     /**
      * @param string $pattern
-     * @param MiddlewareInterface|callable|string|array|null $middleware primary route handler {@see addMiddleware()}
+     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
      * @param ContainerInterface|null $container
      * @return static
      */
@@ -87,7 +87,7 @@ final class Route implements MiddlewareInterface
 
     /**
      * @param string $pattern
-     * @param MiddlewareInterface|callable|string|array|null $middleware primary route handler {@see addMiddleware()}
+     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
      * @param ContainerInterface|null $container
      * @return static
      */
@@ -98,7 +98,7 @@ final class Route implements MiddlewareInterface
 
     /**
      * @param string $pattern
-     * @param MiddlewareInterface|callable|string|array|null $middleware primary route handler {@see addMiddleware()}
+     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
      * @param ContainerInterface|null $container
      * @return static
      */
@@ -109,7 +109,7 @@ final class Route implements MiddlewareInterface
 
     /**
      * @param string $pattern
-     * @param MiddlewareInterface|callable|string|array|null $middleware primary route handler {@see addMiddleware()}
+     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
      * @param ContainerInterface|null $container
      * @return static
      */
@@ -120,7 +120,7 @@ final class Route implements MiddlewareInterface
 
     /**
      * @param string $pattern
-     * @param MiddlewareInterface|callable|string|array|null $middleware primary route handler {@see addMiddleware()}
+     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
      * @param ContainerInterface|null $container
      * @return static
      */
@@ -132,7 +132,7 @@ final class Route implements MiddlewareInterface
     /**
      * @param array $methods
      * @param string $pattern
-     * @param MiddlewareInterface|callable|string|array|null $middleware primary route handler {@see addMiddleware()}
+     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
      * @param ContainerInterface|null $container
      * @return static
      */
@@ -150,7 +150,7 @@ final class Route implements MiddlewareInterface
 
     /**
      * @param string $pattern
-     * @param MiddlewareInterface|callable|string|array|null $middleware primary route handler {@see addMiddleware()}
+     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
      * @param ContainerInterface|null $container
      * @return static
      */
@@ -194,7 +194,7 @@ final class Route implements MiddlewareInterface
     }
 
     /**
-     * @param MiddlewareInterface|callable|string|array $middleware
+     * @param callable|string|array $middleware
      */
     private function validateMiddleware($middleware): void
     {
@@ -212,7 +212,7 @@ final class Route implements MiddlewareInterface
     }
 
     /**
-     * @param MiddlewareInterface|callable|string|array $middleware
+     * @param callable|string|array $middleware
      * @return MiddlewareInterface|string|array
      */
     private function prepareMiddleware($middleware)
@@ -245,16 +245,14 @@ final class Route implements MiddlewareInterface
      * Prepends a handler that should be invoked for a matching route.
      * Last added handler will be invoked first.
      *
-     * Parameter should be either PSR middleware instance, PSR middleware class name, handler action or a callable.
-     *
-     * It can be a PSR middleware instance, PSR middleware class name, handler action
+     * Parameter can be a PSR middleware class name, handler action
      * (an array of [handlerClass, handlerMethod]) or a callable.
      *
      * For handler action and callable typed parameters are automatically injected using dependency
      * injection container passed to the route. Current request and handler could be obtained by
      * type-hinting for ServerRequestInterface and RequestHandlerInterface.
      *
-     * @param MiddlewareInterface|callable|string|array $middleware
+     * @param callable|string|array $middleware
      * @return Route
      */
     public function addMiddleware($middleware): self
