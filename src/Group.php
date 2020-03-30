@@ -7,7 +7,6 @@ namespace Yiisoft\Router;
 use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Server\MiddlewareInterface;
-use Yiisoft\Router\Middleware\Callback;
 
 final class Group implements RouteCollectorInterface
 {
