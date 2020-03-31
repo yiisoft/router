@@ -204,11 +204,11 @@ final class Route implements MiddlewareInterface
             return;
         }
 
-        if (is_callable($middleware)) {
+        if (is_callable($middleware) && (!is_array($middleware) || !is_object($middleware[0]))) {
             return;
         }
 
-        throw new InvalidArgumentException('Parameter should be either PSR middleware class name, handler action or a callable.');
+        throw new InvalidArgumentException('Parameter should be either PSR middleware class name or a callable.');
     }
 
     /**
