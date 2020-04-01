@@ -24,10 +24,12 @@ with one of the following adapter packages:
 ```php
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectorInterface;
+use Yiisoft\Router\Fastroute\UrlMatcher;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+
 
 $routes = [
     Route::get('/', static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
@@ -62,10 +64,10 @@ if (!$result->isSuccess()) {
 $response = $result->process($request, $handler);
 ```
 
-`RouteCollectorInterface` and `UrlMatcher` are specific to adapter package used. See its readme on how to properly
+`UrlGeneratorInterface` and `UrlMatcher` are specific to adapter package used. See its readme on how to properly
 configure it.
 
-In `to()` you can either specify PSR middleware or a callback. More handlers could be added via `then()`.
+In `addMiddleware()` you can either specify PSR middleware class name or a callback.
 
 Note that pattern specified for routes depends on the underlying routing library used.
 
@@ -79,14 +81,14 @@ use \Yiisoft\Router\Group;
 use \Yiisoft\Router\RouteCollectorInterface;
 
 // for obtaining router see adapter package of choice readme
-$router = ... 
+$collector = $container->get(RouteCollectorInterface::class);
     
-$router->addGroup(Group::create('/api', static function (RouteCollectorInterface $r) {
-    $r->addRoute(Route::get('/comments'));
-    $r->addGroup(Group::create('/posts', static function (RouteCollectorInterface $r) {
-        $r->addRoute(Route::get('/list'));
-    }));
-}));
+$collector->addGroup(Group::create('/api',[
+    Route::get('/comments'),
+    Group::create('/posts', [
+        Route::get('/list'),
+    ]),
+]));
 ```
 
 ## Middleware usage
@@ -97,7 +99,7 @@ In order to simplify usage in PSR-middleware based application, there is a ready
 $router = $container->get(Yiisoft\Router\UrlMatcherInterface::class);
 $responseFactory = $container->get(\Psr\Http\Message\ResponseFactoryInterface::class);
 
-$routerMiddleware = new Yiisoft\Router\Middleware\Router($router, $responseFactory);
+$routerMiddleware = new Yiisoft\Router\Middleware\Router($router, $responseFactory, $container);
 
 // add middleware to your middleware handler of choice 
 ```
@@ -112,18 +114,32 @@ URLs could be created using `UrlGeneratorInterface::generate()`. Let's assume a 
 ```php
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use \Yiisoft\Router\Route;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Yiisoft\Yii\Web\SapiEmitter;
+use Yiisoft\Yii\Web\ServerRequestFactory;
+use Yiisoft\Yii\Web\NotFoundHandler;
+use Yiisoft\Router\Route;
+use Yiisoft\Router\RouteCollection;
+use Yiisoft\Router\RouteCollectorInterface;
+use Yiisoft\Router\Fastroute\UrlMatcher;
 
-$router = $container->get(Yiisoft\Router\UrlMatcherInterface::class);
-$responseFactory = $container->get(\Psr\Http\Message\ResponseFactoryInterface::class);
 
-$router->addRoute(Route::get('/test/{id:\w+}', static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+$request = $container->get(ServerRequestFactory::class)->createFromGlobals();
+$responseFactory = $container->get(ResponseFactoryInterface::class);
+$notFoundHandler = new NotFoundHandler($responseFactory);
+$collector = $container->get(RouteCollectorInterface::class);
+$collector->addRoute(Route::get('/test/{id:\w+}', static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
    $id = $request->getAttribute('id');
-
    $response = $responseFactory->createResponse();
    $response->getBody()->write('You are at test with param ' . $id);
+
    return $response;
 })->name('test'));
+$router = new UrlMatcher(new RouteCollection($collector));
+$route = $router->match($request);
+$response = $route->process($request, $notFoundHandler);
+$emitter = new SapiEmitter();
+$emitter->emit($response, $request->getMethod() === Method::HEAD);
 ```
 
 Then that is how URL could be obtained for it:
