@@ -312,10 +312,8 @@ final class Route implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if ($this->stack === null) {
-            $i = 0;
             foreach ($this->middlewares as $middleware) {
                 $handler = $this->wrap($this->prepareMiddleware($middleware), $handler);
-                $i++;
             }
             $this->stack = $handler;
         }
