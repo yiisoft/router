@@ -49,7 +49,7 @@ class GroupTest extends TestCase
 
         $this->assertCount(2, $group->getMiddlewares());
         $this->assertSame($middleware1, $group->getMiddlewares()[0][0]);
-        $this->assertSame($middleware2, $group->getMiddlewares()[0][1]);
+        $this->assertSame($middleware2, $group->getMiddlewares()[1][0]);
     }
 
     public function testAddNestedMiddleware(): void
@@ -168,13 +168,13 @@ class GroupTest extends TestCase
         $this->assertInstanceOf(Group::class, $postGroup);
         $this->assertCount(2, $api->getMiddlewares());
         $this->assertSame($middleware1, $api->getMiddlewares()[0][0]);
-        $this->assertSame($middleware2, $api->getMiddlewares()[0][1]);
+        $this->assertSame($middleware2, $api->getMiddlewares()[1][0]);
 
         $this->assertSame('/post', $postGroup->getPrefix());
         $this->assertCount(2, $postGroup->getItems());
         $this->assertSame($listRoute, $postGroup->getItems()[0]);
         $this->assertSame($viewRoute, $postGroup->getItems()[1]);
-        $this->assertEmpty($postGroup->getMiddlewares()[0]);
+        $this->assertEmpty($postGroup->getMiddlewares());
     }
 
     public function testAddGroupSecondWay(): void
@@ -212,13 +212,13 @@ class GroupTest extends TestCase
         $this->assertInstanceOf(Group::class, $postGroup);
         $this->assertCount(2, $api->getMiddlewares());
         $this->assertSame($middleware1, $api->getMiddlewares()[0][0]);
-        $this->assertSame($middleware2, $api->getMiddlewares()[0][1]);
+        $this->assertSame($middleware2, $api->getMiddlewares()[1][0]);
 
         $this->assertSame('/post', $postGroup->getPrefix());
         $this->assertCount(2, $postGroup->getItems());
         $this->assertSame($listRoute, $postGroup->getItems()[0]);
         $this->assertSame($viewRoute, $postGroup->getItems()[1]);
-        $this->assertEmpty($postGroup->getMiddlewares()[0]);
+        $this->assertEmpty($postGroup->getMiddlewares());
     }
 
     public function testContainerInjected(): void

@@ -33,7 +33,6 @@ final class Route implements MiddlewareInterface
      * @var callable[]|string[]|array[]
      */
     private array $middlewares = [];
-    private array $middlewareParams = [];
     private array $defaults = [];
 
     private function __construct(?ContainerInterface $container = null)
@@ -144,8 +143,7 @@ final class Route implements MiddlewareInterface
         $route->pattern = $pattern;
         if ($middleware !== null) {
             $route->validateMiddleware($middleware);
-            $route->middlewares[] = $middleware;
-            $route->middlewareParams[] = [];
+            $route->middlewares[] = [$middleware, $params];
         }
         return $route;
     }
@@ -217,8 +215,9 @@ final class Route implements MiddlewareInterface
      * @param callable|string|array $middleware
      * @return MiddlewareInterface|string|array
      */
-    private function prepareMiddleware($middleware, array $params)
+    private function prepareMiddleware($middleware)
     {
+        [$middleware, $params] = $middleware;
         if (is_string($middleware)) {
             if ($this->container === null) {
                 throw new InvalidArgumentException('Route container must not be null for lazy loaded middleware.');
@@ -262,8 +261,7 @@ final class Route implements MiddlewareInterface
         $this->validateMiddleware($middleware);
 
         $route = clone $this;
-        $route->middlewares[] = $middleware;
-        $route->middlewareParams[] = $params;
+        $route->middlewares[] = [$middleware, $params];
         return $route;
     }
 
@@ -316,7 +314,7 @@ final class Route implements MiddlewareInterface
         if ($this->stack === null) {
             $i = 0;
             foreach ($this->middlewares as $middleware) {
-                $handler = $this->wrap($this->prepareMiddleware($middleware, $this->middlewareParams[$i]), $handler);
+                $handler = $this->wrap($this->prepareMiddleware($middleware), $handler);
                 $i++;
             }
             $this->stack = $handler;

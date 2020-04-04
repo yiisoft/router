@@ -27,8 +27,7 @@ final class RouteCollection implements RouteCollectionInterface
      */
     public function __construct(RouteCollectorInterface $collector)
     {
-        [,$middlewares] = $collector->getMiddlewares();
-        if ($collector instanceof Group && !empty($middlewares)) {
+        if ($collector instanceof Group && !empty($collector->getMiddlewares())) {
             throw new InvalidArgumentException('Collector can\'t have middlewares');
         }
         $this->collector = $collector;
@@ -116,11 +115,9 @@ final class RouteCollection implements RouteCollectionInterface
         /** @var $items Group[]|Route[] */
         $items = $group->getItems();
         foreach ($items as $index => $item) {
-            $i = 0;
-            [$middlewares, $middlewareParams] = $group->getMiddlewares();
+            $middlewares = $group->getMiddlewares();
             foreach ($middlewares as $middleware) {
-                $item = $item->addMiddleware($middleware, $middlewareParams[$i]);
-                $i++;
+                $item = $item->addMiddleware($middleware[0], $middleware[1]);
             }
 
             if ($item instanceof Group) {
