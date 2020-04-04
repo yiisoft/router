@@ -33,6 +33,7 @@ final class Route implements MiddlewareInterface
      * @var callable[]|string[]|array[]
      */
     private array $middlewares = [];
+    private array $middlewareParams = [];
     private array $defaults = [];
 
     private function __construct(?ContainerInterface $container = null)
@@ -58,9 +59,9 @@ final class Route implements MiddlewareInterface
      * @param ContainerInterface $container|null
      * @return self
      */
-    public static function get(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
+    public static function get(string $pattern, $middleware = null, array $params = [], ?ContainerInterface $container = null): self
     {
-        return self::methods([Method::GET], $pattern, $middleware, $container);
+        return self::methods([Method::GET], $pattern, $middleware, $params, $container);
     }
 
     /**
@@ -69,9 +70,9 @@ final class Route implements MiddlewareInterface
      * @param ContainerInterface|null $container
      * @return self
      */
-    public static function post(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
+    public static function post(string $pattern, $middleware = null, array $params = [], ?ContainerInterface $container = null): self
     {
-        return self::methods([Method::POST], $pattern, $middleware, $container);
+        return self::methods([Method::POST], $pattern, $middleware, $params, $container);
     }
 
     /**
@@ -80,9 +81,9 @@ final class Route implements MiddlewareInterface
      * @param ContainerInterface|null $container
      * @return self
      */
-    public static function put(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
+    public static function put(string $pattern, $middleware = null, array $params = [], ?ContainerInterface $container = null): self
     {
-        return self::methods([Method::PUT], $pattern, $middleware, $container);
+        return self::methods([Method::PUT], $pattern, $middleware, $params, $container);
     }
 
     /**
@@ -91,9 +92,9 @@ final class Route implements MiddlewareInterface
      * @param ContainerInterface|null $container
      * @return self
      */
-    public static function delete(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
+    public static function delete(string $pattern, $middleware = null, array $params = [], ?ContainerInterface $container = null): self
     {
-        return self::methods([Method::DELETE], $pattern, $middleware, $container);
+        return self::methods([Method::DELETE], $pattern, $middleware, $params, $container);
     }
 
     /**
@@ -102,9 +103,9 @@ final class Route implements MiddlewareInterface
      * @param ContainerInterface|null $container
      * @return self
      */
-    public static function patch(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
+    public static function patch(string $pattern, $middleware = null, array $params = [], ?ContainerInterface $container = null): self
     {
-        return self::methods([Method::PATCH], $pattern, $middleware, $container);
+        return self::methods([Method::PATCH], $pattern, $middleware, $params, $container);
     }
 
     /**
@@ -113,9 +114,9 @@ final class Route implements MiddlewareInterface
      * @param ContainerInterface|null $container
      * @return self
      */
-    public static function head(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
+    public static function head(string $pattern, $middleware = null, array $params = [], ?ContainerInterface $container = null): self
     {
-        return self::methods([Method::HEAD], $pattern, $middleware, $container);
+        return self::methods([Method::HEAD], $pattern, $middleware, $params, $container);
     }
 
     /**
@@ -124,9 +125,9 @@ final class Route implements MiddlewareInterface
      * @param ContainerInterface|null $container
      * @return self
      */
-    public static function options(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
+    public static function options(string $pattern, $middleware = null, array $params = [], ?ContainerInterface $container = null): self
     {
-        return self::methods([Method::OPTIONS], $pattern, $middleware, $container);
+        return self::methods([Method::OPTIONS], $pattern, $middleware, $params, $container);
     }
 
     /**
@@ -136,7 +137,7 @@ final class Route implements MiddlewareInterface
      * @param ContainerInterface|null $container
      * @return self
      */
-    public static function methods(array $methods, string $pattern, $middleware = null, ?ContainerInterface $container = null): self
+    public static function methods(array $methods, string $pattern, $middleware = null, array $params = [], ?ContainerInterface $container = null): self
     {
         $route = new self($container);
         $route->methods = $methods;
@@ -144,6 +145,7 @@ final class Route implements MiddlewareInterface
         if ($middleware !== null) {
             $route->validateMiddleware($middleware);
             $route->middlewares[] = $middleware;
+            $route->middlewareParams[] = [];
         }
         return $route;
     }
@@ -154,9 +156,9 @@ final class Route implements MiddlewareInterface
      * @param ContainerInterface|null $container
      * @return self
      */
-    public static function anyMethod(string $pattern, $middleware = null, ?ContainerInterface $container = null): self
+    public static function anyMethod(string $pattern, $middleware = null, array $params = [], ?ContainerInterface $container = null): self
     {
-        return self::methods(Method::ANY, $pattern, $middleware, $container);
+        return self::methods(Method::ANY, $pattern, $middleware, $params, $container);
     }
 
     public function name(string $name): self
@@ -215,27 +217,27 @@ final class Route implements MiddlewareInterface
      * @param callable|string|array $middleware
      * @return MiddlewareInterface|string|array
      */
-    private function prepareMiddleware($middleware)
+    private function prepareMiddleware($middleware, array $params)
     {
         if (is_string($middleware)) {
             if ($this->container === null) {
                 throw new InvalidArgumentException('Route container must not be null for lazy loaded middleware.');
             }
-            return $this->container->get($middleware);
+            return $this->container->get($middleware, $params);
         }
 
         if (is_array($middleware) && !is_object($middleware[0])) {
             if ($this->container === null) {
                 throw new InvalidArgumentException('Route container must not be null for handler action.');
             }
-            return $this->wrapCallable($middleware);
+            return $this->wrapCallable($middleware, $params);
         }
 
         if (is_callable($middleware)) {
             if ($this->container === null) {
                 throw new InvalidArgumentException('Route container must not be null for callable.');
             }
-            return $this->wrapCallable($middleware);
+            return $this->wrapCallable($middleware, $params);
         }
 
         return $middleware;
@@ -255,12 +257,13 @@ final class Route implements MiddlewareInterface
      * @param callable|string|array $middleware
      * @return Route
      */
-    public function addMiddleware($middleware): self
+    public function addMiddleware($middleware, array $params = []): self
     {
         $this->validateMiddleware($middleware);
 
         $route = clone $this;
         $route->middlewares[] = $middleware;
+        $route->middlewareParams[] = $params;
         return $route;
     }
 
@@ -311,8 +314,10 @@ final class Route implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if ($this->stack === null) {
+            $i = 0;
             foreach ($this->middlewares as $middleware) {
-                $handler = $this->wrap($this->prepareMiddleware($middleware), $handler);
+                $handler = $this->wrap($this->prepareMiddleware($middleware, $this->middlewareParams[$i]), $handler);
+                $i++;
             }
             $this->stack = $handler;
         }
@@ -342,43 +347,49 @@ final class Route implements MiddlewareInterface
         };
     }
 
-    private function wrapCallable($callback): MiddlewareInterface
+    private function wrapCallable($callback, array $params): MiddlewareInterface
     {
         if (is_array($callback) && !is_object($callback[0])) {
             [$controller, $action] = $callback;
-            return new class($controller, $action, $this->container) implements MiddlewareInterface {
+            return new class($controller, $action, $params, $this->container) implements MiddlewareInterface {
                 private string $class;
                 private string $method;
+                private array $params;
                 private ContainerInterface $container;
 
-                public function __construct(string $class, string $method, ContainerInterface $container)
+                public function __construct(string $class, string $method, array $params, ContainerInterface $container)
                 {
                     $this->class = $class;
                     $this->method = $method;
+                    $this->params = $params;
                     $this->container = $container;
                 }
 
                 public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
                 {
                     $controller = $this->container->get($this->class);
-                    return (new Injector($this->container))->invoke([$controller, $this->method], [$request, $handler]);
+                    $params = array_merge([$request, $handler], $this->params);
+                    return (new Injector($this->container))->invoke([$controller, $this->method], $params);
                 }
             };
         }
 
-        return new class($callback, $this->container) implements MiddlewareInterface {
+        return new class($callback, $params, $this->container) implements MiddlewareInterface {
             private ContainerInterface $container;
             private $callback;
+            private array $params;
 
-            public function __construct(callable $callback, ContainerInterface $container)
+            public function __construct(callable $callback, array $params, ContainerInterface $container)
             {
                 $this->callback = $callback;
+                $this->params = $params;
                 $this->container = $container;
             }
 
             public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
             {
-                return (new Injector($this->container))->invoke($this->callback, [$request, $handler]);
+                $params = array_merge([$request, $handler], $this->params);
+                return (new Injector($this->container))->invoke($this->callback, $params);
             }
         };
     }

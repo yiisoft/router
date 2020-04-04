@@ -13,9 +13,10 @@ final class Group implements RouteCollectorInterface
     /**
      * @var Group[]|Route[]
      */
-    protected array $items = [];
-    protected ?string $prefix;
-    protected array $middlewares = [];
+    private array $items = [];
+    private ?string $prefix;
+    private array $middlewares = [];
+    private array $middlewareParams = [];
     private ?ContainerInterface $container = null;
 
     private function __construct(?string $prefix = null, ?callable $callback = null, ContainerInterface $container = null)
@@ -119,10 +120,11 @@ final class Group implements RouteCollectorInterface
      * @param callable|MiddlewareInterface $middleware
      * @return $this
      */
-    final public function addMiddleware($middleware): self
+    final public function addMiddleware($middleware, array $params = []): self
     {
         $this->validateMiddleware($middleware);
         $this->middlewares[] = $middleware;
+        $this->middlewareParams[] = $params;
 
         return $this;
     }
@@ -142,6 +144,6 @@ final class Group implements RouteCollectorInterface
 
     final public function getMiddlewares(): array
     {
-        return $this->middlewares;
+        return [$this->middlewares, $this->middlewareParams];
     }
 }
