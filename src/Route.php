@@ -378,7 +378,8 @@ final class Route implements MiddlewareInterface
 
             public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
             {
-                return (new Injector($this->container))->invoke($this->callback, [$request, $handler]);
+                $response = (new Injector($this->container))->invoke($this->callback, [$request, $handler]);
+                return $response instanceof MiddlewareInterface ? $response->process($request, $handler) : $response;
             }
         };
     }
