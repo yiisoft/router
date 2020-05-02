@@ -23,7 +23,7 @@
         "psr/http-server-middleware": "^1.0",
         "psr/http-server-handler": "^1.0",
         "yiisoft/http": "1.0.x-dev",
-        "yiisoft/injector": "^3.0@dev"
+        "yiisoft/injector": "^1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.0",
