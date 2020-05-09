@@ -20,7 +20,7 @@ interface RouteCollectionInterface
     /**
      * Returns routes tree array
      *
-     * @return array
+     * @return string[]|string[][]|string[][][]|string[][][][]|string[][][][][]
      */
     public function getRouteTree(): array;
 }
