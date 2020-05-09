@@ -7,7 +7,7 @@ namespace Yiisoft\Router;
 interface RouteCollectionInterface
 {
     /**
-     * @return array
+     * @return Route[]
      */
     public function getRoutes(): array;
 
