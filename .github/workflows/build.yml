@@ -8,7 +8,7 @@ jobs:
   tests:
     name: PHP ${{ matrix.php-version }}-${{ matrix.os }}
     env:
-      extensions: curl, mbstring, dom, intl
+      extensions: curl, mbstring, dom, intl, json, libxml, xml, xmlwriter
       key: cache-v1
 
     runs-on: ${{ matrix.os }}
@@ -66,6 +66,7 @@ jobs:
           key: php${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-${{ hashFiles('**/composer.json') }}
           restore-keys: |
             php${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-
+
       - name: Install dependencies with composer php 7.4
         if: matrix.php-version == '7.4'
         run: composer update --prefer-dist --no-interaction --no-progress --optimize-autoloader
@@ -74,21 +75,21 @@ jobs:
         if: matrix.php-version == '8.0'
         run: composer update --ignore-platform-reqs --prefer-dist --no-interaction --no-progress --optimize-autoloader
 
-      - name: Run tests with phpunit and coverage
+      - name: Run tests with phpunit and coverage on Linux
         if: matrix.os == 'ubuntu-latest'
         run: vendor/bin/phpunit --coverage-clover=coverage.clover
 
-      - name: Run tests with phpunit without coverage
+      - name: Run tests with phpunit without coverage on Windows
         if: matrix.os == 'windows-latest'
         run: vendor/bin/phpunit
 
-      - name: Code coverage
+      - name: Upload code coverage scrutinizer on Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
           wget https://scrutinizer-ci.com/ocular.phar
           php ocular.phar code-coverage:upload --format=php-clover coverage.clover
 
-      - name: Phan static analysis
-        if: matrix.php-version == '7.4'
+      - name: Phan static analysis on Linux php 7.4
+        if: matrix.os == 'ubuntu-latest' && matrix.php-version == '7.4'
         continue-on-error: true
         run: phan --no-progress-bar --output-mode checkstyle | cs2pr --graceful-warnings --colorize
