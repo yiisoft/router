@@ -74,8 +74,13 @@ jobs:
         if: matrix.php-version == '8.0'
         run: composer update --ignore-platform-reqs --prefer-dist --no-interaction --no-progress --optimize-autoloader
 
-      - name: Run tests with phpunit
+      - name: Run tests with phpunit and coverage
+        if: matrix.os == 'ubuntu-latest'
         run: vendor/bin/phpunit --coverage-clover=coverage.clover
+
+      - name: Run tests with phpunit without coverage
+        if: matrix.os == 'windows-latest'
+        run: vendor/bin/phpunit
 
       - name: Code coverage
         if: matrix.os == 'ubuntu-latest'
