@@ -15,7 +15,7 @@ with one of the following adapter packages:
 
 [![Latest Stable Version](https://poser.pugx.org/yiisoft/router/v/stable.png)](https://packagist.org/packages/yiisoft/router)
 [![Total Downloads](https://poser.pugx.org/yiisoft/router/downloads.png)](https://packagist.org/packages/yiisoft/router)
-[![Build Status](https://travis-ci.com/yiisoft/router.svg?branch=master)](https://travis-ci.com/yiisoft/router)
+[![Build status](https://github.com/yiisoft/router/workflows/build/badge.svg)](https://github.com/yiisoft/router/actions)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/yiisoft/router/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/yiisoft/router/?branch=master)
 [![Code Coverage](https://scrutinizer-ci.com/g/yiisoft/router/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/yiisoft/router/?branch=master)
 

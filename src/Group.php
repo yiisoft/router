@@ -108,11 +108,20 @@ final class Group implements RouteCollectorInterface
             return;
         }
 
-        if (is_callable($middleware) && (!is_array($middleware) || !is_object($middleware[0]))) {
+        if ($this->isCallable($middleware) && (!is_array($middleware) || !is_object($middleware[0]))) {
             return;
         }
 
         throw new InvalidArgumentException('Parameter should be either PSR middleware class name or a callable.');
+    }
+
+    private function isCallable($definition): bool
+    {
+        if (is_callable($definition)) {
+            return true;
+        }
+
+        return is_array($definition) && array_keys($definition) === [0, 1] && in_array($definition[1], get_class_methods($definition[0]) ?? [], true);
     }
 
     /**
