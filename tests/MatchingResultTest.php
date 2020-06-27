@@ -45,7 +45,7 @@ final class MatchingResultTest extends TestCase
     public function testProcessSuccess(): void
     {
         $container = $this->createMock(ContainerInterface::class);
-        $route = Route::post('/', null, $container)->addMiddleware($this->getMiddleware());
+        $route = Route::post('/', null, $container)->withMiddleware($this->getMiddleware());
         $result = MatchingResult::fromSuccess($route, []);
         $request = new ServerRequest('POST', '/');
 

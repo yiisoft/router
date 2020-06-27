@@ -42,7 +42,7 @@ interface RouteCollectorInterface
     public function hasContainer(): bool;
 
     /**
-     * @return Route|Group[]
+     * @return Route[]|Group[]
      */
     public function getItems(): array;
 }

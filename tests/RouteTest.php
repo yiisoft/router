@@ -143,7 +143,7 @@ final class RouteTest extends TestCase
     public function testInvalidMiddlewareAdd(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        Route::get('/')->addMiddleware(new \stdClass());
+        Route::get('/')->withMiddleware(new \stdClass());
     }
 
     public function testAddMiddleware(): void
@@ -151,7 +151,7 @@ final class RouteTest extends TestCase
         $container = $this->createMock(ContainerInterface::class);
         $request = new ServerRequest('GET', '/');
 
-        $route = Route::get('/', null, $container)->addMiddleware(
+        $route = Route::get('/', null, $container)->withMiddleware(
             function () {
                 return new Response(418);
             }
@@ -165,7 +165,7 @@ final class RouteTest extends TestCase
     {
         $request = new ServerRequest('GET', '/');
 
-        $route = Route::get('/', null, $this->getContainer())->addMiddleware(
+        $route = Route::get('/', null, $this->getContainer())->withMiddleware(
             static function (): ResponseInterface {
                 return (new Response())->withStatus(418);
             }
@@ -179,7 +179,7 @@ final class RouteTest extends TestCase
     {
         $request = new ServerRequest('GET', '/');
 
-        $route = Route::get('/', null, $this->getContainer([TestController::class => new TestController()]))->addMiddleware([TestController::class, 'index']);
+        $route = Route::get('/', null, $this->getContainer([TestController::class => new TestController()]))->withMiddleware([TestController::class, 'index']);
 
         $response = $route->process($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
@@ -200,7 +200,7 @@ final class RouteTest extends TestCase
             return new Response(200, [], null, '1.1', implode($request->getAttributes()));
         };
 
-        $routeOne = $routeOne->addMiddleware($middleware2)->addMiddleware($middleware1);
+        $routeOne = $routeOne->withMiddleware($middleware2)->withMiddleware($middleware1);
 
         $response = $routeOne->process($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
@@ -221,7 +221,7 @@ final class RouteTest extends TestCase
             return new Response(200);
         };
 
-        $routeTwo = $routeTwo->addMiddleware($middleware2)->addMiddleware($middleware1);
+        $routeTwo = $routeTwo->withMiddleware($middleware2)->withMiddleware($middleware1);
 
         $response = $routeTwo->process($request, $this->getRequestHandler());
         $this->assertSame(403, $response->getStatusCode());

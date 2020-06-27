@@ -54,7 +54,7 @@ final class Route implements MiddlewareInterface
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
+     * @param callable|string|array|null $middleware primary route handler {@see withMiddleware()}
      * @param ContainerInterface $container|null
      * @return self
      */
@@ -65,7 +65,7 @@ final class Route implements MiddlewareInterface
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
+     * @param callable|string|array|null $middleware primary route handler {@see withMiddleware()}
      * @param ContainerInterface|null $container
      * @return self
      */
@@ -76,7 +76,7 @@ final class Route implements MiddlewareInterface
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
+     * @param callable|string|array|null $middleware primary route handler {@see withMiddleware()}
      * @param ContainerInterface|null $container
      * @return self
      */
@@ -87,7 +87,7 @@ final class Route implements MiddlewareInterface
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
+     * @param callable|string|array|null $middleware primary route handler {@see withMiddleware()}
      * @param ContainerInterface|null $container
      * @return self
      */
@@ -98,7 +98,7 @@ final class Route implements MiddlewareInterface
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
+     * @param callable|string|array|null $middleware primary route handler {@see withMiddleware()}
      * @param ContainerInterface|null $container
      * @return self
      */
@@ -109,7 +109,7 @@ final class Route implements MiddlewareInterface
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
+     * @param callable|string|array|null $middleware primary route handler {@see withMiddleware()}
      * @param ContainerInterface|null $container
      * @return self
      */
@@ -120,7 +120,7 @@ final class Route implements MiddlewareInterface
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
+     * @param callable|string|array|null $middleware primary route handler {@see withMiddleware()}
      * @param ContainerInterface|null $container
      * @return self
      */
@@ -132,7 +132,7 @@ final class Route implements MiddlewareInterface
     /**
      * @param array $methods
      * @param string $pattern
-     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
+     * @param callable|string|array|null $middleware primary route handler {@see withMiddleware()}
      * @param ContainerInterface|null $container
      * @return self
      */
@@ -150,7 +150,7 @@ final class Route implements MiddlewareInterface
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
+     * @param callable|string|array|null $middleware primary route handler {@see withMiddleware()}
      * @param ContainerInterface|null $container
      * @return self
      */
@@ -264,7 +264,7 @@ final class Route implements MiddlewareInterface
      * @param callable|string|array $middleware
      * @return Route
      */
-    public function addMiddleware($middleware): self
+    public function withMiddleware($middleware): self
     {
         $this->validateMiddleware($middleware);
 
