@@ -112,7 +112,6 @@ final class RouteCollection implements RouteCollectionInterface
     private function injectGroup(Group $group, array &$tree, string $prefix = ''): void
     {
         $prefix .= $group->getPrefix();
-        /** @var $items Group[]|Route[] */
         $items = $group->getItems();
         foreach ($items as $index => $item) {
             $groupMiddlewares = $group->getMiddlewares();

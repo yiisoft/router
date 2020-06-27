@@ -128,7 +128,7 @@ final class Group implements RouteCollectorInterface
      * @param callable|MiddlewareInterface $middleware
      * @return $this
      */
-    final public function addMiddleware($middleware): self
+    final public function withMiddleware($middleware): self
     {
         $this->validateMiddleware($middleware);
         $this->middlewares[] = $middleware;

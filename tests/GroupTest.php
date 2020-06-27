@@ -2,11 +2,10 @@
 
 namespace Yiisoft\Router\Tests;
 
-use Nyholm\Psr7\ServerRequest;
 use Nyholm\Psr7\Response;
+use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -44,8 +43,8 @@ class GroupTest extends TestCase
         };
 
         $group
-            ->addMiddleware($middleware1)
-            ->addMiddleware($middleware2);
+            ->withMiddleware($middleware1)
+            ->withMiddleware($middleware2);
 
         $this->assertCount(2, $group->getMiddlewares());
         $this->assertSame($middleware1, $group->getMiddlewares()[0]);
@@ -68,8 +67,8 @@ class GroupTest extends TestCase
         $group = Group::create('/outergroup', [
             Group::create('/innergroup', [
                 Route::get('/test1')->name('request1')
-            ])->addMiddleware($middleware2),
-        ], $this->getContainer())->addMiddleware($middleware1);
+            ])->withMiddleware($middleware2),
+        ], $this->getContainer())->withMiddleware($middleware1);
 
         $collector = Group::create();
         $collector->addGroup($group);
@@ -96,7 +95,7 @@ class GroupTest extends TestCase
             return new Response(200, [], null, '1.1', implode($request->getAttributes()));
         };
 
-        $group->addMiddleware($middleware2)->addMiddleware($middleware1);
+        $group->withMiddleware($middleware2)->withMiddleware($middleware1);
         $collector = Group::create();
         $collector->addGroup($group);
 
@@ -121,7 +120,7 @@ class GroupTest extends TestCase
             return new Response(200);
         };
 
-        $group->addMiddleware($middleware2)->addMiddleware($middleware1);
+        $group->withMiddleware($middleware2)->withMiddleware($middleware1);
         $collector = Group::create();
         $collector->addGroup($group);
 
@@ -152,8 +151,8 @@ class GroupTest extends TestCase
                 $group->addRoute($viewRoute);
             }));
 
-            $group->addMiddleware($middleware1);
-            $group->addMiddleware($middleware2);
+            $group->withMiddleware($middleware1);
+            $group->withMiddleware($middleware2);
         }));
 
         $this->assertCount(1, $root->getItems());
@@ -197,7 +196,7 @@ class GroupTest extends TestCase
                     $listRoute,
                     $viewRoute
                 ])
-            ])->addMiddleware($middleware1)->addMiddleware($middleware2)
+            ])->withMiddleware($middleware1)->withMiddleware($middleware2)
         ]);
 
         $this->assertCount(1, $root->getItems());
