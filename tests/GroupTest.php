@@ -42,7 +42,7 @@ class GroupTest extends TestCase
             return new Response();
         };
 
-        $group
+        $group = $group
             ->withMiddleware($middleware1)
             ->withMiddleware($middleware2);
 
@@ -66,9 +66,11 @@ class GroupTest extends TestCase
 
         $group = Group::create('/outergroup', [
             Group::create('/innergroup', [
-                Route::get('/test1')->name('request1')
-            ])->withMiddleware($middleware2),
-        ], $this->getContainer())->withMiddleware($middleware1);
+                Route::get('/test1')->name('request1'),
+            ])
+                ->withMiddleware($middleware2),
+        ], $this->getContainer())
+            ->withMiddleware($middleware1);
 
         $collector = Group::create();
         $collector->addGroup($group);
@@ -95,7 +97,9 @@ class GroupTest extends TestCase
             return new Response(200, [], null, '1.1', implode($request->getAttributes()));
         };
 
-        $group->withMiddleware($middleware2)->withMiddleware($middleware1);
+        $group = $group
+            ->withMiddleware($middleware2)
+            ->withMiddleware($middleware1);
         $collector = Group::create();
         $collector->addGroup($group);
 
@@ -120,7 +124,9 @@ class GroupTest extends TestCase
             return new Response(200);
         };
 
-        $group->withMiddleware($middleware2)->withMiddleware($middleware1);
+        $group = $group
+            ->withMiddleware($middleware2)
+            ->withMiddleware($middleware1);
         $collector = Group::create();
         $collector->addGroup($group);
 
@@ -143,17 +149,18 @@ class GroupTest extends TestCase
             return new Response();
         };
 
-        $root = Group::create();
-        $root->addGroup(Group::create('/api', static function (Group $group) use ($logoutRoute, $listRoute, $viewRoute, $middleware1, $middleware2) {
-            $group->addRoute($logoutRoute);
-            $group->addGroup(Group::create('/post', static function (Group $group) use ($listRoute, $viewRoute) {
-                $group->addRoute($listRoute);
-                $group->addRoute($viewRoute);
-            }));
+        $apiGroup = Group::create('/api', static function (Group $group) use ($logoutRoute, $listRoute, $viewRoute) {
+            $group
+                ->addRoute($logoutRoute)
+                ->addGroup(Group::create('/post', static function (Group $group) use ($listRoute, $viewRoute) {
+                    $group->addRoute($listRoute);
+                    $group->addRoute($viewRoute);
+                }));
+        })
+            ->withMiddleware($middleware1)
+            ->withMiddleware($middleware2);
 
-            $group->withMiddleware($middleware1);
-            $group->withMiddleware($middleware2);
-        }));
+        $root = Group::create()->addGroup($apiGroup);
 
         $this->assertCount(1, $root->getItems());
         $api = $root->getItems()[0];
@@ -194,9 +201,11 @@ class GroupTest extends TestCase
                 $logoutRoute,
                 Group::create('/post', [
                     $listRoute,
-                    $viewRoute
-                ])
-            ])->withMiddleware($middleware1)->withMiddleware($middleware2)
+                    $viewRoute,
+                ]),
+            ])
+                ->withMiddleware($middleware1)
+                ->withMiddleware($middleware2),
         ]);
 
         $this->assertCount(1, $root->getItems());
