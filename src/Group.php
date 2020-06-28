@@ -37,7 +37,7 @@ final class Group implements RouteCollectorInterface
      *
      * @return self
      */
-    final public static function create(?string $prefix = null, $routes = [], ContainerInterface $container = null): self
+    public static function create(?string $prefix = null, $routes = [], ContainerInterface $container = null): self
     {
         if (\is_callable($routes)) {
             $callback = $routes;
@@ -60,7 +60,7 @@ final class Group implements RouteCollectorInterface
         return new self($prefix, $callback, $container);
     }
 
-    final public function withContainer(ContainerInterface $container): self
+    public function withContainer(ContainerInterface $container): self
     {
         $group = clone $this;
         $group->container = $container;
@@ -74,12 +74,12 @@ final class Group implements RouteCollectorInterface
         return $group;
     }
 
-    final public function hasContainer(): bool
+    public function hasContainer(): bool
     {
         return $this->container !== null;
     }
 
-    final public function addRoute(Route $route): self
+    public function addRoute(Route $route): self
     {
         if (!$route->hasContainer() && $this->hasContainer()) {
             $route = $route->withContainer($this->container);
@@ -88,7 +88,7 @@ final class Group implements RouteCollectorInterface
         return $this;
     }
 
-    final public function addGroup(Group $group): self
+    public function addGroup(Group $group): self
     {
         if (!$group->hasContainer() && $this->hasContainer()) {
             $group = $group->withContainer($this->container);
@@ -128,7 +128,7 @@ final class Group implements RouteCollectorInterface
      * @param callable|MiddlewareInterface $middleware
      * @return $this
      */
-    final public function addMiddleware($middleware): self
+    public function addMiddleware($middleware): self
     {
         $this->validateMiddleware($middleware);
         $this->middlewares[] = $middleware;
@@ -139,17 +139,17 @@ final class Group implements RouteCollectorInterface
     /**
      * @return Route|Group[]
      */
-    final public function getItems(): array
+    public function getItems(): array
     {
         return $this->items;
     }
 
-    final public function getPrefix(): ?string
+    public function getPrefix(): ?string
     {
         return $this->prefix;
     }
 
-    final public function getMiddlewares(): array
+    public function getMiddlewares(): array
     {
         return $this->middlewares;
     }
