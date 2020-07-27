@@ -3,6 +3,7 @@
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Yiisoft\Http\Method;
 use Yiisoft\Injector\Injector;
 use Psr\Container\ContainerInterface;
@@ -370,7 +371,15 @@ final class Route implements MiddlewareInterface
                 public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
                 {
                     $controller = $this->container->get($this->class);
-                    return (new Injector($this->container))->invoke([$controller, $this->method], [$request, $handler]);
+                    $response = (new Injector($this->container))->invoke([$controller, $this->method], [$request, $handler]);
+                    if (is_string($response)) {
+                        $wrappedResponse = $this->container->get(ResponseFactoryInterface::class)->createResponse();
+                        $wrappedResponse->getBody()->write($response);
+
+                        return $wrappedResponse;
+                    }
+
+                    return $response;
                 }
             };
         }
@@ -388,6 +397,12 @@ final class Route implements MiddlewareInterface
             public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
             {
                 $response = (new Injector($this->container))->invoke($this->callback, [$request, $handler]);
+                if (is_string($response)) {
+                    $wrappedResponse = $this->container->get(ResponseFactoryInterface::class)->createResponse();
+                    $wrappedResponse->getBody()->write($response);
+
+                    return $wrappedResponse;
+                }
                 return $response instanceof MiddlewareInterface ? $response->process($request, $handler) : $response;
             }
         };
