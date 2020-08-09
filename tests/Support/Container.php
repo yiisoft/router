@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Yiisoft\Router\Tests\Support;
 
 use Psr\Container\ContainerInterface;
