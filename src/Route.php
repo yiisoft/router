@@ -3,13 +3,13 @@
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
-use Yiisoft\Http\Method;
-use Yiisoft\Injector\Injector;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
+use Yiisoft\Http\Method;
+use Yiisoft\Injector\Injector;
 
 /**
  * Route defines a mapping from URL to callback / name and vice versa
@@ -136,8 +136,12 @@ final class Route implements MiddlewareInterface
      * @param ContainerInterface|null $container
      * @return self
      */
-    public static function methods(array $methods, string $pattern, $middleware = null, ?ContainerInterface $container = null): self
-    {
+    public static function methods(
+        array $methods,
+        string $pattern,
+        $middleware = null,
+        ?ContainerInterface $container = null
+    ): self {
         $route = new self($container);
         $route->methods = $methods;
         $route->pattern = $pattern;
@@ -294,7 +298,7 @@ final class Route implements MiddlewareInterface
 
     public function getName(): string
     {
-        return $this->name ?? (implode(', ', $this->methods) . ' ' . $this->pattern);
+        return $this->name ?? (implode(', ', $this->methods) . ' ' . $this->host . $this->pattern);
     }
 
     public function getMethods(): array
