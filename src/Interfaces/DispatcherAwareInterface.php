@@ -7,4 +7,7 @@ namespace Yiisoft\Router\Interfaces;
 interface DispatcherAwareInterface
 {
     public function getDispatcher(): ?DispatcherInterface;
+
+
+    public function withDispatcher(DispatcherInterface $dispatcher): DispatcherAwareInterface;
 }

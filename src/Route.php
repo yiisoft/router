@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use Yiisoft\Http\Method;
+use Yiisoft\Router\Interfaces\DispatcherAwareInterface;
 use Yiisoft\Router\Interfaces\DispatcherInterface;
 use Yiisoft\Router\Interfaces\RouteDefinitionInterface;
 use Yiisoft\Router\Interfaces\RouteInterface;
@@ -39,6 +40,13 @@ class Route implements RouteInterface
     public function getDispatcher(): ?DispatcherInterface
     {
         return $this->dispatcher;
+    }
+
+    public function withDispatcher(?DispatcherInterface $dispatcher): self
+    {
+        $route = clone $this;
+        $route->dispatcher = $dispatcher;
+        return $route;
     }
 
     // TODO: Move all HTTP method factories to separate trait to make easier defining

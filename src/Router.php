@@ -6,6 +6,7 @@ namespace Yiisoft\Router;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Yiisoft\Router\Interfaces\DispatcherAwareInterface;
 use Yiisoft\Router\Interfaces\DispatcherInterface;
 use Yiisoft\Router\Interfaces\MatcherInterface;
 use Yiisoft\Router\Interfaces\RouteCollectionInterface;
@@ -22,7 +23,7 @@ class Router implements RouterInterface, RouteCollectionInterface
 
     public function __construct(RouteCollectionInterface $routeCollection, MatcherInterface $matcher, DispatcherInterface $dispatcher)
     {
-        $this->routeCollection = $routeCollection;
+        $this->routeCollection = clone $routeCollection;
         $this->matcher = $matcher;
         $this->dispatcher = $dispatcher;
     }
@@ -30,6 +31,13 @@ class Router implements RouterInterface, RouteCollectionInterface
     public function getDispatcher(): DispatcherInterface
     {
         return $this->dispatcher;
+    }
+
+    public function withDispatcher(DispatcherInterface $dispatcher): DispatcherAwareInterface
+    {
+        $new = clone $this;
+        $new->dispatcher = $dispatcher;
+        return $new;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
