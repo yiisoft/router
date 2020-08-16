@@ -16,7 +16,6 @@
     <testsuites>
         <testsuite name="Yii Router tests">
             <directory>./tests/</directory>
-            <exclude>./tests/old/</exclude>
         </testsuite>
     </testsuites>
 

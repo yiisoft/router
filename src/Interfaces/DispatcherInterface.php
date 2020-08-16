@@ -8,5 +8,4 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 interface DispatcherInterface extends RequestHandlerInterface, MiddlewareAwareInterface
 {
-
 }

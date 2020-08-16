@@ -7,6 +7,7 @@ namespace Yiisoft\Router\Tests;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -26,33 +27,24 @@ final class RouterTest extends TestCase
     {
         $request = new ServerRequest('GET', '/');
         $router = $this->createRouter()
-            ->addRoute(Route::get('/', $this->createMiddleware()));
+            ->addRoute(Route::get('/', static function () {
+                return new Response(200, [], 'test');
+            }));
         $response = $router->handle($request);
+
         $this->assertSame(200, $response->getStatusCode());
     }
 
     private function createRouter(): Router
     {
-        return new Router(new RouteCollection(), $this->getMatcher(), new DefaultDispatcher(null));
-    }
-
-    private function createMiddleware(): MiddlewareInterface
-    {
-        return new class() implements MiddlewareInterface {
-
-            public function process(
-                ServerRequestInterface $request,
-                RequestHandlerInterface $handler
-            ): ResponseInterface {
-                return new Response();
-            }
-        };
+        $container = $this->createMock(ContainerInterface::class);
+        $dispatcher = new DefaultDispatcher($container);
+        return new Router(new RouteCollection(), $this->getMatcher(), $dispatcher);
     }
 
     private function getMatcher(): MatcherInterface
     {
         return new class() implements MatcherInterface {
-
             public function match(ServerRequestInterface $request): MatchingResult
             {
                 // TODO: Implement match() method.

@@ -8,5 +8,4 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 interface RouterInterface extends RequestHandlerInterface, MatcherInterface, DispatcherAwareInterface
 {
-
 }

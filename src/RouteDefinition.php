@@ -26,8 +26,7 @@ class RouteDefinition implements RouteDefinitionInterface
         ?int $port = null,
         array $accepts = [],
         array $defaults = []
-    )
-    {
+    ) {
         $this->path = $path;
         $this->methods = $methods;
         $this->name = $name;
@@ -123,7 +122,7 @@ class RouteDefinition implements RouteDefinitionInterface
 
     public function getPort(): ?int
     {
-       return $this->port;
+        return $this->port;
     }
 
     public function withPort(?int $port): RouteDefinitionInterface
