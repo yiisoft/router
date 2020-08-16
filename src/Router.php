@@ -8,7 +8,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Router\Interfaces\DispatcherInterface;
 use Yiisoft\Router\Interfaces\MatcherInterface;
-use Yiisoft\Router\Interfaces\MiddlewareAwareInterface;
 use Yiisoft\Router\Interfaces\RouteCollectionInterface;
 use Yiisoft\Router\Interfaces\RouteInterface;
 use Yiisoft\Router\Interfaces\RouterInterface;
@@ -37,10 +36,18 @@ class Router implements RouterInterface, RouteCollectionInterface
     {
         $matchingResult = $this->match($request);
         if ($matchingResult->isSuccess()) {
-            $this->dispatcher->middlewares(\array_merge($matchingResult->getRoute()->getMiddlewares(), $this->middlewares));
+            $route = $matchingResult->getRoute();
+            $routeDispatcher = $route->getDispatcher();
+            if ($routeDispatcher !== null) {
+                $routeDispatcher = $routeDispatcher->middlewares(\array_merge($matchingResult->getRoute()->getMiddlewares(), $this->middlewares));
+
+                return $routeDispatcher->handle($request);
+            }
+
+            $this->dispatcher = $this->dispatcher->middlewares(\array_merge($route->getMiddlewares(), $this->middlewares));
         }
 
-        $this->dispatcher->handle($request);
+        return $this->dispatcher->handle($request);
     }
 
     public function match(ServerRequestInterface $request): MatchingResult
@@ -53,18 +60,25 @@ class Router implements RouterInterface, RouteCollectionInterface
         return $this->matcher->matchForCollection($collection, $request);
     }
 
-    public function addRoute(RouteInterface $route): RouteCollectionInterface
+    public function addRoute(RouteInterface $route): self
     {
-        // TODO: Implement addRoute() method.
+        $this->routeCollection = $this->routeCollection->addRoute($route);
+
+        return $this;
     }
 
-    public function addRoutes(array $routes): RouteCollectionInterface
+    public function addRoutes(array $routes): self
     {
         // TODO: Implement addRoutes() method.
     }
 
-    public function addCollection(RouteCollectionInterface $collection): RouteCollectionInterface
+    public function addCollection(RouteCollectionInterface $collection): self
     {
         // TODO: Implement addCollection() method.
+    }
+
+    public function getRoutes(): array
+    {
+        return $this->routeCollection->getRoutes();
     }
 }

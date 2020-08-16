@@ -9,10 +9,29 @@ use Yiisoft\Router\Interfaces\RouteInterface;
 final class MatchingResult
 {
     private RouteInterface $route;
-    private bool $matchingSucceeded;
+    private array $parameters;
+    private bool $success;
 
     private function __construct()
     {
+    }
+
+    public static function fromSuccess(RouteInterface $route, array $parameters): self
+    {
+        $result = new self();
+        $result->success = true;
+        $result->route = $route;
+        $result->parameters = $parameters;
+
+        return $result;
+    }
+
+    public static function fromFailure(): self
+    {
+        $result = new self();
+        $result->success = false;
+
+        return $result;
     }
 
     /**
@@ -27,6 +46,6 @@ final class MatchingResult
 
     public function isSuccess(): bool
     {
-        return $this->matchingSucceeded;
+        return $this->success;
     }
 }

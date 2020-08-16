@@ -12,4 +12,9 @@ interface RouteCollectionInterface extends MiddlewareAwareInterface, DispatcherA
     public function addRoutes(array $routes): RouteCollectionInterface;
 
     public function addCollection(RouteCollectionInterface $collection): RouteCollectionInterface;
+
+    /**
+     * @return RouterInterface[]
+     */
+    public function getRoutes(): array;
 }
