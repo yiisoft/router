@@ -1,80 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Yiisoft\Router;
 
-use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
-use Yiisoft\Http\Method;
+use Yiisoft\Router\Interfaces\RouteInterface;
 
-final class MatchingResult implements MiddlewareInterface
+final class MatchingResult
 {
-    private bool $success;
-    private Route $route;
-    private array $parameters = [];
-    private array $methods = [];
-    private ?ContainerInterface $container = null;
+    private RouteInterface $route;
+    private bool $matchingSucceeded;
 
     private function __construct()
     {
     }
 
-    public function withContainer(ContainerInterface $container): self
+    /**
+     * Get the route for which matching was done.
+     *
+     * @return RouteInterface
+     */
+    public function getRoute(): RouteInterface
     {
-        $new = clone $this;
-        $new->container = $container;
-        return $new;
-    }
-
-    public static function fromSuccess(Route $route, array $parameters): self
-    {
-        $new = new self();
-        $new->success = true;
-        $new->route = $route;
-        $new->parameters = $parameters;
-        return $new;
-    }
-
-    public static function fromFailure(array $methods): self
-    {
-        $new = new self();
-        $new->methods = $methods;
-        $new->success = false;
-        return $new;
+        return $this->route;
     }
 
     public function isSuccess(): bool
     {
-        return $this->success;
-    }
-
-    public function isMethodFailure(): bool
-    {
-        return !$this->success && $this->methods !== Method::ANY;
-    }
-
-    public function parameters(): array
-    {
-        return $this->parameters;
-    }
-
-    public function methods(): array
-    {
-        return $this->methods;
-    }
-
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-    {
-        if ($this->success === false) {
-            return $handler->handle($request);
-        }
-        $route = $this->route;
-        if ($this->container !== null && !$route->hasContainer()) {
-            $route = $route->withContainer($this->container);
-        }
-
-        return $route->process($request, $handler);
+        return $this->matchingSucceeded;
     }
 }

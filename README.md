@@ -23,7 +23,7 @@ with one of the following adapter packages:
 
 ```php
 use Yiisoft\Router\Group;
-use Yiisoft\Router\Route;
+use Yiisoft\Router\RouteOld;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectorInterface;
 use Yiisoft\Router\Fastroute\UrlMatcher;
@@ -32,12 +32,12 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 
 $routes = [
-    Route::get('/', static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+    RouteOld::get('/', static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
         $response = $responseFactory->createResponse();
         $response->getBody()->write('You are at homepage.');
         return $response;
     }),
-    Route::get('/test/{id:\w+}', static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+    RouteOld::get('/test/{id:\w+}', static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
         $id = $request->getAttribute('id');
 
         $response = $responseFactory->createResponse();
@@ -76,7 +76,7 @@ Note that pattern specified for routes depends on the underlying routing library
 Routes could be grouped. That is useful for API endpoints and similar cases:
 
 ```php
-use \Yiisoft\Router\Route;
+use \Yiisoft\Router\RouteOld;
 use \Yiisoft\Router\Group;
 use \Yiisoft\Router\RouteCollectorInterface;
 
@@ -84,9 +84,9 @@ use \Yiisoft\Router\RouteCollectorInterface;
 $collector = $container->get(RouteCollectorInterface::class);
     
 $collector->addGroup(Group::create('/api',[
-    Route::get('/comments'),
+    RouteOld::get('/comments'),
     Group::create('/posts', [
-        Route::get('/list'),
+        RouteOld::get('/list'),
     ]),
 ]));
 ```
@@ -118,7 +118,7 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Yiisoft\Yii\Web\SapiEmitter;
 use Yiisoft\Yii\Web\ServerRequestFactory;
 use Yiisoft\Yii\Web\NotFoundHandler;
-use Yiisoft\Router\Route;
+use Yiisoft\Router\RouteOld;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectorInterface;
 use Yiisoft\Router\Fastroute\UrlMatcher;
@@ -128,7 +128,7 @@ $request = $container->get(ServerRequestFactory::class)->createFromGlobals();
 $responseFactory = $container->get(ResponseFactoryInterface::class);
 $notFoundHandler = new NotFoundHandler($responseFactory);
 $collector = $container->get(RouteCollectorInterface::class);
-$collector->addRoute(Route::get('/test/{id:\w+}', static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+$collector->addRoute(RouteOld::get('/test/{id:\w+}', static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
    $id = $request->getAttribute('id');
    $response = $responseFactory->createResponse();
    $response->getBody()->write('You are at test with param ' . $id);
