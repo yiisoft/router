@@ -130,14 +130,14 @@ final class RouteCollection implements RouteCollectionInterface
                 continue;
             }
 
-            if (empty($tree[$group->getPrefix()])) {
-                $tree[] = $item->getName();
-            } else {
-                $tree[$group->getPrefix()][] = $item->getName();
-            }
-
             /** @var Route $modifiedItem */
             $modifiedItem = $item->pattern($prefix . $item->getPattern());
+
+            if (empty($tree[$group->getPrefix()])) {
+                $tree[] = $modifiedItem->getName();
+            } else {
+                $tree[$group->getPrefix()][] = $modifiedItem->getName();
+            }
 
             $routeName = $modifiedItem->getName();
             if (isset($this->routes[$routeName])) {
