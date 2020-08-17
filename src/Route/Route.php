@@ -2,21 +2,27 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Router;
+namespace Yiisoft\Router\Route;
 
 use Yiisoft\Http\Method;
-use Yiisoft\Router\Interfaces\DispatcherAwareInterface;
-use Yiisoft\Router\Interfaces\DispatcherInterface;
-use Yiisoft\Router\Interfaces\RouteDefinitionInterface;
-use Yiisoft\Router\Interfaces\RouteInterface;
+use Yiisoft\Router\Dispatcher\DispatcherAwareInterface;
+use Yiisoft\Router\Dispatcher\DispatcherAwareTrait;
+use Yiisoft\Router\Dispatcher\DispatcherInterface;
+use Yiisoft\Router\Handler\HandlerAwareTrait;
 
-class Route implements RouteInterface
+/**
+ * Class Route
+ *
+ * @method static DispatcherAwareInterface withDispatcher(DispatcherInterface $dispatcher)
+ */
+final class Route implements RouteInterface
 {
-    use MiddlewareAwareTrait;
-    private RouteDefinitionInterface $definition;
-    private ?DispatcherInterface $dispatcher = null;
+    use DispatcherAwareTrait;
+    use HandlerAwareTrait;
 
-    private function __construct(RouteDefinitionInterface $definition)
+    private DefinitionInterface $definition;
+
+    private function __construct(DefinitionInterface $definition)
     {
         $this->definition = $definition;
     }
@@ -32,21 +38,9 @@ class Route implements RouteInterface
         // TODO: Implement unserialize() method.
     }
 
-    public function getDefinition(): RouteDefinitionInterface
+    public function getDefinition(): DefinitionInterface
     {
         return $this->definition;
-    }
-
-    public function getDispatcher(): ?DispatcherInterface
-    {
-        return $this->dispatcher;
-    }
-
-    public function withDispatcher(?DispatcherInterface $dispatcher): self
-    {
-        $route = clone $this;
-        $route->dispatcher = $dispatcher;
-        return $route;
     }
 
     // TODO: Move all HTTP method factories to separate trait to make easier defining
@@ -94,9 +88,9 @@ class Route implements RouteInterface
     public static function methods(array $methods, string $path, $handler = null): self
     {
         // TODO: Do we need to validate methods? If yes, we do it here or in definition
-        $definition = new RouteDefinition($path, $methods);
+        $definition = new Definition($path, $methods);
 
-        return (new self($definition))->middleware($handler);
+        return (new self($definition))->handler($handler);
     }
 
     public function name(string $name): self

@@ -6,16 +6,16 @@ namespace Yiisoft\Router;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\Router\Interfaces\DispatcherAwareInterface;
-use Yiisoft\Router\Interfaces\DispatcherInterface;
-use Yiisoft\Router\Interfaces\MatcherInterface;
-use Yiisoft\Router\Interfaces\RouteCollectionInterface;
-use Yiisoft\Router\Interfaces\RouteInterface;
-use Yiisoft\Router\Interfaces\RouterInterface;
+use Yiisoft\Router\Dispatcher\DispatcherInterface;
+use Yiisoft\Router\Handler\HandlerAwareTrait;
+use Yiisoft\Router\Route\RouteCollectionInterface;
+use Yiisoft\Router\Route\RouteInterface;
 
-class Router implements RouterInterface, RouteCollectionInterface
+use function array_merge;
+
+final class Router implements RouterInterface, RouteCollectionInterface
 {
-    use MiddlewareAwareTrait;
+    use HandlerAwareTrait;
 
     private RouteCollectionInterface $routeCollection;
     private MatcherInterface $matcher;
@@ -33,7 +33,7 @@ class Router implements RouterInterface, RouteCollectionInterface
         return $this->dispatcher;
     }
 
-    public function withDispatcher(DispatcherInterface $dispatcher): DispatcherAwareInterface
+    public function withDispatcher(DispatcherInterface $dispatcher): self
     {
         $new = clone $this;
         $new->dispatcher = $dispatcher;
@@ -46,13 +46,13 @@ class Router implements RouterInterface, RouteCollectionInterface
         if ($matchingResult->isSuccess()) {
             $route = $matchingResult->getRoute();
             $routeDispatcher = $route->getDispatcher();
-            if ($routeDispatcher !== null) {
-                $routeDispatcher = $routeDispatcher->middlewares(\array_merge($matchingResult->getRoute()->getMiddlewares(), $this->middlewares));
+            $handlers = array_merge($route->getHandlers(), $this->getHandlers());
 
-                return $routeDispatcher->handle($request);
+            if ($routeDispatcher !== null) {
+                return $routeDispatcher->handlers($handlers)->handle($request);
             }
 
-            $this->dispatcher = $this->dispatcher->middlewares(\array_merge($route->getMiddlewares(), $this->middlewares));
+            $this->dispatcher = $this->dispatcher->handlers($handlers);
         }
 
         return $this->dispatcher->handle($request);
@@ -60,12 +60,12 @@ class Router implements RouterInterface, RouteCollectionInterface
 
     public function match(ServerRequestInterface $request): MatchingResult
     {
-        return $this->matchForCollection($this->routeCollection, $request);
+        return $this->matchForRoutes($this->routeCollection->getRoutes(), $request);
     }
 
-    public function matchForCollection(RouteCollectionInterface $collection, ServerRequestInterface $request): MatchingResult
+    public function matchForRoutes(iterable $routes, ServerRequestInterface $request): MatchingResult
     {
-        return $this->matcher->matchForCollection($collection, $request);
+        return $this->matcher->matchForRoutes($routes, $request);
     }
 
     public function addRoute(RouteInterface $route): self
@@ -85,7 +85,7 @@ class Router implements RouterInterface, RouteCollectionInterface
         // TODO: Implement addCollection() method.
     }
 
-    public function getRoutes(): array
+    public function getRoutes(): iterable
     {
         return $this->routeCollection->getRoutes();
     }

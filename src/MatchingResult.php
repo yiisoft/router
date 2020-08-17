@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
-use Yiisoft\Router\Interfaces\RouteInterface;
+use Yiisoft\Router\Route\RouteInterface;
 
 final class MatchingResult
 {

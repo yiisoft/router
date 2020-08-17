@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Router;
+namespace Yiisoft\Router\Route;
 
-use Yiisoft\Router\Interfaces\RouteCollectionInterface;
-use Yiisoft\Router\Interfaces\RouteInterface;
+use Yiisoft\Router\Dispatcher\DispatcherAwareTrait;
+use Yiisoft\Router\Handler\HandlerAwareTrait;
 
-class RouteCollection implements RouteCollectionInterface
+final class RouteCollection implements RouteCollectionInterface
 {
-    use MiddlewareAwareTrait;
     use DispatcherAwareTrait;
+    use HandlerAwareTrait;
 
     private array $routes;
 
@@ -37,7 +37,7 @@ class RouteCollection implements RouteCollectionInterface
         // TODO: Implement addCollection() method.
     }
 
-    public function getRoutes(): array
+    public function getRoutes(): iterable
     {
         return $this->routes;
     }

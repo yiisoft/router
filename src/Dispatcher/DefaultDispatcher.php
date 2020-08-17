@@ -2,22 +2,29 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Router;
+namespace Yiisoft\Router\Dispatcher;
 
+use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Injector\Injector;
-use Yiisoft\Router\Interfaces\DispatcherInterface;
+use Yiisoft\Router\Handler\HandlerAwareTrait;
 
+use function array_keys;
 use function array_shift;
+use function get_class_methods;
+use function in_array;
+use function is_array;
+use function is_callable;
+use function is_object;
+use function is_string;
 
-class DefaultDispatcher implements DispatcherInterface
+final class DefaultDispatcher implements DispatcherInterface
 {
-    use MiddlewareAwareTrait;
+    use HandlerAwareTrait;
 
     private ?ContainerInterface $container;
 
@@ -28,66 +35,68 @@ class DefaultDispatcher implements DispatcherInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        // TODO: validate middlewares before preparing
-        $middleware = $this->shiftMiddleware();
+        // TODO: validate middlewares before preparing, or maybe even validate each middleware before preparing
+        // so that if some middlewares in the stack are not called, they are note validated either.
+        $middleware = $this->shiftHandler();
 
         return $middleware->process($request, $this);
     }
 
-    private function shiftMiddleware(): MiddlewareInterface
+    private function shiftHandler(): MiddlewareInterface
     {
-        $middleware = array_shift($this->middlewares);
-        if ($middleware === null) {
+        $handlers = [...$this->getHandlers()];
+        $handler = array_shift($handlers);
+        if ($handler === null) {
             throw new \Exception('There must be at least one middleware.');
         }
 
-        return $this->prepareMiddleware($middleware);
+        return $this->prepareHandler($handler);
     }
 
-    private function prepareMiddleware($middleware): MiddlewareInterface
+    private function prepareHandler($handler): MiddlewareInterface
     {
-        if ($middleware instanceof MiddlewareInterface) {
-            return $middleware;
+        if ($handler instanceof MiddlewareInterface) {
+            return $handler;
         }
 
-        if (\is_string($middleware)) {
+        if (is_string($handler)) {
             if ($this->container === null) {
-                throw new \InvalidArgumentException('Route container must not be null for lazy loaded middleware.');
+                throw new InvalidArgumentException('Route container must not be null for lazy loaded middleware.');
             }
-            return $this->container->get($middleware);
+            return $this->container->get($handler);
         }
 
-        if (\is_array($middleware) && !\is_object($middleware[0])) {
+        if (is_array($handler) && !is_object($handler[0])) {
             if ($this->container === null) {
-                throw new \InvalidArgumentException('Route container must not be null for handler action.');
+                throw new InvalidArgumentException('Route container must not be null for handler action.');
             }
-            return $this->wrapCallable($middleware);
+            return $this->wrapCallable($handler);
         }
 
-        if ($this->isCallable($middleware)) {
+        if ($this->isCallable($handler)) {
             if ($this->container === null) {
-                throw new \InvalidArgumentException('Route container must not be null for callable.');
+                throw new InvalidArgumentException('Route container must not be null for callable.');
             }
-            return $this->wrapCallable($middleware);
+            return $this->wrapCallable($handler);
         }
 
-        return $middleware;
+        return $handler;
     }
 
     private function isCallable($definition): bool
     {
-        if (\is_callable($definition)) {
+        if (is_callable($definition)) {
             return true;
         }
 
         // This additional check is done for PHP 8, as callable types were changed
         // @see https://wiki.php.net/rfc/consistent_callables
-        return \is_array($definition) && \array_keys($definition) === [0, 1] && \in_array($definition[1], \get_class_methods($definition[0]) ?? [], true);
+        return is_array($definition) && array_keys($definition) === [0, 1] && in_array($definition[1], get_class_methods($definition[0]) ?? [], true);
     }
 
     private function wrapCallable($callback)
     {
-        if (\is_array($callback) && !\is_object($callback[0])) {
+        if (is_array($callback) && !is_object($callback[0])) {
             [$controller, $action] = $callback;
             return new class($controller, $action, $this->container) implements MiddlewareInterface {
                 private string $class;

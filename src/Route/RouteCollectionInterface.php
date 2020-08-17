@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Router\Interfaces;
+namespace Yiisoft\Router\Route;
+
+use Yiisoft\Router\Dispatcher\DispatcherAwareInterface;
+use Yiisoft\Router\Handler\HandlerAwareInterface;
 
 // TODO: extend \IteratorAggregate, \ArrayAccess, \Countable, \Serializable
-interface RouteCollectionInterface extends MiddlewareAwareInterface, DispatcherAwareInterface
+interface RouteCollectionInterface extends HandlerAwareInterface, DispatcherAwareInterface
 {
     public function addRoute(RouteInterface $route): RouteCollectionInterface;
 
@@ -13,8 +16,5 @@ interface RouteCollectionInterface extends MiddlewareAwareInterface, DispatcherA
 
     public function addCollection(RouteCollectionInterface $collection): RouteCollectionInterface;
 
-    /**
-     * @return RouterInterface[]
-     */
-    public function getRoutes(): array;
+    public function getRoutes(): iterable;
 }

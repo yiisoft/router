@@ -10,17 +10,14 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
-use Yiisoft\Router\DefaultDispatcher;
-use Yiisoft\Router\Interfaces\DispatcherInterface;
-use Yiisoft\Router\Interfaces\MatcherInterface;
-use Yiisoft\Router\Interfaces\RouteCollectionInterface;
-use Yiisoft\Router\Interfaces\RouteInterface;
+use Yiisoft\Router\Dispatcher\DefaultDispatcher;
+use Yiisoft\Router\Dispatcher\DispatcherInterface;
+use Yiisoft\Router\Handler\HandlerAwareTrait;
+use Yiisoft\Router\MatcherInterface;
 use Yiisoft\Router\MatchingResult;
-use Yiisoft\Router\MiddlewareAwareTrait;
-use Yiisoft\Router\Route;
-use Yiisoft\Router\RouteCollection;
+use Yiisoft\Router\Route\Route;
+use Yiisoft\Router\Route\RouteCollection;
+use Yiisoft\Router\Route\RouteInterface;
 use Yiisoft\Router\Router;
 
 final class RouterTest extends TestCase
@@ -34,7 +31,7 @@ final class RouterTest extends TestCase
             }));
         $response = $router->handle($request);
 
-        $this->assertSame(200, $response->getStatusCode());
+        self::assertSame(200, $response->getStatusCode());
     }
 
     public function testRouterWithRouteSpecificDispatcher(): void
@@ -46,14 +43,14 @@ final class RouterTest extends TestCase
         $router = $this->createRouter()->addRoute($route);
         $response = $router->handle($request);
 
-        $this->assertSame(404, $response->getStatusCode());
+        self::assertSame(404, $response->getStatusCode());
     }
 
     private function getCustomDispatcher(): DispatcherInterface
     {
         return new class() implements DispatcherInterface
         {
-            use MiddlewareAwareTrait;
+            use HandlerAwareTrait;
 
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
@@ -77,12 +74,10 @@ final class RouterTest extends TestCase
                 // TODO: Implement match() method.
             }
 
-            public function matchForCollection(
-                RouteCollectionInterface $collection,
+            public function matchForRoutes(
+                iterable $routes,
                 ServerRequestInterface $request
             ): MatchingResult {
-                $routes = $collection->getRoutes();
-
                 foreach ($routes as $route) {
                     /** @var RouteInterface $route */
                     if ($request->getUri()->getPath() === $route->getDefinition()->getPath()) {

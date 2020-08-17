@@ -2,11 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Router;
+namespace Yiisoft\Router\Route;
 
-use Yiisoft\Router\Interfaces\RouteDefinitionInterface;
-
-class RouteDefinition implements RouteDefinitionInterface
+final class Definition implements DefinitionInterface
 {
     private string $path;
     private array $methods;
@@ -101,7 +99,7 @@ class RouteDefinition implements RouteDefinitionInterface
         return $this->methods;
     }
 
-    public function withMethods(array $methods): RouteDefinitionInterface
+    public function withMethods(array $methods): self
     {
         $definition = clone $this;
         $definition->methods = $methods;
@@ -125,7 +123,7 @@ class RouteDefinition implements RouteDefinitionInterface
         return $this->port;
     }
 
-    public function withPort(?int $port): RouteDefinitionInterface
+    public function withPort(?int $port): self
     {
         $definition = clone $this;
         $definition->port = $port;
@@ -137,7 +135,7 @@ class RouteDefinition implements RouteDefinitionInterface
         return $this->accepts;
     }
 
-    public function withAccepts(array $accepts): RouteDefinitionInterface
+    public function withAccepts(array $accepts): self
     {
         $definition = clone $this;
         $definition->accepts = $accepts;

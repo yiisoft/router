@@ -2,30 +2,28 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Router;
+namespace Yiisoft\Router\Handler;
 
 use Psr\Http\Server\MiddlewareInterface;
-use Yiisoft\Router\Interfaces\MiddlewareAwareInterface;
 
 use function array_unshift;
 
-trait MiddlewareAwareTrait
+trait HandlerAwareTrait
 {
-    private array $middlewares = [];
+    private array $handlers = [];
 
     /**
      * Add handler that should be invoked for the route when match happens to the stack.
      *
-     * @param MiddlewareInterface|string|array|callable $handler that will be added.
-     * Handler can be a PSR middleware, PSR middleware class name, handler action
-     * (an array of [handlerClass, handlerMethod]) or a callable.
+     * @param mixed $handler that will be added.
+     * Handler type and format support depends on the \Yiisoft\Router\Dispatcher\DispatcherInterface implementation.
      * @param bool $validate whether to validate handler before execution
      *
-     * @return MiddlewareAwareInterface
+     * @return HandlerAwareInterface
      */
-    public function middleware($handler, $validate = false): MiddlewareAwareInterface
+    public function handler($handler, $validate = false): HandlerAwareInterface
     {
-        $this->middlewares[] = $handler;
+        $this->handlers[] = $handler;
 
         return $this;
     }
@@ -34,15 +32,15 @@ trait MiddlewareAwareTrait
      * Add multiple handlers that should be invoked for the route when match happens to the stack.
      *
      * @param array $handlers that will be added.
-     * Handler type and format depend on the implementation.
+     * Handler type and format support depends on the \Yiisoft\Router\Dispatcher\DispatcherInterface implementation.
      * @param false $validate whether to validate handlers before execution
      *
-     * @return MiddlewareInterface
+     * @return HandlerAwareInterface
      */
-    public function middlewares(iterable $handlers, $validate = false): MiddlewareAwareInterface
+    public function handlers(iterable $handlers, $validate = false): HandlerAwareInterface
     {
         foreach ($handlers as $handler) {
-            $this->middleware($handler, $validate);
+            $this->handler($handler, $validate);
         }
 
         return $this;
@@ -52,14 +50,14 @@ trait MiddlewareAwareTrait
      * Prepend handler that should be invoked for the route when match happens to the stack.
      *
      * @param mixed $handler that will be added.
-     * Handler type and format depend on the implementation.
+     * Handler type and format support depends on the \Yiisoft\Router\Dispatcher\DispatcherInterface implementation.
      * @param bool $validate whether to validate handler before execution
      *
-     * @return MiddlewareAwareInterface
+     * @return HandlerAwareInterface
      */
-    public function prependMiddleware($handler, $validate = false): MiddlewareAwareInterface
+    public function prependHandler($handler, $validate = false): HandlerAwareInterface
     {
-        array_unshift($this->middlewares, $handler);
+        array_unshift($this->handlers, $handler);
 
         return $this;
     }
@@ -69,8 +67,8 @@ trait MiddlewareAwareTrait
      *
      * @return iterable stack of handlers.
      */
-    public function getMiddlewares(): iterable
+    public function getHandlers(): iterable
     {
-        return $this->middlewares;
+        return $this->handlers;
     }
 }
