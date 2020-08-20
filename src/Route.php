@@ -374,7 +374,13 @@ final class Route implements MiddlewareInterface
                 public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
                 {
                     $controller = $this->container->get($this->class);
-                    return (new Injector($this->container))->invoke([$controller, $this->method], [$request, $handler]);
+                    return (new Injector($this->container))->invoke(
+                        [$controller, $this->method],
+                        array_merge(
+                            [$request, $handler],
+                            $request->getAttributes()
+                        )
+                    );
                 }
             };
         }
