@@ -2,8 +2,6 @@
 
 namespace Yiisoft\Router;
 
-use Psr\Container\ContainerInterface;
-
 interface RouteCollectorInterface
 {
     /**
@@ -31,15 +29,15 @@ interface RouteCollectorInterface
      * Return a clone with container specified.
      * The container is be used to resolve dependencies in callback or action caller middleware.
      *
-     * @param ContainerInterface $container container instance
+     * @param DispatcherInterface $dispatcher container instance
      * @return RouteCollectorInterface
      */
-    public function withContainer(ContainerInterface $container): self;
+    public function withDispatcher(DispatcherInterface $dispatcher): self;
 
     /**
      * @return bool if there is container specified
      */
-    public function hasContainer(): bool;
+    public function hasDispatcher(): bool;
 
     /**
      * @return Route|Group[]

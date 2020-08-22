@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Server\MiddlewareInterface;
 
 final class Group implements RouteCollectorInterface
@@ -16,11 +15,11 @@ final class Group implements RouteCollectorInterface
     protected array $items = [];
     protected ?string $prefix;
     protected array $middlewares = [];
-    private ?ContainerInterface $container = null;
+    private ?DispatcherInterface $dispatcher = null;
 
-    private function __construct(?string $prefix = null, ?callable $callback = null, ContainerInterface $container = null)
+    private function __construct(?string $prefix = null, ?callable $callback = null, DispatcherInterface $dispatcher = null)
     {
-        $this->container = $container;
+        $this->dispatcher = $dispatcher;
         $this->prefix = $prefix;
 
         if ($callback !== null) {
@@ -33,11 +32,11 @@ final class Group implements RouteCollectorInterface
      *
      * @param string $prefix
      * @param callable|array $routes
-     * @param ContainerInterface $container
+     * @param DispatcherInterface $dispatcher
      *
      * @return self
      */
-    public static function create(?string $prefix = null, $routes = [], ContainerInterface $container = null): self
+    public static function create(?string $prefix = null, $routes = [], DispatcherInterface $dispatcher = null): self
     {
         if (\is_callable($routes)) {
             $callback = $routes;
@@ -57,16 +56,16 @@ final class Group implements RouteCollectorInterface
             $callback = null;
         }
 
-        return new self($prefix, $callback, $container);
+        return new self($prefix, $callback, $dispatcher);
     }
 
-    public function withContainer(ContainerInterface $container): self
+    public function withDispatcher(DispatcherInterface $dispatcher): self
     {
         $group = clone $this;
-        $group->container = $container;
+        $group->dispatcher = $dispatcher;
         foreach ($group->items as $index => $item) {
-            if (!$item->hasContainer()) {
-                $item = $item->withContainer($container);
+            if (!$item->hasDispatcher()) {
+                $item = $item->withDispatcher($dispatcher);
                 $group->items[$index] = $item;
             }
         }
@@ -74,15 +73,15 @@ final class Group implements RouteCollectorInterface
         return $group;
     }
 
-    public function hasContainer(): bool
+    public function hasDispatcher(): bool
     {
-        return $this->container !== null;
+        return $this->dispatcher !== null;
     }
 
     public function addRoute(Route $route): self
     {
-        if (!$route->hasContainer() && $this->hasContainer()) {
-            $route = $route->withContainer($this->container);
+        if (!$route->hasDispatcher() && $this->hasDispatcher()) {
+            $route = $route->withDispatcher($this->dispatcher);
         }
         $this->items[] = $route;
         return $this;
@@ -90,8 +89,8 @@ final class Group implements RouteCollectorInterface
 
     public function addGroup(Group $group): self
     {
-        if (!$group->hasContainer() && $this->hasContainer()) {
-            $group = $group->withContainer($this->container);
+        if (!$group->hasDispatcher() && $this->hasDispatcher()) {
+            $group = $group->withDispatcher($this->dispatcher);
         }
         $this->items[] = $group;
         return $this;

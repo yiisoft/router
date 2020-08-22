@@ -9,8 +9,8 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Yiisoft\Router\Dispatcher;
 use Yiisoft\Router\MatchingResult;
 use Yiisoft\Http\Method;
 use Yiisoft\Router\Middleware\Router;
@@ -24,8 +24,8 @@ final class RouterTest extends TestCase
 {
     private function createRouterMiddleware(): Router
     {
-        $container = $this->createMock(ContainerInterface::class);
-        return new Router($this->getMatcher(), new Psr17Factory(), $container);
+        $dispatcher = new Dispatcher($this->createMock(ContainerInterface::class));
+        return new Router($this->getMatcher(), new Psr17Factory(), $dispatcher);
     }
 
     private function processWithRouter(ServerRequestInterface $request): ResponseInterface
