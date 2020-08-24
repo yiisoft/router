@@ -74,7 +74,7 @@ final class MatchingResult implements MiddlewareInterface
         if ($this->dispatcher !== null && !$route->hasDispatcher()) {
             $route = $route->withDispatcher($this->dispatcher);
         }
-        //dd($route->getDispatcher());
+
         return $route->getDispatcherWithMiddlewares()->dispatch($request, $handler);
     }
 }

@@ -12,7 +12,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Injector\Injector;
 
-class Dispatcher implements DispatcherInterface
+final class Dispatcher implements DispatcherInterface
 {
     /**
      * Contains a stack of middleware wrapped in handlers.
