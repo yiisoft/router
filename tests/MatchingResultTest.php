@@ -8,8 +8,8 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Yiisoft\Router\Dispatcher;
 use Yiisoft\Router\MatchingResult;
 use Yiisoft\Http\Method;
 use Yiisoft\Router\Route;
@@ -44,8 +44,8 @@ final class MatchingResultTest extends TestCase
 
     public function testProcessSuccess(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $route = Route::post('/', null, $container)->addMiddleware($this->getMiddleware());
+        $dispatcher = new Dispatcher($this->createMock(ContainerInterface::class));
+        $route = Route::post('/', null, $dispatcher)->addMiddleware($this->getMiddleware());
         $result = MatchingResult::fromSuccess($route, []);
         $request = new ServerRequest('POST', '/');
 
