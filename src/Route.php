@@ -29,7 +29,7 @@ final class Route
         $this->dispatcher = $dispatcher;
     }
 
-    public function withDispatcher(DispatcherInterface $dispatcher)
+    public function withDispatcher(DispatcherInterface $dispatcher): self
     {
         $route = clone $this;
         $route->dispatcher = $dispatcher;
@@ -41,7 +41,7 @@ final class Route
         return $this->dispatcher->withMiddlewares($this->middlewares);
     }
 
-    public function hasDispatcher()
+    public function hasDispatcher(): bool
     {
         return $this->dispatcher !== null;
     }
@@ -49,7 +49,7 @@ final class Route
     /**
      * @param string $pattern
      * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
-     * @param DispatcherInterface $dispatcher |null
+     * @param DispatcherInterface|null $dispatcher
      * @return self
      */
     public static function get(string $pattern, $middleware = null, ?DispatcherInterface $dispatcher = null): self

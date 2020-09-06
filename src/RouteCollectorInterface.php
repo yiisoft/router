@@ -8,6 +8,7 @@ interface RouteCollectorInterface
      * Add a route
      *
      * @param Route $route
+     * @return self
      */
     public function addRoute(Route $route): self;
 
@@ -22,6 +23,7 @@ interface RouteCollectorInterface
      * $router->addGroup($group);
      * ```
      * @param Group $group a group to add
+     * @return self
      */
     public function addGroup(Group $group): self;
 

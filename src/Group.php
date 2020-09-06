@@ -30,7 +30,7 @@ final class Group implements RouteCollectorInterface
     /**
      * Create a new instance
      *
-     * @param string $prefix
+     * @param string|null $prefix
      * @param callable|array $routes
      * @param DispatcherInterface $dispatcher
      *
