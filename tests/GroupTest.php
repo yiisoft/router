@@ -6,10 +6,11 @@ use Nyholm\Psr7\ServerRequest;
 use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Yiisoft\Router\Dispatcher;
+use Yiisoft\Router\DispatcherInterface;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
@@ -69,14 +70,14 @@ class GroupTest extends TestCase
             Group::create('/innergroup', [
                 Route::get('/test1')->name('request1')
             ])->addMiddleware($middleware2),
-        ], $this->getContainer())->addMiddleware($middleware1);
+        ], $this->getDispatcher())->addMiddleware($middleware1);
 
         $collector = Group::create();
         $collector->addGroup($group);
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
-        $response = $route->process($request, $this->getRequestHandler());
+        $response = $route->getDispatcherWithMiddlewares()->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('middleware1', $response->getReasonPhrase());
     }
@@ -85,7 +86,7 @@ class GroupTest extends TestCase
     {
         $group = Group::create('/group', function (RouteCollectorInterface $r) {
             $r->addRoute(Route::get('/test1')->name('request1'));
-        }, $this->getContainer());
+        }, $this->getDispatcher());
 
         $request = new ServerRequest('GET', '/group/test1');
         $middleware1 = function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
@@ -102,7 +103,7 @@ class GroupTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
-        $response = $route->process($request, $this->getRequestHandler());
+        $response = $route->getDispatcherWithMiddlewares()->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('middleware1', $response->getReasonPhrase());
     }
@@ -111,7 +112,7 @@ class GroupTest extends TestCase
     {
         $group = Group::create('/group', function (RouteCollectorInterface $r) {
             $r->addRoute(Route::get('/test1')->name('request1'));
-        }, $this->getContainer());
+        }, $this->getDispatcher());
 
         $request = new ServerRequest('GET', '/group/test1');
         $middleware1 = function () {
@@ -127,7 +128,7 @@ class GroupTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
-        $response = $route->process($request, $this->getRequestHandler());
+        $response = $route->getDispatcherWithMiddlewares()->dispatch($request, $this->getRequestHandler());
         $this->assertSame(403, $response->getStatusCode());
     }
 
@@ -221,9 +222,9 @@ class GroupTest extends TestCase
         $this->assertEmpty($postGroup->getMiddlewares());
     }
 
-    public function testContainerInjected(): void
+    public function testDispatcherInjected(): void
     {
-        $container = $this->getContainer();
+        $dispatcher = $this->getDispatcher();
 
         $apiGroup = Group::create(
             '/api',
@@ -288,12 +289,12 @@ class GroupTest extends TestCase
                     )
                 );
             },
-            $container
+            $dispatcher
         );
 
         $items = $apiGroup->getItems();
 
-        $this->assertAllRoutesAndGroupsHaveContainer($items);
+        $this->assertAllRoutesAndGroupsHaveDispatcher($items);
     }
 
     private function getRequestHandler(): RequestHandlerInterface
@@ -306,15 +307,20 @@ class GroupTest extends TestCase
         };
     }
 
+    private function getDispatcher(): DispatcherInterface
+    {
+        return new Dispatcher($this->getContainer());
+    }
+
     private function getContainer(array $instances = []): ContainerInterface
     {
         return new Container($instances);
     }
 
-    private function assertAllRoutesAndGroupsHaveContainer(array $items): void
+    private function assertAllRoutesAndGroupsHaveDispatcher(array $items): void
     {
         $func = function ($item) use (&$func) {
-            $this->assertTrue($item->hasContainer());
+            $this->assertTrue($item->hasDispatcher());
             if ($item instanceof Group) {
                 $items = $item->getItems();
                 array_walk($items, $func);
