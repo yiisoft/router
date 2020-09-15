@@ -18,6 +18,10 @@ final class MatchingResult implements MiddlewareInterface
     private array $methods = [];
     private ?DispatcherInterface $dispatcher = null;
 
+    private function __construct()
+    {
+    }
+
     public function withDispatcher(DispatcherInterface $dispatcher): self
     {
         $new = clone $this;
