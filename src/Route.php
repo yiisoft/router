@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
@@ -16,7 +18,7 @@ final class Route
     private array $methods;
     private string $pattern;
     private ?string $host = null;
-    private ?DispatcherInterface $dispatcher = null;
+    private ?DispatcherInterface $dispatcher;
 
     /**
      * @var callable[]|string[]|array[]

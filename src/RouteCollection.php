@@ -22,8 +22,6 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * RouteCollection constructor.
      * @param RouteCollectorInterface $collector
-     * @param string $prefix
-     * @param bool $buildRoutes
      */
     public function __construct(RouteCollectorInterface $collector)
     {
