@@ -18,7 +18,7 @@ final class Route
     private array $methods;
     private string $pattern;
     private ?string $host = null;
-    private ?DispatcherInterface $dispatcher;
+    private ?DispatcherInterface $dispatcher = null;
 
     /**
      * @var callable[]|string[]|array[]
