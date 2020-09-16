@@ -40,7 +40,7 @@ final class Route
             return $this->dispatcher;
         }
 
-        return $this->dispatcher->withMiddlewares($this->middlewares);
+        return $this->dispatcher = $this->dispatcher->withMiddlewares($this->middlewares);
     }
 
     public function hasDispatcher(): bool
