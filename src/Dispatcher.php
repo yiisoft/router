@@ -47,11 +47,9 @@ final class Dispatcher implements DispatcherInterface
 
     public function withMiddlewares(array $middlewares): DispatcherInterface
     {
-        $stack = $this->stack;
-        $this->stack = null;
         $clone = clone $this;
         $clone->middlewares = $middlewares;
-        $this->stack = $stack;
+        $clone->stack = null;
 
         return $clone;
     }
