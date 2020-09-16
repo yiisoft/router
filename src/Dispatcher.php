@@ -56,6 +56,11 @@ final class Dispatcher implements DispatcherInterface
         return $clone;
     }
 
+    public function hasMiddlewares(): bool
+    {
+        return $this->middlewares !== [];
+    }
+
     /**
      * Wraps handler by middlewares
      */

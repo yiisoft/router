@@ -36,6 +36,10 @@ final class Route
 
     public function getDispatcherWithMiddlewares(): DispatcherInterface
     {
+        if ($this->dispatcher->hasMiddlewares()) {
+            return $this->dispatcher;
+        }
+
         return $this->dispatcher->withMiddlewares($this->middlewares);
     }
 

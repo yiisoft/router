@@ -18,4 +18,6 @@ interface DispatcherInterface
     public function dispatch(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface;
 
     public function withMiddlewares(array $middlewares): DispatcherInterface;
+
+    public function hasMiddlewares(): bool;
 }
