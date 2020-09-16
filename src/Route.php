@@ -32,13 +32,13 @@ final class Route
     public function withDispatcher(DispatcherInterface $dispatcher): self
     {
         $route = clone $this;
-        $route->dispatcher = $dispatcher;
+        $route->dispatcher = $dispatcher->withMiddlewares($this->middlewares);
         return $route;
     }
 
-    public function getDispatcherWithMiddlewares(): DispatcherInterface
+    public function getDispatcher(): ?DispatcherInterface
     {
-        return $this->dispatcher->withMiddlewares($this->middlewares);
+        return $this->dispatcher;
     }
 
     public function hasDispatcher(): bool
