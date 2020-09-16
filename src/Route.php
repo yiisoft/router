@@ -29,11 +29,9 @@ final class Route
         $this->dispatcher = $dispatcher;
     }
 
-    public function withDispatcher(DispatcherInterface $dispatcher): self
+    public function injectDispatcher(DispatcherInterface $dispatcher): void
     {
-        $route = clone $this;
-        $route->dispatcher = $dispatcher;
-        return $route;
+        $this->dispatcher = $dispatcher;
     }
 
     public function getDispatcherWithMiddlewares(): DispatcherInterface

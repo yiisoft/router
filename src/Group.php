@@ -59,18 +59,15 @@ final class Group implements RouteCollectorInterface
         return new self($prefix, $callback, $dispatcher);
     }
 
-    public function withDispatcher(DispatcherInterface $dispatcher): self
+    public function injectDispatcher(DispatcherInterface $dispatcher): void
     {
-        $group = clone $this;
-        $group->dispatcher = $dispatcher;
-        foreach ($group->items as $index => $item) {
+        $this->dispatcher = $dispatcher;
+        foreach ($this->items as $index => $item) {
             if (!$item->hasDispatcher()) {
-                $item = $item->withDispatcher($dispatcher);
-                $group->items[$index] = $item;
+                $item->injectDispatcher($dispatcher);
+                $this->items[$index] = $item;
             }
         }
-
-        return $group;
     }
 
     public function hasDispatcher(): bool
@@ -81,7 +78,7 @@ final class Group implements RouteCollectorInterface
     public function addRoute(Route $route): self
     {
         if (!$route->hasDispatcher() && $this->hasDispatcher()) {
-            $route = $route->withDispatcher($this->dispatcher);
+            $route->injectDispatcher($this->dispatcher);
         }
         $this->items[] = $route;
         return $this;
@@ -90,7 +87,7 @@ final class Group implements RouteCollectorInterface
     public function addGroup(Group $group): self
     {
         if (!$group->hasDispatcher() && $this->hasDispatcher()) {
-            $group = $group->withDispatcher($this->dispatcher);
+            $group->injectDispatcher($this->dispatcher);
         }
         $this->items[] = $group;
         return $this;
