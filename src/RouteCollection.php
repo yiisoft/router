@@ -19,12 +19,6 @@ final class RouteCollection implements RouteCollectionInterface
      */
     private array $routes = [];
 
-    /**
-     * RouteCollection constructor.
-     * @param RouteCollectorInterface $collector
-     * @param string $prefix
-     * @param bool $buildRoutes
-     */
     public function __construct(RouteCollectorInterface $collector)
     {
         if ($collector instanceof Group && count($collector->getMiddlewares()) > 0) {
