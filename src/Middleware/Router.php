@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Yiisoft\Router\Middleware;
 
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -7,6 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Yiisoft\Http\Status;
 use Yiisoft\Router\DispatcherInterface;
 use Yiisoft\Router\UrlMatcherInterface;
 
@@ -28,7 +31,7 @@ final class Router implements MiddlewareInterface
         $result = $this->matcher->match($request);
 
         if ($result->isMethodFailure()) {
-            return $this->responseFactory->createResponse(405)
+            return $this->responseFactory->createResponse(Status::METHOD_NOT_ALLOWED)
                 ->withHeader('Allow', implode(', ', $result->methods()));
         }
 

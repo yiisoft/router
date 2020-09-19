@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Yiisoft\Router;
 
 use Psr\Http\Message\ResponseInterface;
@@ -66,7 +68,7 @@ final class MatchingResult implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if ($this->success === false) {
+        if (!$this->isSuccess()) {
             return $handler->handle($request);
         }
         $route = $this->route;
