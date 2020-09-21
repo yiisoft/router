@@ -18,7 +18,7 @@ use Yiisoft\Router\Route;
 
 final class MatchingResultTest extends TestCase
 {
-    public function testFromSucess(): void
+    public function testFromSuccess(): void
     {
         $route = Route::get('/{name}');
 
@@ -66,7 +66,7 @@ final class MatchingResultTest extends TestCase
         $this->assertSame(404, $response->getStatusCode());
     }
 
-    private function getMiddleware()
+    private function getMiddleware(): callable
     {
         return static function () {
             return new Response(201);

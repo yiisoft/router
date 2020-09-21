@@ -115,7 +115,7 @@ final class RouterTest extends TestCase
         };
     }
 
-    private function createRouteMiddleware()
+    private function createRouteMiddleware(): callable
     {
         return static function () {
             return new Response(201);
