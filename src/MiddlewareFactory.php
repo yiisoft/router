@@ -35,23 +35,14 @@ final class MiddlewareFactory implements MiddlewareFactoryInterface
         $this->validateMiddleware($middlewareDefinition);
 
         if (is_string($middlewareDefinition)) {
-            if ($this->container === null) {
-                throw new InvalidArgumentException('Route container must not be null for lazy loaded middleware.');
-            }
             return $this->container->get($middlewareDefinition);
         }
 
         if (is_array($middlewareDefinition) && !is_object($middlewareDefinition[0])) {
-            if ($this->container === null) {
-                throw new InvalidArgumentException('Route container must not be null for handler action.');
-            }
             return $this->wrapCallable($middlewareDefinition);
         }
 
         if ($this->isCallable($middlewareDefinition)) {
-            if ($this->container === null) {
-                throw new InvalidArgumentException('Route container must not be null for callable.');
-            }
             return $this->wrapCallable($middlewareDefinition);
         }
 
