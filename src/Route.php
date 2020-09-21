@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
-use InvalidArgumentException;
-use Psr\Http\Server\MiddlewareInterface;
 use Yiisoft\Http\Method;
 
 /**
@@ -18,29 +16,38 @@ final class Route
     private array $methods;
     private string $pattern;
     private ?string $host = null;
-    private ?DispatcherInterface $dispatcher = null;
+    private ?MiddlewareDispatcher $dispatcher = null;
 
     /**
      * @var callable[]|string[]|array[]
      */
-    private array $middlewares = [];
+    private array $middlewareDefinitions = [];
     private array $defaults = [];
 
-    private function __construct(?DispatcherInterface $dispatcher = null)
+    private function __construct(?MiddlewareDispatcher $dispatcher = null)
     {
         $this->dispatcher = $dispatcher;
     }
 
-    public function withDispatcher(DispatcherInterface $dispatcher): self
+    public function injectDispatcher(MiddlewareDispatcher $dispatcher): void
+    {
+        $this->dispatcher = $dispatcher;
+    }
+
+    public function withDispatcher(MiddlewareDispatcher $dispatcher): self
     {
         $route = clone $this;
         $route->dispatcher = $dispatcher;
         return $route;
     }
 
-    public function getDispatcherWithMiddlewares(): DispatcherInterface
+    public function getDispatcherWithMiddlewares(): MiddlewareDispatcher
     {
-        return $this->dispatcher->withMiddlewares($this->middlewares);
+        if ($this->dispatcher->hasMiddlewares()) {
+            return $this->dispatcher;
+        }
+
+        return $this->dispatcher = $this->dispatcher->withMiddlewares($this->middlewareDefinitions);
     }
 
     public function hasDispatcher(): bool
@@ -50,113 +57,112 @@ final class Route
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
-     * @param DispatcherInterface|null $dispatcher
+     * @param callable|string|array|null $middlewareDefinition primary route handler {@see addMiddleware()}
+     * @param MiddlewareDispatcher|null $dispatcher
      * @return self
      */
-    public static function get(string $pattern, $middleware = null, ?DispatcherInterface $dispatcher = null): self
+    public static function get(string $pattern, $middlewareDefinition = null, ?MiddlewareDispatcher $dispatcher = null): self
     {
-        return self::methods([Method::GET], $pattern, $middleware, $dispatcher);
+        return self::methods([Method::GET], $pattern, $middlewareDefinition, $dispatcher);
     }
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
-     * @param DispatcherInterface|null $dispatcher
+     * @param callable|string|array|null $middlewareDefinition primary route handler {@see addMiddleware()}
+     * @param MiddlewareDispatcher|null $dispatcher
      * @return self
      */
-    public static function post(string $pattern, $middleware = null, ?DispatcherInterface $dispatcher = null): self
+    public static function post(string $pattern, $middlewareDefinition = null, ?MiddlewareDispatcher $dispatcher = null): self
     {
-        return self::methods([Method::POST], $pattern, $middleware, $dispatcher);
+        return self::methods([Method::POST], $pattern, $middlewareDefinition, $dispatcher);
     }
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
-     * @param DispatcherInterface|null $dispatcher
+     * @param callable|string|array|null $middlewareDefinition primary route handler {@see addMiddleware()}
+     * @param MiddlewareDispatcher|null $dispatcher
      * @return self
      */
-    public static function put(string $pattern, $middleware = null, ?DispatcherInterface $dispatcher = null): self
+    public static function put(string $pattern, $middlewareDefinition = null, ?MiddlewareDispatcher $dispatcher = null): self
     {
-        return self::methods([Method::PUT], $pattern, $middleware, $dispatcher);
+        return self::methods([Method::PUT], $pattern, $middlewareDefinition, $dispatcher);
     }
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
-     * @param DispatcherInterface|null $dispatcher
+     * @param callable|string|array|null $middlewareDefinition primary route handler {@see addMiddleware()}
+     * @param MiddlewareDispatcher|null $dispatcher
      * @return self
      */
-    public static function delete(string $pattern, $middleware = null, ?DispatcherInterface $dispatcher = null): self
+    public static function delete(string $pattern, $middlewareDefinition = null, ?MiddlewareDispatcher $dispatcher = null): self
     {
-        return self::methods([Method::DELETE], $pattern, $middleware, $dispatcher);
+        return self::methods([Method::DELETE], $pattern, $middlewareDefinition, $dispatcher);
     }
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
-     * @param DispatcherInterface|null $dispatcher
+     * @param callable|string|array|null $middlewareDefinition primary route handler {@see addMiddleware()}
+     * @param MiddlewareDispatcher|null $dispatcher
      * @return self
      */
-    public static function patch(string $pattern, $middleware = null, ?DispatcherInterface $dispatcher = null): self
+    public static function patch(string $pattern, $middlewareDefinition = null, ?MiddlewareDispatcher $dispatcher = null): self
     {
-        return self::methods([Method::PATCH], $pattern, $middleware, $dispatcher);
+        return self::methods([Method::PATCH], $pattern, $middlewareDefinition, $dispatcher);
     }
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
-     * @param DispatcherInterface|null $dispatcher
+     * @param callable|string|array|null $middlewareDefinition primary route handler {@see addMiddleware()}
+     * @param MiddlewareDispatcher|null $dispatcher
      * @return self
      */
-    public static function head(string $pattern, $middleware = null, ?DispatcherInterface $dispatcher = null): self
+    public static function head(string $pattern, $middlewareDefinition = null, ?MiddlewareDispatcher $dispatcher = null): self
     {
-        return self::methods([Method::HEAD], $pattern, $middleware, $dispatcher);
+        return self::methods([Method::HEAD], $pattern, $middlewareDefinition, $dispatcher);
     }
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
-     * @param DispatcherInterface|null $dispatcher
+     * @param callable|string|array|null $middlewareDefinition primary route handler {@see addMiddleware()}
+     * @param MiddlewareDispatcher|null $dispatcher
      * @return self
      */
-    public static function options(string $pattern, $middleware = null, ?DispatcherInterface $dispatcher = null): self
+    public static function options(string $pattern, $middlewareDefinition = null, ?MiddlewareDispatcher $dispatcher = null): self
     {
-        return self::methods([Method::OPTIONS], $pattern, $middleware, $dispatcher);
+        return self::methods([Method::OPTIONS], $pattern, $middlewareDefinition, $dispatcher);
     }
 
     /**
      * @param array $methods
      * @param string $pattern
-     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
-     * @param DispatcherInterface|null $dispatcher
+     * @param callable|string|array|null $middlewareDefinition primary route handler {@see addMiddleware()}
+     * @param MiddlewareDispatcher|null $dispatcher
      * @return self
      */
     public static function methods(
         array $methods,
         string $pattern,
-        $middleware = null,
-        ?DispatcherInterface $dispatcher = null
+        $middlewareDefinition = null,
+        ?MiddlewareDispatcher $dispatcher = null
     ): self {
         $route = new self($dispatcher);
         $route->methods = $methods;
         $route->pattern = $pattern;
-        if ($middleware !== null) {
-            $route->validateMiddleware($middleware);
-            $route->middlewares[] = $middleware;
+        if ($middlewareDefinition !== null) {
+            $route->middlewareDefinitions[] = $middlewareDefinition;
         }
         return $route;
     }
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middleware primary route handler {@see addMiddleware()}
-     * @param DispatcherInterface|null $dispatcher
+     * @param callable|string|array|null $middlewareDefinition primary route handler {@see addMiddleware()}
+     * @param MiddlewareDispatcher|null $dispatcher
      * @return self
      */
-    public static function anyMethod(string $pattern, $middleware = null, ?DispatcherInterface $dispatcher = null): self
+    public static function anyMethod(string $pattern, $middlewareDefinition = null, ?MiddlewareDispatcher $dispatcher = null): self
     {
-        return self::methods(Method::ANY, $pattern, $middleware, $dispatcher);
+        return self::methods(Method::ANY, $pattern, $middlewareDefinition, $dispatcher);
     }
 
     public function name(string $name): self
@@ -194,25 +200,6 @@ final class Route
     }
 
     /**
-     * @param callable|string|array $middleware
-     */
-    private function validateMiddleware($middleware): void
-    {
-        if (
-            is_string($middleware) && is_subclass_of($middleware, MiddlewareInterface::class)
-        ) {
-            return;
-        }
-
-        if ($this->isCallable($middleware) && (!is_array($middleware) || !is_object($middleware[0]))) {
-            return;
-        }
-
-        throw new InvalidArgumentException('Parameter should be either PSR middleware class name or a callable.');
-    }
-
-
-    /**
      * Prepends a handler that should be invoked for a matching route.
      * Last added handler will be invoked first.
      *
@@ -223,15 +210,13 @@ final class Route
      * injection container passed to the route. Current request and handler could be obtained by
      * type-hinting for ServerRequestInterface and RequestHandlerInterface.
      *
-     * @param callable|string|array $middleware
+     * @param callable|string|array $middlewareDefinition
      * @return Route
      */
-    public function addMiddleware($middleware): self
+    public function addMiddleware($middlewareDefinition): self
     {
-        $this->validateMiddleware($middleware);
-
         $route = clone $this;
-        $route->middlewares[] = $middleware;
+        $route->middlewareDefinitions[] = $middlewareDefinition;
         return $route;
     }
 
@@ -277,14 +262,5 @@ final class Route
     public function getDefaults(): array
     {
         return $this->defaults;
-    }
-
-    private function isCallable($definition): bool
-    {
-        if (is_callable($definition)) {
-            return true;
-        }
-
-        return is_array($definition) && array_keys($definition) === [0, 1] && in_array($definition[1], get_class_methods($definition[0]) ?? [], true);
     }
 }

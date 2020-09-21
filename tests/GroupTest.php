@@ -9,9 +9,10 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Yiisoft\Router\Dispatcher;
-use Yiisoft\Router\DispatcherInterface;
+use Yiisoft\Router\MiddlewareDispatcher;
 use Yiisoft\Router\Group;
+use Yiisoft\Router\MiddlewareFactory;
+use Yiisoft\Router\MiddlewareStack;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectorInterface;
@@ -307,9 +308,9 @@ class GroupTest extends TestCase
         };
     }
 
-    private function getDispatcher(): DispatcherInterface
+    private function getDispatcher(): MiddlewareDispatcher
     {
-        return new Dispatcher($this->getContainer());
+        return new MiddlewareDispatcher(new MiddlewareFactory($this->getContainer()), new MiddlewareStack());
     }
 
     private function getContainer(array $instances = []): ContainerInterface
