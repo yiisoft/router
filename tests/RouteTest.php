@@ -10,11 +10,11 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Http\Method;
-use Yiisoft\Router\Dispatcher;
-use Yiisoft\Router\DispatcherInterface;
+use Yiisoft\Router\MiddlewareDispatcher;
+use Yiisoft\Router\MiddlewareFactory;
+use Yiisoft\Router\MiddlewareStack;
 use Yiisoft\Router\Tests\Support\Container;
 use Yiisoft\Router\Tests\Support\TestController;
-use Yiisoft\Router\Tests\Support\TestMiddleware;
 use Yiisoft\Router\Route;
 
 final class RouteTest extends TestCase
@@ -135,157 +135,7 @@ final class RouteTest extends TestCase
         $this->assertSame('GET /', (string)$route);
     }
 
-    public function testInvalidMiddlewareMethod(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        Route::get('/', new \stdClass());
-    }
-
-    public function testInvalidMiddlewareAdd(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        Route::get('/')->addMiddleware(new \stdClass());
-    }
-
-    public function testAddMiddleware(): void
-    {
-        $dispatcher = new Dispatcher($this->createMock(ContainerInterface::class));
-        $request = new ServerRequest('GET', '/');
-
-        $route = Route::get('/', null, $dispatcher)->addMiddleware(
-            function () {
-                return new Response(418);
-            }
-        );
-
-        $response = $route->getDispatcherWithMiddlewares()->dispatch($request, $this->getRequestHandler());
-        $this->assertSame(418, $response->getStatusCode());
-    }
-
-    public function testAddCallableMiddleware(): void
-    {
-        $request = new ServerRequest('GET', '/');
-
-        $route = Route::get('/', null, $this->getDispatcher())->addMiddleware(
-            static function (): ResponseInterface {
-                return (new Response())->withStatus(418);
-            }
-        );
-
-        $response = $route->getDispatcherWithMiddlewares()->dispatch($request, $this->getRequestHandler());
-        $this->assertSame(418, $response->getStatusCode());
-    }
-
-    public function testAddCallableArrayMiddleware(): void
-    {
-        $request = new ServerRequest('GET', '/');
-        $container = $this->getContainer([TestController::class => new TestController()]);
-        $dispatcher = $this->getDispatcher($container);
-
-        $route = Route::get('/', null, $dispatcher)->addMiddleware([TestController::class, 'index']);
-
-        $response = $route->getDispatcherWithMiddlewares()->dispatch($request, $this->getRequestHandler());
-        $this->assertSame(200, $response->getStatusCode());
-    }
-
-    public function testMiddlewareFullStackCalled(): void
-    {
-        $dispatcher = $this->getDispatcher();
-        $request = new ServerRequest('GET', '/');
-
-        $routeOne = Route::get('/', null, $dispatcher);
-
-        $middleware1 = function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
-            $request = $request->withAttribute('middleware', 'middleware1');
-            return $handler->handle($request);
-        };
-        $middleware2 = function (ServerRequestInterface $request) {
-            return new Response(200, [], null, '1.1', implode($request->getAttributes()));
-        };
-
-        $routeOne = $routeOne->addMiddleware($middleware2)->addMiddleware($middleware1);
-
-        $response = $routeOne->getDispatcherWithMiddlewares()->dispatch($request, $this->getRequestHandler());
-        $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame('middleware1', $response->getReasonPhrase());
-    }
-
-    public function testMiddlewareStackInterrupted(): void
-    {
-        $dispatcher = $this->getDispatcher();
-        $request = new ServerRequest('GET', '/');
-
-        $routeTwo = Route::get('/', null, $dispatcher);
-
-        $middleware1 = function () {
-            return new Response(403);
-        };
-        $middleware2 = function () {
-            return new Response(200);
-        };
-
-        $routeTwo = $routeTwo->addMiddleware($middleware2)->addMiddleware($middleware1);
-
-        $response = $routeTwo->getDispatcherWithMiddlewares()->dispatch($request, $this->getRequestHandler());
-        $this->assertSame(403, $response->getStatusCode());
-    }
-
-    public function testInvalidMiddlewareAddWrongStringLL(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        Route::get('/', 'test');
-    }
-
-    public function testInvalidMiddlewareAddWrongStringClassLL(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Parameter should be either PSR middleware class name or a callable.');
-        Route::get('/', TestController::class);
-    }
-
-    public function testMiddlewareAddSuccessStringLL(): void
-    {
-        $route = Route::get('/', TestMiddleware::class, $this->getDispatcher());
-        $this->assertInstanceOf(Route::class, $route);
-    }
-
-    public function testInvalidMiddlewareAddWrongArraySizeLL(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        Route::get('/', ['test']);
-    }
-
-    public function testInvalidMiddlewareAddWrongArrayClassLL(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        Route::get('/', ['class', 'test']);
-    }
-
-    public function testInvalidMiddlewareAddWrongArrayTypeLL(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        Route::get('/', ['class' => TestController::class, 'index']);
-    }
-
-    public function testMiddlewareAddSuccessArrayLL(): void
-    {
-        $route = Route::get('/', [TestController::class, 'index'], $this->getDispatcher());
-        $this->assertInstanceOf(Route::class, $route);
-    }
-
-    public function testMiddlewareCallSuccessArrayLL(): void
-    {
-        $request = new ServerRequest('GET', '/');
-        $container = $this->getContainer([
-            TestController::class => new TestController(),
-        ]);
-        $dispatcher = $this->getDispatcher($container);
-        $route = Route::get('/', [TestController::class, 'index'], $dispatcher);
-        $response = $route->getDispatcherWithMiddlewares()->dispatch($request, $this->getRequestHandler());
-        $this->assertSame(200, $response->getStatusCode());
-    }
-
-    public function testMiddlewareCallSuccessArrayWithoutContainerLL(): void
+    public function testDispatcherInjecting(): void
     {
         $request = new ServerRequest('GET', '/');
         $container = $this->getContainer([
@@ -308,13 +158,13 @@ final class RouteTest extends TestCase
         };
     }
 
-    private function getDispatcher(ContainerInterface $container = null): DispatcherInterface
+    private function getDispatcher(ContainerInterface $container = null): MiddlewareDispatcher
     {
         if ($container === null) {
-            return new Dispatcher($this->getContainer());
+            return new MiddlewareDispatcher(new MiddlewareFactory($this->getContainer()), new MiddlewareStack());
         }
 
-        return new Dispatcher($container);
+        return new MiddlewareDispatcher(new MiddlewareFactory($container), new MiddlewareStack());
     }
 
     private function getContainer(array $instances = []): ContainerInterface

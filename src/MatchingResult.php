@@ -16,13 +16,13 @@ final class MatchingResult implements MiddlewareInterface
     private Route $route;
     private array $parameters = [];
     private array $methods = [];
-    private ?DispatcherInterface $dispatcher = null;
+    private ?MiddlewareDispatcher $dispatcher = null;
 
     private function __construct()
     {
     }
 
-    public function withDispatcher(DispatcherInterface $dispatcher): self
+    public function withDispatcher(MiddlewareDispatcher $dispatcher): self
     {
         $new = clone $this;
         $new->dispatcher = $dispatcher;

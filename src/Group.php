@@ -15,9 +15,9 @@ final class Group implements RouteCollectorInterface
     protected array $items = [];
     protected ?string $prefix;
     protected array $middlewares = [];
-    private ?DispatcherInterface $dispatcher = null;
+    private ?MiddlewareDispatcher $dispatcher = null;
 
-    private function __construct(?string $prefix = null, ?callable $callback = null, DispatcherInterface $dispatcher = null)
+    private function __construct(?string $prefix = null, ?callable $callback = null, MiddlewareDispatcher $dispatcher = null)
     {
         $this->dispatcher = $dispatcher;
         $this->prefix = $prefix;
@@ -32,11 +32,11 @@ final class Group implements RouteCollectorInterface
      *
      * @param string|null $prefix
      * @param callable|array $routes
-     * @param DispatcherInterface $dispatcher
+     * @param MiddlewareDispatcher $dispatcher
      *
      * @return self
      */
-    public static function create(?string $prefix = null, $routes = [], DispatcherInterface $dispatcher = null): self
+    public static function create(?string $prefix = null, $routes = [], MiddlewareDispatcher $dispatcher = null): self
     {
         if (\is_callable($routes)) {
             $callback = $routes;
@@ -59,7 +59,7 @@ final class Group implements RouteCollectorInterface
         return new self($prefix, $callback, $dispatcher);
     }
 
-    public function injectDispatcher(DispatcherInterface $dispatcher): void
+    public function injectDispatcher(MiddlewareDispatcher $dispatcher): void
     {
         $this->dispatcher = $dispatcher;
         foreach ($this->items as $index => $item) {

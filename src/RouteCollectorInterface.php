@@ -31,10 +31,10 @@ interface RouteCollectorInterface
      * Return a clone with container specified.
      * The container is be used to resolve dependencies in callback or action caller middleware.
      *
-     * @param DispatcherInterface $dispatcher container instance
+     * @param MiddlewareDispatcher $dispatcher container instance
      * @return RouteCollectorInterface
      */
-    public function injectDispatcher(DispatcherInterface $dispatcher): void;
+    public function injectDispatcher(MiddlewareDispatcher $dispatcher): void;
 
     /**
      * @return bool if there is container specified
