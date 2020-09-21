@@ -27,7 +27,7 @@ final class MiddlewareFactory implements MiddlewareFactoryInterface
     }
 
     /**
-     * @param callable|string|array $middleware
+     * @param callable|string|array $middlewareDefinition
      * @return MiddlewareInterface
      */
     private function createMiddleware($middlewareDefinition): MiddlewareInterface
