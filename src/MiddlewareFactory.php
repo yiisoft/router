@@ -23,16 +23,17 @@ final class MiddlewareFactory implements MiddlewareFactoryInterface
 
     public function create($middlewareDefinition): MiddlewareInterface
     {
-        $this->validateMiddleware($middlewareDefinition);
         return $this->createMiddleware($middlewareDefinition);
     }
 
     /**
      * @param callable|string|array $middleware
-     * @return MiddlewareInterface|string|array
+     * @return MiddlewareInterface
      */
-    private function createMiddleware($middlewareDefinition)
+    private function createMiddleware($middlewareDefinition): MiddlewareInterface
     {
+        $this->validateMiddleware($middlewareDefinition);
+
         if (is_string($middlewareDefinition)) {
             if ($this->container === null) {
                 throw new InvalidArgumentException('Route container must not be null for lazy loaded middleware.');
@@ -54,7 +55,7 @@ final class MiddlewareFactory implements MiddlewareFactoryInterface
             return $this->wrapCallable($middlewareDefinition);
         }
 
-        return $middlewareDefinition;
+        throw new \RuntimeException('Middleware creating error.');
     }
 
     private function wrapCallable($callback): MiddlewareInterface
