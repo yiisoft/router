@@ -9,14 +9,16 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Yiisoft\Router\Dispatcher;
+use Yiisoft\Router\MiddlewareDispatcher;
 use Yiisoft\Router\MatchingResult;
 use Yiisoft\Http\Method;
+use Yiisoft\Router\MiddlewareFactory;
+use Yiisoft\Router\MiddlewareStack;
 use Yiisoft\Router\Route;
 
 final class MatchingResultTest extends TestCase
 {
-    public function testFromSucess(): void
+    public function testFromSuccess(): void
     {
         $route = Route::get('/{name}');
 
@@ -44,7 +46,8 @@ final class MatchingResultTest extends TestCase
 
     public function testProcessSuccess(): void
     {
-        $dispatcher = new Dispatcher($this->createMock(ContainerInterface::class));
+        $container = $this->createMock(ContainerInterface::class);
+        $dispatcher = new MiddlewareDispatcher(new MiddlewareFactory($container), new MiddlewareStack());
         $route = Route::post('/', null, $dispatcher)->addMiddleware($this->getMiddleware());
         $result = MatchingResult::fromSuccess($route, []);
         $request = new ServerRequest('POST', '/');
@@ -63,7 +66,7 @@ final class MatchingResultTest extends TestCase
         $this->assertSame(404, $response->getStatusCode());
     }
 
-    private function getMiddleware()
+    private function getMiddleware(): callable
     {
         return static function () {
             return new Response(201);

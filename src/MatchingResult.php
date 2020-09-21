@@ -16,13 +16,13 @@ final class MatchingResult implements MiddlewareInterface
     private Route $route;
     private array $parameters = [];
     private array $methods = [];
-    private ?DispatcherInterface $dispatcher = null;
+    private ?MiddlewareDispatcher $dispatcher = null;
 
     private function __construct()
     {
     }
 
-    public function withDispatcher(DispatcherInterface $dispatcher): self
+    public function withDispatcher(MiddlewareDispatcher $dispatcher): self
     {
         $new = clone $this;
         $new->dispatcher = $dispatcher;
@@ -74,7 +74,7 @@ final class MatchingResult implements MiddlewareInterface
         $route = $this->route;
 
         if ($this->dispatcher !== null && !$route->hasDispatcher()) {
-            $route = $route->withDispatcher($this->dispatcher);
+            $route->injectDispatcher($this->dispatcher);
         }
 
         return $route->getDispatcherWithMiddlewares()->dispatch($request, $handler);

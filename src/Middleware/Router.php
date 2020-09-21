@@ -10,16 +10,16 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Http\Status;
-use Yiisoft\Router\DispatcherInterface;
+use Yiisoft\Router\MiddlewareDispatcher;
 use Yiisoft\Router\UrlMatcherInterface;
 
 final class Router implements MiddlewareInterface
 {
     private UrlMatcherInterface $matcher;
     private ResponseFactoryInterface $responseFactory;
-    private DispatcherInterface $dispatcher;
+    private MiddlewareDispatcher $dispatcher;
 
-    public function __construct(UrlMatcherInterface $matcher, ResponseFactoryInterface $responseFactory, DispatcherInterface $dispatcher)
+    public function __construct(UrlMatcherInterface $matcher, ResponseFactoryInterface $responseFactory, MiddlewareDispatcher $dispatcher)
     {
         $this->matcher = $matcher;
         $this->responseFactory = $responseFactory;
