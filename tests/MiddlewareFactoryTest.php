@@ -9,7 +9,6 @@ use Yiisoft\Router\MiddlewareFactory;
 use Yiisoft\Router\MiddlewareFactoryInterface;
 use Yiisoft\Router\Tests\Support\TestMiddleware;
 
-
 class MiddlewareFactoryTest extends TestCase
 {
     public function testMiddlewareAddSuccessStringLL(): void

@@ -72,4 +72,3 @@ class MiddlewareStack implements MiddlewareStackInterface
         };
     }
 }
-
