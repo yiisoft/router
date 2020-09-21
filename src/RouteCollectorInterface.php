@@ -34,7 +34,7 @@ interface RouteCollectorInterface
      * @param MiddlewareDispatcher $dispatcher container instance
      * @return RouteCollectorInterface
      */
-    public function injectDispatcher(MiddlewareDispatcher $dispatcher): void;
+    public function withDispatcher(MiddlewareDispatcher $dispatcher): self;
 
     /**
      * @return bool if there is container specified

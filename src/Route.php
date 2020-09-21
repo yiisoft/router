@@ -34,6 +34,13 @@ final class Route
         $this->dispatcher = $dispatcher;
     }
 
+    public function withDispatcher(MiddlewareDispatcher $dispatcher): self
+    {
+        $route = clone $this;
+        $route->dispatcher = $dispatcher;
+        return $route;
+    }
+
     public function getDispatcherWithMiddlewares(): MiddlewareDispatcher
     {
         if ($this->dispatcher->hasMiddlewares()) {
