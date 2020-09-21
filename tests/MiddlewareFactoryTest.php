@@ -11,14 +11,14 @@ use Yiisoft\Router\Tests\Support\TestMiddleware;
 
 class MiddlewareFactoryTest extends TestCase
 {
-    public function testMiddlewareAddSuccessStringLL(): void
+    public function testCreateFromString(): void
     {
         $container = $this->getContainer([TestMiddleware::class => new TestMiddleware()]);
         $middleware = $this->getMiddlewareFactory($container)->create(TestMiddleware::class);
         $this->assertInstanceOf(MiddlewareInterface::class, $middleware);
     }
 
-    public function testMiddlewareAddSuccessArrayLL(): void
+    public function testCreateFromArray(): void
     {
         $container = $this->getContainer([TestController::class => new TestController()]);
         $middleware = $this->getMiddlewareFactory($container)->create([TestController::class, 'index']);
@@ -31,32 +31,32 @@ class MiddlewareFactoryTest extends TestCase
         $this->getMiddlewareFactory()->create(new \stdClass());
     }
 
-    public function testInvalidMiddlewareAddWrongStringLL(): void
+    public function testInvalidMiddlewareAddWrongString(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->getMiddlewareFactory()->create('test');
     }
 
-    public function testInvalidMiddlewareAddWrongStringClassLL(): void
+    public function testInvalidMiddlewareAddWrongStringClass(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Parameter should be either PSR middleware class name or a callable.');
         $this->getMiddlewareFactory()->create(TestController::class);
     }
 
-    public function testInvalidMiddlewareAddWrongArraySizeLL(): void
+    public function testInvalidMiddlewareAddWrongArraySize(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->getMiddlewareFactory()->create(['test']);
     }
 
-    public function testInvalidMiddlewareAddWrongArrayClassLL(): void
+    public function testInvalidMiddlewareAddWrongArrayClass(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->getMiddlewareFactory()->create(['class', 'test']);
     }
 
-    public function testInvalidMiddlewareAddWrongArrayTypeLL(): void
+    public function testInvalidMiddlewareAddWrongArrayType(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->getMiddlewareFactory()->create(['class' => \Yiisoft\Router\Tests\Support\TestController::class, 'index']);

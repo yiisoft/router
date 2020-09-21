@@ -92,7 +92,7 @@ final class MiddlewareDispatcherTest extends TestCase
         $this->assertSame(403, $response->getStatusCode());
     }
 
-    public function testMiddlewareCallSuccessArrayLL(): void
+    public function testLazyLoadedArrayMiddlewareSuccessfulCall(): void
     {
         $request = new ServerRequest('GET', '/');
         $container = $this->getContainer([
