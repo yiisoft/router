@@ -63,7 +63,7 @@ final class Group implements RouteCollectorInterface
     {
         $group = clone $this;
         $group->dispatcher = $dispatcher;
-        foreach ($this->items as $index => $item) {
+        foreach ($group->items as $index => $item) {
             if (!$item->hasDispatcher()) {
                 $item = $item->withDispatcher($dispatcher);
                 $group->items[$index] = $item;
