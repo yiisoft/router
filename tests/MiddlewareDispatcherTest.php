@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Router\MiddlewareDispatcher;
 use Yiisoft\Router\MiddlewareFactory;
@@ -22,11 +23,35 @@ final class MiddlewareDispatcherTest extends TestCase
         $container = $this->createMock(ContainerInterface::class);
         $request = new ServerRequest('GET', '/');
 
-        $dispatcher = $this->getDispatcher($container)->withMiddlewares([
-            function () {
-                return new Response(418);
-            },
-        ]);
+        $dispatcher = $this->getDispatcher($container)->withMiddlewares(
+            [
+                function () {
+                    return new Response(418);
+                },
+            ]
+        );
+
+        $response = $dispatcher->dispatch($request, $this->getRequestHandler());
+        $this->assertSame(418, $response->getStatusCode());
+    }
+
+    public function testAddPsrMiddleware()
+    {
+        $container = $this->createMock(ContainerInterface::class);
+        $request = new ServerRequest('GET', '/');
+
+        $dispatcher = $this->getDispatcher($container)->withMiddlewares(
+            [
+                new class() implements MiddlewareInterface {
+                    public function process(
+                        ServerRequestInterface $request,
+                        RequestHandlerInterface $handler
+                    ): ResponseInterface {
+                        return new Response(418);
+                    }
+                },
+            ]
+        );
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(418, $response->getStatusCode());
@@ -36,11 +61,13 @@ final class MiddlewareDispatcherTest extends TestCase
     {
         $request = new ServerRequest('GET', '/');
 
-        $dispatcher = $this->getDispatcher()->withMiddlewares([
-            static function (): ResponseInterface {
-                return (new Response())->withStatus(418);
-            },
-        ]);
+        $dispatcher = $this->getDispatcher()->withMiddlewares(
+            [
+                static function (): ResponseInterface {
+                    return (new Response())->withStatus(418);
+                },
+            ]
+        );
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(418, $response->getStatusCode());
