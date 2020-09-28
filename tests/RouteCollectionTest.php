@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Yiisoft\Router\Tests;
 
 use PHPUnit\Framework\TestCase;
@@ -7,7 +9,7 @@ use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
 
-class RouteCollectionTest extends TestCase
+final class RouteCollectionTest extends TestCase
 {
     public function testAddRouteWithDuplicateName(): void
     {

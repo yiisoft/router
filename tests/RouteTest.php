@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Yiisoft\Router\Tests;
 
 use Nyholm\Psr7\Response;
@@ -138,9 +140,11 @@ final class RouteTest extends TestCase
     public function testDispatcherInjecting(): void
     {
         $request = new ServerRequest('GET', '/');
-        $container = $this->getContainer([
-            TestController::class => new TestController(),
-        ]);
+        $container = $this->getContainer(
+            [
+                TestController::class => new TestController(),
+            ]
+        );
         $dispatcher = $this->getDispatcher($container);
         $route = Route::get('/', [TestController::class, 'index']);
         $route->injectDispatcher($dispatcher);

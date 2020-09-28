@@ -38,15 +38,7 @@ final class MiddlewareFactory implements MiddlewareFactoryInterface
             return $this->container->get($middlewareDefinition);
         }
 
-        if (is_array($middlewareDefinition) && !is_object($middlewareDefinition[0])) {
-            return $this->wrapCallable($middlewareDefinition);
-        }
-
-        if ($this->isCallable($middlewareDefinition)) {
-            return $this->wrapCallable($middlewareDefinition);
-        }
-
-        throw new \RuntimeException('Middleware creating error.');
+        return $this->wrapCallable($middlewareDefinition);
     }
 
     private function wrapCallable($callback): MiddlewareInterface
@@ -96,9 +88,7 @@ final class MiddlewareFactory implements MiddlewareFactoryInterface
      */
     private function validateMiddleware($middlewareDefinition): void
     {
-        if (
-            is_string($middlewareDefinition) && is_subclass_of($middlewareDefinition, MiddlewareInterface::class)
-        ) {
+        if (is_string($middlewareDefinition) && is_subclass_of($middlewareDefinition, MiddlewareInterface::class)) {
             return;
         }
 
@@ -112,7 +102,9 @@ final class MiddlewareFactory implements MiddlewareFactoryInterface
     private function isCallable($definition): bool
     {
         if (is_callable($definition)) {
-            return true;
+            return is_object($definition)
+                ? !$definition instanceof MiddlewareInterface
+                : true;
         }
 
         return is_array($definition)

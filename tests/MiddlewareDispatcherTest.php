@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Yiisoft\Router\Tests;
 
 use Nyholm\Psr7\Response;
@@ -22,11 +24,13 @@ final class MiddlewareDispatcherTest extends TestCase
         $container = $this->createMock(ContainerInterface::class);
         $request = new ServerRequest('GET', '/');
 
-        $dispatcher = $this->getDispatcher($container)->withMiddlewares([
-            function () {
-                return new Response(418);
-            },
-        ]);
+        $dispatcher = $this->getDispatcher($container)->withMiddlewares(
+            [
+                function () {
+                    return new Response(418);
+                },
+            ]
+        );
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(418, $response->getStatusCode());
@@ -36,11 +40,13 @@ final class MiddlewareDispatcherTest extends TestCase
     {
         $request = new ServerRequest('GET', '/');
 
-        $dispatcher = $this->getDispatcher()->withMiddlewares([
-            static function (): ResponseInterface {
-                return (new Response())->withStatus(418);
-            },
-        ]);
+        $dispatcher = $this->getDispatcher()->withMiddlewares(
+            [
+                static function (): ResponseInterface {
+                    return (new Response())->withStatus(418);
+                },
+            ]
+        );
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(418, $response->getStatusCode());
@@ -95,9 +101,11 @@ final class MiddlewareDispatcherTest extends TestCase
     public function testArrayMiddlewareSuccessfulCall(): void
     {
         $request = new ServerRequest('GET', '/');
-        $container = $this->getContainer([
-            TestController::class => new TestController(),
-        ]);
+        $container = $this->getContainer(
+            [
+                TestController::class => new TestController(),
+            ]
+        );
         $dispatcher = $this->getDispatcher($container)->withMiddlewares([[TestController::class, 'index']]);
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
