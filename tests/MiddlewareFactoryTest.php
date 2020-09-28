@@ -45,7 +45,8 @@ final class MiddlewareFactoryTest extends TestCase
 
         $this->getMiddlewareFactory()->create(
             new class() implements MiddlewareInterface {
-                public function __invoke(){
+                public function __invoke()
+                {
                 }
                 public function process(
                     ServerRequestInterface $request,
