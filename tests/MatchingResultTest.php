@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Yiisoft\Router\Tests;
 
 use Nyholm\Psr7\Response;

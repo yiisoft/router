@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Yiisoft\Router\Tests;
 
 use Nyholm\Psr7\ServerRequest;
@@ -18,7 +20,7 @@ use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectorInterface;
 use Yiisoft\Router\Tests\Support\Container;
 
-class GroupTest extends TestCase
+final class GroupTest extends TestCase
 {
     public function testAddRoute(): void
     {
@@ -67,11 +69,18 @@ class GroupTest extends TestCase
             return new Response(200, [], null, '1.1', implode($request->getAttributes()));
         };
 
-        $group = Group::create('/outergroup', [
-            Group::create('/innergroup', [
-                Route::get('/test1')->name('request1')
-            ])->addMiddleware($middleware2),
-        ], $this->getDispatcher())->addMiddleware($middleware1);
+        $group = Group::create(
+            '/outergroup',
+            [
+                Group::create(
+                    '/innergroup',
+                    [
+                        Route::get('/test1')->name('request1')
+                    ]
+                )->addMiddleware($middleware2),
+            ],
+            $this->getDispatcher()
+        )->addMiddleware($middleware1);
 
         $collector = Group::create();
         $collector->addGroup($group);
@@ -85,9 +94,13 @@ class GroupTest extends TestCase
 
     public function testGroupMiddlewareFullStackCalled(): void
     {
-        $group = Group::create('/group', function (RouteCollectorInterface $r) {
-            $r->addRoute(Route::get('/test1')->name('request1'));
-        }, $this->getDispatcher());
+        $group = Group::create(
+            '/group',
+            function (RouteCollectorInterface $r) {
+                $r->addRoute(Route::get('/test1')->name('request1'));
+            },
+            $this->getDispatcher()
+        );
 
         $request = new ServerRequest('GET', '/group/test1');
         $middleware1 = function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
@@ -111,9 +124,13 @@ class GroupTest extends TestCase
 
     public function testGroupMiddlewareStackInterrupted(): void
     {
-        $group = Group::create('/group', function (RouteCollectorInterface $r) {
-            $r->addRoute(Route::get('/test1')->name('request1'));
-        }, $this->getDispatcher());
+        $group = Group::create(
+            '/group',
+            function (RouteCollectorInterface $r) {
+                $r->addRoute(Route::get('/test1')->name('request1'));
+            },
+            $this->getDispatcher()
+        );
 
         $request = new ServerRequest('GET', '/group/test1');
         $middleware1 = function () {
@@ -147,16 +164,26 @@ class GroupTest extends TestCase
         };
 
         $root = Group::create();
-        $root->addGroup(Group::create('/api', static function (Group $group) use ($logoutRoute, $listRoute, $viewRoute, $middleware1, $middleware2) {
-            $group->addRoute($logoutRoute);
-            $group->addGroup(Group::create('/post', static function (Group $group) use ($listRoute, $viewRoute) {
-                $group->addRoute($listRoute);
-                $group->addRoute($viewRoute);
-            }));
+        $root->addGroup(
+            Group::create(
+                '/api',
+                static function (Group $group) use ($logoutRoute, $listRoute, $viewRoute, $middleware1, $middleware2) {
+                    $group->addRoute($logoutRoute);
+                    $group->addGroup(
+                        Group::create(
+                            '/post',
+                            static function (Group $group) use ($listRoute, $viewRoute) {
+                                $group->addRoute($listRoute);
+                                $group->addRoute($viewRoute);
+                            }
+                        )
+                    );
 
-            $group->addMiddleware($middleware1);
-            $group->addMiddleware($middleware2);
-        }));
+                    $group->addMiddleware($middleware1);
+                    $group->addMiddleware($middleware2);
+                }
+            )
+        );
 
         $this->assertCount(1, $root->getItems());
         $api = $root->getItems()[0];
@@ -192,15 +219,24 @@ class GroupTest extends TestCase
             return new Response();
         };
 
-        $root = Group::create(null, [
-            Group::create('/api', [
-                $logoutRoute,
-                Group::create('/post', [
-                    $listRoute,
-                    $viewRoute
-                ])
-            ])->addMiddleware($middleware1)->addMiddleware($middleware2)
-        ]);
+        $root = Group::create(
+            null,
+            [
+                Group::create(
+                    '/api',
+                    [
+                        $logoutRoute,
+                        Group::create(
+                            '/post',
+                            [
+                                $listRoute,
+                                $viewRoute
+                            ]
+                        )
+                    ]
+                )->addMiddleware($middleware1)->addMiddleware($middleware2)
+            ]
+        );
 
         $this->assertCount(1, $root->getItems());
         $api = $root->getItems()[0];

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Yiisoft\Router\Tests;
 
 use Nyholm\Psr7\Response;
@@ -8,7 +10,6 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Router\MiddlewareDispatcher;
 use Yiisoft\Router\MiddlewareFactory;
@@ -27,28 +28,6 @@ final class MiddlewareDispatcherTest extends TestCase
             [
                 function () {
                     return new Response(418);
-                },
-            ]
-        );
-
-        $response = $dispatcher->dispatch($request, $this->getRequestHandler());
-        $this->assertSame(418, $response->getStatusCode());
-    }
-
-    public function testAddPsrMiddleware()
-    {
-        $container = $this->createMock(ContainerInterface::class);
-        $request = new ServerRequest('GET', '/');
-
-        $dispatcher = $this->getDispatcher($container)->withMiddlewares(
-            [
-                new class() implements MiddlewareInterface {
-                    public function process(
-                        ServerRequestInterface $request,
-                        RequestHandlerInterface $handler
-                    ): ResponseInterface {
-                        return new Response(418);
-                    }
                 },
             ]
         );
@@ -122,9 +101,11 @@ final class MiddlewareDispatcherTest extends TestCase
     public function testArrayMiddlewareSuccessfulCall(): void
     {
         $request = new ServerRequest('GET', '/');
-        $container = $this->getContainer([
-            TestController::class => new TestController(),
-        ]);
+        $container = $this->getContainer(
+            [
+                TestController::class => new TestController(),
+            ]
+        );
         $dispatcher = $this->getDispatcher($container)->withMiddlewares([[TestController::class, 'index']]);
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
