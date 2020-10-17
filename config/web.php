@@ -10,5 +10,5 @@ use Yiisoft\Router\RouteCollectorInterface;
 return [
     MiddlewareStackInterface::class => MiddlewareStack::class,
     MiddlewareFactoryInterface::class => MiddlewareFactory::class,
-    RouteCollectorInterface::class => Group::create(),
+    RouteCollectorInterface::class => static fn() => Group::create(),
 ];
