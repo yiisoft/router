@@ -8,7 +8,7 @@ use Yiisoft\Router\MiddlewareStackInterface;
 use Yiisoft\Router\RouteCollectorInterface;
 
 return [
-    MiddlewareStackInterface::class => Middlewarestack::class,
+    MiddlewareStackInterface::class => MiddlewareStack::class,
     MiddlewareFactoryInterface::class => MiddlewareFactory::class,
     RouteCollectorInterface::class => Group::create(),
 ];
