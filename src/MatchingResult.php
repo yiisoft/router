@@ -9,6 +9,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Http\Method;
+use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
 final class MatchingResult implements MiddlewareInterface
 {
