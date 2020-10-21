@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use Yiisoft\Http\Method;
+use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
 /**
  * Route defines a mapping from URL to callback / name and vice versa

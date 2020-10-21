@@ -6,6 +6,7 @@ namespace Yiisoft\Router;
 
 use InvalidArgumentException;
 use Psr\Http\Server\MiddlewareInterface;
+use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
 final class Group implements RouteCollectorInterface
 {
