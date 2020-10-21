@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
+use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
+
 interface RouteCollectorInterface
 {
     /**

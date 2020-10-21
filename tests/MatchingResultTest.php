@@ -11,11 +11,11 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Yiisoft\Router\MiddlewareDispatcher;
-use Yiisoft\Router\MatchingResult;
 use Yiisoft\Http\Method;
-use Yiisoft\Router\MiddlewareFactory;
-use Yiisoft\Router\MiddlewareStack;
+use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
+use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
+use Yiisoft\Middleware\Dispatcher\MiddlewareStack;
+use Yiisoft\Router\MatchingResult;
 use Yiisoft\Router\Route;
 
 final class MatchingResultTest extends TestCase
