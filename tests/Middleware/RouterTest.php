@@ -11,6 +11,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
@@ -76,14 +77,8 @@ final class RouterTest extends TestCase
             {
             }
 
-            public function getLastMatchedRequest(): ?ServerRequestInterface
+            public function getCurrentUri(): ?UriInterface
             {
-            }
-
-            public function getRouteCollection(): RouteCollectionInterface
-            {
-                $collector = Group::create();
-                return new RouteCollection($collector);
             }
 
             /**
