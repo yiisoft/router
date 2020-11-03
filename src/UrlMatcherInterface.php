@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
 
 /**
  * UrlMatcherInterface allows finding a matching route given a PSR-8 server request. It is preferred to type-hint
@@ -21,8 +22,8 @@ interface UrlMatcherInterface
     public function getCurrentRoute(): ?Route;
 
     /**
-     * Returns last matched Request
-     * @return ServerRequestInterface|null current route
+     * Returns current URI
+     * @return UriInterface|null current URI
      */
-    public function getLastMatchedRequest(): ?ServerRequestInterface;
+    public function getCurrentUri(): ?UriInterface;
 }
