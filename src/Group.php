@@ -137,7 +137,7 @@ final class Group implements RouteCollectorInterface
     }
 
     /**
-     * @return Route|Group[]
+     * @return Route[]|Group[]
      */
     public function getItems(): array
     {
