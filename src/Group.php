@@ -116,7 +116,6 @@ final class Group implements RouteCollectorInterface
             $type = gettype($middleware) . ' with value "' . $middleware . '"';
         } elseif (is_object($middleware)) {
             $type = 'an instance of ' . get_class($middleware);
-
         } else {
             $type = gettype($middleware);
         }
