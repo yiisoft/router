@@ -112,7 +112,16 @@ final class Group implements RouteCollectorInterface
             return;
         }
 
-        throw new InvalidArgumentException('Parameter should be either PSR middleware class name or a callable.');
+        if (is_scalar($middleware)) {
+            $type = gettype($middleware) . ' with value "' . $middleware . '"';
+        } elseif (is_object($middleware)) {
+            $type = 'an instance of ' . get_class($middleware);
+
+        } else {
+            $type = gettype($middleware);
+        }
+
+        throw new InvalidArgumentException("Parameter should be either PSR middleware class name or a callable, $type given.");
     }
 
     private function isCallable($definition): bool
