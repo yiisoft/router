@@ -15,8 +15,10 @@ interface UrlGeneratorInterface
      *
      * @param string $name name of the route
      * @param array $parameters parameter-value set
-     * @return string URL generated
+     *
      * @throws RouteNotFoundException in case there is no route with the name specified
+     *
+     * @return string URL generated
      */
     public function generate(string $name, array $parameters = []): string;
 
@@ -27,8 +29,10 @@ interface UrlGeneratorInterface
      * @param array $parameters parameter-value set
      * @param string|null $scheme host scheme
      * @param string|null $host host for manual setup
-     * @return string URL generated
+     *
      * @throws RouteNotFoundException in case there is no route with the name specified
+     *
+     * @return string URL generated
      */
     public function generateAbsolute(string $name, array $parameters = [], string $scheme = null, string $host = null): string;
 

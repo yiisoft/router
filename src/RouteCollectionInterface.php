@@ -13,6 +13,7 @@ interface RouteCollectionInterface
 
     /**
      * @param string $name
+     *
      * @return Route
      */
     public function getRoute(string $name): Route;

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router\Tests;
 
-use Nyholm\Psr7\ServerRequest;
 use Nyholm\Psr7\Response;
+use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -75,7 +75,7 @@ final class GroupTest extends TestCase
                 Group::create(
                     '/innergroup',
                     [
-                        Route::get('/test1')->name('request1')
+                        Route::get('/test1')->name('request1'),
                     ]
                 )->addMiddleware($middleware2),
             ],
@@ -230,11 +230,11 @@ final class GroupTest extends TestCase
                             '/post',
                             [
                                 $listRoute,
-                                $viewRoute
+                                $viewRoute,
                             ]
-                        )
+                        ),
                     ]
-                )->addMiddleware($middleware1)->addMiddleware($middleware2)
+                )->addMiddleware($middleware1)->addMiddleware($middleware2),
             ]
         );
 

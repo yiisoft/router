@@ -38,6 +38,7 @@ final class RouteCollection implements RouteCollectionInterface
 
     /**
      * @param string $name
+     *
      * @return Route
      */
     public function getRoute(string $name): Route
@@ -54,6 +55,7 @@ final class RouteCollection implements RouteCollectionInterface
      * Returns routes tree array
      *
      * @param bool $routeAsString
+     *
      * @return array
      */
     public function getRouteTree(bool $routeAsString = true): array
@@ -72,7 +74,7 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * Build routes array
      *
-     * @param Route[]|Group[] $items
+     * @param Group[]|Route[] $items
      */
     private function injectItems(array $items): void
     {
@@ -83,7 +85,8 @@ final class RouteCollection implements RouteCollectionInterface
 
     /**
      * Add an item into routes array
-     * @param Route|Group $route
+     *
+     * @param Group|Route $route
      */
     private function injectItem($route): void
     {
@@ -146,6 +149,7 @@ final class RouteCollection implements RouteCollectionInterface
      *
      * @param array $items
      * @param bool $routeAsString
+     *
      * @return array
      */
     private function buildTree(array $items, bool $routeAsString): array
