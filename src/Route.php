@@ -20,7 +20,7 @@ final class Route
     private ?MiddlewareDispatcher $dispatcher = null;
 
     /**
-     * @var callable[]|string[]|array[]
+     * @var array[]|callable[]|string[]
      */
     private array $middlewareDefinitions = [];
     private array $defaults = [];
@@ -58,8 +58,9 @@ final class Route
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middlewareDefinition primary route handler {@see addMiddleware()}
+     * @param array|callable|string|null $middlewareDefinition primary route handler {@see addMiddleware()}
      * @param MiddlewareDispatcher|null $dispatcher
+     *
      * @return self
      */
     public static function get(string $pattern, $middlewareDefinition = null, ?MiddlewareDispatcher $dispatcher = null): self
@@ -69,8 +70,9 @@ final class Route
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middlewareDefinition primary route handler {@see addMiddleware()}
+     * @param array|callable|string|null $middlewareDefinition primary route handler {@see addMiddleware()}
      * @param MiddlewareDispatcher|null $dispatcher
+     *
      * @return self
      */
     public static function post(string $pattern, $middlewareDefinition = null, ?MiddlewareDispatcher $dispatcher = null): self
@@ -80,8 +82,9 @@ final class Route
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middlewareDefinition primary route handler {@see addMiddleware()}
+     * @param array|callable|string|null $middlewareDefinition primary route handler {@see addMiddleware()}
      * @param MiddlewareDispatcher|null $dispatcher
+     *
      * @return self
      */
     public static function put(string $pattern, $middlewareDefinition = null, ?MiddlewareDispatcher $dispatcher = null): self
@@ -91,8 +94,9 @@ final class Route
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middlewareDefinition primary route handler {@see addMiddleware()}
+     * @param array|callable|string|null $middlewareDefinition primary route handler {@see addMiddleware()}
      * @param MiddlewareDispatcher|null $dispatcher
+     *
      * @return self
      */
     public static function delete(string $pattern, $middlewareDefinition = null, ?MiddlewareDispatcher $dispatcher = null): self
@@ -102,8 +106,9 @@ final class Route
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middlewareDefinition primary route handler {@see addMiddleware()}
+     * @param array|callable|string|null $middlewareDefinition primary route handler {@see addMiddleware()}
      * @param MiddlewareDispatcher|null $dispatcher
+     *
      * @return self
      */
     public static function patch(string $pattern, $middlewareDefinition = null, ?MiddlewareDispatcher $dispatcher = null): self
@@ -113,8 +118,9 @@ final class Route
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middlewareDefinition primary route handler {@see addMiddleware()}
+     * @param array|callable|string|null $middlewareDefinition primary route handler {@see addMiddleware()}
      * @param MiddlewareDispatcher|null $dispatcher
+     *
      * @return self
      */
     public static function head(string $pattern, $middlewareDefinition = null, ?MiddlewareDispatcher $dispatcher = null): self
@@ -124,8 +130,9 @@ final class Route
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middlewareDefinition primary route handler {@see addMiddleware()}
+     * @param array|callable|string|null $middlewareDefinition primary route handler {@see addMiddleware()}
      * @param MiddlewareDispatcher|null $dispatcher
+     *
      * @return self
      */
     public static function options(string $pattern, $middlewareDefinition = null, ?MiddlewareDispatcher $dispatcher = null): self
@@ -136,8 +143,9 @@ final class Route
     /**
      * @param array $methods
      * @param string $pattern
-     * @param callable|string|array|null $middlewareDefinition primary route handler {@see addMiddleware()}
+     * @param array|callable|string|null $middlewareDefinition primary route handler {@see addMiddleware()}
      * @param MiddlewareDispatcher|null $dispatcher
+     *
      * @return self
      */
     public static function methods(
@@ -157,8 +165,9 @@ final class Route
 
     /**
      * @param string $pattern
-     * @param callable|string|array|null $middlewareDefinition primary route handler {@see addMiddleware()}
+     * @param array|callable|string|null $middlewareDefinition primary route handler {@see addMiddleware()}
      * @param MiddlewareDispatcher|null $dispatcher
+     *
      * @return self
      */
     public static function anyMethod(string $pattern, $middlewareDefinition = null, ?MiddlewareDispatcher $dispatcher = null): self
@@ -191,6 +200,7 @@ final class Route
      * Parameter default values indexed by parameter names
      *
      * @param array $defaults
+     *
      * @return self
      */
     public function defaults(array $defaults): self
@@ -211,7 +221,8 @@ final class Route
      * injection container passed to the route. Current request and handler could be obtained by
      * type-hinting for ServerRequestInterface and RequestHandlerInterface.
      *
-     * @param callable|string|array $middlewareDefinition
+     * @param array|callable|string $middlewareDefinition
+     *
      * @return Route
      */
     public function addMiddleware($middlewareDefinition): self

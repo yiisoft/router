@@ -32,7 +32,7 @@ final class Group implements RouteCollectorInterface
      * Create a new instance
      *
      * @param string|null $prefix
-     * @param callable|array $routes
+     * @param array|callable $routes
      * @param MiddlewareDispatcher $dispatcher
      *
      * @return self
@@ -42,11 +42,11 @@ final class Group implements RouteCollectorInterface
         if (\is_callable($routes)) {
             $callback = $routes;
         } elseif (is_array($routes)) {
-            $callback = static function (Group $group) use (&$routes) {
+            $callback = static function (self $group) use (&$routes) {
                 foreach ($routes as $route) {
                     if ($route instanceof Route) {
                         $group->addRoute($route);
-                    } elseif ($route instanceof Group) {
+                    } elseif ($route instanceof self) {
                         $group->addGroup($route);
                     } else {
                         throw new InvalidArgumentException('Route should be either instance of Route or Group.');
@@ -88,7 +88,7 @@ final class Group implements RouteCollectorInterface
         return $this;
     }
 
-    public function addGroup(Group $group): self
+    public function addGroup(self $group): self
     {
         if (!$group->hasDispatcher() && $this->hasDispatcher()) {
             $group = $group->withDispatcher($this->dispatcher);
@@ -98,7 +98,7 @@ final class Group implements RouteCollectorInterface
     }
 
     /**
-     * @param MiddlewareInterface|callable|string|array $middleware
+     * @param array|callable|MiddlewareInterface|string $middleware
      */
     private function validateMiddleware($middleware): void
     {
@@ -134,6 +134,7 @@ final class Group implements RouteCollectorInterface
 
     /**
      * @param callable|MiddlewareInterface $middleware
+     *
      * @return $this
      */
     public function addMiddleware($middleware): self
@@ -145,7 +146,7 @@ final class Group implements RouteCollectorInterface
     }
 
     /**
-     * @return Route[]|Group[]
+     * @return Group[]|Route[]
      */
     public function getItems(): array
     {
