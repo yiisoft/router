@@ -17,12 +17,14 @@ interface UrlMatcherInterface
 
     /**
      * Returns the current Route object
+     *
      * @return Route|null current route
      */
     public function getCurrentRoute(): ?Route;
 
     /**
      * Returns current URI
+     *
      * @return UriInterface|null current URI
      */
     public function getCurrentUri(): ?UriInterface;

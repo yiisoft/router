@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router\Tests\Middleware;
 
-use Nyholm\Psr7\Response;
 use Nyholm\Psr7\Factory\Psr17Factory;
+use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
@@ -20,9 +20,6 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareStack;
 use Yiisoft\Router\MatchingResult;
 use Yiisoft\Router\Middleware\Router;
 use Yiisoft\Router\Route;
-use Yiisoft\Router\Group;
-use Yiisoft\Router\RouteCollection;
-use Yiisoft\Router\RouteCollectionInterface;
 use Yiisoft\Router\UrlMatcherInterface;
 
 final class RouterTest extends TestCase
@@ -83,7 +80,9 @@ final class RouterTest extends TestCase
 
             /**
              * Emulates router with a single `GET /` route
+             *
              * @param ServerRequestInterface $request
+             *
              * @return MatchingResult
              */
             public function match(ServerRequestInterface $request): MatchingResult
