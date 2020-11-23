@@ -211,19 +211,17 @@ final class Route
     }
 
     /**
-     * Prepends a handler that should be invoked for a matching route.
-     * Last added handler will be invoked first.
+     * Adds a handler middleware that should be invoked for a matched route.
+     * Last added handler will be executed first.
      *
-     * Parameter can be a PSR middleware class name, handler action
-     * (an array of [handlerClass, handlerMethod]) or a callable.
-     *
+     * @param array|callable|string $middlewareDefinition A PSR-15 middleware class name, handler action
+     * (an array of [handlerClass, handlerMethod]) or a callable with
+     * `function(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface` signature.
      * For handler action and callable typed parameters are automatically injected using dependency
      * injection container passed to the route. Current request and handler could be obtained by
-     * type-hinting for ServerRequestInterface and RequestHandlerInterface.
+     * type-hinting for {@see ServerRequestInterface} and {@see RequestHandlerInterface}.
      *
-     * @param array|callable|string $middlewareDefinition
-     *
-     * @return Route
+     * @return self
      */
     public function addMiddleware($middlewareDefinition): self
     {
