@@ -8,6 +8,7 @@ use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -346,7 +347,10 @@ final class GroupTest extends TestCase
 
     private function getDispatcher(): MiddlewareDispatcher
     {
-        return new MiddlewareDispatcher(new MiddlewareFactory($this->getContainer()), new MiddlewareStack());
+        return new MiddlewareDispatcher(
+            new MiddlewareFactory($this->getContainer()),
+            new MiddlewareStack($this->createMock(EventDispatcherInterface::class))
+        );
     }
 
     private function getContainer(array $instances = []): ContainerInterface
