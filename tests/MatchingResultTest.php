@@ -8,6 +8,7 @@ use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -49,7 +50,10 @@ final class MatchingResultTest extends TestCase
     public function testProcessSuccess(): void
     {
         $container = $this->createMock(ContainerInterface::class);
-        $dispatcher = new MiddlewareDispatcher(new MiddlewareFactory($container), new MiddlewareStack());
+        $dispatcher = new MiddlewareDispatcher(
+            new MiddlewareFactory($container),
+            new MiddlewareStack($this->createMock(EventDispatcherInterface::class))
+        );
         $route = Route::post('/', null, $dispatcher)->addMiddleware($this->getMiddleware());
         $result = MatchingResult::fromSuccess($route, []);
         $request = new ServerRequest('POST', '/');
