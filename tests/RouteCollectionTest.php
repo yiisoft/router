@@ -23,4 +23,18 @@ final class RouteCollectionTest extends TestCase
         $routeCollection = new RouteCollection($group);
         $routeCollection->getRoutes();
     }
+
+    public function testRouteOverride(): void
+    {
+        $listRoute = Route::get('/')->name('my-route');
+        $viewRoute = Route::get('/{id}')->name('my-route')->override();
+
+        $group = Group::create();
+        $group->addRoute($listRoute);
+        $group->addRoute($viewRoute);
+
+        $routeCollection = new RouteCollection($group);
+        $route = $routeCollection->getRoute('my-route');
+        $this->assertSame('/{id}', $route->getPattern());
+    }
 }
