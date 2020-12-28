@@ -11,10 +11,23 @@ use Yiisoft\Router\RouteCollection;
 
 final class RouteCollectionTest extends TestCase
 {
-    public function testRouteOverride(): void
+    public function testAddRouteWithDuplicateName(): void
     {
         $listRoute = Route::get('/')->name('my-route');
         $viewRoute = Route::get('/{id}')->name('my-route');
+
+        $group = Group::create();
+        $group->addRoute($listRoute);
+        $group->addRoute($viewRoute);
+        $this->expectExceptionMessage("A route with name 'my-route' already exists.");
+        $routeCollection = new RouteCollection($group);
+        $routeCollection->getRoutes();
+    }
+
+    public function testRouteOverride(): void
+    {
+        $listRoute = Route::get('/')->name('my-route');
+        $viewRoute = Route::get('/{id}')->name('my-route')->override();
 
         $group = Group::create();
         $group->addRoute($listRoute);
