@@ -17,7 +17,8 @@ final class Group implements RouteCollectorInterface
     protected ?string $prefix;
 
     /**
-     * @var array|callable|MiddlewareInterface|string
+     * @var array
+     * @psalm-var array<array|callable|MiddlewareInterface|string>
      */
     protected array $middlewares = [];
     private ?MiddlewareDispatcher $dispatcher = null;
