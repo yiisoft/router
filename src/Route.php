@@ -17,6 +17,7 @@ final class Route
     private array $methods;
     private string $pattern;
     private ?string $host = null;
+    private bool $override = false;
     private ?MiddlewareDispatcher $dispatcher = null;
 
     /**
@@ -196,6 +197,13 @@ final class Route
         return $route;
     }
 
+    public function override(): self
+    {
+        $route = clone $this;
+        $route->override = true;
+        return $route;
+    }
+
     /**
      * Parameter default values indexed by parameter names
      *
@@ -267,6 +275,12 @@ final class Route
     public function getHost(): ?string
     {
         return $this->host;
+    }
+
+    public function isOverride(): bool
+
+    {
+        return $this->override;
     }
 
     public function getDefaults(): array
