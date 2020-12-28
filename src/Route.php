@@ -8,7 +8,7 @@ use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
 /**
- * Route defines a mapping from URL to callback / name and vice versa
+ * Route defines a mapping from URL to callback / name and vice versa.
  */
 final class Route
 {
@@ -173,7 +173,7 @@ final class Route
      */
     public static function anyMethod(string $pattern, $middlewareDefinition = null, ?MiddlewareDispatcher $dispatcher = null): self
     {
-        return self::methods(Method::ANY, $pattern, $middlewareDefinition, $dispatcher);
+        return self::methods(Method::ALL, $pattern, $middlewareDefinition, $dispatcher);
     }
 
     public function name(string $name): self
@@ -197,6 +197,11 @@ final class Route
         return $route;
     }
 
+    /**
+     * Marks route as override. When added it will replace existing route with the same name.
+     *
+     * @return self
+     */
     public function override(): self
     {
         $route = clone $this;
@@ -205,7 +210,7 @@ final class Route
     }
 
     /**
-     * Parameter default values indexed by parameter names
+     * Parameter default values indexed by parameter names.
      *
      * @param array $defaults
      *
