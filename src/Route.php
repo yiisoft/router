@@ -278,7 +278,6 @@ final class Route
     }
 
     public function isOverride(): bool
-
     {
         return $this->override;
     }
