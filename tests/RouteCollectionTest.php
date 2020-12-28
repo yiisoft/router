@@ -11,7 +11,7 @@ use Yiisoft\Router\RouteCollection;
 
 final class RouteCollectionTest extends TestCase
 {
-    public function testAddRouteWithDuplicateName(): void
+    public function testRouteOverride(): void
     {
         $listRoute = Route::get('/')->name('my-route');
         $viewRoute = Route::get('/{id}')->name('my-route');
@@ -19,8 +19,9 @@ final class RouteCollectionTest extends TestCase
         $group = Group::create();
         $group->addRoute($listRoute);
         $group->addRoute($viewRoute);
-        $this->expectExceptionMessage("A route with name 'my-route' already exists.");
+
         $routeCollection = new RouteCollection($group);
-        $routeCollection->getRoutes();
+        $route = $routeCollection->getRoute('my-route');
+        $this->assertSame('/{id}', $route->getPattern());
     }
 }

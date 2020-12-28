@@ -94,9 +94,7 @@ final class RouteCollection implements RouteCollectionInterface
 
         $this->items[] = $route->getName();
         $routeName = $route->getName();
-        if (isset($this->routes[$routeName])) {
-            throw new InvalidArgumentException("A route with name '$routeName' already exists.");
-        }
+
         $this->routes[$routeName] = $route;
     }
 
@@ -134,9 +132,6 @@ final class RouteCollection implements RouteCollectionInterface
             }
 
             $routeName = $modifiedItem->getName();
-            if (isset($this->routes[$routeName])) {
-                throw new InvalidArgumentException("A route with name '$routeName' already exists.");
-            }
             $this->routes[$routeName] = $modifiedItem;
         }
     }
