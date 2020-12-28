@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
-
 class FallbackGenerator implements UrlGeneratorInterface
 {
     private UrlGeneratorInterface $urlGenerator;
