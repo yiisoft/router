@@ -33,7 +33,8 @@
         "psr/event-dispatcher": "^1.0",
         "roave/infection-static-analysis-plugin": "^1.5",
         "spatie/phpunit-watcher": "^1.23",
-        "vimeo/psalm": "^4.2"
+        "vimeo/psalm": "^4.2",
+        "yiisoft/router-fastroute": "3.0.x-dev@dev"
     },
     "autoload": {
         "psr-4": {
