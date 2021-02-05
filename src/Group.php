@@ -7,6 +7,12 @@ namespace Yiisoft\Router;
 use InvalidArgumentException;
 use Psr\Http\Server\MiddlewareInterface;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
+use function get_class;
+use function in_array;
+use function is_array;
+use function is_callable;
+use function is_object;
+use function is_string;
 
 final class Group implements RouteCollectorInterface
 {
@@ -44,7 +50,7 @@ final class Group implements RouteCollectorInterface
      */
     public static function create(?string $prefix = null, $routes = [], MiddlewareDispatcher $dispatcher = null): self
     {
-        if (\is_callable($routes)) {
+        if (is_callable($routes)) {
             $callback = $routes;
         } elseif (is_array($routes)) {
             $callback = static function (self $group) use (&$routes) {
@@ -54,7 +60,8 @@ final class Group implements RouteCollectorInterface
                     } elseif ($route instanceof self) {
                         $group->addGroup($route);
                     } else {
-                        throw new InvalidArgumentException('Route should be either instance of Route or Group.');
+                        $type = is_object($route) ? get_class($route) : gettype($route);
+                        throw new InvalidArgumentException(sprintf('Route should be either instance of Route or Group, %s given.', $type));
                     }
                 }
             };
