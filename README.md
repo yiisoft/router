@@ -86,7 +86,7 @@ use \Yiisoft\Router\RouteCollectorInterface;
 // for obtaining router see adapter package of choice readme
 $collector = $container->get(RouteCollectorInterface::class);
     
-$collector->addGroup(Group::create('/api',[
+$collector->addGroup(Group::create('/api', [
     Route::get('/comments'),
     Group::create('/posts', [
         Route::get('/list'),
