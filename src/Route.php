@@ -158,8 +158,7 @@ final class Route
         string $pattern,
         $middlewareDefinition = null,
         ?MiddlewareDispatcher $dispatcher = null
-    ): self
-    {
+    ): self {
         $route = new self($dispatcher);
         $route->methods = $methods;
         $route->pattern = $pattern;
@@ -233,6 +232,7 @@ final class Route
      * Last added handler will be executed first.
      *
      * @param $middlewareDefinition mixed
+     *
      * @return self
      */
     public function addMiddleware($middlewareDefinition): self
