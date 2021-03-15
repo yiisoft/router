@@ -52,9 +52,9 @@ final class GroupTest extends TestCase
             ->addMiddleware($middleware1)
             ->addMiddleware($middleware2);
 
-        $this->assertCount(2, $group->getMiddlewares());
-        $this->assertSame($middleware1, $group->getMiddlewares()[0]);
-        $this->assertSame($middleware2, $group->getMiddlewares()[1]);
+        $this->assertCount(2, $group->getMiddlewareDefinitions());
+        $this->assertSame($middleware1, $group->getMiddlewareDefinitions()[0]);
+        $this->assertSame($middleware2, $group->getMiddlewareDefinitions()[1]);
     }
 
     public function testAddNestedMiddleware(): void
@@ -196,15 +196,15 @@ final class GroupTest extends TestCase
         /** @var Group $postGroup */
         $postGroup = $api->getItems()[1];
         $this->assertInstanceOf(Group::class, $postGroup);
-        $this->assertCount(2, $api->getMiddlewares());
-        $this->assertSame($middleware1, $api->getMiddlewares()[0]);
-        $this->assertSame($middleware2, $api->getMiddlewares()[1]);
+        $this->assertCount(2, $api->getMiddlewareDefinitions());
+        $this->assertSame($middleware1, $api->getMiddlewareDefinitions()[0]);
+        $this->assertSame($middleware2, $api->getMiddlewareDefinitions()[1]);
 
         $this->assertSame('/post', $postGroup->getPrefix());
         $this->assertCount(2, $postGroup->getItems());
         $this->assertSame($listRoute, $postGroup->getItems()[0]);
         $this->assertSame($viewRoute, $postGroup->getItems()[1]);
-        $this->assertEmpty($postGroup->getMiddlewares());
+        $this->assertEmpty($postGroup->getMiddlewareDefinitions());
     }
 
     public function testAddGroupSecondWay(): void
@@ -249,15 +249,15 @@ final class GroupTest extends TestCase
         /** @var Group $postGroup */
         $postGroup = $api->getItems()[1];
         $this->assertInstanceOf(Group::class, $postGroup);
-        $this->assertCount(2, $api->getMiddlewares());
-        $this->assertSame($middleware1, $api->getMiddlewares()[0]);
-        $this->assertSame($middleware2, $api->getMiddlewares()[1]);
+        $this->assertCount(2, $api->getMiddlewareDefinitions());
+        $this->assertSame($middleware1, $api->getMiddlewareDefinitions()[0]);
+        $this->assertSame($middleware2, $api->getMiddlewareDefinitions()[1]);
 
         $this->assertSame('/post', $postGroup->getPrefix());
         $this->assertCount(2, $postGroup->getItems());
         $this->assertSame($listRoute, $postGroup->getItems()[0]);
         $this->assertSame($viewRoute, $postGroup->getItems()[1]);
-        $this->assertEmpty($postGroup->getMiddlewares());
+        $this->assertEmpty($postGroup->getMiddlewareDefinitions());
     }
 
     public function testDispatcherInjected(): void
