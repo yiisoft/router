@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
-use Psr\Http\Server\MiddlewareInterface;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use function get_class;
 use function in_array;
 use function is_array;
 use function is_callable;
 use function is_object;
-use function is_string;
 
 final class Group implements RouteCollectorInterface
 {
@@ -111,6 +109,7 @@ final class Group implements RouteCollectorInterface
      * Last added handler will be executed first.
      *
      * @param $middlewareDefinition mixed
+     *
      * @return self
      */
     public function addMiddleware($middlewareDefinition): self
