@@ -22,11 +22,8 @@ final class Group implements RouteCollectorInterface
     protected array $items = [];
     protected ?string $prefix;
 
-    /**
-     * @var array
-     * @psalm-var array<array|callable|MiddlewareInterface|string>
-     */
-    protected array $middlewares = [];
+    protected array $middlewareDefinitions = [];
+    private array $disabledMiddlewareDefinitions = [];
     private ?MiddlewareDispatcher $dispatcher = null;
 
     private function __construct(?string $prefix = null, ?callable $callback = null, MiddlewareDispatcher $dispatcher = null)
@@ -110,59 +107,23 @@ final class Group implements RouteCollectorInterface
     }
 
     /**
-     * @param array|callable|MiddlewareInterface|string $middleware
-     */
-    private function validateMiddleware($middleware): void
-    {
-        if (
-            is_string($middleware) && is_subclass_of($middleware, MiddlewareInterface::class)
-        ) {
-            return;
-        }
-
-        if ($this->isCallable($middleware) && (!is_array($middleware) || !is_object($middleware[0]))) {
-            return;
-        }
-
-        if (is_scalar($middleware)) {
-            $type = gettype($middleware) . ' with value "' . $middleware . '"';
-        } elseif (is_object($middleware)) {
-            $type = 'an instance of ' . get_class($middleware);
-        } else {
-            $type = gettype($middleware);
-        }
-
-        throw new InvalidArgumentException("Parameter should be either PSR middleware class name or a callable, $type given.");
-    }
-
-    private function isCallable($definition): bool
-    {
-        if (is_callable($definition)) {
-            return true;
-        }
-
-        return is_array($definition) && array_keys($definition) === [0, 1] && in_array($definition[1], get_class_methods($definition[0]) ?? [], true);
-    }
-
-    /**
-     * Adds a handler middleware that should be invoked for a matched route.
+     * Adds a handler middleware definition that should be invoked for a matched route.
      * Last added handler will be executed first.
      *
-     * @param array|callable|MiddlewareInterface|string $middleware An instance or a name of PSR-15 middleware,
-     * handler action (an array of [handlerClass, handlerMethod]) or a callable with
-     * `function(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface` signature.
-     * For handler action and callable typed parameters are automatically injected using dependency
-     * injection container passed to the route. Current request and handler could be obtained by
-     * type-hinting for {@see ServerRequestInterface} and {@see RequestHandlerInterface}.
-     *
+     * @param $middlewareDefinition mixed
      * @return self
      */
-    public function addMiddleware($middleware): self
+    public function addMiddleware($middlewareDefinition): self
     {
-        $this->validateMiddleware($middleware);
-        $this->middlewares[] = $middleware;
-
+        $this->middlewareDefinitions[] = $middlewareDefinition;
         return $this;
+    }
+
+    public function disableMiddleware($middlewareDefinition): self
+    {
+        $route = clone $this;
+        $route->disabledMiddlewareDefinitions[] = $middlewareDefinition;
+        return $route;
     }
 
     /**
@@ -178,8 +139,14 @@ final class Group implements RouteCollectorInterface
         return $this->prefix;
     }
 
-    public function getMiddlewares(): array
+    public function getMiddlewareDefinitions(): array
     {
-        return $this->middlewares;
+        foreach ($this->middlewareDefinitions as $index => $definition) {
+            if (in_array($definition, $this->disabledMiddlewareDefinitions)) {
+                unset($this->middlewareDefinitions[$index]);
+            }
+        }
+
+        return $this->middlewareDefinitions;
     }
 }

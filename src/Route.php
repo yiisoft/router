@@ -20,10 +20,8 @@ final class Route
     private bool $override = false;
     private ?MiddlewareDispatcher $dispatcher = null;
 
-    /**
-     * @var array[]|callable[]|string[]
-     */
     private array $middlewareDefinitions = [];
+    private array $disabledMiddlewareDefinitions = [];
     private array $defaults = [];
 
     private function __construct(?MiddlewareDispatcher $dispatcher = null)
@@ -47,6 +45,12 @@ final class Route
     {
         if ($this->dispatcher->hasMiddlewares()) {
             return $this->dispatcher;
+        }
+
+        foreach ($this->middlewareDefinitions as $index => $definition) {
+            if (in_array($definition, $this->disabledMiddlewareDefinitions)) {
+                unset($this->middlewareDefinitions[$index]);
+            }
         }
 
         return $this->dispatcher = $this->dispatcher->withMiddlewares($this->middlewareDefinitions);
@@ -154,7 +158,8 @@ final class Route
         string $pattern,
         $middlewareDefinition = null,
         ?MiddlewareDispatcher $dispatcher = null
-    ): self {
+    ): self
+    {
         $route = new self($dispatcher);
         $route->methods = $methods;
         $route->pattern = $pattern;
@@ -224,22 +229,23 @@ final class Route
     }
 
     /**
-     * Adds a handler middleware that should be invoked for a matched route.
+     * Adds a handler middleware definition that should be invoked for a matched route.
      * Last added handler will be executed first.
      *
-     * @param array|callable|string $middlewareDefinition A PSR-15 middleware class name, handler action
-     * (an array of [handlerClass, handlerMethod]) or a callable with
-     * `function(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface` signature.
-     * For handler action and callable typed parameters are automatically injected using dependency
-     * injection container passed to the route. Current request and handler could be obtained by
-     * type-hinting for {@see ServerRequestInterface} and {@see RequestHandlerInterface}.
-     *
+     * @param $middlewareDefinition mixed
      * @return self
      */
     public function addMiddleware($middlewareDefinition): self
     {
         $route = clone $this;
         $route->middlewareDefinitions[] = $middlewareDefinition;
+        return $route;
+    }
+
+    public function disableMiddleware($middlewareDefinition): self
+    {
+        $route = clone $this;
+        $route->disabledMiddlewareDefinitions[] = $middlewareDefinition;
         return $route;
     }
 
