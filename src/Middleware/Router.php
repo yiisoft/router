@@ -43,6 +43,10 @@ final class Router implements MiddlewareInterface
             $request = $request->withAttribute($parameter, $value);
         }
 
-        return $result->withDispatcher($this->dispatcher)->process($request, $handler);
+        foreach ($result->getRouteHandlers() as $routeHandler) {
+            $this->dispatcher->add($routeHandler);
+        }
+
+        return $this->dispatcher->dispatch($request, $handler);
     }
 }

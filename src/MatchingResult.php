@@ -4,30 +4,17 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Http\Method;
-use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
-final class MatchingResult implements MiddlewareInterface
+final class MatchingResult
 {
     private bool $success;
-    private Route $route;
+    private ?Route $route = null;
     private array $parameters = [];
     private array $methods = [];
-    private ?MiddlewareDispatcher $dispatcher = null;
 
     private function __construct()
     {
-    }
-
-    public function withDispatcher(MiddlewareDispatcher $dispatcher): self
-    {
-        $new = clone $this;
-        $new->dispatcher = $dispatcher;
-        return $new;
     }
 
     public static function fromSuccess(Route $route, array $parameters): self
@@ -54,7 +41,7 @@ final class MatchingResult implements MiddlewareInterface
 
     public function isMethodFailure(): bool
     {
-        return !$this->success && $this->methods !== Method::ANY;
+        return !$this->success && $this->methods !== Method::ALL;
     }
 
     public function parameters(): array
@@ -67,17 +54,14 @@ final class MatchingResult implements MiddlewareInterface
         return $this->methods;
     }
 
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    public function getRouteHandlers(): array
     {
-        if (!$this->isSuccess()) {
-            return $handler->handle($request);
-        }
-        $route = $this->route;
-
-        if ($this->dispatcher !== null && !$route->hasDispatcher()) {
-            $route->injectDispatcher($this->dispatcher);
+        if ($this->route === null) {
+            return [];
         }
 
-        return $route->getDispatcherWithMiddlewares()->dispatch($request, $handler);
+        $handlers = $this->route->getMiddlewareDefinitions();
+        $handlers[] = $this->route->getHandler();
+        return $handlers;
     }
 }

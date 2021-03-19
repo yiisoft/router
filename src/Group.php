@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
-use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
+
 use function get_class;
 use function in_array;
 use function is_array;
@@ -22,11 +22,9 @@ final class Group implements RouteCollectorInterface
 
     protected array $middlewareDefinitions = [];
     private array $disabledMiddlewareDefinitions = [];
-    private ?MiddlewareDispatcher $dispatcher = null;
 
-    private function __construct(?string $prefix = null, ?callable $callback = null, MiddlewareDispatcher $dispatcher = null)
+    private function __construct(?string $prefix = null, ?callable $callback = null)
     {
-        $this->dispatcher = $dispatcher;
         $this->prefix = $prefix;
 
         if ($callback !== null) {
@@ -39,11 +37,10 @@ final class Group implements RouteCollectorInterface
      *
      * @param string|null $prefix
      * @param array|callable $routes
-     * @param MiddlewareDispatcher|null $dispatcher
      *
      * @return self
      */
-    public static function create(?string $prefix = null, $routes = [], MiddlewareDispatcher $dispatcher = null): self
+    public static function create(?string $prefix = null, $routes = []): self
     {
         if (is_callable($routes)) {
             $callback = $routes;
@@ -64,42 +61,17 @@ final class Group implements RouteCollectorInterface
             $callback = null;
         }
 
-        return new self($prefix, $callback, $dispatcher);
-    }
-
-    public function withDispatcher(MiddlewareDispatcher $dispatcher): self
-    {
-        $group = clone $this;
-        $group->dispatcher = $dispatcher;
-        foreach ($group->items as $index => $item) {
-            if (!$item->hasDispatcher()) {
-                $item = $item->withDispatcher($dispatcher);
-                $group->items[$index] = $item;
-            }
-        }
-
-        return $group;
-    }
-
-    public function hasDispatcher(): bool
-    {
-        return $this->dispatcher !== null;
+        return new self($prefix, $callback);
     }
 
     public function addRoute(Route $route): self
     {
-        if (!$route->hasDispatcher() && $this->hasDispatcher()) {
-            $route->injectDispatcher($this->dispatcher);
-        }
         $this->items[] = $route;
         return $this;
     }
 
     public function addGroup(self $group): self
     {
-        if (!$group->hasDispatcher() && $this->hasDispatcher()) {
-            $group = $group->withDispatcher($this->dispatcher);
-        }
         $this->items[] = $group;
         return $this;
     }

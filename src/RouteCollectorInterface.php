@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
-use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
-
 interface RouteCollectorInterface
 {
     /**
@@ -33,21 +31,6 @@ interface RouteCollectorInterface
      * @return self
      */
     public function addGroup(Group $group): self;
-
-    /**
-     * Return a clone with container specified.
-     * The container is be used to resolve dependencies in callback or action caller middleware.
-     *
-     * @param MiddlewareDispatcher $dispatcher container instance
-     *
-     * @return RouteCollectorInterface
-     */
-    public function withDispatcher(MiddlewareDispatcher $dispatcher): self;
-
-    /**
-     * @return bool if there is container specified
-     */
-    public function hasDispatcher(): bool;
 
     /**
      * @return Group[]|Route
