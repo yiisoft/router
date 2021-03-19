@@ -67,6 +67,34 @@ final class Group implements RouteCollectorInterface
         return new self($prefix, $callback, $dispatcher);
     }
 
+    public function routes($routes): self
+    {
+        if (is_callable($routes)) {
+            $callback = $routes;
+        } elseif (is_array($routes)) {
+            $callback = static function (self $group) use (&$routes) {
+                foreach ($routes as $route) {
+                    if ($route instanceof Route) {
+                        $group->addRoute($route);
+                    } elseif ($route instanceof self) {
+                        $group->addGroup($route);
+                    } else {
+                        $type = is_object($route) ? get_class($route) : gettype($route);
+                        throw new InvalidArgumentException(sprintf('Route should be either instance of Route or Group, %s given.', $type));
+                    }
+                }
+            };
+        } else {
+            $callback = null;
+        }
+
+        if ($callback !== null) {
+            $callback($this);
+        }
+
+        return $this;
+    }
+
     public function withDispatcher(MiddlewareDispatcher $dispatcher): self
     {
         $group = clone $this;
@@ -115,6 +143,12 @@ final class Group implements RouteCollectorInterface
     public function addMiddleware($middlewareDefinition): self
     {
         $this->middlewareDefinitions[] = $middlewareDefinition;
+        return $this;
+    }
+
+    public function pipe($middlewareDefinition): self
+    {
+        array_unshift($this->middlewareDefinitions, $middlewareDefinition);
         return $this;
     }
 

@@ -242,6 +242,20 @@ final class Route
         return $route;
     }
 
+    public function pipe($middlewareDefinition): self
+    {
+        $route = clone $this;
+        array_unshift($route->middlewareDefinitions, $middlewareDefinition);
+        return $route;
+    }
+
+    public function action($middlewareDefinition): self
+    {
+        $route = clone $this;
+        array_unshift($route->middlewareDefinitions, $middlewareDefinition);
+        return $route;
+    }
+
     public function disableMiddleware($middlewareDefinition): self
     {
         $route = clone $this;
