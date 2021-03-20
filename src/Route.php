@@ -242,7 +242,7 @@ final class Route
         return $route;
     }
 
-    public function pipe($middlewareDefinition): self
+    public function middleware($middlewareDefinition): self
     {
         $route = clone $this;
         array_unshift($route->middlewareDefinitions, $middlewareDefinition);
