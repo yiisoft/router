@@ -67,7 +67,7 @@ final class Group implements RouteCollectorInterface
         return new self($prefix, $callback, $dispatcher);
     }
 
-    public function routes($routes): self
+    public function routes(...$routes): self
     {
         if (is_callable($routes)) {
             $callback = $routes;
