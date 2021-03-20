@@ -146,7 +146,7 @@ final class Group implements RouteCollectorInterface
         return $this;
     }
 
-    public function pipe($middlewareDefinition): self
+    public function middleware($middlewareDefinition): self
     {
         array_unshift($this->middlewareDefinitions, $middlewareDefinition);
         return $this;
