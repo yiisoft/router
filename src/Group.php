@@ -80,7 +80,7 @@ final class Group implements RouteCollectorInterface
                         $group->addGroup($route);
                     } else {
                         $type = is_object($route) ? get_class($route) : gettype($route);
-                        throw new InvalidArgumentException(sprintf('Route should be either instance of Route or Group, %s given.', $type));
+                        throw new InvalidArgumentException(sprintf('Route should be either an instance of Route or Group, %s given.', $type));
                     }
                 }
             };
