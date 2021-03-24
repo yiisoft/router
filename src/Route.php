@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
+use RuntimeException;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
@@ -74,7 +75,7 @@ final class Route
 
     /**
      * @param string $pattern
-     * @param array|callable|string|null $middlewareDefinition primary route handler {@see addMiddleware()}
+     * @param array|callable|string|null $middlewareDefinition primary route handler {@see prependMiddleware()}
      * @param MiddlewareDispatcher|null $dispatcher
      *
      * @return self
@@ -217,27 +218,34 @@ final class Route
     }
 
     /**
-     * Adds a handler middleware definition that should be invoked for a matched route.
+     * Appends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed first.
      *
-     * @param $middlewareDefinition mixed
+     * @param mixed $middlewareDefinition
      *
      * @return self
      */
     public function middleware($middlewareDefinition): self
     {
         if ($this->actionAdded) {
-            throw new \RuntimeException('Method middleware() can\'t be used after method action()');
+            throw new RuntimeException('Method middleware() can\'t be used after action().');
         }
         $route = clone $this;
         array_unshift($route->middlewareDefinitions, $middlewareDefinition);
         return $route;
     }
 
-    public function addMiddleware($middlewareDefinition): self
+    /**
+     * Prepends a handler middleware definition that should be invoked for a matched route.
+     * Last added handler will be executed first.
+     *
+     * @param mixed $middlewareDefinition
+     * @return $this
+     */
+    public function prependMiddleware($middlewareDefinition): self
     {
         if (!$this->actionAdded) {
-            throw new \RuntimeException('Method addMiddleware() can\'t be used before method action()');
+            throw new RuntimeException('Method prependMiddleware() can\'t be used before action().');
         }
         $route = clone $this;
         $route->middlewareDefinitions[] = $middlewareDefinition;

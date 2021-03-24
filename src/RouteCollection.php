@@ -108,10 +108,10 @@ final class RouteCollection implements RouteCollectionInterface
         $prefix .= $group->getPrefix();
         /** @var $items Group[]|Route[] */
         $items = $group->getItems();
-        foreach ($items as $index => $item) {
+        foreach ($items as $item) {
             $groupMiddlewares = $group->getMiddlewareDefinitions();
             foreach ($groupMiddlewares as $middleware) {
-                $item = $item->addMiddleware($middleware);
+                $item = $item->prependMiddleware($middleware);
             }
 
             if ($item instanceof Group) {

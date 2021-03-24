@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
+use RuntimeException;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use function get_class;
 use function in_array;
@@ -49,7 +50,7 @@ final class Group implements RouteCollectorInterface
     public function routes(...$routes): self
     {
         if ($this->middlewareAdded) {
-            throw new \RuntimeException('Method routes() can\'t be used after method addMiddleware()');
+            throw new RuntimeException('Method routes() can\'t be used after prependMiddleware().');
         }
         if (is_callable($routes)) {
             $callback = $routes;
@@ -128,14 +129,14 @@ final class Group implements RouteCollectorInterface
     public function middleware($middlewareDefinition): self
     {
         if ($this->routesAdded) {
-            throw new \RuntimeException('Method middleware() can\'t be used after method routes()');
+            throw new RuntimeException('Method middleware() can\'t be used after routes().');
         }
         array_unshift($this->middlewareDefinitions, $middlewareDefinition);
 
         return $this;
     }
 
-    public function addMiddleware($middlewareDefinition): self
+    public function prependMiddleware($middlewareDefinition): self
     {
         $this->middlewareDefinitions[] = $middlewareDefinition;
         $this->middlewareAdded = true;
