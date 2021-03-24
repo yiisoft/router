@@ -60,13 +60,18 @@ final class GroupTest extends TestCase
     {
         $request = new ServerRequest('GET', '/outergroup/innergroup/test1');
 
+        $action = static function (ServerRequestInterface $request) {
+            return new Response(200, [], null, '1.1', implode($request->getAttributes()));
+        };
+
         $middleware1 = static function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             $request = $request->withAttribute('middleware', 'middleware1');
             return $handler->handle($request);
         };
 
-        $middleware2 = static function (ServerRequestInterface $request) {
-            return new Response(200, [], null, '1.1', implode($request->getAttributes()));
+        $middleware2 = static function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+            $request = $request->withAttribute('middleware', 'middleware2');
+            return $handler->handle($request);
         };
 
         $group = Group::create('/outergroup', $this->getDispatcher())
@@ -75,7 +80,7 @@ final class GroupTest extends TestCase
                 Group::create('/innergroup')
                     ->middleware($middleware2)
                     ->routes(
-                        Route::get('/test1')->name('request1'),
+                        Route::get('/test1')->action($action)->name('request1'),
                     )
             );
 
@@ -86,25 +91,30 @@ final class GroupTest extends TestCase
         $route = $routeCollection->getRoute('request1');
         $response = $route->getDispatcherWithMiddlewares()->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame('middleware1', $response->getReasonPhrase());
+        $this->assertSame('middleware2', $response->getReasonPhrase());
     }
 
     public function testGroupMiddlewareFullStackCalled(): void
     {
         $request = new ServerRequest('GET', '/group/test1');
+
+        $action = static function (ServerRequestInterface $request) {
+            return new Response(200, [], null, '1.1', implode($request->getAttributes()));
+        };
         $middleware1 = function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             $request = $request->withAttribute('middleware', 'middleware1');
             return $handler->handle($request);
         };
-        $middleware2 = function (ServerRequestInterface $request) {
-            return new Response(200, [], null, '1.1', implode($request->getAttributes()));
+        $middleware2 = function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+            $request = $request->withAttribute('middleware', 'middleware2');
+            return $handler->handle($request);
         };
 
         $group = Group::create('/group', $this->getDispatcher())
             ->middleware($middleware1)
             ->middleware($middleware2)
             ->routes(
-                Route::get('/test1')->name('request1'),
+                Route::get('/test1')->action($action)->name('request1'),
             );
 
         $collector = Group::create();
@@ -114,24 +124,28 @@ final class GroupTest extends TestCase
         $route = $routeCollection->getRoute('request1');
         $response = $route->getDispatcherWithMiddlewares()->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame('middleware1', $response->getReasonPhrase());
+        $this->assertSame('middleware2', $response->getReasonPhrase());
     }
 
     public function testGroupMiddlewareStackInterrupted(): void
     {
         $request = new ServerRequest('GET', '/group/test1');
+
+        $action = static function (ServerRequestInterface $request) {
+            return new Response(200);
+        };
         $middleware1 = function () {
             return new Response(403);
         };
         $middleware2 = function () {
-            return new Response(200);
+            return new Response(405);
         };
 
         $group = Group::create('/group', $this->getDispatcher())
             ->middleware($middleware1)
             ->middleware($middleware2)
             ->routes(
-                Route::get('/test1')->name('request1')
+                Route::get('/test1')->action($action)->name('request1')
             );
 
         $collector = Group::create();

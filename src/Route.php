@@ -236,9 +236,9 @@ final class Route
 
     public function addMiddleware($middlewareDefinition): self
     {
-//        if (!$this->actionAdded) {
-//            throw new \RuntimeException('Method addMiddleware() can\'t be used before method action()');
-//        }
+        if (!$this->actionAdded) {
+            throw new \RuntimeException('Method addMiddleware() can\'t be used before method action()');
+        }
         $route = clone $this;
         $route->middlewareDefinitions[] = $middlewareDefinition;
         return $route;
@@ -248,7 +248,7 @@ final class Route
     {
         $route = clone $this;
         array_unshift($route->middlewareDefinitions, $middlewareDefinition);
-        $this->actionAdded = true;
+        $route->actionAdded = true;
         return $route;
     }
 
