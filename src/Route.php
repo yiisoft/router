@@ -19,7 +19,7 @@ final class Route
     private string $pattern;
     private ?string $host = null;
     private bool $override = false;
-    private ?MiddlewareDispatcher $dispatcher = null;
+    private ?MiddlewareDispatcher $dispatcher;
     private bool $actionAdded = false;
     private array $middlewareDefinitions = [];
     private array $disabledMiddlewareDefinitions = [];
@@ -49,7 +49,7 @@ final class Route
         }
 
         foreach ($this->middlewareDefinitions as $index => $definition) {
-            if (in_array($definition, $this->disabledMiddlewareDefinitions)) {
+            if (in_array($definition, $this->disabledMiddlewareDefinitions, true)) {
                 unset($this->middlewareDefinitions[$index]);
             }
         }
@@ -75,7 +75,6 @@ final class Route
 
     /**
      * @param string $pattern
-     * @param array|callable|string|null $middlewareDefinition primary route handler {@see prependMiddleware()}
      * @param MiddlewareDispatcher|null $dispatcher
      *
      * @return self
@@ -228,7 +227,7 @@ final class Route
     public function middleware($middlewareDefinition): self
     {
         if ($this->actionAdded) {
-            throw new RuntimeException('Method middleware() can\'t be used after action().');
+            throw new RuntimeException('middleware() can not be used after action().');
         }
         $route = clone $this;
         array_unshift($route->middlewareDefinitions, $middlewareDefinition);
@@ -240,18 +239,24 @@ final class Route
      * Last added handler will be executed first.
      *
      * @param mixed $middlewareDefinition
-     * @return $this
+     * @return self
      */
     public function prependMiddleware($middlewareDefinition): self
     {
         if (!$this->actionAdded) {
-            throw new RuntimeException('Method prependMiddleware() can\'t be used before action().');
+            throw new RuntimeException('prependMiddleware() can not be used before action().');
         }
         $route = clone $this;
         $route->middlewareDefinitions[] = $middlewareDefinition;
         return $route;
     }
 
+    /**
+     * Appends action handler. It is a primary middleware definition that should be invoked last for a matched route.
+     *
+     * @param mixed $middlewareDefinition
+     * @return self
+     */
     public function action($middlewareDefinition): self
     {
         $route = clone $this;
@@ -260,6 +265,14 @@ final class Route
         return $route;
     }
 
+    /**
+     * Excludes middleware from being invoked when action is handled.
+     * It is useful to avoid invoking one of the parent group middleware for
+     * a certain route.
+     *
+     * @param mixed $middlewareDefinition
+     * @return $this
+     */
     public function disableMiddleware($middlewareDefinition): self
     {
         $route = clone $this;
