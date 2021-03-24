@@ -49,9 +49,8 @@ final class GroupTest extends TestCase
         };
 
         $group
-            ->addMiddleware($middleware1)
-            ->addMiddleware($middleware2);
-
+            ->middleware($middleware2)
+            ->middleware($middleware1);
         $this->assertCount(2, $group->getMiddlewareDefinitions());
         $this->assertSame($middleware1, $group->getMiddlewareDefinitions()[0]);
         $this->assertSame($middleware2, $group->getMiddlewareDefinitions()[1]);
@@ -70,18 +69,15 @@ final class GroupTest extends TestCase
             return new Response(200, [], null, '1.1', implode($request->getAttributes()));
         };
 
-        $group = Group::create(
-            '/outergroup',
-            [
-                Group::create(
-                    '/innergroup',
-                    [
+        $group = Group::create('/outergroup', $this->getDispatcher())
+            ->middleware($middleware1)
+            ->routes(
+                Group::create('/innergroup')
+                    ->middleware($middleware2)
+                    ->routes(
                         Route::get('/test1')->name('request1'),
-                    ]
-                )->addMiddleware($middleware2),
-            ],
-            $this->getDispatcher()
-        )->addMiddleware($middleware1);
+                    )
+            );
 
         $collector = Group::create();
         $collector->addGroup($group);
@@ -95,14 +91,6 @@ final class GroupTest extends TestCase
 
     public function testGroupMiddlewareFullStackCalled(): void
     {
-        $group = Group::create(
-            '/group',
-            function (RouteCollectorInterface $r) {
-                $r->addRoute(Route::get('/test1')->name('request1'));
-            },
-            $this->getDispatcher()
-        );
-
         $request = new ServerRequest('GET', '/group/test1');
         $middleware1 = function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             $request = $request->withAttribute('middleware', 'middleware1');
@@ -112,7 +100,13 @@ final class GroupTest extends TestCase
             return new Response(200, [], null, '1.1', implode($request->getAttributes()));
         };
 
-        $group->addMiddleware($middleware2)->addMiddleware($middleware1);
+        $group = Group::create('/group', $this->getDispatcher())
+            ->middleware($middleware1)
+            ->middleware($middleware2)
+            ->routes(
+                Route::get('/test1')->name('request1'),
+            );
+
         $collector = Group::create();
         $collector->addGroup($group);
 
@@ -125,14 +119,6 @@ final class GroupTest extends TestCase
 
     public function testGroupMiddlewareStackInterrupted(): void
     {
-        $group = Group::create(
-            '/group',
-            function (RouteCollectorInterface $r) {
-                $r->addRoute(Route::get('/test1')->name('request1'));
-            },
-            $this->getDispatcher()
-        );
-
         $request = new ServerRequest('GET', '/group/test1');
         $middleware1 = function () {
             return new Response(403);
@@ -141,7 +127,13 @@ final class GroupTest extends TestCase
             return new Response(200);
         };
 
-        $group->addMiddleware($middleware2)->addMiddleware($middleware1);
+        $group = Group::create('/group', $this->getDispatcher())
+            ->middleware($middleware1)
+            ->middleware($middleware2)
+            ->routes(
+                Route::get('/test1')->name('request1')
+            );
+
         $collector = Group::create();
         $collector->addGroup($group);
 
@@ -164,80 +156,20 @@ final class GroupTest extends TestCase
             return new Response();
         };
 
-        $root = Group::create();
-        $root->addGroup(
-            Group::create(
-                '/api',
-                static function (Group $group) use ($logoutRoute, $listRoute, $viewRoute, $middleware1, $middleware2) {
-                    $group->addRoute($logoutRoute);
-                    $group->addGroup(
-                        Group::create(
-                            '/post',
-                            static function (Group $group) use ($listRoute, $viewRoute) {
-                                $group->addRoute($listRoute);
-                                $group->addRoute($viewRoute);
-                            }
-                        )
-                    );
-
-                    $group->addMiddleware($middleware1);
-                    $group->addMiddleware($middleware2);
-                }
-            )
-        );
-
-        $this->assertCount(1, $root->getItems());
-        $api = $root->getItems()[0];
-
-        $this->assertSame('/api', $api->getPrefix());
-        $this->assertCount(2, $api->getItems());
-        $this->assertSame($logoutRoute, $api->getItems()[0]);
-
-        /** @var Group $postGroup */
-        $postGroup = $api->getItems()[1];
-        $this->assertInstanceOf(Group::class, $postGroup);
-        $this->assertCount(2, $api->getMiddlewareDefinitions());
-        $this->assertSame($middleware1, $api->getMiddlewareDefinitions()[0]);
-        $this->assertSame($middleware2, $api->getMiddlewareDefinitions()[1]);
-
-        $this->assertSame('/post', $postGroup->getPrefix());
-        $this->assertCount(2, $postGroup->getItems());
-        $this->assertSame($listRoute, $postGroup->getItems()[0]);
-        $this->assertSame($viewRoute, $postGroup->getItems()[1]);
-        $this->assertEmpty($postGroup->getMiddlewareDefinitions());
-    }
-
-    public function testAddGroupSecondWay(): void
-    {
-        $logoutRoute = Route::post('/logout');
-        $listRoute = Route::get('/');
-        $viewRoute = Route::get('/{id}');
-
-        $middleware1 = static function () {
-            return new Response();
-        };
-        $middleware2 = static function () {
-            return new Response();
-        };
-
-        $root = Group::create(
-            null,
-            [
-                Group::create(
-                    '/api',
-                    [
+        $root = Group::create(null)
+            ->routes(
+                Group::create('/api')
+                    ->middleware($middleware2)
+                    ->middleware($middleware1)
+                    ->routes(
                         $logoutRoute,
-                        Group::create(
-                            '/post',
-                            [
+                        Group::create('/post')
+                            ->routes(
                                 $listRoute,
-                                $viewRoute,
-                            ]
-                        ),
-                    ]
-                )->addMiddleware($middleware1)->addMiddleware($middleware2),
-            ]
-        );
+                                $viewRoute
+                            )
+                    ),
+            );
 
         $this->assertCount(1, $root->getItems());
         $api = $root->getItems()[0];
@@ -260,82 +192,61 @@ final class GroupTest extends TestCase
         $this->assertEmpty($postGroup->getMiddlewareDefinitions());
     }
 
-    public function testDispatcherInjected(): void
+    public
+    function testDispatcherInjected(): void
     {
         $dispatcher = $this->getDispatcher();
 
-        $apiGroup = Group::create(
-            '/api',
-            static function (Group $group) {
-                $group->addRoute(Route::get('/info')->name('api-info'));
-                $group->addGroup(
-                    Group::create(
-                        '/v1',
-                        static function (Group $group) {
-                            $group->addRoute(Route::get('/user')->name('api-v1-user/index'));
-                            $group->addRoute(Route::get('/user/{id}')->name('api-v1-user/view'));
-                            $group->addGroup(
-                                Group::create(
-                                    '/news',
-                                    static function (Group $group) {
-                                        $group->addRoute(Route::get('/post')->name('api-v1-news-post/index'));
-                                        $group->addRoute(Route::get('/post/{id}')->name('api-v1-news-post/view'));
-                                    }
-                                )
-                            );
-                            $group->addGroup(
-                                Group::create(
-                                    '/blog',
-                                    static function (Group $group) {
-                                        $group->addRoute(Route::get('/post')->name('api-v1-blog-post/index'));
-                                        $group->addRoute(Route::get('/post/{id}')->name('api-v1-blog-post/view'));
-                                    }
-                                )
-                            );
-                            $group->addRoute(Route::get('/note')->name('api-v1-note/index'));
-                            $group->addRoute(Route::get('/note/{id}')->name('api-v1-note/view'));
-                        }
+        $apiGroup = Group::create('/api', $dispatcher)
+            ->routes(
+                Route::get('/info')->name('api-info'),
+                Group::create('/v1')
+                    ->routes(
+                        Route::get('/user')->name('api-v1-user/index'),
+                        Route::get('/user/{id}')->name('api-v1-user/view'),
+                        Group::create('/news')
+                            ->routes(
+                                Route::get('/post')->name('api-v1-news-post/index'),
+                                Route::get('/post/{id}')->name('api-v1-news-post/view'),
+                            ),
+
+                        Group::create('/blog')
+                            ->routes(
+                                Route::get('/post')->name('api-v1-blog-post/index'),
+                                Route::get('/post/{id}')->name('api-v1-blog-post/view'),
+                            ),
+                        Route::get('/note')->name('api-v1-note/index'),
+                        Route::get('/note/{id}')->name('api-v1-note/view'),
+                    ),
+
+                Group::create('/v2')
+                    ->routes(
+                        Route::get('/user')->name('api-v2-user/index'),
+                        Route::get('/user/{id}')->name('api-v2-user/view'),
+                        Group::create('/news')
+                            ->routes(
+                                Route::get('/post')->name('api-v2-news-post/index'),
+                                Route::get('/post/{id}')->name('api-v2-news-post/view'),
+
+                                Group::create('/blog')
+                                    ->routes(
+                                        Route::get('/post')->name('api-v2-blog-post/index'),
+                                        Route::get('/post/{id}')->name('api-v2-blog-post/view'),
+
+                                        Route::get('/note')->name('api-v2-note/index'),
+                                        Route::get('/note/{id}')->name('api-v2-note/view')
+                                    )
+                            )
                     )
-                );
-                $group->addGroup(
-                    Group::create(
-                        '/v2',
-                        static function (Group $group) {
-                            $group->addRoute(Route::get('/user')->name('api-v2-user/index'));
-                            $group->addRoute(Route::get('/user/{id}')->name('api-v2-user/view'));
-                            $group->addGroup(
-                                Group::create(
-                                    '/news',
-                                    static function (Group $group) {
-                                        $group->addRoute(Route::get('/post')->name('api-v2-news-post/index'));
-                                        $group->addRoute(Route::get('/post/{id}')->name('api-v2-news-post/view'));
-                                    }
-                                )
-                            );
-                            $group->addGroup(
-                                Group::create(
-                                    '/blog',
-                                    static function (Group $group) {
-                                        $group->addRoute(Route::get('/post')->name('api-v2-blog-post/index'));
-                                        $group->addRoute(Route::get('/post/{id}')->name('api-v2-blog-post/view'));
-                                    }
-                                )
-                            );
-                            $group->addRoute(Route::get('/note')->name('api-v2-note/index'));
-                            $group->addRoute(Route::get('/note/{id}')->name('api-v2-note/view'));
-                        }
-                    )
-                );
-            },
-            $dispatcher
-        );
+            );
 
         $items = $apiGroup->getItems();
 
         $this->assertAllRoutesAndGroupsHaveDispatcher($items);
     }
 
-    private function getRequestHandler(): RequestHandlerInterface
+    private
+    function getRequestHandler(): RequestHandlerInterface
     {
         return new class() implements RequestHandlerInterface {
             public function handle(ServerRequestInterface $request): ResponseInterface
@@ -345,7 +256,8 @@ final class GroupTest extends TestCase
         };
     }
 
-    private function getDispatcher(): MiddlewareDispatcher
+    private
+    function getDispatcher(): MiddlewareDispatcher
     {
         return new MiddlewareDispatcher(
             new MiddlewareFactory($this->getContainer()),
@@ -353,12 +265,14 @@ final class GroupTest extends TestCase
         );
     }
 
-    private function getContainer(array $instances = []): ContainerInterface
+    private
+    function getContainer(array $instances = []): ContainerInterface
     {
         return new Container($instances);
     }
 
-    private function assertAllRoutesAndGroupsHaveDispatcher(array $items): void
+    private
+    function assertAllRoutesAndGroupsHaveDispatcher(array $items): void
     {
         $func = function ($item) use (&$func) {
             $this->assertTrue($item->hasDispatcher());

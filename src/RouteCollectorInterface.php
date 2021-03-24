@@ -21,10 +21,12 @@ interface RouteCollectorInterface
      * Add a group of routes
      *
      * ```php
-     * $group = Group::create('/api', [
+     * $group = Group::create('/api')
+     * ->middleware($myMiddleware)
+     * ->routes(
      *     Route::get('/users', function () {}),
      *     Route::get('/contacts', function () {}),
-     * ])->addMiddleware($myMiddleware);
+     * );
      * $router->addGroup($group);
      * ```
      *

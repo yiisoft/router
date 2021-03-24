@@ -19,19 +19,17 @@ final class Group implements RouteCollectorInterface
      */
     protected array $items = [];
     protected ?string $prefix;
-
     protected array $middlewareDefinitions = [];
+
+    private bool $routesAdded = false;
+    private bool $middlewareAdded = false;
     private array $disabledMiddlewareDefinitions = [];
     private ?MiddlewareDispatcher $dispatcher = null;
 
-    private function __construct(?string $prefix = null, ?callable $callback = null, MiddlewareDispatcher $dispatcher = null)
+    private function __construct(?string $prefix = null, MiddlewareDispatcher $dispatcher = null)
     {
         $this->dispatcher = $dispatcher;
         $this->prefix = $prefix;
-
-        if ($callback !== null) {
-            $callback($this);
-        }
     }
 
     /**
@@ -43,32 +41,16 @@ final class Group implements RouteCollectorInterface
      *
      * @return self
      */
-    public static function create(?string $prefix = null, $routes = [], MiddlewareDispatcher $dispatcher = null): self
+    public static function create(?string $prefix = null, MiddlewareDispatcher $dispatcher = null): self
     {
-        if (is_callable($routes)) {
-            $callback = $routes;
-        } elseif (is_array($routes)) {
-            $callback = static function (self $group) use (&$routes) {
-                foreach ($routes as $route) {
-                    if ($route instanceof Route) {
-                        $group->addRoute($route);
-                    } elseif ($route instanceof self) {
-                        $group->addGroup($route);
-                    } else {
-                        $type = is_object($route) ? get_class($route) : gettype($route);
-                        throw new InvalidArgumentException(sprintf('Route should be either instance of Route or Group, %s given.', $type));
-                    }
-                }
-            };
-        } else {
-            $callback = null;
-        }
-
-        return new self($prefix, $callback, $dispatcher);
+        return new self($prefix, $dispatcher);
     }
 
     public function routes(...$routes): self
     {
+        if ($this->middlewareAdded) {
+            throw new \RuntimeException('Method routes() can\'t be used after method addMiddleware()');
+        }
         if (is_callable($routes)) {
             $callback = $routes;
         } elseif (is_array($routes)) {
@@ -91,6 +73,7 @@ final class Group implements RouteCollectorInterface
         if ($callback !== null) {
             $callback($this);
         }
+        $this->routesAdded = true;
 
         return $this;
     }
@@ -129,6 +112,8 @@ final class Group implements RouteCollectorInterface
             $group = $group->withDispatcher($this->dispatcher);
         }
         $this->items[] = $group;
+
+
         return $this;
     }
 
@@ -140,23 +125,27 @@ final class Group implements RouteCollectorInterface
      *
      * @return self
      */
-    public function addMiddleware($middlewareDefinition): self
+    public function middleware($middlewareDefinition): self
     {
-        $this->middlewareDefinitions[] = $middlewareDefinition;
+        if ($this->routesAdded) {
+            throw new \RuntimeException('Method middleware() can\'t be used after method routes()');
+        }
+        array_unshift($this->middlewareDefinitions, $middlewareDefinition);
+
         return $this;
     }
 
-    public function middleware($middlewareDefinition): self
+    public function addMiddleware($middlewareDefinition): self
     {
-        array_unshift($this->middlewareDefinitions, $middlewareDefinition);
+        $this->middlewareDefinitions[] = $middlewareDefinition;
+        $this->middlewareAdded = true;
         return $this;
     }
 
     public function disableMiddleware($middlewareDefinition): self
     {
-        $route = clone $this;
-        $route->disabledMiddlewareDefinitions[] = $middlewareDefinition;
-        return $route;
+        $this->disabledMiddlewareDefinitions[] = $middlewareDefinition;
+        return $this;
     }
 
     /**
