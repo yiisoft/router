@@ -37,7 +37,7 @@ final class GroupTest extends TestCase
         $this->assertSame($viewRoute, $group->getItems()[1]);
     }
 
-    public function testPrependMiddleware(): void
+    public function testAddMiddleware(): void
     {
         $group = Group::create();
 
