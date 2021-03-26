@@ -27,7 +27,7 @@ interface RouteCollectorInterface
      *     Route::get('/users', function () {}),
      *     Route::get('/contacts', function () {}),
      * );
-     * $router->addGroup($group);
+     * $routeCollector->addGroup($group);
      * ```
      *
      * @param Group $group a group to add
@@ -37,22 +37,13 @@ interface RouteCollectorInterface
     public function addGroup(Group $group): self;
 
     /**
-     * Return a clone with container specified.
-     * The container is be used to resolve dependencies in callback or action caller middleware.
-     *
-     * @param MiddlewareDispatcher $dispatcher container instance
-     *
-     * @return RouteCollectorInterface
-     */
-    public function withDispatcher(MiddlewareDispatcher $dispatcher): self;
-
-    /**
-     * @return bool if there is container specified
-     */
-    public function hasDispatcher(): bool;
-
-    /**
      * @return Group[]|Route
      */
     public function getItems(): array;
+
+    public function getPrefix(): ?string;
+
+    public function getMiddlewareDefinitions(): array;
+
+    public function middleware($middlewareDefinition): self;
 }
