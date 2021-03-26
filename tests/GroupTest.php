@@ -18,7 +18,6 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareStack;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
-use Yiisoft\Router\RouteCollectorInterface;
 use Yiisoft\Router\Tests\Support\Container;
 
 final class GroupTest extends TestCase
@@ -206,8 +205,7 @@ final class GroupTest extends TestCase
         $this->assertEmpty($postGroup->getMiddlewareDefinitions());
     }
 
-    public
-    function testDispatcherInjected(): void
+    public function testDispatcherInjected(): void
     {
         $dispatcher = $this->getDispatcher();
 
@@ -223,7 +221,6 @@ final class GroupTest extends TestCase
                                 Route::get('/post')->name('api-v1-news-post/index'),
                                 Route::get('/post/{id}')->name('api-v1-news-post/view'),
                             ),
-
                         Group::create('/blog')
                             ->routes(
                                 Route::get('/post')->name('api-v1-blog-post/index'),
@@ -232,7 +229,6 @@ final class GroupTest extends TestCase
                         Route::get('/note')->name('api-v1-note/index'),
                         Route::get('/note/{id}')->name('api-v1-note/view'),
                     ),
-
                 Group::create('/v2')
                     ->routes(
                         Route::get('/user')->name('api-v2-user/index'),
@@ -241,12 +237,10 @@ final class GroupTest extends TestCase
                             ->routes(
                                 Route::get('/post')->name('api-v2-news-post/index'),
                                 Route::get('/post/{id}')->name('api-v2-news-post/view'),
-
                                 Group::create('/blog')
                                     ->routes(
                                         Route::get('/post')->name('api-v2-blog-post/index'),
                                         Route::get('/post/{id}')->name('api-v2-blog-post/view'),
-
                                         Route::get('/note')->name('api-v2-note/index'),
                                         Route::get('/note/{id}')->name('api-v2-note/view')
                                     )
@@ -259,8 +253,7 @@ final class GroupTest extends TestCase
         $this->assertAllRoutesAndGroupsHaveDispatcher($items);
     }
 
-    private
-    function getRequestHandler(): RequestHandlerInterface
+    private function getRequestHandler(): RequestHandlerInterface
     {
         return new class() implements RequestHandlerInterface {
             public function handle(ServerRequestInterface $request): ResponseInterface
@@ -270,8 +263,7 @@ final class GroupTest extends TestCase
         };
     }
 
-    private
-    function getDispatcher(): MiddlewareDispatcher
+    private function getDispatcher(): MiddlewareDispatcher
     {
         return new MiddlewareDispatcher(
             new MiddlewareFactory($this->getContainer()),
@@ -279,14 +271,12 @@ final class GroupTest extends TestCase
         );
     }
 
-    private
-    function getContainer(array $instances = []): ContainerInterface
+    private function getContainer(array $instances = []): ContainerInterface
     {
         return new Container($instances);
     }
 
-    private
-    function assertAllRoutesAndGroupsHaveDispatcher(array $items): void
+    private function assertAllRoutesAndGroupsHaveDispatcher(array $items): void
     {
         $func = function ($item) use (&$func) {
             $this->assertTrue($item->hasDispatcher());
