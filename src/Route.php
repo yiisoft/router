@@ -239,6 +239,7 @@ final class Route
      * Last added handler will be executed first.
      *
      * @param mixed $middlewareDefinition
+     *
      * @return self
      */
     public function prependMiddleware($middlewareDefinition): self
@@ -255,6 +256,7 @@ final class Route
      * Appends action handler. It is a primary middleware definition that should be invoked last for a matched route.
      *
      * @param mixed $middlewareDefinition
+     *
      * @return self
      */
     public function action($middlewareDefinition): self
@@ -271,6 +273,7 @@ final class Route
      * a certain route.
      *
      * @param mixed $middlewareDefinition
+     *
      * @return $this
      */
     public function disableMiddleware($middlewareDefinition): self

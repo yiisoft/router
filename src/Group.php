@@ -140,6 +140,7 @@ final class Group implements RouteCollectorInterface
      * First added handler will be executed last.
      *
      * @param mixed $middlewareDefinition
+     *
      * @return $this
      */
     public function prependMiddleware($middlewareDefinition): self
@@ -155,6 +156,7 @@ final class Group implements RouteCollectorInterface
      * a certain route.
      *
      * @param mixed $middlewareDefinition
+     *
      * @return $this
      */
     public function disableMiddleware($middlewareDefinition): self
