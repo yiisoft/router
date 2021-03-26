@@ -70,7 +70,7 @@ $response = $result->process($request, $handler);
 `UrlGeneratorInterface` and `UrlMatcher` are specific to adapter package used. See its readme on how to properly
 configure it.
 
-In `addMiddleware()` you can either specify PSR middleware class name or a callback.
+In `middleware()` and `prependMiddleware()` you can either specify PSR middleware class name or a callback.
 
 Note that pattern specified for routes depends on the underlying routing library used.
 

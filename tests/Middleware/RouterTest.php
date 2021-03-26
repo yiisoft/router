@@ -97,7 +97,7 @@ final class RouterTest extends TestCase
                 }
 
                 if ($request->getMethod() === 'GET') {
-                    $route = Route::get('/')->addMiddleware($this->middleware);
+                    $route = Route::get('/')->middleware($this->middleware);
                     return MatchingResult::fromSuccess($route, ['parameter' => 'value']);
                 }
 
