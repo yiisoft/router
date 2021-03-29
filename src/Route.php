@@ -19,6 +19,7 @@ final class Route
     private string $pattern;
     private ?string $host = null;
     private bool $override = false;
+    private bool $isStatic = false;
     private ?MiddlewareDispatcher $dispatcher;
     private bool $actionAdded = false;
     private array $middlewareDefinitions = [];
@@ -203,6 +204,21 @@ final class Route
     }
 
     /**
+     * Marks route as static.
+     *
+     * @return self
+     */
+    public function static(): self
+    {
+        if ($this->hasMiddlewares()) {
+            throw new RuntimeException('Static route can not has middlewares.');
+        }
+        $route = clone $this;
+        $route->isStatic = true;
+        return $route;
+    }
+
+    /**
      * Parameter default values indexed by parameter names.
      *
      * @param array $defaults
@@ -226,6 +242,9 @@ final class Route
      */
     public function middleware($middlewareDefinition): self
     {
+        if ($this->isStatic()) {
+            throw new RuntimeException('Static route can not has middleware.');
+        }
         if ($this->actionAdded) {
             throw new RuntimeException('middleware() can not be used after action().');
         }
@@ -244,6 +263,9 @@ final class Route
      */
     public function prependMiddleware($middlewareDefinition): self
     {
+        if ($this->isStatic()) {
+            throw new RuntimeException('Static route can not has middleware.');
+        }
         if (!$this->actionAdded) {
             throw new RuntimeException('prependMiddleware() can not be used before action().');
         }
@@ -261,6 +283,9 @@ final class Route
      */
     public function action($middlewareDefinition): self
     {
+        if ($this->isStatic()) {
+            throw new RuntimeException('Static route can not has action.');
+        }
         $route = clone $this;
         array_unshift($route->middlewareDefinitions, $middlewareDefinition);
         $route->actionAdded = true;
@@ -327,8 +352,18 @@ final class Route
         return $this->override;
     }
 
+    public function isStatic(): bool
+    {
+        return $this->isStatic;
+    }
+
     public function getDefaults(): array
     {
         return $this->defaults;
+    }
+
+    private function hasMiddlewares(): bool
+    {
+        return $this->middlewareDefinitions !== [];
     }
 }

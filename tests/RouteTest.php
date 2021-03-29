@@ -124,6 +124,46 @@ final class RouteTest extends TestCase
         $this->assertSame(['language' => 'en'], $route->getDefaults());
     }
 
+    public function testOverride(): void
+    {
+        $route = Route::get('/')->override();
+
+        $this->assertTrue($route->isOverride());
+    }
+
+    public function testStatic(): void
+    {
+        $route = Route::get('/')->static();
+
+        $this->assertTrue($route->isStatic());
+    }
+
+    public function testStaticFailWihExistedMiddlewares(): void
+    {
+        $this->expectExceptionMessage("Static route can not has middlewares.");
+        Route::get('/')->middleware(fn () => 1)->static();
+        $this->expectExceptionMessage("Static route can not has middlewares.");
+        Route::get('/')->action(fn () => 1)->static();
+    }
+
+    public function testStaticFailWihAddMiddleware(): void
+    {
+        $this->expectExceptionMessage("Static route can not has middleware.");
+        Route::get('/')->static()->middleware(fn () => 1);
+    }
+
+    public function testStaticFailWihPrependMiddleware(): void
+    {
+        $this->expectExceptionMessage("Static route can not has middleware.");
+        Route::get('/')->static()->middleware(fn () => 1);
+    }
+
+    public function testStaticFailWihAddAction(): void
+    {
+        $this->expectExceptionMessage("Static route can not has action.");
+        Route::get('/')->static()->action(fn () => 1);
+    }
+
     public function testToString(): void
     {
         $route = Route::methods([Method::GET, Method::POST], '/')->name('test.route')->host('yiiframework.com');
