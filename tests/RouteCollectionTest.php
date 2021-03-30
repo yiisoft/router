@@ -46,17 +46,16 @@ final class RouteCollectionTest extends TestCase
 
     public function testRouteStatic(): void
     {
-        $group = Group::create(null, $this->getDispatcher())
+        $group = Group::create(null)
             ->middleware(fn() => 1)
             ->routes(
-                Route::get('/test')->action(fn () => 2)->name('test'),
-                Route::get('/images/{sile}')->name('image')->static()
+                Route::get('/test', $this->getDispatcher())->action(fn () => 2)->name('test'),
+                Route::static('/images/{sile}')->name('image')
             );
 
         $routeCollection = new RouteCollection($group);
         $route = $routeCollection->getRoute('image');
-        $routeDispatcher = $route->getDispatcherWithMiddlewares();
-        $this->assertFalse($routeDispatcher->hasMiddlewares());
+        $this->assertFalse($route->hasMiddlewares());
     }
 
     private function getDispatcher(): MiddlewareDispatcher

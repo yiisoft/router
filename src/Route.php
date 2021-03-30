@@ -33,11 +33,17 @@ final class Route
 
     public function injectDispatcher(MiddlewareDispatcher $dispatcher): void
     {
+        if ($this->isStatic()) {
+            throw new RuntimeException('Static route can not has middleware dispatcher.');
+        }
         $this->dispatcher = $dispatcher;
     }
 
     public function withDispatcher(MiddlewareDispatcher $dispatcher): self
     {
+        if ($this->isStatic()) {
+            throw new RuntimeException('Static route can not has middleware dispatcher.');
+        }
         $route = clone $this;
         $route->dispatcher = $dispatcher;
         return $route;
@@ -142,6 +148,19 @@ final class Route
 
     /**
      * @param string $pattern
+     *
+     * @return self
+     */
+    public static function static(string $pattern): self
+    {
+        $route = new self();
+        $route->pattern = $pattern;
+        $route->isStatic = true;
+        return $route;
+    }
+
+    /**
+     * @param string $pattern
      * @param MiddlewareDispatcher|null $dispatcher
      *
      * @return self
@@ -200,21 +219,6 @@ final class Route
     {
         $route = clone $this;
         $route->override = true;
-        return $route;
-    }
-
-    /**
-     * Marks route as static.
-     *
-     * @return self
-     */
-    public function static(): self
-    {
-        if ($this->hasMiddlewares()) {
-            throw new RuntimeException('Static route can not has middlewares.');
-        }
-        $route = clone $this;
-        $route->isStatic = true;
         return $route;
     }
 
@@ -362,7 +366,7 @@ final class Route
         return $this->defaults;
     }
 
-    private function hasMiddlewares(): bool
+    public function hasMiddlewares(): bool
     {
         return $this->middlewareDefinitions !== [];
     }

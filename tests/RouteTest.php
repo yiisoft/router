@@ -133,35 +133,36 @@ final class RouteTest extends TestCase
 
     public function testStatic(): void
     {
-        $route = Route::get('/')->static();
+        $route = Route::static('/');
 
         $this->assertTrue($route->isStatic());
     }
 
-    public function testStaticFailWihExistedMiddlewares(): void
+    public function testStaticFailWithDispatcher(): void
     {
-        $this->expectExceptionMessage("Static route can not has middlewares.");
-        Route::get('/')->middleware(fn () => 1)->static();
-        $this->expectExceptionMessage("Static route can not has middlewares.");
-        Route::get('/')->action(fn () => 1)->static();
+        $dispatcher = $this->getDispatcher();
+        $this->expectExceptionMessage("Static route can not has middleware dispatcher.");
+        Route::static('/')->withDispatcher($dispatcher);
+        $this->expectExceptionMessage("Static route can not has middleware dispatcher.");
+        Route::get('/')->injectDispatcher($dispatcher);
     }
 
     public function testStaticFailWihAddMiddleware(): void
     {
         $this->expectExceptionMessage("Static route can not has middleware.");
-        Route::get('/')->static()->middleware(fn () => 1);
+        Route::static('/')->middleware(fn () => 1);
     }
 
     public function testStaticFailWihPrependMiddleware(): void
     {
         $this->expectExceptionMessage("Static route can not has middleware.");
-        Route::get('/')->static()->middleware(fn () => 1);
+        Route::static('/')->middleware(fn () => 1);
     }
 
     public function testStaticFailWihAddAction(): void
     {
         $this->expectExceptionMessage("Static route can not has action.");
-        Route::get('/')->static()->action(fn () => 1);
+        Route::static('/')->action(fn () => 1);
     }
 
     public function testToString(): void
