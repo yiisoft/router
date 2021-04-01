@@ -331,4 +331,9 @@ final class Route
     {
         return $this->defaults;
     }
+
+    public function hasMiddlewares(): bool
+    {
+        return $this->middlewareDefinitions !== [];
+    }
 }
