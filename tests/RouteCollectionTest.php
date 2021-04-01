@@ -44,9 +44,9 @@ final class RouteCollectionTest extends TestCase
         $this->assertSame('/{id}', $route->getPattern());
     }
 
-    public function testRouteStatic(): void
+    public function testRouteWithoutAction(): void
     {
-        $group = Group::create(null)
+        $group = Group::create()
             ->middleware(fn() => 1)
             ->routes(
                 Route::get('/test', $this->getDispatcher())->action(fn () => 2)->name('test'),
