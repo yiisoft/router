@@ -124,6 +124,13 @@ final class RouteTest extends TestCase
         $this->assertSame(['language' => 'en'], $route->getDefaults());
     }
 
+    public function testOverride(): void
+    {
+        $route = Route::get('/')->override();
+
+        $this->assertTrue($route->isOverride());
+    }
+
     public function testToString(): void
     {
         $route = Route::methods([Method::GET, Method::POST], '/')->name('test.route')->host('yiiframework.com');
