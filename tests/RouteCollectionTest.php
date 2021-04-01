@@ -50,7 +50,7 @@ final class RouteCollectionTest extends TestCase
             ->middleware(fn() => 1)
             ->routes(
                 Route::get('/test', $this->getDispatcher())->action(fn () => 2)->name('test'),
-                Route::static('/images/{sile}')->name('image')
+                Route::get('/images/{sile}')->name('image')
             );
 
         $routeCollection = new RouteCollection($group);

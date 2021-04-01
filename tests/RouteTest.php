@@ -131,40 +131,6 @@ final class RouteTest extends TestCase
         $this->assertTrue($route->isOverride());
     }
 
-    public function testStatic(): void
-    {
-        $route = Route::static('/');
-
-        $this->assertTrue($route->isStatic());
-    }
-
-    public function testStaticFailWithDispatcher(): void
-    {
-        $dispatcher = $this->getDispatcher();
-        $this->expectExceptionMessage("Static route can not has middleware dispatcher.");
-        Route::static('/')->withDispatcher($dispatcher);
-        $this->expectExceptionMessage("Static route can not has middleware dispatcher.");
-        Route::get('/')->injectDispatcher($dispatcher);
-    }
-
-    public function testStaticFailWihAddMiddleware(): void
-    {
-        $this->expectExceptionMessage("Static route can not has middleware.");
-        Route::static('/')->middleware(fn () => 1);
-    }
-
-    public function testStaticFailWihPrependMiddleware(): void
-    {
-        $this->expectExceptionMessage("Static route can not has middleware.");
-        Route::static('/')->middleware(fn () => 1);
-    }
-
-    public function testStaticFailWihAddAction(): void
-    {
-        $this->expectExceptionMessage("Static route can not has action.");
-        Route::static('/')->action(fn () => 1);
-    }
-
     public function testToString(): void
     {
         $route = Route::methods([Method::GET, Method::POST], '/')->name('test.route')->host('yiiframework.com');

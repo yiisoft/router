@@ -19,7 +19,6 @@ final class Route
     private string $pattern;
     private ?string $host = null;
     private bool $override = false;
-    private bool $isStatic = false;
     private ?MiddlewareDispatcher $dispatcher;
     private bool $actionAdded = false;
     private array $middlewareDefinitions = [];
@@ -33,17 +32,11 @@ final class Route
 
     public function injectDispatcher(MiddlewareDispatcher $dispatcher): void
     {
-        if ($this->isStatic()) {
-            throw new RuntimeException('Static route can not has middleware dispatcher.');
-        }
         $this->dispatcher = $dispatcher;
     }
 
     public function withDispatcher(MiddlewareDispatcher $dispatcher): self
     {
-        if ($this->isStatic()) {
-            throw new RuntimeException('Static route can not has middleware dispatcher.');
-        }
         $route = clone $this;
         $route->dispatcher = $dispatcher;
         return $route;
@@ -148,19 +141,6 @@ final class Route
 
     /**
      * @param string $pattern
-     *
-     * @return self
-     */
-    public static function static(string $pattern): self
-    {
-        $route = new self();
-        $route->pattern = $pattern;
-        $route->isStatic = true;
-        return $route;
-    }
-
-    /**
-     * @param string $pattern
      * @param MiddlewareDispatcher|null $dispatcher
      *
      * @return self
@@ -246,9 +226,6 @@ final class Route
      */
     public function middleware($middlewareDefinition): self
     {
-        if ($this->isStatic()) {
-            throw new RuntimeException('Static route can not has middleware.');
-        }
         if ($this->actionAdded) {
             throw new RuntimeException('middleware() can not be used after action().');
         }
@@ -267,9 +244,6 @@ final class Route
      */
     public function prependMiddleware($middlewareDefinition): self
     {
-        if ($this->isStatic()) {
-            throw new RuntimeException('Static route can not has middleware.');
-        }
         if (!$this->actionAdded) {
             throw new RuntimeException('prependMiddleware() can not be used before action().');
         }
@@ -287,9 +261,6 @@ final class Route
      */
     public function action($middlewareDefinition): self
     {
-        if ($this->isStatic()) {
-            throw new RuntimeException('Static route can not has action.');
-        }
         $route = clone $this;
         array_unshift($route->middlewareDefinitions, $middlewareDefinition);
         $route->actionAdded = true;
@@ -354,11 +325,6 @@ final class Route
     public function isOverride(): bool
     {
         return $this->override;
-    }
-
-    public function isStatic(): bool
-    {
-        return $this->isStatic;
     }
 
     public function getDefaults(): array
