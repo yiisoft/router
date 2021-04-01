@@ -13,7 +13,6 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareStack;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
-use Yiisoft\Router\Tests\Support\Container;
 
 final class RouteCollectionTest extends TestCase
 {
@@ -47,7 +46,7 @@ final class RouteCollectionTest extends TestCase
     public function testRouteWithoutAction(): void
     {
         $group = Group::create()
-            ->middleware(fn() => 1)
+            ->middleware(fn () => 1)
             ->routes(
                 Route::get('/test', $this->getDispatcher())->action(fn () => 2)->name('test'),
                 Route::get('/images/{sile}')->name('image')
@@ -61,8 +60,8 @@ final class RouteCollectionTest extends TestCase
     private function getDispatcher(): MiddlewareDispatcher
     {
         return new MiddlewareDispatcher(
-                new MiddlewareFactory($this->createMock(ContainerInterface::class)),
-                new MiddlewareStack($this->createMock(EventDispatcherInterface::class))
-            );
+            new MiddlewareFactory($this->createMock(ContainerInterface::class)),
+            new MiddlewareStack($this->createMock(EventDispatcherInterface::class))
+        );
     }
 }
