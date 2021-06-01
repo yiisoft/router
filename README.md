@@ -7,11 +7,8 @@
 </p>
 
 The package provides PSR-7 compatible request routing and a PSR-compatible middleware ready to be used in an application.
-Instead of implementing routing from groud up, the package provides an interface for configuring routes and could be used
-with one of the following adapter packages:
-
-- [FastRoute](https://github.com/yiisoft/router-fastroute)
-- ...
+Instead of implementing routing from ground up, the package provides an interface for configuring routes and could be used
+with an adapter package. Currently, the only adapter is available, [FastRoute](https://github.com/yiisoft/router-fastroute).
 
 [![Latest Stable Version](https://poser.pugx.org/yiisoft/router/v/stable.png)](https://packagist.org/packages/yiisoft/router)
 [![Total Downloads](https://poser.pugx.org/yiisoft/router/downloads.png)](https://packagist.org/packages/yiisoft/router)
@@ -35,35 +32,37 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 
 $routes = [
-    Route::get('/', static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
-        $response = $responseFactory->createResponse();
-        $response->getBody()->write('You are at homepage.');
-        return $response;
-    }),
-    Route::get('/test/{id:\w+}', static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
-        $id = $request->getAttribute('id');
-
-        $response = $responseFactory->createResponse();
-        $response->getBody()->write('You are at test with param ' . $id);
-        return $response;
-    })
+    Route::get('/')
+        ->action(static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+            $response = $responseFactory->createResponse();
+            $response->getBody()->write('You are at homepage.');
+            return $response;
+        }),
+    Route::get('/test/{id:\w+}')
+        ->action(static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+            $id = $request->getAttribute('id');
+    
+            $response = $responseFactory->createResponse();
+            $response->getBody()->write('You are at test with param ' . $id);
+            return $response;
+        })
 ];
 
 $collector = $container->get(RouteCollectorInterface::class);
-$collector->addGroup(Group::create(null, $routes));
+$collector->addGroup(Group::create(null)->routes($routes));
 
 $urlMatcher = new UrlMatcher(new RouteCollection($collector));
 
-// $request is PSR-7 ServerRequestInterface
+// $request is PSR-7 ServerRequestInterface.
 $result = $urlMatcher->match($request);
 
 if (!$result->isSuccess()) {
      // 404
 }
 
-// $result->parameters() contains parameters from the match
+// $result->parameters() contains parameters from the match.
 
-// run middleware assigned to a route found 
+// Run middleware assigned to a route found.
 $response = $result->process($request, $handler);
 ```
 
@@ -86,9 +85,9 @@ use \Yiisoft\Router\RouteCollectorInterface;
 // for obtaining router see adapter package of choice readme
 $collector = $container->get(RouteCollectorInterface::class);
     
-$collector->addGroup(Group::create('/api', [
+$collector->addGroup(Group::create('/api')->routes([
     Route::get('/comments'),
-    Group::create('/posts', [
+    Group::create('/posts')->routes([
         Route::get('/list'),
     ]),
 ]));
@@ -104,7 +103,7 @@ $responseFactory = $container->get(\Psr\Http\Message\ResponseFactoryInterface::c
 
 $routerMiddleware = new Yiisoft\Router\Middleware\Router($router, $responseFactory, $container);
 
-// add middleware to your middleware handler of choice 
+// Add middleware to your middleware handler of choice.
 ```
 
 In case of a route match router middleware executes handler middleware attached to the route. If there is no match, next
@@ -131,7 +130,7 @@ $request = $container->get(ServerRequestFactory::class)->createFromGlobals();
 $responseFactory = $container->get(ResponseFactoryInterface::class);
 $notFoundHandler = new NotFoundHandler($responseFactory);
 $collector = $container->get(RouteCollectorInterface::class);
-$collector->addRoute(Route::get('/test/{id:\w+}', static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+$collector->addRoute(Route::get('/test/{id:\w+}')->action(static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
    $id = $request->getAttribute('id');
    $response = $responseFactory->createResponse();
    $response->getBody()->write('You are at test with param ' . $id);
