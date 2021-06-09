@@ -6,7 +6,7 @@ namespace Yiisoft\Router;
 
 use InvalidArgumentException;
 use RuntimeException;
-use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
+use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcherInterface;
 use function get_class;
 use function in_array;
 use function is_array;
@@ -27,7 +27,7 @@ final class Group implements RouteCollectorInterface
     private array $disabledMiddlewareDefinitions = [];
     private ?MiddlewareDispatcher $dispatcher;
 
-    private function __construct(?string $prefix = null, MiddlewareDispatcher $dispatcher = null)
+    private function __construct(?string $prefix = null, MiddlewareDispatcherInterface $dispatcher = null)
     {
         $this->dispatcher = $dispatcher;
         $this->prefix = $prefix;
@@ -37,11 +37,11 @@ final class Group implements RouteCollectorInterface
      * Create a new group instance.
      *
      * @param string|null $prefix URL prefix to prepend to all routes of the group.
-     * @param MiddlewareDispatcher|null $dispatcher Middleware dispatcher to use for the group.
+     * @param MiddlewareDispatcherInterface|null $dispatcher Middleware dispatcher to use for the group.
      *
      * @return self
      */
-    public static function create(?string $prefix = null, MiddlewareDispatcher $dispatcher = null): self
+    public static function create(?string $prefix = null, MiddlewareDispatcherInterface $dispatcher = null): self
     {
         return new self($prefix, $dispatcher);
     }

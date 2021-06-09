@@ -6,7 +6,7 @@ namespace Yiisoft\Router;
 
 use RuntimeException;
 use Yiisoft\Http\Method;
-use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
+use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcherInterface;
 
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
@@ -19,30 +19,30 @@ final class Route
     private string $pattern;
     private ?string $host = null;
     private bool $override = false;
-    private ?MiddlewareDispatcher $dispatcher;
+    private ?MiddlewareDispatcherInterface $dispatcher;
     private bool $actionAdded = false;
     private array $middlewareDefinitions = [];
     private array $disabledMiddlewareDefinitions = [];
     private array $defaults = [];
 
-    private function __construct(?MiddlewareDispatcher $dispatcher = null)
+    private function __construct(?MiddlewareDispatcherInterface $dispatcher = null)
     {
         $this->dispatcher = $dispatcher;
     }
 
-    public function injectDispatcher(MiddlewareDispatcher $dispatcher): void
+    public function injectDispatcher(MiddlewareDispatcherInterface $dispatcher): void
     {
         $this->dispatcher = $dispatcher;
     }
 
-    public function withDispatcher(MiddlewareDispatcher $dispatcher): self
+    public function withDispatcher(MiddlewareDispatcherInterface $dispatcher): self
     {
         $route = clone $this;
         $route->dispatcher = $dispatcher;
         return $route;
     }
 
-    public function getDispatcherWithMiddlewares(): MiddlewareDispatcher
+    public function getDispatcherWithMiddlewares(): MiddlewareDispatcherInterface
     {
         if ($this->dispatcher->hasMiddlewares()) {
             return $this->dispatcher;
@@ -64,88 +64,88 @@ final class Route
 
     /**
      * @param string $pattern
-     * @param MiddlewareDispatcher|null $dispatcher
+     * @param MiddlewareDispatcherInterface|null $dispatcher
      *
      * @return self
      */
-    public static function get(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function get(string $pattern, ?MiddlewareDispatcherInterface $dispatcher = null): self
     {
         return self::methods([Method::GET], $pattern, $dispatcher);
     }
 
     /**
      * @param string $pattern
-     * @param MiddlewareDispatcher|null $dispatcher
+     * @param MiddlewareDispatcherInterface|null $dispatcher
      *
      * @return self
      */
-    public static function post(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function post(string $pattern, ?MiddlewareDispatcherInterface $dispatcher = null): self
     {
         return self::methods([Method::POST], $pattern, $dispatcher);
     }
 
     /**
      * @param string $pattern
-     * @param MiddlewareDispatcher|null $dispatcher
+     * @param MiddlewareDispatcherInterface|null $dispatcher
      *
      * @return self
      */
-    public static function put(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function put(string $pattern, ?MiddlewareDispatcherInterface $dispatcher = null): self
     {
         return self::methods([Method::PUT], $pattern, $dispatcher);
     }
 
     /**
      * @param string $pattern
-     * @param MiddlewareDispatcher|null $dispatcher
+     * @param MiddlewareDispatcherInterface|null $dispatcher
      *
      * @return self
      */
-    public static function delete(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function delete(string $pattern, ?MiddlewareDispatcherInterface $dispatcher = null): self
     {
         return self::methods([Method::DELETE], $pattern, $dispatcher);
     }
 
     /**
      * @param string $pattern
-     * @param MiddlewareDispatcher|null $dispatcher
+     * @param MiddlewareDispatcherInterface|null $dispatcher
      *
      * @return self
      */
-    public static function patch(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function patch(string $pattern, ?MiddlewareDispatcherInterface $dispatcher = null): self
     {
         return self::methods([Method::PATCH], $pattern, $dispatcher);
     }
 
     /**
      * @param string $pattern
-     * @param MiddlewareDispatcher|null $dispatcher
+     * @param MiddlewareDispatcherInterface|null $dispatcher
      *
      * @return self
      */
-    public static function head(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function head(string $pattern, ?MiddlewareDispatcherInterface $dispatcher = null): self
     {
         return self::methods([Method::HEAD], $pattern, $dispatcher);
     }
 
     /**
      * @param string $pattern
-     * @param MiddlewareDispatcher|null $dispatcher
+     * @param MiddlewareDispatcherInterface|null $dispatcher
      *
      * @return self
      */
-    public static function options(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function options(string $pattern, ?MiddlewareDispatcherInterface $dispatcher = null): self
     {
         return self::methods([Method::OPTIONS], $pattern, $dispatcher);
     }
 
     /**
      * @param string $pattern
-     * @param MiddlewareDispatcher|null $dispatcher
+     * @param MiddlewareDispatcherInterface|null $dispatcher
      *
      * @return self
      */
-    public static function anyMethod(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function anyMethod(string $pattern, ?MiddlewareDispatcherInterface $dispatcher = null): self
     {
         return self::methods(Method::ALL, $pattern, $dispatcher);
     }
@@ -153,14 +153,14 @@ final class Route
     /**
      * @param array $methods
      * @param string $pattern
-     * @param MiddlewareDispatcher|null $dispatcher
+     * @param MiddlewareDispatcherInterface|null $dispatcher
      *
      * @return self
      */
     public static function methods(
         array $methods,
         string $pattern,
-        ?MiddlewareDispatcher $dispatcher = null
+        ?MiddlewareDispatcherInterface $dispatcher = null
     ): self {
         $route = new self($dispatcher);
         $route->methods = $methods;

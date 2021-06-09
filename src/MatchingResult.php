@@ -9,7 +9,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Http\Method;
-use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
+use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcherInterface;
 
 final class MatchingResult implements MiddlewareInterface
 {
@@ -17,13 +17,13 @@ final class MatchingResult implements MiddlewareInterface
     private Route $route;
     private array $parameters = [];
     private array $methods = [];
-    private ?MiddlewareDispatcher $dispatcher = null;
+    private ?MiddlewareDispatcherInterface $dispatcher = null;
 
     private function __construct()
     {
     }
 
-    public function withDispatcher(MiddlewareDispatcher $dispatcher): self
+    public function withDispatcher(MiddlewareDispatcherInterface $dispatcher): self
     {
         $new = clone $this;
         $new->dispatcher = $dispatcher;

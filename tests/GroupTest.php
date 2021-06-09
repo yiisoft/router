@@ -13,6 +13,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
+use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcherInterface;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Middleware\Dispatcher\MiddlewareStack;
 use Yiisoft\Router\Group;
@@ -263,7 +264,7 @@ final class GroupTest extends TestCase
         };
     }
 
-    private function getDispatcher(): MiddlewareDispatcher
+    private function getDispatcher(): MiddlewareDispatcherInterface
     {
         return new MiddlewareDispatcher(
             new MiddlewareFactory($this->getContainer()),
