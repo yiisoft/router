@@ -175,13 +175,13 @@ final class RouteTest extends TestCase
         if ($container === null) {
             return new MiddlewareDispatcher(
                 new MiddlewareFactory($this->getContainer()),
-                new MiddlewareStack($this->createMock(EventDispatcherInterface::class))
+                $this->createMock(EventDispatcherInterface::class)
             );
         }
 
         return new MiddlewareDispatcher(
             new MiddlewareFactory($container),
-            new MiddlewareStack($this->createMock(EventDispatcherInterface::class))
+            $this->createMock(EventDispatcherInterface::class)
         );
     }
 

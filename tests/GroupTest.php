@@ -267,7 +267,7 @@ final class GroupTest extends TestCase
     {
         return new MiddlewareDispatcher(
             new MiddlewareFactory($this->getContainer()),
-            new MiddlewareStack($this->createMock(EventDispatcherInterface::class))
+            $this->createMock(EventDispatcherInterface::class)
         );
     }
 

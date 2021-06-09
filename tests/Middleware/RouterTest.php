@@ -30,7 +30,7 @@ final class RouterTest extends TestCase
         $container = $this->createMock(ContainerInterface::class);
         $dispatcher = new MiddlewareDispatcher(
             new MiddlewareFactory($container),
-            new MiddlewareStack($this->createMock(EventDispatcherInterface::class))
+            $this->createMock(EventDispatcherInterface::class)
         );
 
         return new Router($this->getMatcher(), new Psr17Factory(), $dispatcher);

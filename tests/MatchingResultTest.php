@@ -52,7 +52,7 @@ final class MatchingResultTest extends TestCase
         $container = $this->createMock(ContainerInterface::class);
         $dispatcher = new MiddlewareDispatcher(
             new MiddlewareFactory($container),
-            new MiddlewareStack($this->createMock(EventDispatcherInterface::class))
+            $this->createMock(EventDispatcherInterface::class)
         );
         $route = Route::post('/', $dispatcher)->middleware($this->getMiddleware());
         $result = MatchingResult::fromSuccess($route, []);
