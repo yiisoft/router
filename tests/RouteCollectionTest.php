@@ -61,7 +61,7 @@ final class RouteCollectionTest extends TestCase
     {
         return new MiddlewareDispatcher(
             new MiddlewareFactory($this->createMock(ContainerInterface::class)),
-            new MiddlewareStack($this->createMock(EventDispatcherInterface::class))
+            $this->createMock(EventDispatcherInterface::class)
         );
     }
 }
