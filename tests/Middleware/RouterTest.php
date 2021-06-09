@@ -17,7 +17,6 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
-use Yiisoft\Middleware\Dispatcher\MiddlewareStack;
 use Yiisoft\Router\MatchingResult;
 use Yiisoft\Router\Middleware\Router;
 use Yiisoft\Router\Route;
