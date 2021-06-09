@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use \Yiisoft\Middleware\Dispatcher\MiddlewareDispatcherInterface;
-use \Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
+use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcherInterface;
+use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\RouteCollectorInterface;
 
