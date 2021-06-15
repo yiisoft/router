@@ -140,17 +140,6 @@ final class Route
     }
 
     /**
-     * @param string $pattern
-     * @param MiddlewareDispatcher|null $dispatcher
-     *
-     * @return self
-     */
-    public static function anyMethod(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
-    {
-        return self::methods(Method::ALL, $pattern, $dispatcher);
-    }
-
-    /**
      * @param array $methods
      * @param string $pattern
      * @param MiddlewareDispatcher|null $dispatcher

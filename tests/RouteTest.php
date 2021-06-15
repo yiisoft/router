@@ -95,13 +95,6 @@ final class RouteTest extends TestCase
         $this->assertSame([Method::OPTIONS], $route->getMethods());
     }
 
-    public function testAnyMethod(): void
-    {
-        $route = Route::anyMethod('/');
-
-        $this->assertSame(Method::ANY, $route->getMethods());
-    }
-
     public function testPattern(): void
     {
         $route = Route::get('/test')->pattern('/test2');
