@@ -92,9 +92,9 @@ final class RouteCollection implements RouteCollectionInterface
             return;
         }
 
-        $routeName = $route->getParameter(Route::PARAMETER_NAME, $route->getDefaultName());
+        $routeName = $route->getParameter(Route::NAME, $route->getDefaultName());
         $this->items[] = $routeName;
-        if (isset($this->routes[$routeName]) && !$route->getParameter(Route::PARAMETER_OVERRIDE)) {
+        if (isset($this->routes[$routeName]) && !$route->getParameter(Route::OVERRIDE)) {
             throw new InvalidArgumentException("A route with name '$routeName' already exists.");
         }
         $this->routes[$routeName] = $route;
@@ -127,16 +127,16 @@ final class RouteCollection implements RouteCollectionInterface
             }
 
             /** @var Route $modifiedItem */
-            $modifiedItem = $item->pattern($prefix . $item->getParameter(Route::PARAMETER_PATTERN));
+            $modifiedItem = $item->pattern($prefix . $item->getParameter(Route::PATTERN));
 
             if (empty($tree[$group->getPrefix()])) {
-                $tree[] = $modifiedItem->getParameter(Route::PARAMETER_NAME, $modifiedItem->getDefaultName());
+                $tree[] = $modifiedItem->getParameter(Route::NAME, $modifiedItem->getDefaultName());
             } else {
-                $tree[$group->getPrefix()][] = $modifiedItem->getParameter(Route::PARAMETER_NAME, $modifiedItem->getDefaultName());
+                $tree[$group->getPrefix()][] = $modifiedItem->getParameter(Route::NAME, $modifiedItem->getDefaultName());
             }
 
-            $routeName = $modifiedItem->getParameter(Route::PARAMETER_NAME, $modifiedItem->getDefaultName());
-            if (isset($this->routes[$routeName]) && !$modifiedItem->getParameter(Route::PARAMETER_OVERRIDE)) {
+            $routeName = $modifiedItem->getParameter(Route::NAME, $modifiedItem->getDefaultName());
+            if (isset($this->routes[$routeName]) && !$modifiedItem->getParameter(Route::OVERRIDE)) {
                 throw new InvalidArgumentException("A route with name '$routeName' already exists.");
             }
             $this->routes[$routeName] = $modifiedItem;

@@ -25,21 +25,21 @@ final class RouteTest extends TestCase
     {
         $route = Route::get('/')->name('test.route');
 
-        $this->assertSame('test.route', $route->getParameter(Route::PARAMETER_NAME, $route->getDefaultName()));
+        $this->assertSame('test.route', $route->getParameter(Route::NAME, $route->getDefaultName()));
     }
 
     public function testNameDefault(): void
     {
         $route = Route::get('/');
 
-        $this->assertSame('GET /', $route->getParameter(Route::PARAMETER_NAME, $route->getDefaultName()));
+        $this->assertSame('GET /', $route->getParameter(Route::NAME, $route->getDefaultName()));
     }
 
     public function testMethods(): void
     {
         $route = Route::methods([Method::POST, Method::HEAD], '/');
 
-        $this->assertSame([Method::POST, Method::HEAD], $route->getParameter(Route::PARAMETER_METHODS));
+        $this->assertSame([Method::POST, Method::HEAD], $route->getParameter(Route::METHODS));
     }
 
     public const PATCH = 'PATCH';
@@ -50,77 +50,77 @@ final class RouteTest extends TestCase
     {
         $route = Route::get('/');
 
-        $this->assertSame([Method::GET], $route->getParameter(Route::PARAMETER_METHODS));
+        $this->assertSame([Method::GET], $route->getParameter(Route::METHODS));
     }
 
     public function testPostMethod(): void
     {
         $route = Route::post('/');
 
-        $this->assertSame([Method::POST], $route->getParameter(Route::PARAMETER_METHODS));
+        $this->assertSame([Method::POST], $route->getParameter(Route::METHODS));
     }
 
     public function testPutMethod(): void
     {
         $route = Route::put('/');
 
-        $this->assertSame([Method::PUT], $route->getParameter(Route::PARAMETER_METHODS));
+        $this->assertSame([Method::PUT], $route->getParameter(Route::METHODS));
     }
 
     public function testDeleteMethod(): void
     {
         $route = Route::delete('/');
 
-        $this->assertSame([Method::DELETE], $route->getParameter(Route::PARAMETER_METHODS));
+        $this->assertSame([Method::DELETE], $route->getParameter(Route::METHODS));
     }
 
     public function testPatchMethod(): void
     {
         $route = Route::patch('/');
 
-        $this->assertSame([Method::PATCH], $route->getParameter(Route::PARAMETER_METHODS));
+        $this->assertSame([Method::PATCH], $route->getParameter(Route::METHODS));
     }
 
     public function testHeadMethod(): void
     {
         $route = Route::head('/');
 
-        $this->assertSame([Method::HEAD], $route->getParameter(Route::PARAMETER_METHODS));
+        $this->assertSame([Method::HEAD], $route->getParameter(Route::METHODS));
     }
 
     public function testOptionsMethod(): void
     {
         $route = Route::options('/');
 
-        $this->assertSame([Method::OPTIONS], $route->getParameter(Route::PARAMETER_METHODS));
+        $this->assertSame([Method::OPTIONS], $route->getParameter(Route::METHODS));
     }
 
     public function testPattern(): void
     {
         $route = Route::get('/test')->pattern('/test2');
 
-        $this->assertSame('/test2', $route->getParameter(Route::PARAMETER_PATTERN));
+        $this->assertSame('/test2', $route->getParameter(Route::PATTERN));
     }
 
     public function testHost(): void
     {
         $route = Route::get('/')->host('https://yiiframework.com/');
 
-        $this->assertSame('https://yiiframework.com', $route->getParameter(Route::PARAMETER_HOST));
+        $this->assertSame('https://yiiframework.com', $route->getParameter(Route::HOST));
     }
 
     public function testDefaults(): void
     {
         $route = Route::get('/{language}')->defaults(['language' => 'en']);
 
-        $this->assertSame(['language' => 'en'], $route->getParameter(Route::PARAMETER_DEFAULTS));
+        $this->assertSame(['language' => 'en'], $route->getParameter(Route::DEFAULTS));
     }
 
     public function testOverride(): void
     {
         $route = Route::get('/')->override();
 
-        $this->assertTrue($route->getParameter(Route::PARAMETER_OVERRIDE));
+        $this->assertTrue($route->getParameter(Route::OVERRIDE));
     }
 
     public function testToString(): void

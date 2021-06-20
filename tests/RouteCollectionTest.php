@@ -39,7 +39,7 @@ final class RouteCollectionTest extends TestCase
 
         $routeCollection = new RouteCollection($group);
         $route = $routeCollection->getRoute('my-route');
-        $this->assertSame('/{id}', $route->getParameter(Route::PARAMETER_PATTERN));
+        $this->assertSame('/{id}', $route->getParameter(Route::PATTERN));
     }
 
     public function testRouteWithoutAction(): void

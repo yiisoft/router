@@ -13,16 +13,16 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
  */
 final class Route
 {
-    public const PARAMETER_NAME = 'name';
-    public const PARAMETER_METHODS = 'methods';
-    public const PARAMETER_PATTERN = 'pattern';
-    public const PARAMETER_HOST = 'host';
-    public const PARAMETER_DEFAULTS = 'defaults';
-    public const PARAMETER_OVERRIDE = 'override';
-    public const PARAMETER_ACTION_ADDED = 'action_added';
+    public const NAME = 'name';
+    public const METHODS = 'methods';
+    public const PATTERN = 'pattern';
+    public const HOST = 'host';
+    public const DEFAULTS = 'defaults';
+    public const OVERRIDE = 'override';
 
     /** @var string[] */
     private array $parameters;
+    private bool $actionAdded = false;
     private ?MiddlewareDispatcher $dispatcher;
     private array $middlewareDefinitions = [];
     private array $disabledMiddlewareDefinitions = [];
@@ -32,13 +32,12 @@ final class Route
         $this->dispatcher = $dispatcher;
         // Set default parameters
         $this->parameters = [
-            self::PARAMETER_OVERRIDE => false,
-            self::PARAMETER_ACTION_ADDED => false,
-            self::PARAMETER_DEFAULTS => [],
+            self::OVERRIDE => false,
+            self::DEFAULTS => [],
         ];
     }
 
-    private function setParameter(string $parameter, $value)
+    private function setParameter(string $parameter, $value): void
     {
         $this->parameters[$parameter] = $value;
     }
@@ -170,8 +169,8 @@ final class Route
         ?MiddlewareDispatcher $dispatcher = null
     ): self {
         $route = new self($dispatcher);
-        $route->setParameter(self::PARAMETER_METHODS, $methods);
-        $route->setParameter(self::PARAMETER_PATTERN, $pattern);
+        $route->setParameter(self::METHODS, $methods);
+        $route->setParameter(self::PATTERN, $pattern);
 
         return $route;
     }
@@ -179,21 +178,21 @@ final class Route
     public function name(string $name): self
     {
         $route = clone $this;
-        $route->setParameter(self::PARAMETER_NAME, $name);
+        $route->setParameter(self::NAME, $name);
         return $route;
     }
 
     public function pattern(string $pattern): self
     {
-        $new = clone $this;
-        $new->setParameter(self::PARAMETER_PATTERN, $pattern);
-        return $new;
+        $route = clone $this;
+        $route->setParameter(self::PATTERN, $pattern);
+        return $route;
     }
 
     public function host(string $host): self
     {
         $route = clone $this;
-        $route->setParameter(self::PARAMETER_HOST, rtrim($host, '/'));
+        $route->setParameter(self::HOST, rtrim($host, '/'));
         return $route;
     }
 
@@ -205,7 +204,7 @@ final class Route
     public function override(): self
     {
         $route = clone $this;
-        $route->setParameter(self::PARAMETER_OVERRIDE, true);
+        $route->setParameter(self::OVERRIDE, true);
         return $route;
     }
 
@@ -219,7 +218,7 @@ final class Route
     public function defaults(array $defaults): self
     {
         $route = clone $this;
-        $route->setParameter(self::PARAMETER_DEFAULTS, $defaults);
+        $route->setParameter(self::DEFAULTS, $defaults);
         return $route;
     }
 
@@ -233,7 +232,7 @@ final class Route
      */
     public function middleware($middlewareDefinition): self
     {
-        if ($this->getParameter(self::PARAMETER_ACTION_ADDED)) {
+        if ($this->actionAdded) {
             throw new RuntimeException('middleware() can not be used after action().');
         }
         $route = clone $this;
@@ -251,7 +250,7 @@ final class Route
      */
     public function prependMiddleware($middlewareDefinition): self
     {
-        if (!$this->getParameter(self::PARAMETER_ACTION_ADDED)) {
+        if (!$this->actionAdded) {
             throw new RuntimeException('prependMiddleware() can not be used before action().');
         }
         $route = clone $this;
@@ -270,7 +269,7 @@ final class Route
     {
         $route = clone $this;
         array_unshift($route->middlewareDefinitions, $middlewareDefinition);
-        $route->setParameter(self::PARAMETER_ACTION_ADDED, true);
+        $route->actionAdded = true;
         return $route;
     }
 
@@ -294,24 +293,24 @@ final class Route
     {
         $result = '';
 
-        if ($this->getParameter(self::PARAMETER_NAME) !== null) {
-            $result .= '[' . $this->getParameter(self::PARAMETER_NAME) . '] ';
+        if ($this->getParameter(self::NAME) !== null) {
+            $result .= '[' . $this->getParameter(self::NAME) . '] ';
         }
 
-        if ($this->getParameter(self::PARAMETER_METHODS) !== []) {
-            $result .= implode(',', $this->getParameter(self::PARAMETER_METHODS)) . ' ';
+        if ($this->getParameter(self::METHODS) !== []) {
+            $result .= implode(',', $this->getParameter(self::METHODS)) . ' ';
         }
-        if ($this->getParameter(self::PARAMETER_HOST) !== null && strrpos($this->getParameter(self::PARAMETER_PATTERN), $this->getParameter(self::PARAMETER_HOST)) === false) {
-            $result .= $this->getParameter(self::PARAMETER_HOST);
+        if ($this->getParameter(self::HOST) !== null && strrpos($this->getParameter(self::PATTERN), $this->getParameter(self::HOST)) === false) {
+            $result .= $this->getParameter(self::HOST);
         }
-        $result .= $this->getParameter(self::PARAMETER_PATTERN);
+        $result .= $this->getParameter(self::PATTERN);
 
         return $result;
     }
 
     public function getDefaultName(): string
     {
-        return implode(', ', $this->getParameter(self::PARAMETER_METHODS)) . ' ' . $this->getParameter(self::PARAMETER_HOST) . $this->getParameter(self::PARAMETER_PATTERN);
+        return implode(', ', $this->getParameter(self::METHODS)) . ' ' . $this->getParameter(self::HOST) . $this->getParameter(self::PATTERN);
     }
 
     public function hasMiddlewares(): bool
