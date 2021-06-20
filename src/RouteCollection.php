@@ -92,9 +92,9 @@ final class RouteCollection implements RouteCollectionInterface
             return;
         }
 
-        $this->items[] = $route->getName();
-        $routeName = $route->getName();
-        if (isset($this->routes[$routeName]) && !$route->isOverride()) {
+        $routeName = $route->getParameter(Route::PARAMETER_NAME, $route->getDefaultName());
+        $this->items[] = $routeName;
+        if (isset($this->routes[$routeName]) && !$route->getParameter(Route::PARAMETER_OVERRIDE)) {
             throw new InvalidArgumentException("A route with name '$routeName' already exists.");
         }
         $this->routes[$routeName] = $route;
@@ -127,16 +127,16 @@ final class RouteCollection implements RouteCollectionInterface
             }
 
             /** @var Route $modifiedItem */
-            $modifiedItem = $item->pattern($prefix . $item->getPattern());
+            $modifiedItem = $item->pattern($prefix . $item->getParameter(Route::PARAMETER_PATTERN));
 
             if (empty($tree[$group->getPrefix()])) {
-                $tree[] = $modifiedItem->getName();
+                $tree[] = $modifiedItem->getParameter(Route::PARAMETER_NAME, $modifiedItem->getDefaultName());
             } else {
-                $tree[$group->getPrefix()][] = $modifiedItem->getName();
+                $tree[$group->getPrefix()][] = $modifiedItem->getParameter(Route::PARAMETER_NAME, $modifiedItem->getDefaultName());
             }
 
-            $routeName = $modifiedItem->getName();
-            if (isset($this->routes[$routeName]) && !$modifiedItem->isOverride()) {
+            $routeName = $modifiedItem->getParameter(Route::PARAMETER_NAME, $modifiedItem->getDefaultName());
+            if (isset($this->routes[$routeName]) && !$modifiedItem->getParameter(Route::PARAMETER_OVERRIDE)) {
                 throw new InvalidArgumentException("A route with name '$routeName' already exists.");
             }
             $this->routes[$routeName] = $modifiedItem;
