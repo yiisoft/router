@@ -15,7 +15,7 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * All attached routes as Route instances
      *
-     * @var Route[]
+     * @var RouteInterface[]
      */
     private array $routes = [];
 
@@ -25,7 +25,7 @@ final class RouteCollection implements RouteCollectionInterface
     }
 
     /**
-     * @return Route[]
+     * @return RouteInterface[]
      */
     public function getRoutes(): array
     {
@@ -36,9 +36,9 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * @param string $name
      *
-     * @return Route
+     * @return RouteInterface
      */
-    public function getRoute(string $name): Route
+    public function getRoute(string $name): RouteInterface
     {
         $this->ensureItemsInjected();
         if (!array_key_exists($name, $this->routes)) {
@@ -71,7 +71,7 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * Build routes array
      *
-     * @param Group[]|Route[]|RouteCollectorInterface[] $items
+     * @param Group[]|RouteInterface[]|RouteCollectorInterface[] $items
      */
     private function injectItems(array $items): void
     {
@@ -106,7 +106,7 @@ final class RouteCollection implements RouteCollectionInterface
     private function injectGroup(Group $group, array &$tree, string $prefix = ''): void
     {
         $prefix .= $group->getPrefix();
-        /** @var $items Group[]|Route[] */
+        /** @var $items Group[]|RouteInterface[] */
         $items = $group->getItems();
         foreach ($items as $item) {
             if ($item instanceof Group || $item->hasMiddlewares()) {
