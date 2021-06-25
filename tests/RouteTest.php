@@ -25,21 +25,21 @@ final class RouteTest extends TestCase
     {
         $route = Route::get('/')->name('test.route');
 
-        $this->assertSame('test.route', $route->getParameter(Route::NAME, $route->getDefaultName()));
+        $this->assertSame('test.route', $route->getName());
     }
 
     public function testNameDefault(): void
     {
         $route = Route::get('/');
 
-        $this->assertSame('GET /', $route->getParameter(Route::NAME, $route->getDefaultName()));
+        $this->assertSame('GET /', $route->getName());
     }
 
     public function testMethods(): void
     {
         $route = Route::methods([Method::POST, Method::HEAD], '/');
 
-        $this->assertSame([Method::POST, Method::HEAD], $route->getParameter(Route::METHODS));
+        $this->assertSame([Method::POST, Method::HEAD], $route->getMethods());
     }
 
     public const PATCH = 'PATCH';
@@ -50,77 +50,77 @@ final class RouteTest extends TestCase
     {
         $route = Route::get('/');
 
-        $this->assertSame([Method::GET], $route->getParameter(Route::METHODS));
+        $this->assertSame([Method::GET], $route->getMethods());
     }
 
     public function testPostMethod(): void
     {
         $route = Route::post('/');
 
-        $this->assertSame([Method::POST], $route->getParameter(Route::METHODS));
+        $this->assertSame([Method::POST], $route->getMethods());
     }
 
     public function testPutMethod(): void
     {
         $route = Route::put('/');
 
-        $this->assertSame([Method::PUT], $route->getParameter(Route::METHODS));
+        $this->assertSame([Method::PUT], $route->getMethods());
     }
 
     public function testDeleteMethod(): void
     {
         $route = Route::delete('/');
 
-        $this->assertSame([Method::DELETE], $route->getParameter(Route::METHODS));
+        $this->assertSame([Method::DELETE], $route->getMethods());
     }
 
     public function testPatchMethod(): void
     {
         $route = Route::patch('/');
 
-        $this->assertSame([Method::PATCH], $route->getParameter(Route::METHODS));
+        $this->assertSame([Method::PATCH], $route->getMethods());
     }
 
     public function testHeadMethod(): void
     {
         $route = Route::head('/');
 
-        $this->assertSame([Method::HEAD], $route->getParameter(Route::METHODS));
+        $this->assertSame([Method::HEAD], $route->getMethods());
     }
 
     public function testOptionsMethod(): void
     {
         $route = Route::options('/');
 
-        $this->assertSame([Method::OPTIONS], $route->getParameter(Route::METHODS));
+        $this->assertSame([Method::OPTIONS], $route->getMethods());
     }
 
     public function testPattern(): void
     {
         $route = Route::get('/test')->pattern('/test2');
 
-        $this->assertSame('/test2', $route->getParameter(Route::PATTERN));
+        $this->assertSame('/test2', $route->getPattern());
     }
 
     public function testHost(): void
     {
         $route = Route::get('/')->host('https://yiiframework.com/');
 
-        $this->assertSame('https://yiiframework.com', $route->getParameter(Route::HOST));
+        $this->assertSame('https://yiiframework.com', $route->getHost());
     }
 
     public function testDefaults(): void
     {
         $route = Route::get('/{language}')->defaults(['language' => 'en']);
 
-        $this->assertSame(['language' => 'en'], $route->getParameter(Route::DEFAULTS));
+        $this->assertSame(['language' => 'en'], $route->getDefaults());
     }
 
     public function testOverride(): void
     {
         $route = Route::get('/')->override();
 
-        $this->assertTrue($route->getParameter(Route::OVERRIDE));
+        $this->assertTrue($route->isOverride());
     }
 
     public function testToString(): void

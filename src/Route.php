@@ -13,38 +13,21 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
  */
 final class Route
 {
-    public const NAME = 'name';
-    public const METHODS = 'methods';
-    public const PATTERN = 'pattern';
-    public const HOST = 'host';
-    public const DEFAULTS = 'defaults';
-    public const OVERRIDE = 'override';
-
+    private ?string $name = null;
     /** @var string[] */
-    private array $parameters;
-    private bool $actionAdded = false;
+    private array $methods;
+    private string $pattern;
+    private ?string $host = null;
+    private bool $override = false;
     private ?MiddlewareDispatcher $dispatcher;
+    private bool $actionAdded = false;
     private array $middlewareDefinitions = [];
     private array $disabledMiddlewareDefinitions = [];
+    private array $defaults = [];
 
     private function __construct(?MiddlewareDispatcher $dispatcher = null)
     {
         $this->dispatcher = $dispatcher;
-        // Set default parameters
-        $this->parameters = [
-            self::OVERRIDE => false,
-            self::DEFAULTS => [],
-        ];
-    }
-
-    private function setParameter(string $parameter, $value): void
-    {
-        $this->parameters[$parameter] = $value;
-    }
-
-    public function getParameter(string $parameter, $default = null)
-    {
-        return array_key_exists($parameter, $this->parameters) ? $this->parameters[$parameter] : $default;
     }
 
     public function injectDispatcher(MiddlewareDispatcher $dispatcher): void
@@ -169,8 +152,8 @@ final class Route
         ?MiddlewareDispatcher $dispatcher = null
     ): self {
         $route = new self($dispatcher);
-        $route->setParameter(self::METHODS, $methods);
-        $route->setParameter(self::PATTERN, $pattern);
+        $route->methods = $methods;
+        $route->pattern = $pattern;
 
         return $route;
     }
@@ -178,21 +161,21 @@ final class Route
     public function name(string $name): self
     {
         $route = clone $this;
-        $route->setParameter(self::NAME, $name);
+        $route->name = $name;
         return $route;
     }
 
     public function pattern(string $pattern): self
     {
-        $route = clone $this;
-        $route->setParameter(self::PATTERN, $pattern);
-        return $route;
+        $new = clone $this;
+        $new->pattern = $pattern;
+        return $new;
     }
 
     public function host(string $host): self
     {
         $route = clone $this;
-        $route->setParameter(self::HOST, rtrim($host, '/'));
+        $route->host = rtrim($host, '/');
         return $route;
     }
 
@@ -204,7 +187,7 @@ final class Route
     public function override(): self
     {
         $route = clone $this;
-        $route->setParameter(self::OVERRIDE, true);
+        $route->override = true;
         return $route;
     }
 
@@ -218,7 +201,7 @@ final class Route
     public function defaults(array $defaults): self
     {
         $route = clone $this;
-        $route->setParameter(self::DEFAULTS, $defaults);
+        $route->defaults = $defaults;
         return $route;
     }
 
@@ -293,24 +276,49 @@ final class Route
     {
         $result = '';
 
-        if ($this->getParameter(self::NAME) !== null) {
-            $result .= '[' . $this->getParameter(self::NAME) . '] ';
+        if ($this->name !== null) {
+            $result .= '[' . $this->name . '] ';
         }
 
-        if ($this->getParameter(self::METHODS) !== []) {
-            $result .= implode(',', $this->getParameter(self::METHODS)) . ' ';
+        if ($this->methods !== []) {
+            $result .= implode(',', $this->methods) . ' ';
         }
-        if ($this->getParameter(self::HOST) !== null && strrpos($this->getParameter(self::PATTERN), $this->getParameter(self::HOST)) === false) {
-            $result .= $this->getParameter(self::HOST);
+        if ($this->host !== null && strrpos($this->pattern, $this->host) === false) {
+            $result .= $this->host;
         }
-        $result .= $this->getParameter(self::PATTERN);
+        $result .= $this->pattern;
 
         return $result;
     }
 
-    public function getDefaultName(): string
+    public function getName(): string
     {
-        return implode(', ', $this->getParameter(self::METHODS)) . ' ' . $this->getParameter(self::HOST) . $this->getParameter(self::PATTERN);
+        return $this->name ?? (implode(', ', $this->methods) . ' ' . $this->host . $this->pattern);
+    }
+
+    public function getMethods(): array
+    {
+        return $this->methods;
+    }
+
+    public function getPattern(): string
+    {
+        return $this->pattern;
+    }
+
+    public function getHost(): ?string
+    {
+        return $this->host;
+    }
+
+    public function isOverride(): bool
+    {
+        return $this->override;
+    }
+
+    public function getDefaults(): array
+    {
+        return $this->defaults;
     }
 
     public function hasMiddlewares(): bool
