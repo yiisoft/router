@@ -18,9 +18,9 @@ interface UrlMatcherInterface
     /**
      * Returns the current Route object
      *
-     * @return RouteInterface|null current route
+     * @return RouteParametersInterface |null current route
      */
-    public function getCurrentRoute(): ?RouteInterface;
+    public function getCurrentRoute(): ?RouteParametersInterface;
 
     /**
      * Returns current URI

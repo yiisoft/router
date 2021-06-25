@@ -7,16 +7,16 @@ namespace Yiisoft\Router;
 interface RouteCollectionInterface
 {
     /**
-     * @return RouteInterface[]
+     * @return RouteParametersInterface[]
      */
     public function getRoutes(): array;
 
     /**
      * @param string $name
      *
-     * @return RouteInterface
+     * @return RouteParametersInterface
      */
-    public function getRoute(string $name): RouteInterface;
+    public function getRoute(string $name): RouteParametersInterface;
 
     /**
      * Returns routes tree array

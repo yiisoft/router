@@ -14,7 +14,7 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 final class MatchingResult implements MiddlewareInterface
 {
     private bool $success;
-    private RouteInterface $route;
+    private RouteParametersInterface $route;
     private array $parameters = [];
     private array $methods = [];
     private ?MiddlewareDispatcher $dispatcher = null;
@@ -30,7 +30,7 @@ final class MatchingResult implements MiddlewareInterface
         return $new;
     }
 
-    public static function fromSuccess(RouteInterface $route, array $parameters): self
+    public static function fromSuccess(RouteParametersInterface $route, array $parameters): self
     {
         $new = new self();
         $new->success = true;
@@ -54,7 +54,7 @@ final class MatchingResult implements MiddlewareInterface
 
     public function isMethodFailure(): bool
     {
-        return !$this->success && $this->methods !== Method::ANY;
+        return !$this->success && $this->methods !== Method::ALL;
     }
 
     public function parameters(): array

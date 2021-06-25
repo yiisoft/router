@@ -247,11 +247,6 @@ final class Route implements RouteInterface, RouteParametersInterface
         return $result;
     }
 
-    public function getParameters(): RouteParametersInterface
-    {
-        return $this;
-    }
-
     public function getName(): string
     {
         return $this->name ?? (implode(', ', $this->methods) . ' ' . $this->host . $this->pattern);

@@ -16,7 +16,7 @@ use function is_object;
 final class Group implements RouteCollectorInterface
 {
     /**
-     * @var Group[]|Route[]
+     * @var Group[]|RouteParametersInterface[]
      */
     protected array $items = [];
     protected ?string $prefix;
@@ -166,7 +166,7 @@ final class Group implements RouteCollectorInterface
     }
 
     /**
-     * @return Group[]|RouteInterface[]
+     * @return Group[]|RouteParametersInterface[]
      */
     public function getItems(): array
     {

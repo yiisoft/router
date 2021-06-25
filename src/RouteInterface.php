@@ -8,8 +8,6 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
 interface RouteInterface
 {
-    public function getParameters(): RouteParametersInterface;
-
     public function injectDispatcher(MiddlewareDispatcher $dispatcher): void;
 
     public function withDispatcher(MiddlewareDispatcher $dispatcher): self;

@@ -15,7 +15,7 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * All attached routes as Route instances
      *
-     * @var RouteInterface[]
+     * @var RouteParametersInterface[]
      */
     private array $routes = [];
 
@@ -25,7 +25,7 @@ final class RouteCollection implements RouteCollectionInterface
     }
 
     /**
-     * @return RouteInterface[]
+     * @return RouteParametersInterface[]
      */
     public function getRoutes(): array
     {
@@ -36,9 +36,9 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * @param string $name
      *
-     * @return RouteInterface
+     * @return RouteParametersInterface
      */
-    public function getRoute(string $name): RouteInterface
+    public function getRoute(string $name): RouteParametersInterface
     {
         $this->ensureItemsInjected();
         if (!array_key_exists($name, $this->routes)) {
@@ -71,7 +71,7 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * Build routes array
      *
-     * @param Group[]|RouteInterface[]|RouteCollectorInterface[] $items
+     * @param Group[]|RouteParametersInterface[]|RouteCollectorInterface[] $items
      */
     private function injectItems(array $items): void
     {
@@ -83,7 +83,7 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * Add an item into routes array
      *
-     * @param Group|Route $route
+     * @param Group|RouteParametersInterface $route
      */
     private function injectItem($route): void
     {
@@ -106,7 +106,7 @@ final class RouteCollection implements RouteCollectionInterface
     private function injectGroup(Group $group, array &$tree, string $prefix = ''): void
     {
         $prefix .= $group->getPrefix();
-        /** @var $items Group[]|RouteInterface[] */
+        /** @var $items Group[]|Route[] */
         $items = $group->getItems();
         foreach ($items as $item) {
             if ($item instanceof Group || $item->hasMiddlewares()) {

@@ -35,7 +35,7 @@ interface RouteCollectorInterface
     public function addGroup(Group $group): self;
 
     /**
-     * @return Group[]|RouteInterface[]
+     * @return Group[]|RouteParametersInterface[]
      */
     public function getItems(): array;
 
