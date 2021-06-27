@@ -11,40 +11,23 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
  */
-final class Route
+final class Route implements RouteInterface, RouteParametersInterface
 {
-    public const NAME = 'name';
-    public const METHODS = 'methods';
-    public const PATTERN = 'pattern';
-    public const HOST = 'host';
-    public const DEFAULTS = 'defaults';
-    public const OVERRIDE = 'override';
-
+    private ?string $name = null;
     /** @var string[] */
-    private array $parameters;
-    private bool $actionAdded = false;
+    private array $methods;
+    private string $pattern;
+    private ?string $host = null;
+    private bool $override = false;
     private ?MiddlewareDispatcher $dispatcher;
+    private bool $actionAdded = false;
     private array $middlewareDefinitions = [];
     private array $disabledMiddlewareDefinitions = [];
+    private array $defaults = [];
 
     private function __construct(?MiddlewareDispatcher $dispatcher = null)
     {
         $this->dispatcher = $dispatcher;
-        // Set default parameters
-        $this->parameters = [
-            self::OVERRIDE => false,
-            self::DEFAULTS => [],
-        ];
-    }
-
-    private function setParameter(string $parameter, $value): void
-    {
-        $this->parameters[$parameter] = $value;
-    }
-
-    public function getParameter(string $parameter, $default = null)
-    {
-        return array_key_exists($parameter, $this->parameters) ? $this->parameters[$parameter] : $default;
     }
 
     public function injectDispatcher(MiddlewareDispatcher $dispatcher): void
@@ -52,7 +35,7 @@ final class Route
         $this->dispatcher = $dispatcher;
     }
 
-    public function withDispatcher(MiddlewareDispatcher $dispatcher): self
+    public function withDispatcher(MiddlewareDispatcher $dispatcher): RouteInterface
     {
         $route = clone $this;
         $route->dispatcher = $dispatcher;
@@ -83,9 +66,9 @@ final class Route
      * @param string $pattern
      * @param MiddlewareDispatcher|null $dispatcher
      *
-     * @return self
+     * @return RouteInterface
      */
-    public static function get(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function get(string $pattern, ?MiddlewareDispatcher $dispatcher = null): RouteInterface
     {
         return self::methods([Method::GET], $pattern, $dispatcher);
     }
@@ -94,9 +77,9 @@ final class Route
      * @param string $pattern
      * @param MiddlewareDispatcher|null $dispatcher
      *
-     * @return self
+     * @return RouteInterface
      */
-    public static function post(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function post(string $pattern, ?MiddlewareDispatcher $dispatcher = null): RouteInterface
     {
         return self::methods([Method::POST], $pattern, $dispatcher);
     }
@@ -105,9 +88,9 @@ final class Route
      * @param string $pattern
      * @param MiddlewareDispatcher|null $dispatcher
      *
-     * @return self
+     * @return RouteInterface
      */
-    public static function put(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function put(string $pattern, ?MiddlewareDispatcher $dispatcher = null): RouteInterface
     {
         return self::methods([Method::PUT], $pattern, $dispatcher);
     }
@@ -116,9 +99,9 @@ final class Route
      * @param string $pattern
      * @param MiddlewareDispatcher|null $dispatcher
      *
-     * @return self
+     * @return RouteInterface
      */
-    public static function delete(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function delete(string $pattern, ?MiddlewareDispatcher $dispatcher = null): RouteInterface
     {
         return self::methods([Method::DELETE], $pattern, $dispatcher);
     }
@@ -127,9 +110,9 @@ final class Route
      * @param string $pattern
      * @param MiddlewareDispatcher|null $dispatcher
      *
-     * @return self
+     * @return RouteInterface
      */
-    public static function patch(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function patch(string $pattern, ?MiddlewareDispatcher $dispatcher = null): RouteInterface
     {
         return self::methods([Method::PATCH], $pattern, $dispatcher);
     }
@@ -138,9 +121,9 @@ final class Route
      * @param string $pattern
      * @param MiddlewareDispatcher|null $dispatcher
      *
-     * @return self
+     * @return RouteInterface
      */
-    public static function head(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function head(string $pattern, ?MiddlewareDispatcher $dispatcher = null): RouteInterface
     {
         return self::methods([Method::HEAD], $pattern, $dispatcher);
     }
@@ -149,9 +132,9 @@ final class Route
      * @param string $pattern
      * @param MiddlewareDispatcher|null $dispatcher
      *
-     * @return self
+     * @return RouteInterface
      */
-    public static function options(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function options(string $pattern, ?MiddlewareDispatcher $dispatcher = null): RouteInterface
     {
         return self::methods([Method::OPTIONS], $pattern, $dispatcher);
     }
@@ -161,76 +144,56 @@ final class Route
      * @param string $pattern
      * @param MiddlewareDispatcher|null $dispatcher
      *
-     * @return self
+     * @return RouteInterface
      */
     public static function methods(
         array $methods,
         string $pattern,
         ?MiddlewareDispatcher $dispatcher = null
-    ): self {
+    ): RouteInterface {
         $route = new self($dispatcher);
-        $route->setParameter(self::METHODS, $methods);
-        $route->setParameter(self::PATTERN, $pattern);
+        $route->methods = $methods;
+        $route->pattern = $pattern;
 
         return $route;
     }
 
-    public function name(string $name): self
+    public function name(string $name): RouteInterface
     {
         $route = clone $this;
-        $route->setParameter(self::NAME, $name);
+        $route->name = $name;
         return $route;
     }
 
-    public function pattern(string $pattern): self
+    public function pattern(string $pattern): RouteInterface
+    {
+        $new = clone $this;
+        $new->pattern = $pattern;
+        return $new;
+    }
+
+    public function host(string $host): RouteInterface
     {
         $route = clone $this;
-        $route->setParameter(self::PATTERN, $pattern);
+        $route->host = rtrim($host, '/');
         return $route;
     }
 
-    public function host(string $host): self
+    public function override(): RouteInterface
     {
         $route = clone $this;
-        $route->setParameter(self::HOST, rtrim($host, '/'));
+        $route->override = true;
         return $route;
     }
 
-    /**
-     * Marks route as override. When added it will replace existing route with the same name.
-     *
-     * @return self
-     */
-    public function override(): self
+    public function defaults(array $defaults): RouteInterface
     {
         $route = clone $this;
-        $route->setParameter(self::OVERRIDE, true);
+        $route->defaults = $defaults;
         return $route;
     }
 
-    /**
-     * Parameter default values indexed by parameter names.
-     *
-     * @param array $defaults
-     *
-     * @return self
-     */
-    public function defaults(array $defaults): self
-    {
-        $route = clone $this;
-        $route->setParameter(self::DEFAULTS, $defaults);
-        return $route;
-    }
-
-    /**
-     * Appends a handler middleware definition that should be invoked for a matched route.
-     * First added handler will be executed first.
-     *
-     * @param mixed $middlewareDefinition
-     *
-     * @return self
-     */
-    public function middleware($middlewareDefinition): self
+    public function middleware($middlewareDefinition): RouteInterface
     {
         if ($this->actionAdded) {
             throw new RuntimeException('middleware() can not be used after action().');
@@ -240,15 +203,7 @@ final class Route
         return $route;
     }
 
-    /**
-     * Prepends a handler middleware definition that should be invoked for a matched route.
-     * Last added handler will be executed first.
-     *
-     * @param mixed $middlewareDefinition
-     *
-     * @return self
-     */
-    public function prependMiddleware($middlewareDefinition): self
+    public function prependMiddleware($middlewareDefinition): RouteInterface
     {
         if (!$this->actionAdded) {
             throw new RuntimeException('prependMiddleware() can not be used before action().');
@@ -258,14 +213,7 @@ final class Route
         return $route;
     }
 
-    /**
-     * Appends action handler. It is a primary middleware definition that should be invoked last for a matched route.
-     *
-     * @param mixed $middlewareDefinition
-     *
-     * @return self
-     */
-    public function action($middlewareDefinition): self
+    public function action($middlewareDefinition): RouteInterface
     {
         $route = clone $this;
         array_unshift($route->middlewareDefinitions, $middlewareDefinition);
@@ -273,16 +221,7 @@ final class Route
         return $route;
     }
 
-    /**
-     * Excludes middleware from being invoked when action is handled.
-     * It is useful to avoid invoking one of the parent group middleware for
-     * a certain route.
-     *
-     * @param mixed $middlewareDefinition
-     *
-     * @return $this
-     */
-    public function disableMiddleware($middlewareDefinition): self
+    public function disableMiddleware($middlewareDefinition): RouteInterface
     {
         $route = clone $this;
         $route->disabledMiddlewareDefinitions[] = $middlewareDefinition;
@@ -293,24 +232,49 @@ final class Route
     {
         $result = '';
 
-        if ($this->getParameter(self::NAME) !== null) {
-            $result .= '[' . $this->getParameter(self::NAME) . '] ';
+        if ($this->name !== null) {
+            $result .= '[' . $this->name . '] ';
         }
 
-        if ($this->getParameter(self::METHODS) !== []) {
-            $result .= implode(',', $this->getParameter(self::METHODS)) . ' ';
+        if ($this->methods !== []) {
+            $result .= implode(',', $this->methods) . ' ';
         }
-        if ($this->getParameter(self::HOST) !== null && strrpos($this->getParameter(self::PATTERN), $this->getParameter(self::HOST)) === false) {
-            $result .= $this->getParameter(self::HOST);
+        if ($this->host !== null && strrpos($this->pattern, $this->host) === false) {
+            $result .= $this->host;
         }
-        $result .= $this->getParameter(self::PATTERN);
+        $result .= $this->pattern;
 
         return $result;
     }
 
-    public function getDefaultName(): string
+    public function getName(): string
     {
-        return implode(', ', $this->getParameter(self::METHODS)) . ' ' . $this->getParameter(self::HOST) . $this->getParameter(self::PATTERN);
+        return $this->name ?? (implode(', ', $this->methods) . ' ' . $this->host . $this->pattern);
+    }
+
+    public function getMethods(): array
+    {
+        return $this->methods;
+    }
+
+    public function getPattern(): string
+    {
+        return $this->pattern;
+    }
+
+    public function getHost(): ?string
+    {
+        return $this->host;
+    }
+
+    public function isOverride(): bool
+    {
+        return $this->override;
+    }
+
+    public function getDefaults(): array
+    {
+        return $this->defaults;
     }
 
     public function hasMiddlewares(): bool

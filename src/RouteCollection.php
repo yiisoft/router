@@ -15,7 +15,7 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * All attached routes as Route instances
      *
-     * @var Route[]
+     * @var RouteParametersInterface[]
      */
     private array $routes = [];
 
@@ -25,7 +25,7 @@ final class RouteCollection implements RouteCollectionInterface
     }
 
     /**
-     * @return Route[]
+     * @return RouteParametersInterface[]
      */
     public function getRoutes(): array
     {
@@ -36,9 +36,9 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * @param string $name
      *
-     * @return Route
+     * @return RouteParametersInterface
      */
-    public function getRoute(string $name): Route
+    public function getRoute(string $name): RouteParametersInterface
     {
         $this->ensureItemsInjected();
         if (!array_key_exists($name, $this->routes)) {
@@ -71,7 +71,7 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * Build routes array
      *
-     * @param Group[]|Route[]|RouteCollectorInterface[] $items
+     * @param Group[]|RouteCollectorInterface[]|RouteParametersInterface[] $items
      */
     private function injectItems(array $items): void
     {
@@ -83,7 +83,7 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * Add an item into routes array
      *
-     * @param Group|Route $route
+     * @param Group|RouteParametersInterface $route
      */
     private function injectItem($route): void
     {
@@ -92,9 +92,9 @@ final class RouteCollection implements RouteCollectionInterface
             return;
         }
 
-        $routeName = $route->getParameter(Route::NAME, $route->getDefaultName());
-        $this->items[] = $routeName;
-        if (isset($this->routes[$routeName]) && !$route->getParameter(Route::OVERRIDE)) {
+        $this->items[] = $route->getName();
+        $routeName = $route->getName();
+        if (isset($this->routes[$routeName]) && !$route->isOverride()) {
             throw new InvalidArgumentException("A route with name '$routeName' already exists.");
         }
         $this->routes[$routeName] = $route;
@@ -127,16 +127,16 @@ final class RouteCollection implements RouteCollectionInterface
             }
 
             /** @var Route $modifiedItem */
-            $modifiedItem = $item->pattern($prefix . $item->getParameter(Route::PATTERN));
+            $modifiedItem = $item->pattern($prefix . $item->getPattern());
 
             if (empty($tree[$group->getPrefix()])) {
-                $tree[] = $modifiedItem->getParameter(Route::NAME, $modifiedItem->getDefaultName());
+                $tree[] = $modifiedItem->getName();
             } else {
-                $tree[$group->getPrefix()][] = $modifiedItem->getParameter(Route::NAME, $modifiedItem->getDefaultName());
+                $tree[$group->getPrefix()][] = $modifiedItem->getName();
             }
 
-            $routeName = $modifiedItem->getParameter(Route::NAME, $modifiedItem->getDefaultName());
-            if (isset($this->routes[$routeName]) && !$modifiedItem->getParameter(Route::OVERRIDE)) {
+            $routeName = $modifiedItem->getName();
+            if (isset($this->routes[$routeName]) && !$modifiedItem->isOverride()) {
                 throw new InvalidArgumentException("A route with name '$routeName' already exists.");
             }
             $this->routes[$routeName] = $modifiedItem;
