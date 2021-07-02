@@ -35,6 +35,9 @@ final class Route implements RouteInterface, RouteParametersInterface
         $this->dispatcher = $dispatcher;
     }
 
+    /**
+     * @return self
+     */
     public function withDispatcher(MiddlewareDispatcher $dispatcher): RouteInterface
     {
         $route = clone $this;
@@ -158,6 +161,9 @@ final class Route implements RouteInterface, RouteParametersInterface
         return $route;
     }
 
+    /**
+     * @return self
+     */
     public function name(string $name): RouteInterface
     {
         $route = clone $this;
@@ -165,6 +171,9 @@ final class Route implements RouteInterface, RouteParametersInterface
         return $route;
     }
 
+    /**
+     * @return self
+     */
     public function pattern(string $pattern): RouteInterface
     {
         $new = clone $this;
@@ -172,6 +181,9 @@ final class Route implements RouteInterface, RouteParametersInterface
         return $new;
     }
 
+    /**
+     * @return self
+     */
     public function host(string $host): RouteInterface
     {
         $route = clone $this;
@@ -179,6 +191,9 @@ final class Route implements RouteInterface, RouteParametersInterface
         return $route;
     }
 
+    /**
+     * @return self
+     */
     public function override(): RouteInterface
     {
         $route = clone $this;
@@ -186,6 +201,9 @@ final class Route implements RouteInterface, RouteParametersInterface
         return $route;
     }
 
+    /**
+     * @return self
+     */
     public function defaults(array $defaults): RouteInterface
     {
         $route = clone $this;
@@ -193,6 +211,9 @@ final class Route implements RouteInterface, RouteParametersInterface
         return $route;
     }
 
+    /**
+     * @return self
+     */
     public function middleware($middlewareDefinition): RouteInterface
     {
         if ($this->actionAdded) {
@@ -216,6 +237,9 @@ final class Route implements RouteInterface, RouteParametersInterface
         return $route;
     }
 
+    /**
+     * @return self
+     */
     public function action($middlewareDefinition): RouteInterface
     {
         $route = clone $this;
@@ -224,6 +248,9 @@ final class Route implements RouteInterface, RouteParametersInterface
         return $route;
     }
 
+    /**
+     * @return self
+     */
     public function disableMiddleware($middlewareDefinition): RouteInterface
     {
         $route = clone $this;
