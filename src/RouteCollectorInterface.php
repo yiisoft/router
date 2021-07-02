@@ -9,11 +9,11 @@ interface RouteCollectorInterface
     /**
      * Add a route
      *
-     * @param RouteInterface $route
+     * @param Route $route
      *
      * @return self
      */
-    public function addRoute(RouteInterface $route): self;
+    public function addRoute(Route $route): self;
 
     /**
      * Add a group of routes
@@ -35,7 +35,7 @@ interface RouteCollectorInterface
     public function addGroup(Group $group): self;
 
     /**
-     * @return Group[]|RouteParametersInterface[]
+     * @return Group[]|Route[]
      */
     public function getItems(): array;
 

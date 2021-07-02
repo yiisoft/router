@@ -203,6 +203,9 @@ final class Route implements RouteInterface, RouteParametersInterface
         return $route;
     }
 
+    /**
+     * @return self
+     */
     public function prependMiddleware($middlewareDefinition): RouteInterface
     {
         if (!$this->actionAdded) {
