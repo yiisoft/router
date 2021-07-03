@@ -21,4 +21,6 @@ interface RouteParametersInterface
     public function isOverride(): bool;
 
     public function getDefaults(): array;
+
+    public function __toString(): string;
 }
