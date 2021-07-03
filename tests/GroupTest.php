@@ -46,7 +46,7 @@ final class GroupTest extends TestCase
             return new Response();
         };
 
-        $group
+        $group = $group
             ->middleware($middleware2)
             ->middleware($middleware1);
         $this->assertCount(2, $group->getMiddlewareDefinitions());
@@ -202,6 +202,20 @@ final class GroupTest extends TestCase
         $this->assertSame($listRoute, $postGroup->getItems()[0]);
         $this->assertSame($viewRoute, $postGroup->getItems()[1]);
         $this->assertEmpty($postGroup->getMiddlewareDefinitions());
+    }
+
+    public function testHost()
+    {
+        $group = Group::create()->host('https://yiiframework.com/');
+
+        $this->assertSame($group->getHost(), 'https://yiiframework.com');
+    }
+
+    public function testName()
+    {
+        $group = Group::create()->name('api');
+
+        $this->assertSame($group->getName(), 'api');
     }
 
     public function testDispatcherInjected(): void

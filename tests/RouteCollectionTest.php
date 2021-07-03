@@ -56,6 +56,33 @@ final class RouteCollectionTest extends TestCase
         $this->assertFalse($route->hasMiddlewares());
     }
 
+    public function testGroupHost(): void
+    {
+        $group = Group::create()
+            ->routes(
+                Route::get('/images/{name}')->name('image')
+            )->host('https://yiiframework.com/');
+
+        $routeCollection = new RouteCollection($group);
+        $route = $routeCollection->getRoute('image');
+        $this->assertSame('https://yiiframework.com', $route->getHost());
+    }
+
+    public function testGroupName(): void
+    {
+        $group = Group::create('api')
+            ->routes(
+                Route::get('/post/{slug}')->name('/post/view'),
+                Route::get('/user/{username}'),
+            )->name('api');
+
+        $routeCollection = new RouteCollection($group);
+        $route1 = $routeCollection->getRoute('api/post/view');
+        $route2 = $routeCollection->getRoute('GET api/user/{username}');
+        $this->assertInstanceOf(Route::class, $route1);
+        $this->assertInstanceOf(Route::class, $route2);
+    }
+
     private function getDispatcher(): MiddlewareDispatcher
     {
         return new MiddlewareDispatcher(

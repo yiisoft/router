@@ -128,6 +128,12 @@ final class RouteCollection implements RouteCollectionInterface
 
             /** @var Route $modifiedItem */
             $modifiedItem = $item->pattern($prefix . $item->getPattern());
+            if ($group->getHost() !== null && $modifiedItem->getHost() === null) {
+                $modifiedItem = $modifiedItem->host($group->getHost());
+            }
+            if ($group->getName() !== null && strpos($modifiedItem->getName(), implode(', ', $modifiedItem->getMethods())) === false) {
+                $modifiedItem = $modifiedItem->name($group->getName() . $modifiedItem->getName());
+            }
 
             if (empty($tree[$group->getPrefix()])) {
                 $tree[] = $modifiedItem->getName();
