@@ -17,7 +17,7 @@ use function is_object;
 final class Group implements RouteCollectorInterface
 {
     /**
-     * @var Group[]|RouteParametersInterface[]
+     * @var Group[]|Route[]
      */
     private array $items = [];
     private ?string $prefix;
@@ -58,7 +58,7 @@ final class Group implements RouteCollectorInterface
         } elseif (is_array($routes)) {
             $callback = static function (self $group) use (&$routes) {
                 foreach ($routes as $route) {
-                    if ($route instanceof RouteInterface) {
+                    if ($route instanceof Route) {
                         $group->addRoute($route);
                     } elseif ($route instanceof self) {
                         $group->addGroup($route);
@@ -101,7 +101,7 @@ final class Group implements RouteCollectorInterface
         return $this->dispatcher !== null;
     }
 
-    public function addRoute(RouteInterface $route): self
+    public function addRoute(Route $route): self
     {
         if (!$route->hasDispatcher() && $this->hasDispatcher()) {
             $route->injectDispatcher($this->dispatcher);
@@ -186,7 +186,7 @@ final class Group implements RouteCollectorInterface
     }
 
     /**
-     * @return Group[]|RouteParametersInterface[]
+     * @return Group[]|Route[]
      */
     public function getItems(): array
     {
