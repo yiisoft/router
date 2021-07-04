@@ -14,7 +14,7 @@ use function is_array;
 use function is_callable;
 use function is_object;
 
-final class Group implements RouteCollectorInterface, GroupParametersInterface
+final class Group implements RouteCollectorInterface
 {
     /**
      * @var Group[]|Route[]
