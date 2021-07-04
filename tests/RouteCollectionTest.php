@@ -77,20 +77,27 @@ final class RouteCollectionTest extends TestCase
     {
         $group = Group::create('api')
             ->routes(
-                Group::create('/v1')->routes(
-                    Route::get('/package/downloads/{package}')->name('/package/downloads')
-                )->name('/v1'),
-                Route::get('/post/{slug}')->name('/post/view'),
-                Route::get('/user/{username}'),
+                Group::create()->routes(
+                    Group::create('/v1')->routes(
+                        Route::get('/package/downloads/{package}')->name('/package/downloads')
+                    )->name('/v1'),
+                    Group::create()->routes(
+                        Route::get('')->name('/index')
+                    ),
+                    Route::get('/post/{slug}')->name('/post/view'),
+                    Route::get('/user/{username}'),
+                )
             )->name('api');
 
         $routeCollection = new RouteCollection($group);
         $route1 = $routeCollection->getRoute('api/post/view');
         $route2 = $routeCollection->getRoute('api/v1/package/downloads');
-        $route3 = $routeCollection->getRoute('GET api/user/{username}');
+        $route3 = $routeCollection->getRoute('api/index');
+        $route4 = $routeCollection->getRoute('GET api/user/{username}');
         $this->assertInstanceOf(Route::class, $route1);
         $this->assertInstanceOf(Route::class, $route2);
         $this->assertInstanceOf(Route::class, $route3);
+        $this->assertInstanceOf(Route::class, $route4);
     }
 
     private function getDispatcher(): MiddlewareDispatcher
