@@ -60,27 +60,37 @@ final class RouteCollectionTest extends TestCase
     {
         $group = Group::create()
             ->routes(
+                Group::create()->routes(
+                    Route::get('/project/{name}')->name('project')
+                )->host('https://yiipowered.com/'),
                 Route::get('/images/{name}')->name('image')
             )->host('https://yiiframework.com/');
 
         $routeCollection = new RouteCollection($group);
-        $route = $routeCollection->getRoute('image');
-        $this->assertSame('https://yiiframework.com', $route->getHost());
+        $route1 = $routeCollection->getRoute('image');
+        $route2 = $routeCollection->getRoute('project');
+        $this->assertSame('https://yiiframework.com', $route1->getHost());
+        $this->assertSame('https://yiipowered.com', $route2->getHost());
     }
 
     public function testGroupName(): void
     {
         $group = Group::create('api')
             ->routes(
+                Group::create('/v1')->routes(
+                    Route::get('/package/downloads/{package}')->name('/package/downloads')
+                )->name('/v1'),
                 Route::get('/post/{slug}')->name('/post/view'),
                 Route::get('/user/{username}'),
             )->name('api');
 
         $routeCollection = new RouteCollection($group);
         $route1 = $routeCollection->getRoute('api/post/view');
-        $route2 = $routeCollection->getRoute('GET api/user/{username}');
+        $route2 = $routeCollection->getRoute('api/v1/package/downloads');
+        $route3 = $routeCollection->getRoute('GET api/user/{username}');
         $this->assertInstanceOf(Route::class, $route1);
         $this->assertInstanceOf(Route::class, $route2);
+        $this->assertInstanceOf(Route::class, $route3);
     }
 
     private function getDispatcher(): MiddlewareDispatcher

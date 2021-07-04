@@ -103,9 +103,10 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * Inject a Group instance into route and item arrays.
      */
-    private function injectGroup(Group $group, array &$tree, string $prefix = ''): void
+    private function injectGroup(Group $group, array &$tree, string $prefix = '', string $namePrefix = ''): void
     {
         $prefix .= $group->getPrefix();
+        $namePrefix .= $group->getName();
         $items = $group->getItems();
         foreach ($items as $item) {
             if ($item instanceof Group || $item->hasMiddlewares()) {
@@ -115,23 +116,25 @@ final class RouteCollection implements RouteCollectionInterface
                 }
             }
 
+            if ($group->getHost() !== null && $item->getHost() === null) {
+                $item = $item->host($group->getHost());
+            }
+
             if ($item instanceof Group) {
                 if (empty($item->getPrefix())) {
-                    $this->injectGroup($item, $tree, $prefix);
+                    $this->injectGroup($item, $tree, $prefix, $namePrefix);
                     continue;
                 }
                 $tree[$item->getPrefix()] = [];
-                $this->injectGroup($item, $tree[$item->getPrefix()], $prefix);
+                $this->injectGroup($item, $tree[$item->getPrefix()], $prefix, $namePrefix);
                 continue;
             }
 
             /** @var Route $modifiedItem */
             $modifiedItem = $item->pattern($prefix . $item->getPattern());
-            if ($group->getHost() !== null && $modifiedItem->getHost() === null) {
-                $modifiedItem = $modifiedItem->host($group->getHost());
-            }
-            if ($group->getName() !== null && strpos($modifiedItem->getName(), implode(', ', $modifiedItem->getMethods())) === false) {
-                $modifiedItem = $modifiedItem->name($group->getName() . $modifiedItem->getName());
+
+            if (strpos($item->getName(), implode(', ', $item->getMethods())) === false) {
+                $modifiedItem = $modifiedItem->name($namePrefix . $item->getName());
             }
 
             if (empty($tree[$group->getPrefix()])) {
