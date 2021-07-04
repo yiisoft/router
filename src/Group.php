@@ -14,7 +14,7 @@ use function is_array;
 use function is_callable;
 use function is_object;
 
-final class Group implements RouteCollectorInterface
+final class Group implements RouteCollectorInterface, GroupParametersInterface
 {
     /**
      * @var Group[]|Route[]
@@ -41,14 +41,14 @@ final class Group implements RouteCollectorInterface
      * @param string|null $prefix URL prefix to prepend to all routes of the group.
      * @param MiddlewareDispatcher|null $dispatcher Middleware dispatcher to use for the group.
      *
-     * @return self
+     * @return RouteCollectorInterface
      */
-    public static function create(?string $prefix = null, MiddlewareDispatcher $dispatcher = null): self
+    public static function create(?string $prefix = null, MiddlewareDispatcher $dispatcher = null): RouteCollectorInterface
     {
         return new self($prefix, $dispatcher);
     }
 
-    public function routes(...$routes): self
+    public function routes(...$routes): RouteCollectorInterface
     {
         if ($this->middlewareAdded) {
             throw new RuntimeException('routes() can not be used after prependMiddleware().');
@@ -82,7 +82,7 @@ final class Group implements RouteCollectorInterface
         return $this;
     }
 
-    public function withDispatcher(MiddlewareDispatcher $dispatcher): self
+    public function withDispatcher(MiddlewareDispatcher $dispatcher): RouteCollectorInterface
     {
         $group = clone $this;
         $group->dispatcher = $dispatcher;
@@ -101,7 +101,7 @@ final class Group implements RouteCollectorInterface
         return $this->dispatcher !== null;
     }
 
-    public function addRoute(Route $route): self
+    public function addRoute(Route $route): RouteCollectorInterface
     {
         if (!$route->hasDispatcher() && $this->hasDispatcher()) {
             $route->injectDispatcher($this->dispatcher);
@@ -110,7 +110,7 @@ final class Group implements RouteCollectorInterface
         return $this;
     }
 
-    public function addGroup(self $group): self
+    public function addGroup(self $group): RouteCollectorInterface
     {
         if (!$group->hasDispatcher() && $this->hasDispatcher()) {
             $group = $group->withDispatcher($this->dispatcher);
@@ -129,7 +129,7 @@ final class Group implements RouteCollectorInterface
      *
      * @return self
      */
-    public function middleware($middlewareDefinition): self
+    public function middleware($middlewareDefinition): RouteCollectorInterface
     {
         if ($this->routesAdded) {
             throw new RuntimeException('middleware() can not be used after routes().');
@@ -147,7 +147,7 @@ final class Group implements RouteCollectorInterface
      *
      * @return self
      */
-    public function prependMiddleware($middlewareDefinition): self
+    public function prependMiddleware($middlewareDefinition): RouteCollectorInterface
     {
         $new = clone $this;
         $new->middlewareDefinitions[] = $middlewareDefinition;
@@ -155,14 +155,14 @@ final class Group implements RouteCollectorInterface
         return $new;
     }
 
-    public function name(string $name): self
+    public function name(string $name): RouteCollectorInterface
     {
         $new = clone $this;
         $new->name = $name;
         return $new;
     }
 
-    public function host(string $host): self
+    public function host(string $host): RouteCollectorInterface
     {
         $new = clone $this;
         $new->host = rtrim($host, '/');
@@ -178,7 +178,7 @@ final class Group implements RouteCollectorInterface
      *
      * @return self
      */
-    public function disableMiddleware($middlewareDefinition): self
+    public function disableMiddleware($middlewareDefinition): RouteCollectorInterface
     {
         $new = clone $this;
         $new->disabledMiddlewareDefinitions[] = $middlewareDefinition;
