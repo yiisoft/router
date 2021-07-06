@@ -56,6 +56,50 @@ final class RouteCollectionTest extends TestCase
         $this->assertFalse($route->hasMiddlewares());
     }
 
+    public function testGroupHost(): void
+    {
+        $group = Group::create()
+            ->routes(
+                Group::create()->routes(
+                    Route::get('/project/{name}')->name('project')
+                )->host('https://yiipowered.com/'),
+                Route::get('/images/{name}')->name('image')
+            )->host('https://yiiframework.com/');
+
+        $routeCollection = new RouteCollection($group);
+        $route1 = $routeCollection->getRoute('image');
+        $route2 = $routeCollection->getRoute('project');
+        $this->assertSame('https://yiiframework.com', $route1->getHost());
+        $this->assertSame('https://yiipowered.com', $route2->getHost());
+    }
+
+    public function testGroupName(): void
+    {
+        $group = Group::create('api')
+            ->routes(
+                Group::create()->routes(
+                    Group::create('/v1')->routes(
+                        Route::get('/package/downloads/{package}')->name('/package/downloads')
+                    )->namePrefix('/v1'),
+                    Group::create()->routes(
+                        Route::get('')->name('/index')
+                    ),
+                    Route::get('/post/{slug}')->name('/post/view'),
+                    Route::get('/user/{username}'),
+                )
+            )->namePrefix('api');
+
+        $routeCollection = new RouteCollection($group);
+        $route1 = $routeCollection->getRoute('api/post/view');
+        $route2 = $routeCollection->getRoute('api/v1/package/downloads');
+        $route3 = $routeCollection->getRoute('api/index');
+        $route4 = $routeCollection->getRoute('GET api/user/{username}');
+        $this->assertInstanceOf(Route::class, $route1);
+        $this->assertInstanceOf(Route::class, $route2);
+        $this->assertInstanceOf(Route::class, $route3);
+        $this->assertInstanceOf(Route::class, $route4);
+    }
+
     private function getDispatcher(): MiddlewareDispatcher
     {
         return new MiddlewareDispatcher(
