@@ -157,7 +157,7 @@ final class Group implements RouteCollectorInterface
 
     public function namePrefix(string $namePrefix): RouteCollectorInterface
     {
-        $this->namePrefix= $namePrefix;
+        $this->namePrefix = $namePrefix;
         return $this;
     }
 
