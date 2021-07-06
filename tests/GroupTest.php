@@ -204,6 +204,20 @@ final class GroupTest extends TestCase
         $this->assertEmpty($postGroup->getMiddlewareDefinitions());
     }
 
+    public function testHost()
+    {
+        $group = Group::create()->host('https://yiiframework.com/');
+
+        $this->assertSame($group->getHost(), 'https://yiiframework.com');
+    }
+
+    public function testName()
+    {
+        $group = Group::create()->namePrefix('api');
+
+        $this->assertSame($group->getNamePrefix(), 'api');
+    }
+
     public function testDispatcherInjected(): void
     {
         $dispatcher = $this->getDispatcher();

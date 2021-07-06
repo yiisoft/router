@@ -7,6 +7,7 @@ namespace Yiisoft\Router;
 use InvalidArgumentException;
 use RuntimeException;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
+
 use function get_class;
 use function in_array;
 use function is_array;
@@ -18,10 +19,11 @@ final class Group implements RouteCollectorInterface
     /**
      * @var Group[]|Route[]
      */
-    protected array $items = [];
-    protected ?string $prefix;
-    protected array $middlewareDefinitions = [];
-
+    private array $items = [];
+    private ?string $prefix;
+    private array $middlewareDefinitions = [];
+    private ?string $host = null;
+    private ?string $namePrefix = null;
     private bool $routesAdded = false;
     private bool $middlewareAdded = false;
     private array $disabledMiddlewareDefinitions = [];
@@ -39,14 +41,16 @@ final class Group implements RouteCollectorInterface
      * @param string|null $prefix URL prefix to prepend to all routes of the group.
      * @param MiddlewareDispatcher|null $dispatcher Middleware dispatcher to use for the group.
      *
-     * @return self
+     * @return RouteCollectorInterface
      */
-    public static function create(?string $prefix = null, MiddlewareDispatcher $dispatcher = null): self
-    {
+    public static function create(
+        ?string $prefix = null,
+        MiddlewareDispatcher $dispatcher = null
+    ): RouteCollectorInterface {
         return new self($prefix, $dispatcher);
     }
 
-    public function routes(...$routes): self
+    public function routes(...$routes): RouteCollectorInterface
     {
         if ($this->middlewareAdded) {
             throw new RuntimeException('routes() can not be used after prependMiddleware().');
@@ -62,7 +66,9 @@ final class Group implements RouteCollectorInterface
                         $group->addGroup($route);
                     } else {
                         $type = is_object($route) ? get_class($route) : gettype($route);
-                        throw new InvalidArgumentException(sprintf('Route should be either an instance of Route or Group, %s given.', $type));
+                        throw new InvalidArgumentException(
+                            sprintf('Route should be either an instance of Route or Group, %s given.', $type)
+                        );
                     }
                 }
             };
@@ -78,7 +84,7 @@ final class Group implements RouteCollectorInterface
         return $this;
     }
 
-    public function withDispatcher(MiddlewareDispatcher $dispatcher): self
+    public function withDispatcher(MiddlewareDispatcher $dispatcher): RouteCollectorInterface
     {
         $group = clone $this;
         $group->dispatcher = $dispatcher;
@@ -97,7 +103,7 @@ final class Group implements RouteCollectorInterface
         return $this->dispatcher !== null;
     }
 
-    public function addRoute(Route $route): self
+    public function addRoute(Route $route): RouteCollectorInterface
     {
         if (!$route->hasDispatcher() && $this->hasDispatcher()) {
             $route->injectDispatcher($this->dispatcher);
@@ -106,7 +112,7 @@ final class Group implements RouteCollectorInterface
         return $this;
     }
 
-    public function addGroup(self $group): self
+    public function addGroup(self $group): RouteCollectorInterface
     {
         if (!$group->hasDispatcher() && $this->hasDispatcher()) {
             $group = $group->withDispatcher($this->dispatcher);
@@ -125,13 +131,12 @@ final class Group implements RouteCollectorInterface
      *
      * @return self
      */
-    public function middleware($middlewareDefinition): self
+    public function middleware($middlewareDefinition): RouteCollectorInterface
     {
         if ($this->routesAdded) {
             throw new RuntimeException('middleware() can not be used after routes().');
         }
         array_unshift($this->middlewareDefinitions, $middlewareDefinition);
-
         return $this;
     }
 
@@ -141,12 +146,24 @@ final class Group implements RouteCollectorInterface
      *
      * @param mixed $middlewareDefinition
      *
-     * @return $this
+     * @return self
      */
-    public function prependMiddleware($middlewareDefinition): self
+    public function prependMiddleware($middlewareDefinition): RouteCollectorInterface
     {
         $this->middlewareDefinitions[] = $middlewareDefinition;
         $this->middlewareAdded = true;
+        return $this;
+    }
+
+    public function namePrefix(string $namePrefix): RouteCollectorInterface
+    {
+        $this->namePrefix = $namePrefix;
+        return $this;
+    }
+
+    public function host(string $host): RouteCollectorInterface
+    {
+        $this->host = rtrim($host, '/');
         return $this;
     }
 
@@ -157,9 +174,9 @@ final class Group implements RouteCollectorInterface
      *
      * @param mixed $middlewareDefinition
      *
-     * @return $this
+     * @return self
      */
-    public function disableMiddleware($middlewareDefinition): self
+    public function disableMiddleware($middlewareDefinition): RouteCollectorInterface
     {
         $this->disabledMiddlewareDefinitions[] = $middlewareDefinition;
         return $this;
@@ -176,6 +193,16 @@ final class Group implements RouteCollectorInterface
     public function getPrefix(): ?string
     {
         return $this->prefix;
+    }
+
+    public function getNamePrefix(): ?string
+    {
+        return $this->namePrefix;
+    }
+
+    public function getHost(): ?string
+    {
+        return $this->host;
     }
 
     public function getMiddlewareDefinitions(): array
