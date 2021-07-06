@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
-use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
-
 interface RouteCollectorInterface
 {
     /**
@@ -35,10 +33,6 @@ interface RouteCollectorInterface
      * @return self
      */
     public function addGroup(Group $group): self;
-
-    public function withDispatcher(MiddlewareDispatcher $dispatcher): self;
-
-    public function hasDispatcher(): bool;
 
     public function middleware($middlewareDefinition): self;
 

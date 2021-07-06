@@ -4,18 +4,8 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
-use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
-
 interface RouteInterface
 {
-    public function injectDispatcher(MiddlewareDispatcher $dispatcher): void;
-
-    public function withDispatcher(MiddlewareDispatcher $dispatcher): self;
-
-    public function hasMiddlewares(): bool;
-
-    public function hasDispatcher(): bool;
-
     public function name(string $name): self;
 
     public function pattern(string $pattern): self;
