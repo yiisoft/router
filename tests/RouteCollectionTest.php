@@ -80,14 +80,14 @@ final class RouteCollectionTest extends TestCase
                 Group::create()->routes(
                     Group::create('/v1')->routes(
                         Route::get('/package/downloads/{package}')->name('/package/downloads')
-                    )->name('/v1'),
+                    )->namePrefix('/v1'),
                     Group::create()->routes(
                         Route::get('')->name('/index')
                     ),
                     Route::get('/post/{slug}')->name('/post/view'),
                     Route::get('/user/{username}'),
                 )
-            )->name('api');
+            )->namePrefix('api');
 
         $routeCollection = new RouteCollection($group);
         $route1 = $routeCollection->getRoute('api/post/view');

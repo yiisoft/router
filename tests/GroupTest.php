@@ -213,9 +213,9 @@ final class GroupTest extends TestCase
 
     public function testName()
     {
-        $group = Group::create()->name('api');
+        $group = Group::create()->namePrefix('api');
 
-        $this->assertSame($group->getName(), 'api');
+        $this->assertSame($group->getNamePrefix(), 'api');
     }
 
     public function testDispatcherInjected(): void

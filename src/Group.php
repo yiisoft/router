@@ -23,7 +23,7 @@ final class Group implements RouteCollectorInterface
     private ?string $prefix;
     private array $middlewareDefinitions = [];
     private ?string $host = null;
-    private ?string $name = null;
+    private ?string $namePrefix = null;
     private bool $routesAdded = false;
     private bool $middlewareAdded = false;
     private array $disabledMiddlewareDefinitions = [];
@@ -155,18 +155,16 @@ final class Group implements RouteCollectorInterface
         return $this;
     }
 
-    public function name(string $name): RouteCollectorInterface
+    public function namePrefix(string $namePrefix): RouteCollectorInterface
     {
-        $new = clone $this;
-        $new->name = $name;
-        return $new;
+        $this->namePrefix= $namePrefix;
+        return $this;
     }
 
     public function host(string $host): RouteCollectorInterface
     {
-        $new = clone $this;
-        $new->host = rtrim($host, '/');
-        return $new;
+        $this->host = rtrim($host, '/');
+        return $this;
     }
 
     /**
@@ -180,9 +178,8 @@ final class Group implements RouteCollectorInterface
      */
     public function disableMiddleware($middlewareDefinition): RouteCollectorInterface
     {
-        $new = clone $this;
-        $new->disabledMiddlewareDefinitions[] = $middlewareDefinition;
-        return $new;
+        $this->disabledMiddlewareDefinitions[] = $middlewareDefinition;
+        return $this;
     }
 
     /**
@@ -198,9 +195,9 @@ final class Group implements RouteCollectorInterface
         return $this->prefix;
     }
 
-    public function getName(): ?string
+    public function getNamePrefix(): ?string
     {
-        return $this->name;
+        return $this->namePrefix;
     }
 
     public function getHost(): ?string

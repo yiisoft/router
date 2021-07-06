@@ -48,7 +48,7 @@ interface RouteCollectorInterface
 
     public function host(string $host): self;
 
-    public function name(string $name): self;
+    public function namePrefix(string $namePrefix): self;
 
     public function routes(...$routes): self;
 }
