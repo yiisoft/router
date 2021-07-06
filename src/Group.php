@@ -43,8 +43,10 @@ final class Group implements RouteCollectorInterface
      *
      * @return RouteCollectorInterface
      */
-    public static function create(?string $prefix = null, MiddlewareDispatcher $dispatcher = null): RouteCollectorInterface
-    {
+    public static function create(
+        ?string $prefix = null,
+        MiddlewareDispatcher $dispatcher = null
+    ): RouteCollectorInterface {
         return new self($prefix, $dispatcher);
     }
 
@@ -134,9 +136,8 @@ final class Group implements RouteCollectorInterface
         if ($this->routesAdded) {
             throw new RuntimeException('middleware() can not be used after routes().');
         }
-        $new = clone $this;
-        array_unshift($new->middlewareDefinitions, $middlewareDefinition);
-        return $new;
+        array_unshift($this->middlewareDefinitions, $middlewareDefinition);
+        return $this;
     }
 
     /**
@@ -149,10 +150,9 @@ final class Group implements RouteCollectorInterface
      */
     public function prependMiddleware($middlewareDefinition): RouteCollectorInterface
     {
-        $new = clone $this;
-        $new->middlewareDefinitions[] = $middlewareDefinition;
-        $new->middlewareAdded = true;
-        return $new;
+        $this->middlewareDefinitions[] = $middlewareDefinition;
+        $this->middlewareAdded = true;
+        return $this;
     }
 
     public function name(string $name): RouteCollectorInterface
