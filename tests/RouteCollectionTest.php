@@ -12,6 +12,7 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
+use Yiisoft\Router\RouteCollector;
 
 final class RouteCollectionTest extends TestCase
 {
@@ -20,11 +21,13 @@ final class RouteCollectionTest extends TestCase
         $listRoute = Route::get('/')->name('my-route');
         $viewRoute = Route::get('/{id}')->name('my-route');
 
-        $group = Group::create();
-        $group->addRoute($listRoute);
-        $group->addRoute($viewRoute);
+        $group = Group::create()->routes($listRoute, $viewRoute);
+
+        $collector = new RouteCollector($this->getDispatcher());
+        $collector->addGroup($group);
+
         $this->expectExceptionMessage("A route with name 'my-route' already exists.");
-        $routeCollection = new RouteCollection($group);
+        $routeCollection = new RouteCollection($collector);
         $routeCollection->getRoutes();
     }
 
@@ -33,11 +36,12 @@ final class RouteCollectionTest extends TestCase
         $listRoute = Route::get('/')->name('my-route');
         $viewRoute = Route::get('/{id}')->name('my-route')->override();
 
-        $group = Group::create();
-        $group->addRoute($listRoute);
-        $group->addRoute($viewRoute);
+        $group = Group::create()->routes($listRoute, $viewRoute);
 
-        $routeCollection = new RouteCollection($group);
+        $collector = new RouteCollector($this->getDispatcher());
+        $collector->addGroup($group);
+
+        $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('my-route');
         $this->assertSame('/{id}', $route->getPattern());
     }
@@ -51,7 +55,10 @@ final class RouteCollectionTest extends TestCase
                 Route::get('/images/{sile}')->name('image')
             );
 
-        $routeCollection = new RouteCollection($group);
+        $collector = new RouteCollector($this->getDispatcher());
+        $collector->addGroup($group);
+
+        $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('image');
         $this->assertFalse($route->hasMiddlewares());
     }
@@ -66,7 +73,10 @@ final class RouteCollectionTest extends TestCase
                 Route::get('/images/{name}')->name('image')
             )->host('https://yiiframework.com/');
 
-        $routeCollection = new RouteCollection($group);
+        $collector = new RouteCollector($this->getDispatcher());
+        $collector->addGroup($group);
+
+        $routeCollection = new RouteCollection($collector);
         $route1 = $routeCollection->getRoute('image');
         $route2 = $routeCollection->getRoute('project');
         $this->assertSame('https://yiiframework.com', $route1->getHost());
@@ -89,7 +99,10 @@ final class RouteCollectionTest extends TestCase
                 )
             )->namePrefix('api');
 
-        $routeCollection = new RouteCollection($group);
+        $collector = new RouteCollector($this->getDispatcher());
+        $collector->addGroup($group);
+
+        $routeCollection = new RouteCollection($collector);
         $route1 = $routeCollection->getRoute('api/post/view');
         $route2 = $routeCollection->getRoute('api/v1/package/downloads');
         $route3 = $routeCollection->getRoute('api/index');

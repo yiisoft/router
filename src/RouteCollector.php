@@ -54,8 +54,6 @@ final class RouteCollector implements RouteCollectorInterface
             $group = $group->withDispatcher($this->dispatcher);
         }
         $this->items[] = $group;
-
-
         return $this;
     }
 
