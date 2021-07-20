@@ -158,7 +158,7 @@ final class RouteCollectorTest extends TestCase
         $func = function ($item) use (&$func) {
             $this->assertTrue($item->hasDispatcher());
             if ($item instanceof Group) {
-                $items = $item->getItems();
+                $items = $item->getRoutes();
                 array_walk($items, $func);
             }
         };
