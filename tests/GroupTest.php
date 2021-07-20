@@ -33,7 +33,7 @@ final class GroupTest extends TestCase
             return new Response();
         };
 
-        $group
+        $group = $group
             ->middleware($middleware2)
             ->middleware($middleware1);
         $this->assertCount(2, $group->getMiddlewareDefinitions());

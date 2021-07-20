@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
+use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
+
 interface GroupInterface
 {
+    public function withDispatcher(MiddlewareDispatcher $dispatcher): self;
+
     public function middleware($middlewareDefinition): self;
 
     public function prependMiddleware($middlewareDefinition): self;

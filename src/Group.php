@@ -77,12 +77,13 @@ final class Group implements GroupInterface
             $callback = null;
         }
 
+        $new = clone $this;
         if ($callback !== null) {
-            $callback($this);
+            $callback($new);
         }
-        $this->routesAdded = true;
+        $new->routesAdded = true;
 
-        return $this;
+        return $new;
     }
 
     public function withDispatcher(MiddlewareDispatcher $dispatcher): GroupInterface
@@ -117,8 +118,9 @@ final class Group implements GroupInterface
         if ($this->routesAdded) {
             throw new RuntimeException('middleware() can not be used after routes().');
         }
-        array_unshift($this->middlewareDefinitions, $middlewareDefinition);
-        return $this;
+        $new = clone $this;
+        array_unshift($new->middlewareDefinitions, $middlewareDefinition);
+        return $new;
     }
 
     /**
@@ -131,21 +133,24 @@ final class Group implements GroupInterface
      */
     public function prependMiddleware($middlewareDefinition): GroupInterface
     {
-        $this->middlewareDefinitions[] = $middlewareDefinition;
-        $this->middlewareAdded = true;
-        return $this;
+        $new = clone $this;
+        $new->middlewareDefinitions[] = $middlewareDefinition;
+        $new->middlewareAdded = true;
+        return $new;
     }
 
     public function namePrefix(string $namePrefix): GroupInterface
     {
-        $this->namePrefix = $namePrefix;
-        return $this;
+        $new = clone $this;
+        $new->namePrefix = $namePrefix;
+        return $new;
     }
 
     public function host(string $host): GroupInterface
     {
-        $this->host = rtrim($host, '/');
-        return $this;
+        $new = clone $this;
+        $new->host = rtrim($host, '/');
+        return $new;
     }
 
     /**
@@ -159,8 +164,9 @@ final class Group implements GroupInterface
      */
     public function disableMiddleware($middlewareDefinition): GroupInterface
     {
-        $this->disabledMiddlewareDefinitions[] = $middlewareDefinition;
-        return $this;
+        $new = clone $this;
+        $new->disabledMiddlewareDefinitions[] = $middlewareDefinition;
+        return $new;
     }
 
     /**
