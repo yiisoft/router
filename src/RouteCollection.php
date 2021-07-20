@@ -64,7 +64,7 @@ final class RouteCollection implements RouteCollectionInterface
     private function ensureItemsInjected(): void
     {
         if ($this->items === []) {
-            $this->injectItems([$this->collector]);
+            $this->injectItems($this->collector->getItems());
         }
     }
 
@@ -76,6 +76,9 @@ final class RouteCollection implements RouteCollectionInterface
     private function injectItems(array $items): void
     {
         foreach ($items as $index => $item) {
+            foreach ($this->collector->getMiddlewareDefinitions() as $middlewareDefinition) {
+                $item = $item->prependMiddleware($middlewareDefinition);
+            }
             $this->injectItem($item);
         }
     }

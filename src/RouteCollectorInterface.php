@@ -38,11 +38,7 @@ interface RouteCollectorInterface
 
     public function prependMiddleware($middlewareDefinition): self;
 
-    public function disableMiddleware($middlewareDefinition): self;
+    public function getItems(): array;
 
-    public function host(string $host): self;
-
-    public function namePrefix(string $namePrefix): self;
-
-    public function routes(...$routes): self;
+    public function getMiddlewareDefinitions(): array;
 }
