@@ -10,8 +10,6 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
 use function get_class;
 use function in_array;
-use function is_array;
-use function is_callable;
 use function is_object;
 
 final class Group implements GroupInterface
