@@ -18,7 +18,7 @@ final class RouteCollector implements RouteCollectorInterface
         return $this;
     }
 
-    public function addGroup(GroupInterface $group): RouteCollectorInterface
+    public function addGroup(Group $group): RouteCollectorInterface
     {
         $this->items[] = $group;
         return $this;

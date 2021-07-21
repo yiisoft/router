@@ -10,10 +10,6 @@ interface RouteInterface
 {
     public function withDispatcher(MiddlewareDispatcher $dispatcher): self;
 
-    public function hasMiddlewares(): bool;
-
-    public function hasDispatcher(): bool;
-
     public function name(string $name): self;
 
     public function pattern(string $pattern): self;
