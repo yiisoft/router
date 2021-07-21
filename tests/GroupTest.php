@@ -69,7 +69,7 @@ final class GroupTest extends TestCase
                     )
             );
 
-        $collector = new RouteCollector($this->getDispatcher());
+        $collector = new RouteCollector();
         $collector->addGroup($group);
 
         $routeCollection = new RouteCollection($collector);
@@ -102,7 +102,7 @@ final class GroupTest extends TestCase
                 Route::get('/test1')->action($action)->name('request1'),
             );
 
-        $collector = new RouteCollector($this->getDispatcher());
+        $collector = new RouteCollector();
         $collector->addGroup($group);
 
         $routeCollection = new RouteCollection($collector);
@@ -133,7 +133,7 @@ final class GroupTest extends TestCase
                 Route::get('/test1')->action($action)->name('request1')
             );
 
-        $collector = new RouteCollector($this->getDispatcher());
+        $collector = new RouteCollector();
         $collector->addGroup($group);
 
         $routeCollection = new RouteCollection($collector);

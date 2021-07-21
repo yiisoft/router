@@ -23,7 +23,7 @@ final class RouteCollectionTest extends TestCase
 
         $group = Group::create()->routes($listRoute, $viewRoute);
 
-        $collector = new RouteCollector($this->getDispatcher());
+        $collector = new RouteCollector();
         $collector->addGroup($group);
 
         $this->expectExceptionMessage("A route with name 'my-route' already exists.");
@@ -38,7 +38,7 @@ final class RouteCollectionTest extends TestCase
 
         $group = Group::create()->routes($listRoute, $viewRoute);
 
-        $collector = new RouteCollector($this->getDispatcher());
+        $collector = new RouteCollector();
         $collector->addGroup($group);
 
         $routeCollection = new RouteCollection($collector);
@@ -55,7 +55,7 @@ final class RouteCollectionTest extends TestCase
                 Route::get('/images/{sile}')->name('image')
             );
 
-        $collector = new RouteCollector($this->getDispatcher());
+        $collector = new RouteCollector();
         $collector->addGroup($group);
 
         $routeCollection = new RouteCollection($collector);
@@ -73,7 +73,7 @@ final class RouteCollectionTest extends TestCase
                 Route::get('/images/{name}')->name('image')
             )->host('https://yiiframework.com/');
 
-        $collector = new RouteCollector($this->getDispatcher());
+        $collector = new RouteCollector();
         $collector->addGroup($group);
 
         $routeCollection = new RouteCollection($collector);
@@ -99,7 +99,7 @@ final class RouteCollectionTest extends TestCase
                 )
             )->namePrefix('api');
 
-        $collector = new RouteCollector($this->getDispatcher());
+        $collector = new RouteCollector();
         $collector->addGroup($group);
 
         $routeCollection = new RouteCollection($collector);
