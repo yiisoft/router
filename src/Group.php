@@ -55,32 +55,24 @@ final class Group implements GroupInterface
         if ($this->middlewareAdded) {
             throw new RuntimeException('routes() can not be used after prependMiddleware().');
         }
-        if (is_callable($routes)) {
-            $callback = $routes;
-        } elseif (is_array($routes)) {
-            $callback = static function (self $group) use (&$routes) {
-                foreach ($routes as $route) {
-                    if ($route instanceof Route || $route instanceof self) {
-                        if (!$route->hasDispatcher() && $group->hasDispatcher()) {
-                            $route = $route->withDispatcher($group->dispatcher);
-                        }
-                        $group->items[] = $route;
-                    } else {
-                        $type = is_object($route) ? get_class($route) : gettype($route);
-                        throw new InvalidArgumentException(
-                            sprintf('Route should be either an instance of Route or Group, %s given.', $type)
-                        );
+        $callback = static function (self $group) use (&$routes) {
+            foreach ($routes as $route) {
+                if ($route instanceof Route || $route instanceof self) {
+                    if (!$route->hasDispatcher() && $group->hasDispatcher()) {
+                        $route = $route->withDispatcher($group->dispatcher);
                     }
+                    $group->items[] = $route;
+                } else {
+                    $type = is_object($route) ? get_class($route) : gettype($route);
+                    throw new InvalidArgumentException(
+                        sprintf('Route should be either an instance of Route or Group, %s given.', $type)
+                    );
                 }
-            };
-        } else {
-            $callback = null;
-        }
+            }
+        };
 
         $new = clone $this;
-        if ($callback !== null) {
-            $callback($new);
-        }
+        $callback($new);
         $new->routesAdded = true;
 
         return $new;

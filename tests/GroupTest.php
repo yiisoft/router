@@ -41,6 +41,34 @@ final class GroupTest extends TestCase
         $this->assertSame($middleware2, $group->getMiddlewareDefinitions()[1]);
     }
 
+    public function testRoutesAfterMiddleware(): void
+    {
+        $group = Group::create();
+
+        $middleware1 = static function () {
+            return new Response();
+        };
+
+        $group = $group->prependMiddleware($middleware1);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('routes() can not be used after prependMiddleware().');
+
+        $group->routes(Route::get('/'));
+    }
+
+    public function testRoutesWithNull(): void
+    {
+        $group = Group::create();
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            sprintf('Route should be either an instance of Route or Group, %s given.', \stdClass::class)
+        );
+
+        $group->routes(new \stdClass());
+    }
+
     public function testAddNestedMiddleware(): void
     {
         $request = new ServerRequest('GET', '/outergroup/innergroup/test1');
