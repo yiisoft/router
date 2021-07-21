@@ -53,24 +53,21 @@ final class Group implements GroupInterface
         if ($this->middlewareAdded) {
             throw new RuntimeException('routes() can not be used after prependMiddleware().');
         }
-        $callback = static function (self $group) use (&$routes) {
-            foreach ($routes as $route) {
-                if ($route instanceof Route || $route instanceof self) {
-                    if (!$route->hasDispatcher() && $group->hasDispatcher()) {
-                        $route = $route->withDispatcher($group->dispatcher);
-                    }
-                    $group->items[] = $route;
-                } else {
-                    $type = is_object($route) ? get_class($route) : gettype($route);
-                    throw new InvalidArgumentException(
-                        sprintf('Route should be either an instance of Route or Group, %s given.', $type)
-                    );
-                }
-            }
-        };
-
         $new = clone $this;
-        $callback($new);
+        foreach ($routes as $route) {
+            if ($route instanceof Route || $route instanceof self) {
+                if (!$route->hasDispatcher() && $new->hasDispatcher()) {
+                    $route = $route->withDispatcher($new->dispatcher);
+                }
+                $new->items[] = $route;
+            } else {
+                $type = is_object($route) ? get_class($route) : gettype($route);
+                throw new InvalidArgumentException(
+                    sprintf('Route should be either an instance of Route or Group, %s given.', $type)
+                );
+            }
+        }
+
         $new->routesAdded = true;
 
         return $new;
@@ -80,10 +77,10 @@ final class Group implements GroupInterface
     {
         $group = clone $this;
         $group->dispatcher = $dispatcher;
-        foreach ($group->items as $index => $route) {
-            if (!$route->hasDispatcher()) {
-                $route = $route->withDispatcher($dispatcher);
-                $group->items[$index] = $route;
+        foreach ($group->items as $index => $item) {
+            if (!$item->hasDispatcher()) {
+                $item = $item->withDispatcher($dispatcher);
+                $group->items[$index] = $item;
             }
         }
 
