@@ -170,24 +170,24 @@ final class GroupTest extends TestCase
                     ),
             );
 
-        $this->assertCount(1, $root->getRoutes());
-        $api = $root->getRoutes()[0];
+        $this->assertCount(1, $root->getItems());
+        $api = $root->getItems()[0];
 
         $this->assertSame('/api', $api->getPrefix());
-        $this->assertCount(2, $api->getRoutes());
-        $this->assertSame($logoutRoute, $api->getRoutes()[0]);
+        $this->assertCount(2, $api->getItems());
+        $this->assertSame($logoutRoute, $api->getItems()[0]);
 
         /** @var Group $postGroup */
-        $postGroup = $api->getRoutes()[1];
+        $postGroup = $api->getItems()[1];
         $this->assertInstanceOf(Group::class, $postGroup);
         $this->assertCount(2, $api->getMiddlewareDefinitions());
         $this->assertSame($middleware1, $api->getMiddlewareDefinitions()[0]);
         $this->assertSame($middleware2, $api->getMiddlewareDefinitions()[1]);
 
         $this->assertSame('/post', $postGroup->getPrefix());
-        $this->assertCount(2, $postGroup->getRoutes());
-        $this->assertSame($listRoute, $postGroup->getRoutes()[0]);
-        $this->assertSame($viewRoute, $postGroup->getRoutes()[1]);
+        $this->assertCount(2, $postGroup->getItems());
+        $this->assertSame($listRoute, $postGroup->getItems()[0]);
+        $this->assertSame($viewRoute, $postGroup->getItems()[1]);
         $this->assertEmpty($postGroup->getMiddlewareDefinitions());
     }
 
@@ -248,7 +248,7 @@ final class GroupTest extends TestCase
                     )
             );
 
-        $items = $apiGroup->getRoutes();
+        $items = $apiGroup->getItems();
 
         $this->assertAllRoutesAndGroupsHaveDispatcher($items);
     }
@@ -281,7 +281,7 @@ final class GroupTest extends TestCase
         $func = function ($item) use (&$func) {
             $this->assertTrue($item->hasDispatcher());
             if ($item instanceof Group) {
-                $items = $item->getRoutes();
+                $items = $item->getItems();
                 array_walk($items, $func);
             }
         };

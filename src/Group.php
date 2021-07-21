@@ -19,7 +19,7 @@ final class Group implements GroupInterface
     /**
      * @var Group[]|Route[]
      */
-    private array $routes = [];
+    private array $items = [];
     private ?string $prefix;
     private array $middlewareDefinitions = [];
     private ?string $host = null;
@@ -64,7 +64,7 @@ final class Group implements GroupInterface
                         if (!$route->hasDispatcher() && $group->hasDispatcher()) {
                             $route = $route->withDispatcher($group->dispatcher);
                         }
-                        $group->routes[] = $route;
+                        $group->items[] = $route;
                     } else {
                         $type = is_object($route) ? get_class($route) : gettype($route);
                         throw new InvalidArgumentException(
@@ -90,10 +90,10 @@ final class Group implements GroupInterface
     {
         $group = clone $this;
         $group->dispatcher = $dispatcher;
-        foreach ($group->routes as $index => $route) {
+        foreach ($group->items as $index => $route) {
             if (!$route->hasDispatcher()) {
                 $route = $route->withDispatcher($dispatcher);
-                $group->routes[$index] = $route;
+                $group->items[$index] = $route;
             }
         }
 
@@ -172,9 +172,9 @@ final class Group implements GroupInterface
     /**
      * @return Group[]|Route[]
      */
-    public function getRoutes(): array
+    public function getItems(): array
     {
-        return $this->routes;
+        return $this->items;
     }
 
     public function getPrefix(): ?string

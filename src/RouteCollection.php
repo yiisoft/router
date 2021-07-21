@@ -110,47 +110,47 @@ final class RouteCollection implements RouteCollectionInterface
     {
         $prefix .= $group->getPrefix();
         $namePrefix .= $group->getNamePrefix();
-        $routes = $group->getRoutes();
-        foreach ($routes as $route) {
-            if ($route instanceof Group || $route->hasMiddlewares()) {
+        $items = $group->getItems();
+        foreach ($items as $item) {
+            if ($item instanceof Group || $item->hasMiddlewares()) {
                 $groupMiddlewares = $group->getMiddlewareDefinitions();
                 foreach ($groupMiddlewares as $middleware) {
-                    $route = $route->prependMiddleware($middleware);
+                    $item = $item->prependMiddleware($middleware);
                 }
             }
 
-            if ($group->getHost() !== null && $route->getHost() === null) {
-                $route = $route->host($group->getHost());
+            if ($group->getHost() !== null && $item->getHost() === null) {
+                $item = $item->host($group->getHost());
             }
 
-            if ($route instanceof Group) {
-                if (empty($route->getPrefix())) {
-                    $this->injectGroup($route, $tree, $prefix, $namePrefix);
+            if ($item instanceof Group) {
+                if (empty($item->getPrefix())) {
+                    $this->injectGroup($item, $tree, $prefix, $namePrefix);
                     continue;
                 }
-                $tree[$route->getPrefix()] = [];
-                $this->injectGroup($route, $tree[$route->getPrefix()], $prefix, $namePrefix);
+                $tree[$item->getPrefix()] = [];
+                $this->injectGroup($item, $tree[$item->getPrefix()], $prefix, $namePrefix);
                 continue;
             }
 
-            /** @var Route $modifiedRoute */
-            $modifiedRoute = $route->pattern($prefix . $route->getPattern());
+            /** @var Route $modifiedItem */
+            $modifiedItem = $item->pattern($prefix . $item->getPattern());
 
-            if (strpos($modifiedRoute->getName(), implode(', ', $modifiedRoute->getMethods())) === false) {
-                $modifiedRoute = $modifiedRoute->name($namePrefix . $modifiedRoute->getName());
+            if (strpos($modifiedItem->getName(), implode(', ', $modifiedItem->getMethods())) === false) {
+                $modifiedItem = $modifiedItem->name($namePrefix . $modifiedItem->getName());
             }
 
             if (empty($tree[$group->getPrefix()])) {
-                $tree[] = $modifiedRoute->getName();
+                $tree[] = $modifiedItem->getName();
             } else {
-                $tree[$group->getPrefix()][] = $modifiedRoute->getName();
+                $tree[$group->getPrefix()][] = $modifiedItem->getName();
             }
 
-            $routeName = $modifiedRoute->getName();
-            if (isset($this->routes[$routeName]) && !$modifiedRoute->isOverride()) {
+            $routeName = $modifiedItem->getName();
+            if (isset($this->routes[$routeName]) && !$modifiedItem->isOverride()) {
                 throw new InvalidArgumentException("A route with name '$routeName' already exists.");
             }
-            $this->routes[$routeName] = $modifiedRoute;
+            $this->routes[$routeName] = $modifiedItem;
         }
     }
 

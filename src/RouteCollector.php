@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
-use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
-
 final class RouteCollector implements RouteCollectorInterface
 {
     /**
@@ -13,46 +11,15 @@ final class RouteCollector implements RouteCollectorInterface
      */
     private array $items = [];
     private array $middlewareDefinitions = [];
-    private ?MiddlewareDispatcher $dispatcher;
-
-    public function __construct(MiddlewareDispatcher $dispatcher = null)
-    {
-        $this->dispatcher = $dispatcher;
-    }
-
-    public function withDispatcher(MiddlewareDispatcher $dispatcher): RouteCollectorInterface
-    {
-        $group = clone $this;
-        $group->dispatcher = $dispatcher;
-        foreach ($group->items as $index => $item) {
-            if (!$item->hasDispatcher()) {
-                $item = $item->withDispatcher($dispatcher);
-                $group->items[$index] = $item;
-            }
-        }
-
-        return $group;
-    }
-
-    public function hasDispatcher(): bool
-    {
-        return $this->dispatcher !== null;
-    }
 
     public function addRoute(Route $route): RouteCollectorInterface
     {
-        if (!$route->hasDispatcher() && $this->hasDispatcher()) {
-            $route->injectDispatcher($this->dispatcher);
-        }
         $this->items[] = $route;
         return $this;
     }
 
     public function addGroup(GroupInterface $group): RouteCollectorInterface
     {
-        if (!$group->hasDispatcher() && $this->hasDispatcher()) {
-            $group = $group->withDispatcher($this->dispatcher);
-        }
         $this->items[] = $group;
         return $this;
     }
