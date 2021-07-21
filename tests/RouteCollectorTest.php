@@ -6,15 +6,9 @@ namespace Yiisoft\Router\Tests;
 
 use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
-use Psr\EventDispatcher\EventDispatcherInterface;
-use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
-use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
-use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollector;
-use Yiisoft\Router\Tests\Support\Container;
 
 final class RouteCollectorTest extends TestCase
 {
