@@ -92,14 +92,6 @@ final class Group implements GroupInterface
         return $this->dispatcher !== null;
     }
 
-    /**
-     * Appends a handler middleware definition that should be invoked for a matched route.
-     * First added handler will be executed first.
-     *
-     * @param mixed $middlewareDefinition
-     *
-     * @return self
-     */
     public function middleware($middlewareDefinition): GroupInterface
     {
         if ($this->routesAdded) {
@@ -110,14 +102,6 @@ final class Group implements GroupInterface
         return $new;
     }
 
-    /**
-     * Prepends a handler middleware definition that should be invoked for a matched route.
-     * First added handler will be executed last.
-     *
-     * @param mixed $middlewareDefinition
-     *
-     * @return self
-     */
     public function prependMiddleware($middlewareDefinition): GroupInterface
     {
         $new = clone $this;
@@ -140,15 +124,6 @@ final class Group implements GroupInterface
         return $new;
     }
 
-    /**
-     * Excludes middleware from being invoked when action is handled.
-     * It is useful to avoid invoking one of the parent group middleware for
-     * a certain route.
-     *
-     * @param mixed $middlewareDefinition
-     *
-     * @return self
-     */
     public function disableMiddleware($middlewareDefinition): GroupInterface
     {
         $new = clone $this;
