@@ -24,37 +24,18 @@ final class RouteCollector implements RouteCollectorInterface
         return $this;
     }
 
-    /**
-     * Appends a handler middleware definition that should be invoked for a matched route.
-     * First added handler will be executed first.
-     *
-     * @param mixed $middlewareDefinition
-     *
-     * @return self
-     */
     public function middleware($middlewareDefinition): RouteCollectorInterface
     {
         array_unshift($this->middlewareDefinitions, $middlewareDefinition);
         return $this;
     }
 
-    /**
-     * Prepends a handler middleware definition that should be invoked for a matched route.
-     * First added handler will be executed last.
-     *
-     * @param mixed $middlewareDefinition
-     *
-     * @return self
-     */
     public function prependMiddleware($middlewareDefinition): RouteCollectorInterface
     {
         $this->middlewareDefinitions[] = $middlewareDefinition;
         return $this;
     }
 
-    /**
-     * @return Group[]|Route[]
-     */
     public function getItems(): array
     {
         return $this->items;
