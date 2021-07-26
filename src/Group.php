@@ -10,11 +10,9 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
 use function get_class;
 use function in_array;
-use function is_array;
-use function is_callable;
 use function is_object;
 
-final class Group implements RouteCollectorInterface
+final class Group implements GroupInterface
 {
     /**
      * @var Group[]|Route[]
@@ -41,50 +39,41 @@ final class Group implements RouteCollectorInterface
      * @param string|null $prefix URL prefix to prepend to all routes of the group.
      * @param MiddlewareDispatcher|null $dispatcher Middleware dispatcher to use for the group.
      *
-     * @return RouteCollectorInterface
+     * @return GroupInterface
      */
     public static function create(
         ?string $prefix = null,
         MiddlewareDispatcher $dispatcher = null
-    ): RouteCollectorInterface {
+    ): GroupInterface {
         return new self($prefix, $dispatcher);
     }
 
-    public function routes(...$routes): RouteCollectorInterface
+    public function routes(...$routes): GroupInterface
     {
         if ($this->middlewareAdded) {
             throw new RuntimeException('routes() can not be used after prependMiddleware().');
         }
-        if (is_callable($routes)) {
-            $callback = $routes;
-        } elseif (is_array($routes)) {
-            $callback = static function (self $group) use (&$routes) {
-                foreach ($routes as $route) {
-                    if ($route instanceof Route) {
-                        $group->addRoute($route);
-                    } elseif ($route instanceof self) {
-                        $group->addGroup($route);
-                    } else {
-                        $type = is_object($route) ? get_class($route) : gettype($route);
-                        throw new InvalidArgumentException(
-                            sprintf('Route should be either an instance of Route or Group, %s given.', $type)
-                        );
-                    }
+        $new = clone $this;
+        foreach ($routes as $route) {
+            if ($route instanceof Route || $route instanceof self) {
+                if (!$route->hasDispatcher() && $new->hasDispatcher()) {
+                    $route = $route->withDispatcher($new->dispatcher);
                 }
-            };
-        } else {
-            $callback = null;
+                $new->items[] = $route;
+            } else {
+                $type = is_object($route) ? get_class($route) : gettype($route);
+                throw new InvalidArgumentException(
+                    sprintf('Route should be either an instance of Route or Group, %s given.', $type)
+                );
+            }
         }
 
-        if ($callback !== null) {
-            $callback($this);
-        }
-        $this->routesAdded = true;
+        $new->routesAdded = true;
 
-        return $this;
+        return $new;
     }
 
-    public function withDispatcher(MiddlewareDispatcher $dispatcher): RouteCollectorInterface
+    public function withDispatcher(MiddlewareDispatcher $dispatcher): GroupInterface
     {
         $group = clone $this;
         $group->dispatcher = $dispatcher;
@@ -103,83 +92,43 @@ final class Group implements RouteCollectorInterface
         return $this->dispatcher !== null;
     }
 
-    public function addRoute(Route $route): RouteCollectorInterface
-    {
-        if (!$route->hasDispatcher() && $this->hasDispatcher()) {
-            $route->injectDispatcher($this->dispatcher);
-        }
-        $this->items[] = $route;
-        return $this;
-    }
-
-    public function addGroup(self $group): RouteCollectorInterface
-    {
-        if (!$group->hasDispatcher() && $this->hasDispatcher()) {
-            $group = $group->withDispatcher($this->dispatcher);
-        }
-        $this->items[] = $group;
-
-
-        return $this;
-    }
-
-    /**
-     * Appends a handler middleware definition that should be invoked for a matched route.
-     * First added handler will be executed first.
-     *
-     * @param mixed $middlewareDefinition
-     *
-     * @return self
-     */
-    public function middleware($middlewareDefinition): RouteCollectorInterface
+    public function middleware($middlewareDefinition): GroupInterface
     {
         if ($this->routesAdded) {
             throw new RuntimeException('middleware() can not be used after routes().');
         }
-        array_unshift($this->middlewareDefinitions, $middlewareDefinition);
-        return $this;
+        $new = clone $this;
+        array_unshift($new->middlewareDefinitions, $middlewareDefinition);
+        return $new;
     }
 
-    /**
-     * Prepends a handler middleware definition that should be invoked for a matched route.
-     * First added handler will be executed last.
-     *
-     * @param mixed $middlewareDefinition
-     *
-     * @return self
-     */
-    public function prependMiddleware($middlewareDefinition): RouteCollectorInterface
+    public function prependMiddleware($middlewareDefinition): GroupInterface
     {
-        $this->middlewareDefinitions[] = $middlewareDefinition;
-        $this->middlewareAdded = true;
-        return $this;
+        $new = clone $this;
+        $new->middlewareDefinitions[] = $middlewareDefinition;
+        $new->middlewareAdded = true;
+        return $new;
     }
 
-    public function namePrefix(string $namePrefix): RouteCollectorInterface
+    public function namePrefix(string $namePrefix): GroupInterface
     {
-        $this->namePrefix = $namePrefix;
-        return $this;
+        $new = clone $this;
+        $new->namePrefix = $namePrefix;
+        return $new;
     }
 
-    public function host(string $host): RouteCollectorInterface
+    public function host(string $host): GroupInterface
     {
-        $this->host = rtrim($host, '/');
-        return $this;
+        $new = clone $this;
+        $new->host = rtrim($host, '/');
+        return $new;
     }
 
-    /**
-     * Excludes middleware from being invoked when action is handled.
-     * It is useful to avoid invoking one of the parent group middleware for
-     * a certain route.
-     *
-     * @param mixed $middlewareDefinition
-     *
-     * @return self
-     */
-    public function disableMiddleware($middlewareDefinition): RouteCollectorInterface
+    public function disableMiddleware($middlewareDefinition): GroupInterface
     {
-        $this->disabledMiddlewareDefinitions[] = $middlewareDefinition;
-        return $this;
+        $new = clone $this;
+        $new->disabledMiddlewareDefinitions[] = $middlewareDefinition;
+        return $new;
     }
 
     /**

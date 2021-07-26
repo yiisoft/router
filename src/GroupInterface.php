@@ -6,31 +6,9 @@ namespace Yiisoft\Router;
 
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
-interface RouteInterface
+interface GroupInterface
 {
     public function withDispatcher(MiddlewareDispatcher $dispatcher): self;
-
-    public function name(string $name): self;
-
-    public function pattern(string $pattern): self;
-
-    public function host(string $host): self;
-
-    /**
-     * Marks route as override. When added it will replace existing route with the same name.
-     *
-     * @return self
-     */
-    public function override(): self;
-
-    /**
-     * Parameter default values indexed by parameter names.
-     *
-     * @param array $defaults
-     *
-     * @return self
-     */
-    public function defaults(array $defaults): self;
 
     /**
      * Appends a handler middleware definition that should be invoked for a matched route.
@@ -44,7 +22,7 @@ interface RouteInterface
 
     /**
      * Prepends a handler middleware definition that should be invoked for a matched route.
-     * Last added handler will be executed first.
+     * First added handler will be executed last.
      *
      * @param mixed $middlewareDefinition
      *
@@ -63,12 +41,9 @@ interface RouteInterface
      */
     public function disableMiddleware($middlewareDefinition): self;
 
-    /**
-     * Appends action handler. It is a primary middleware definition that should be invoked last for a matched route.
-     *
-     * @param mixed $middlewareDefinition
-     *
-     * @return self
-     */
-    public function action($middlewareDefinition): self;
+    public function host(string $host): self;
+
+    public function namePrefix(string $namePrefix): self;
+
+    public function routes(...$routes): self;
 }

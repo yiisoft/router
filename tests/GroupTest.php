@@ -17,24 +17,11 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
+use Yiisoft\Router\RouteCollector;
 use Yiisoft\Router\Tests\Support\Container;
 
 final class GroupTest extends TestCase
 {
-    public function testAddRoute(): void
-    {
-        $listRoute = Route::get('/');
-        $viewRoute = Route::get('/{id}');
-
-        $group = Group::create();
-        $group->addRoute($listRoute);
-        $group->addRoute($viewRoute);
-
-        $this->assertCount(2, $group->getItems());
-        $this->assertSame($listRoute, $group->getItems()[0]);
-        $this->assertSame($viewRoute, $group->getItems()[1]);
-    }
-
     public function testAddMiddleware(): void
     {
         $group = Group::create();
@@ -46,12 +33,40 @@ final class GroupTest extends TestCase
             return new Response();
         };
 
-        $group
+        $group = $group
             ->middleware($middleware2)
             ->middleware($middleware1);
         $this->assertCount(2, $group->getMiddlewareDefinitions());
         $this->assertSame($middleware1, $group->getMiddlewareDefinitions()[0]);
         $this->assertSame($middleware2, $group->getMiddlewareDefinitions()[1]);
+    }
+
+    public function testRoutesAfterMiddleware(): void
+    {
+        $group = Group::create();
+
+        $middleware1 = static function () {
+            return new Response();
+        };
+
+        $group = $group->prependMiddleware($middleware1);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('routes() can not be used after prependMiddleware().');
+
+        $group->routes(Route::get('/'));
+    }
+
+    public function testRoutesWithNull(): void
+    {
+        $group = Group::create();
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            sprintf('Route should be either an instance of Route or Group, %s given.', \stdClass::class)
+        );
+
+        $group->routes(new \stdClass());
     }
 
     public function testAddNestedMiddleware(): void
@@ -82,7 +97,7 @@ final class GroupTest extends TestCase
                     )
             );
 
-        $collector = Group::create();
+        $collector = new RouteCollector();
         $collector->addGroup($group);
 
         $routeCollection = new RouteCollection($collector);
@@ -115,7 +130,7 @@ final class GroupTest extends TestCase
                 Route::get('/test1')->action($action)->name('request1'),
             );
 
-        $collector = Group::create();
+        $collector = new RouteCollector();
         $collector->addGroup($group);
 
         $routeCollection = new RouteCollection($collector);
@@ -146,7 +161,7 @@ final class GroupTest extends TestCase
                 Route::get('/test1')->action($action)->name('request1')
             );
 
-        $collector = Group::create();
+        $collector = new RouteCollector();
         $collector->addGroup($group);
 
         $routeCollection = new RouteCollection($collector);
