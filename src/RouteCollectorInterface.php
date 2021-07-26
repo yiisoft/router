@@ -34,15 +34,30 @@ interface RouteCollectorInterface
      */
     public function addGroup(Group $group): self;
 
+    /**
+     * Appends a handler middleware definition that should be invoked for a matched route.
+     * First added handler will be executed first.
+     *
+     * @param mixed $middlewareDefinition
+     *
+     * @return self
+     */
     public function middleware($middlewareDefinition): self;
 
+    /**
+     * Prepends a handler middleware definition that should be invoked for a matched route.
+     * First added handler will be executed last.
+     *
+     * @param mixed $middlewareDefinition
+     *
+     * @return self
+     */
     public function prependMiddleware($middlewareDefinition): self;
 
-    public function disableMiddleware($middlewareDefinition): self;
+    /**
+     * @return Group[]|Route[]
+     */
+    public function getItems(): array;
 
-    public function host(string $host): self;
-
-    public function namePrefix(string $namePrefix): self;
-
-    public function routes(...$routes): self;
+    public function getMiddlewareDefinitions(): array;
 }

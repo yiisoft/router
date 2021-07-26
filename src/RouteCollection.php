@@ -24,20 +24,12 @@ final class RouteCollection implements RouteCollectionInterface
         $this->collector = $collector;
     }
 
-    /**
-     * @return Route[]
-     */
     public function getRoutes(): array
     {
         $this->ensureItemsInjected();
         return $this->routes;
     }
 
-    /**
-     * @param string $name
-     *
-     * @return Route
-     */
     public function getRoute(string $name): Route
     {
         $this->ensureItemsInjected();
@@ -48,13 +40,6 @@ final class RouteCollection implements RouteCollectionInterface
         return $this->routes[$name];
     }
 
-    /**
-     * Returns routes tree array
-     *
-     * @param bool $routeAsString
-     *
-     * @return array
-     */
     public function getRouteTree(bool $routeAsString = true): array
     {
         $this->ensureItemsInjected();
@@ -64,18 +49,21 @@ final class RouteCollection implements RouteCollectionInterface
     private function ensureItemsInjected(): void
     {
         if ($this->items === []) {
-            $this->injectItems([$this->collector]);
+            $this->injectItems($this->collector->getItems());
         }
     }
 
     /**
      * Build routes array
      *
-     * @param Group[]|Route[]|RouteCollectorInterface[] $items
+     * @param Group[]|Route[] $items
      */
     private function injectItems(array $items): void
     {
         foreach ($items as $index => $item) {
+            foreach ($this->collector->getMiddlewareDefinitions() as $middlewareDefinition) {
+                $item = $item->prependMiddleware($middlewareDefinition);
+            }
             $this->injectItem($item);
         }
     }
