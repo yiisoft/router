@@ -14,18 +14,4 @@ use Psr\Http\Message\UriInterface;
 interface UrlMatcherInterface
 {
     public function match(ServerRequestInterface $request): MatchingResult;
-
-    /**
-     * Returns the current Route object
-     *
-     * @return RouteParametersInterface|null current route
-     */
-    public function getCurrentRoute(): ?RouteParametersInterface;
-
-    /**
-     * Returns current URI
-     *
-     * @return UriInterface|null current URI
-     */
-    public function getCurrentUri(): ?UriInterface;
 }
