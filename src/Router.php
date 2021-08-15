@@ -4,25 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
-use FastRoute\DataGenerator\GroupCountBased as RouteGenerator;
-use FastRoute\Dispatcher;
-use FastRoute\Dispatcher\GroupCountBased;
-use FastRoute\RouteCollector;
-use FastRoute\RouteParser\Std as RouteParser;
-use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
-use Psr\SimpleCache\CacheInterface;
-use Yiisoft\Http\Method;
-use Yiisoft\Router\MatchingResult;
-use Yiisoft\Router\Route;
-use Yiisoft\Router\RouteCollectionInterface;
-use Yiisoft\Router\RouteParametersInterface;
-use Yiisoft\Router\RouterInterface;
-use Yiisoft\Router\UrlMatcherInterface;
-
-use function array_merge;
-use function array_reduce;
-use function array_unique;
 
 final class Router implements RouterInterface
 {
