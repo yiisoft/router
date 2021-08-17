@@ -6,6 +6,9 @@ namespace Yiisoft\Router;
 
 use Psr\Http\Message\UriInterface;
 
+/**
+ * Holds information about current route e.g. matched last.
+ */
 final class CurrentRoute
 {
     private ?RouteParametersInterface $route = null;
