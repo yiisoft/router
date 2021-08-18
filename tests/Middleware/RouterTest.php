@@ -17,6 +17,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
+use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\MatchingResult;
 use Yiisoft\Router\Middleware\Router;
 use Yiisoft\Router\Route;
@@ -32,7 +33,7 @@ final class RouterTest extends TestCase
             $this->createMock(EventDispatcherInterface::class)
         );
 
-        return new Router($this->getMatcher(), new Psr17Factory(), $dispatcher);
+        return new Router($this->getMatcher(), new Psr17Factory(), $dispatcher, new CurrentRoute());
     }
 
     private function processWithRouter(ServerRequestInterface $request): ResponseInterface
@@ -72,14 +73,6 @@ final class RouterTest extends TestCase
             public function __construct($middleware)
             {
                 $this->middleware = $middleware;
-            }
-
-            public function getCurrentRoute(): ?Route
-            {
-            }
-
-            public function getCurrentUri(): ?UriInterface
-            {
             }
 
             /**
