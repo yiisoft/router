@@ -11,6 +11,11 @@ use Psr\Http\Message\UriInterface;
  */
 final class CurrentRoute
 {
+    /**
+     * Current Route
+     *
+     * @var RouteParametersInterface|null
+     */
     private ?RouteParametersInterface $route = null;
     /**
      * Current URI
@@ -39,16 +44,23 @@ final class CurrentRoute
         return $this->uri;
     }
 
+    /**
+     * @param RouteParametersInterface $route
+     */
     public function setRoute(RouteParametersInterface $route): void
     {
-        $this->route = $route;
+        if ($this->route === null) {
+            $this->route = $route;
+        }
     }
 
     /**
-     * @param UriInterface|null $uri
+     * @param UriInterface $uri
      */
-    public function setUri(?UriInterface $uri): void
+    public function setUri(UriInterface $uri): void
     {
-        $this->uri = $uri;
+        if ($this->uri === null) {
+            $this->uri = $uri;
+        }
     }
 }
