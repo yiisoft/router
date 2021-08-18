@@ -155,6 +155,25 @@ function getUrl(UrlGeneratorInterface $urlGenerator, $parameters = [])
 }
 ```
 
+## Obtain current route and URI
+
+Current route (matched last) and URI could be obtained the following:
+
+```php
+use Yiisoft\Router\CurrentRoute;
+
+function getCurrentRoute(CurrentRoute $currentRoute)
+{
+    return $currentRoute->getRoute();
+}
+
+function getCurrentUri(CurrentRoute $currentRoute)
+{
+    return $currentRoute->getUri();
+}
+
+```
+
 ### Unit testing
 
 The package is tested with [PHPUnit](https://phpunit.de/). To run tests:
