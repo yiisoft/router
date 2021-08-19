@@ -9,20 +9,19 @@ use Psr\Http\Message\UriInterface;
 /**
  * Holds information about current route e.g. matched last.
  */
-final class CurrentRoute
+final class CurrentRoute implements CurrentRouteInterface
 {
     private ?RouteParametersInterface $route = null;
+
     /**
      * Current URI
-     *
-     * @var UriInterface|null
      */
     private ?UriInterface $uri = null;
 
     /**
-     * Returns the current Route object
+     * Returns the current route object.
      *
-     * @return RouteParametersInterface|null current route
+     * @return RouteParametersInterface|null The current route.
      */
     public function getRoute(): ?RouteParametersInterface
     {
@@ -30,9 +29,9 @@ final class CurrentRoute
     }
 
     /**
-     * Returns current URI
+     * Returns the current URI.
      *
-     * @return UriInterface|null current URI
+     * @return UriInterface|null The current URI.
      */
     public function getUri(): ?UriInterface
     {
@@ -44,9 +43,6 @@ final class CurrentRoute
         $this->route = $route;
     }
 
-    /**
-     * @param UriInterface|null $uri
-     */
     public function setUri(?UriInterface $uri): void
     {
         $this->uri = $uri;
