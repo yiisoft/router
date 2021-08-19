@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use Psr\Http\Message\UriInterface;
+use RuntimeException;
 
 /**
  * Holds information about current route e.g. matched last.
@@ -51,7 +52,9 @@ final class CurrentRoute
     {
         if ($this->route === null) {
             $this->route = $route;
+            return;
         }
+        throw new RuntimeException('Can not set route. Route already established.');
     }
 
     /**
@@ -61,6 +64,8 @@ final class CurrentRoute
     {
         if ($this->uri === null) {
             $this->uri = $uri;
+            return;
         }
+        throw new RuntimeException('Can not set URI. URI already established.');
     }
 }
