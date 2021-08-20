@@ -54,7 +54,7 @@ final class CurrentRoute
             $this->route = $route;
             return;
         }
-        throw new RuntimeException('Can not set route. Route already established.');
+        throw new RuntimeException('Can not set route since it was already set.');
     }
 
     /**
