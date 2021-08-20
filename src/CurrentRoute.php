@@ -66,6 +66,6 @@ final class CurrentRoute
             $this->uri = $uri;
             return;
         }
-        throw new RuntimeException('Can not set URI. URI already established.');
+        throw new RuntimeException('Can not set URI since it was already set.');
     }
 }
