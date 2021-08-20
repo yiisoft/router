@@ -12,11 +12,11 @@ use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UriInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
+use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\MatchingResult;
 use Yiisoft\Router\Middleware\Router;
 use Yiisoft\Router\Route;
@@ -24,7 +24,7 @@ use Yiisoft\Router\UrlMatcherInterface;
 
 final class RouterTest extends TestCase
 {
-    private function createRouterMiddleware(): Router
+    private function createRouterMiddleware(?CurrentRoute $currentRoute = null): Router
     {
         $container = $this->createMock(ContainerInterface::class);
         $dispatcher = new MiddlewareDispatcher(
@@ -32,12 +32,12 @@ final class RouterTest extends TestCase
             $this->createMock(EventDispatcherInterface::class)
         );
 
-        return new Router($this->getMatcher(), new Psr17Factory(), $dispatcher);
+        return new Router($this->getMatcher(), new Psr17Factory(), $dispatcher, $currentRoute ?? new CurrentRoute());
     }
 
-    private function processWithRouter(ServerRequestInterface $request): ResponseInterface
+    private function processWithRouter(ServerRequestInterface $request, ?CurrentRoute $currentRoute = null): ResponseInterface
     {
-        return $this->createRouterMiddleware()->process($request, $this->createRequestHandler());
+        return $this->createRouterMiddleware($currentRoute)->process($request, $this->createRequestHandler());
     }
 
     public function testProcessSuccess(): void
@@ -62,6 +62,27 @@ final class RouterTest extends TestCase
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
     }
 
+    public function testGetCurrentRoute(): void
+    {
+        $currentRoute = new CurrentRoute();
+        $request = new ServerRequest('GET', '/');
+
+        $this->processWithRouter($request, $currentRoute);
+
+        $this->assertInstanceOf(Route::class, $currentRoute->getRoute());
+        $this->assertEquals('GET /', $currentRoute->getRoute()->getName());
+    }
+
+    public function testGetCurrentUri(): void
+    {
+        $currentRoute = new CurrentRoute();
+        $request = new ServerRequest('GET', '/');
+
+        $this->processWithRouter($request, $currentRoute);
+
+        $this->assertSame($request->getUri(), $currentRoute->getUri());
+    }
+
     private function getMatcher(): UrlMatcherInterface
     {
         $middleware = $this->createRouteMiddleware();
@@ -74,14 +95,6 @@ final class RouterTest extends TestCase
                 $this->middleware = $middleware;
             }
 
-            public function getCurrentRoute(): ?Route
-            {
-            }
-
-            public function getCurrentUri(): ?UriInterface
-            {
-            }
-
             /**
              * Emulates router with a single `GET /` route
              *
@@ -92,7 +105,7 @@ final class RouterTest extends TestCase
             public function match(ServerRequestInterface $request): MatchingResult
             {
                 if ($request->getUri()->getPath() !== '/') {
-                    return MatchingResult::fromFailure(Method::ANY);
+                    return MatchingResult::fromFailure(Method::ALL);
                 }
 
                 if ($request->getMethod() === 'GET') {

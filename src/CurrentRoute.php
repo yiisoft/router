@@ -5,12 +5,18 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use Psr\Http\Message\UriInterface;
+use RuntimeException;
 
 /**
  * Holds information about current route e.g. matched last.
  */
 final class CurrentRoute implements CurrentRouteInterface
 {
+    /**
+     * Current Route
+     *
+     * @var RouteParametersInterface|null
+     */
     private ?RouteParametersInterface $route = null;
 
     /**
@@ -38,13 +44,27 @@ final class CurrentRoute implements CurrentRouteInterface
         return $this->uri;
     }
 
+    /**
+     * @param RouteParametersInterface $route
+     */
     public function setRoute(RouteParametersInterface $route): void
     {
-        $this->route = $route;
+        if ($this->route === null) {
+            $this->route = $route;
+            return;
+        }
+        throw new RuntimeException('Can not set route since it was already set.');
     }
 
-    public function setUri(?UriInterface $uri): void
+    /**
+     * @param UriInterface $uri
+     */
+    public function setUri(UriInterface $uri): void
     {
-        $this->uri = $uri;
+        if ($this->uri === null) {
+            $this->uri = $uri;
+            return;
+        }
+        throw new RuntimeException('Can not set URI since it was already set.');
     }
 }
