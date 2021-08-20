@@ -67,6 +67,11 @@ final class MatchingResult implements MiddlewareInterface
         return $this->methods;
     }
 
+    public function route(): Route
+    {
+        return $this->route;
+    }
+
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if (!$this->isSuccess()) {
