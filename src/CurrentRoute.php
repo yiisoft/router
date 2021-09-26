@@ -28,11 +28,11 @@ final class CurrentRoute
     /**
      * Returns the current Route name
      *
-     * @return string
+     * @return string|null
      */
-    public function getName(): string
+    public function getName(): ?string
     {
-        return $this->route === null ? '' : $this->route->getName();
+        return $this->route !== null ? $this->route->getName() : null;
     }
 
     /**
