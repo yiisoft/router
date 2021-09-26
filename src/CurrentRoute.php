@@ -26,6 +26,16 @@ final class CurrentRoute
     private ?UriInterface $uri = null;
 
     /**
+     * Returns the current Route name
+     *
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->route === null ? '' : $this->route->getName();
+    }
+
+    /**
      * Returns the current Route object
      *
      * @return RouteParametersInterface|null current route
