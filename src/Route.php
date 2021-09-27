@@ -73,7 +73,7 @@ final class Route implements RouteInterface, RouteParametersInterface
      */
     public static function get(string $pattern, ?MiddlewareDispatcher $dispatcher = null): RouteInterface
     {
-        return self::methods([Method::GET], $pattern, $dispatcher);
+        return self::methods([Method::GET, Method::HEAD], $pattern, $dispatcher);
     }
 
     /**
