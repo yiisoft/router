@@ -32,7 +32,7 @@ final class RouteTest extends TestCase
     {
         $route = Route::get('/');
 
-        $this->assertSame('GET /', $route->getName());
+        $this->assertSame('GET, HEAD /', $route->getName());
     }
 
     public function testMethods(): void
@@ -50,7 +50,7 @@ final class RouteTest extends TestCase
     {
         $route = Route::get('/');
 
-        $this->assertSame([Method::GET], $route->getMethods());
+        $this->assertSame([Method::GET, Method::HEAD], $route->getMethods());
     }
 
     public function testPostMethod(): void
@@ -134,7 +134,7 @@ final class RouteTest extends TestCase
     {
         $route = Route::get('/');
 
-        $this->assertSame('GET /', (string)$route);
+        $this->assertSame('GET,HEAD /', (string)$route);
     }
 
     public function testDispatcherInjecting(): void

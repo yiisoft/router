@@ -70,7 +70,7 @@ final class RouterTest extends TestCase
         $this->processWithRouter($request, $currentRoute);
 
         $this->assertInstanceOf(Route::class, $currentRoute->getRoute());
-        $this->assertEquals('GET /', $currentRoute->getRoute()->getName());
+        $this->assertEquals('GET, HEAD /', $currentRoute->getRoute()->getName());
     }
 
     public function testGetCurrentUri(): void
