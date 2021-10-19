@@ -155,6 +155,27 @@ function getUrl(UrlGeneratorInterface $urlGenerator, $parameters = [])
 }
 ```
 
+### Creating locale URLs
+
+Locale based URLs can be configured the following:
+
+```php
+
+$urlGenerator->setLocales(['en' => 'en-US', 'ru' => 'ru-RU', 'uz' => 'uz-UZ']);
+$urlGenerator->setLocaleParameterName('_locale');
+```
+
+Then that is how locale URL could be obtained for it:
+
+```php
+use Yiisoft\Router\UrlGeneratorInterface;
+
+function getLocaleUrl(UrlGeneratorInterface $urlGenerator, string $locale)
+{
+    return $urlGenerator->generate('test', ['_locale' => $locale]);
+}
+```
+
 ## Obtain current route and URI
 
 Current route (matched last) and URI could be obtained the following:
