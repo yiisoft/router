@@ -9,6 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Yiisoft\Http\Method;
 use Yiisoft\Http\Status;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Router\CurrentRoute;
@@ -20,9 +21,14 @@ final class Router implements MiddlewareInterface
     private ResponseFactoryInterface $responseFactory;
     private MiddlewareDispatcher $dispatcher;
     private CurrentRoute $currentRoute;
+    private ?bool $autoResponseOptions = true;
 
-    public function __construct(UrlMatcherInterface $matcher, ResponseFactoryInterface $responseFactory, MiddlewareDispatcher $dispatcher, CurrentRoute $currentRoute)
-    {
+    public function __construct(
+        UrlMatcherInterface $matcher,
+        ResponseFactoryInterface $responseFactory,
+        MiddlewareDispatcher $dispatcher,
+        CurrentRoute $currentRoute
+    ) {
         $this->matcher = $matcher;
         $this->responseFactory = $responseFactory;
         $this->dispatcher = $dispatcher;
@@ -36,6 +42,10 @@ final class Router implements MiddlewareInterface
         $this->currentRoute->setUri($request->getUri());
 
         if ($result->isMethodFailure()) {
+            if ($this->autoResponseOptions && $request->getMethod() === Method::OPTIONS) {
+                return $this->responseFactory->createResponse(Status::NO_CONTENT)
+                    ->withHeader('Allow', implode(', ', $result->methods()));
+            }
             return $this->responseFactory->createResponse(Status::METHOD_NOT_ALLOWED)
                 ->withHeader('Allow', implode(', ', $result->methods()));
         }
@@ -51,5 +61,12 @@ final class Router implements MiddlewareInterface
         }
 
         return $result->withDispatcher($this->dispatcher)->process($request, $handler);
+    }
+
+    public function withAutoResponseOptions(): self
+    {
+        $new = clone $this;
+        $new->autoResponseOptions = true;
+        return $new;
     }
 }

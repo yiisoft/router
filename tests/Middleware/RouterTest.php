@@ -62,6 +62,14 @@ final class RouterTest extends TestCase
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
     }
 
+    public function testAutoResponseOptions(): void
+    {
+        $request = new ServerRequest('OPTIONS', '/');
+        $response = $this->processWithRouter($request);
+        $this->assertSame(204, $response->getStatusCode());
+        $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
+    }
+
     public function testGetCurrentRoute(): void
     {
         $currentRoute = new CurrentRoute();
