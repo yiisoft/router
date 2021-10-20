@@ -21,7 +21,7 @@ final class Router implements MiddlewareInterface
     private ResponseFactoryInterface $responseFactory;
     private MiddlewareDispatcher $dispatcher;
     private CurrentRoute $currentRoute;
-    private ?bool $autoResponseOptions = true;
+    private ?bool $autoResponseOptions = false;
 
     public function __construct(
         UrlMatcherInterface $matcher,
