@@ -35,9 +35,21 @@ final class RouterTest extends TestCase
         return new Router($this->getMatcher(), new Psr17Factory(), $dispatcher, $currentRoute ?? new CurrentRoute());
     }
 
-    private function processWithRouter(ServerRequestInterface $request, ?CurrentRoute $currentRoute = null): ResponseInterface
-    {
+    private function processWithRouter(
+        ServerRequestInterface $request,
+        ?CurrentRoute $currentRoute = null
+    ): ResponseInterface {
         return $this->createRouterMiddleware($currentRoute)->process($request, $this->createRequestHandler());
+    }
+
+    private function processWithRouterWithoutAutoResponse(
+        ServerRequestInterface $request,
+        ?CurrentRoute $currentRoute = null
+    ): ResponseInterface {
+        return $this->createRouterMiddleware($currentRoute)->withoutAutoResponseOptions()->process(
+            $request,
+            $this->createRequestHandler()
+        );
     }
 
     public function testProcessSuccess(): void
@@ -58,6 +70,29 @@ final class RouterTest extends TestCase
     {
         $request = new ServerRequest('POST', '/');
         $response = $this->processWithRouter($request);
+        $this->assertSame(405, $response->getStatusCode());
+        $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
+    }
+
+    public function testAutoResponseOptions(): void
+    {
+        $request = new ServerRequest('OPTIONS', '/');
+        $response = $this->processWithRouter($request);
+        $this->assertSame(204, $response->getStatusCode());
+        $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
+    }
+
+    public function testWithOptionsHandler(): void
+    {
+        $request = new ServerRequest('OPTIONS', '/options');
+        $response = $this->processWithRouter($request);
+        $this->assertSame(201, $response->getStatusCode());
+    }
+
+    public function testWithoutAutoResponseOptions(): void
+    {
+        $request = new ServerRequest('OPTIONS', '/');
+        $response = $this->processWithRouterWithoutAutoResponse($request);
         $this->assertSame(405, $response->getStatusCode());
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
     }
@@ -104,6 +139,11 @@ final class RouterTest extends TestCase
              */
             public function match(ServerRequestInterface $request): MatchingResult
             {
+                if ($request->getMethod() === 'OPTIONS' && $request->getUri()->getPath() === '/options') {
+                    $route = Route::methods(['OPTIONS'], '/options')->middleware($this->middleware);
+                    return MatchingResult::fromSuccess($route, ['method' => 'options']);
+                }
+
                 if ($request->getUri()->getPath() !== '/') {
                     return MatchingResult::fromFailure(Method::ALL);
                 }
