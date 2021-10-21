@@ -21,7 +21,7 @@ final class Router implements MiddlewareInterface
     private ResponseFactoryInterface $responseFactory;
     private MiddlewareDispatcher $dispatcher;
     private CurrentRoute $currentRoute;
-    private ?bool $autoResponseOptions = false;
+    private ?bool $autoResponseOptions = true;
 
     public function __construct(
         UrlMatcherInterface $matcher,
@@ -67,6 +67,13 @@ final class Router implements MiddlewareInterface
     {
         $new = clone $this;
         $new->autoResponseOptions = true;
+        return $new;
+    }
+
+    public function withoutAutoResponseOptions(): self
+    {
+        $new = clone $this;
+        $new->autoResponseOptions = false;
         return $new;
     }
 }
