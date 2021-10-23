@@ -39,4 +39,10 @@ interface UrlGeneratorInterface
     public function getUriPrefix(): string;
 
     public function setUriPrefix(string $name): void;
+
+    public function getLocales(): array;
+
+    public function setLocales(array $locales): void;
+
+    public function setLocaleParameterName(string $localeParameterName): void;
 }
