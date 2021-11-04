@@ -25,6 +25,16 @@ final class CurrentRoute implements CurrentRouteInterface
     private ?UriInterface $uri = null;
 
     /**
+     * Returns the current route name.
+     *
+     * @return string|null The current route name.
+     */
+    public function getName(): ?string
+    {
+        return $this->route !== null ? $this->route->getName() : null;
+    }
+
+    /**
      * Returns the current route object.
      *
      * @return RouteParametersInterface|null The current route.
