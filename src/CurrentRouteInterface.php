@@ -9,6 +9,13 @@ use Psr\Http\Message\UriInterface;
 interface CurrentRouteInterface
 {
     /**
+     * Returns the current route name.
+     *
+     * @return string|null The current route name.
+     */
+    public function getName(): ?string;
+
+    /**
      * Returns the current route object.
      *
      * @return RouteParametersInterface|null The current route.
