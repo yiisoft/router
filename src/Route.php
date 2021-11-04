@@ -311,4 +311,20 @@ final class Route implements RouteInterface, RouteParametersInterface
     {
         return $this->middlewareDefinitions !== [];
     }
+
+    public function __debugInfo()
+    {
+        return [
+            'name' => $this->name,
+            'methods' => $this->methods,
+            'pattern' => $this->pattern,
+            'host' => $this->host,
+            'defaults' => $this->defaults,
+            'override' => $this->override,
+            'actionAdded' => $this->actionAdded,
+            'middlewareDefinitions' => $this->middlewareDefinitions,
+            'disabledMiddlewareDefinitions' => $this->disabledMiddlewareDefinitions,
+            'middlewareDispatcher' => $this->dispatcher,
+        ];
+    }
 }
