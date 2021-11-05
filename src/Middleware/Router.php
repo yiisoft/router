@@ -13,6 +13,7 @@ use Yiisoft\Http\Method;
 use Yiisoft\Http\Status;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Router\CurrentRoute;
+use Yiisoft\Router\CurrentRouteInterface;
 use Yiisoft\Router\UrlMatcherInterface;
 
 final class Router implements MiddlewareInterface
@@ -27,7 +28,7 @@ final class Router implements MiddlewareInterface
         UrlMatcherInterface $matcher,
         ResponseFactoryInterface $responseFactory,
         MiddlewareDispatcher $dispatcher,
-        CurrentRoute $currentRoute
+        CurrentRouteInterface $currentRoute
     ) {
         $this->matcher = $matcher;
         $this->responseFactory = $responseFactory;

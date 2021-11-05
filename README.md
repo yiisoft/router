@@ -181,18 +181,19 @@ function getLocaleUrl(UrlGeneratorInterface $urlGenerator, string $locale)
 Current route (matched last) and URI could be obtained the following:
 
 ```php
-use Yiisoft\Router\CurrentRoute;
+use Psr\Http\Message\UriInterface;
+use Yiisoft\Router\CurrentRouteInterface;
+use Yiisoft\Router\RouteParametersInterface;
 
-function getCurrentRoute(CurrentRoute $currentRoute)
-{
-    return $currentRoute->getRoute();
+final class MyClass {
+    private ?RouteParametersInterface $currentRoute;
+    private ?UriInterface $currentUri;
+    
+    public function __construct(CurrentRouteInterface $currentRoute) {
+            $this->currentRoute = $currentRoute->getRoute();
+            $this->currentUri = $currentRoute->getUri();
+    }
 }
-
-function getCurrentUri(CurrentRoute $currentRoute)
-{
-    return $currentRoute->getUri();
-}
-
 ```
 
 ### Unit testing

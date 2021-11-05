@@ -10,7 +10,7 @@ use RuntimeException;
 /**
  * Holds information about current route e.g. matched last.
  */
-final class CurrentRoute
+final class CurrentRoute implements CurrentRouteInterface
 {
     /**
      * Current Route
@@ -18,17 +18,16 @@ final class CurrentRoute
      * @var RouteParametersInterface|null
      */
     private ?RouteParametersInterface $route = null;
+
     /**
      * Current URI
-     *
-     * @var UriInterface|null
      */
     private ?UriInterface $uri = null;
 
     /**
-     * Returns the current Route name
+     * Returns the current route name.
      *
-     * @return string|null
+     * @return string|null The current route name.
      */
     public function getName(): ?string
     {
@@ -36,9 +35,9 @@ final class CurrentRoute
     }
 
     /**
-     * Returns the current Route object
+     * Returns the current route object.
      *
-     * @return RouteParametersInterface|null current route
+     * @return RouteParametersInterface|null The current route.
      */
     public function getRoute(): ?RouteParametersInterface
     {
@@ -46,9 +45,9 @@ final class CurrentRoute
     }
 
     /**
-     * Returns current URI
+     * Returns the current URI.
      *
-     * @return UriInterface|null current URI
+     * @return UriInterface|null The current URI.
      */
     public function getUri(): ?UriInterface
     {
