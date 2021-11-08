@@ -28,4 +28,18 @@ interface CurrentRouteInterface
      * @return UriInterface|null The current URI.
      */
     public function getUri(): ?UriInterface;
+
+    /**
+     * Returns the current route parameters.
+     * @return array
+     */
+    public function getParameters(): array;
+
+    /**
+     * Returns the current route parameter.
+     * @param string $name
+     *
+     * @return mixed
+     */
+    public function getParameter(string $name);
 }

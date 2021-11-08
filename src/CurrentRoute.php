@@ -25,6 +25,11 @@ final class CurrentRoute implements CurrentRouteInterface
     private ?UriInterface $uri = null;
 
     /**
+     * Current Route parameters
+     */
+    private array $parameters = [];
+
+    /**
      * Returns the current route name.
      *
      * @return string|null The current route name.
@@ -76,5 +81,24 @@ final class CurrentRoute implements CurrentRouteInterface
             return;
         }
         throw new RuntimeException('Can not set URI since it was already set.');
+    }
+
+    public function getParameters(): array
+    {
+        return $this->parameters;
+    }
+
+    public function getParameter(string $name)
+    {
+        return $this->parameters[$name] ?? null;
+    }
+
+    public function setParameters(array $parameters)
+    {
+        if ($this->parameters === []) {
+            $this->parameters = $parameters;
+            return;
+        }
+        throw new RuntimeException('Can not set parameters since it was already set.');
     }
 }
