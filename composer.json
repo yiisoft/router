@@ -23,7 +23,7 @@
         "psr/http-message": "^1.0",
         "psr/http-server-handler": "^1.0",
         "psr/http-server-middleware": "^1.0",
-        "yiisoft/http": "^1.0",
+        "yiisoft/http": "^1.2",
         "yiisoft/middleware-dispatcher": "^1.0",
         "yiisoft/router-implementation": "1.0.0"
     },
@@ -31,9 +31,9 @@
         "nyholm/psr7": "^1.3",
         "phpunit/phpunit": "^9.5",
         "psr/event-dispatcher": "^1.0",
-        "roave/infection-static-analysis-plugin": "^1.8",
+        "roave/infection-static-analysis-plugin": "^1.10",
         "spatie/phpunit-watcher": "^1.23",
-        "vimeo/psalm": "^4.8",
+        "vimeo/psalm": "^4.12",
         "yiisoft/dummy-provider": "^1.0.0"
     },
     "autoload": {
