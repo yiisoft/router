@@ -117,9 +117,9 @@ URLs could be created using `UrlGeneratorInterface::generate()`. Let's assume a 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
-use Yiisoft\Yii\Web\SapiEmitter;
-use Yiisoft\Yii\Web\ServerRequestFactory;
-use Yiisoft\Yii\Web\NotFoundHandler;
+use Yiisoft\Yii\Http\Handler\NotFoundHandler;
+use Yiisoft\Yii\Runner\Http\SapiEmitter;
+use Yiisoft\Yii\Runner\Http\ServerRequestFactory;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectorInterface;
