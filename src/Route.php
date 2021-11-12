@@ -220,7 +220,7 @@ final class Route implements RouteInterface, RouteParametersInterface
             throw new RuntimeException('middleware() can not be used after action().');
         }
         $route = clone $this;
-        array_unshift($route->middlewareDefinitions, $middlewareDefinition);
+        $route->middlewareDefinitions[] = $middlewareDefinition;
         return $route;
     }
 
@@ -233,7 +233,7 @@ final class Route implements RouteInterface, RouteParametersInterface
             throw new RuntimeException('prependMiddleware() can not be used before action().');
         }
         $route = clone $this;
-        $route->middlewareDefinitions[] = $middlewareDefinition;
+        array_unshift($route->middlewareDefinitions, $middlewareDefinition);
         return $route;
     }
 
@@ -243,7 +243,7 @@ final class Route implements RouteInterface, RouteParametersInterface
     public function action($middlewareDefinition): RouteInterface
     {
         $route = clone $this;
-        array_unshift($route->middlewareDefinitions, $middlewareDefinition);
+        $route->middlewareDefinitions[] = $middlewareDefinition;
         $route->actionAdded = true;
         return $route;
     }
