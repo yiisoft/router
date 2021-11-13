@@ -37,4 +37,36 @@ class CurrentRouteTest extends TestCase
 
         $this->assertSame($uri, $currentRoute->getUri());
     }
+
+    public function testGetParameters(): void
+    {
+        $parameters = [
+            'test' => 'test',
+            'foo' => 'bar',
+        ];
+        $currentRoute = new CurrentRoute();
+        $currentRoute->setParameters($parameters);
+
+        $this->assertSame($parameters, $currentRoute->getParameters());
+    }
+
+    public function testGetParameter(): void
+    {
+        $parameters = [
+            'test' => 'test',
+            'foo' => 'bar',
+        ];
+        $currentRoute = new CurrentRoute();
+        $currentRoute->setParameters($parameters);
+
+        $this->assertSame('bar', $currentRoute->getParameter('foo'));
+    }
+
+    public function testGetParameterWithNonExist()
+    {
+        $currentRoute = new CurrentRoute();
+        $currentRoute->setParameters(['test' => 1]);
+
+        $this->assertNull($currentRoute->getParameter('foo'));
+    }
 }
