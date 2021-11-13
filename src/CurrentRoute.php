@@ -88,9 +88,9 @@ final class CurrentRoute implements CurrentRouteInterface
         return $this->parameters;
     }
 
-    public function getParameter(string $name)
+    public function getParameter(string $name, $default = null): ?string
     {
-        return $this->parameters[$name] ?? null;
+        return $this->parameters[$name] ?? $default;
     }
 
     public function setParameters(array $parameters)

@@ -31,15 +31,18 @@ interface CurrentRouteInterface
 
     /**
      * Returns the current route parameters.
+     *
      * @return array
      */
     public function getParameters(): array;
 
     /**
      * Returns the current route parameter.
+     *
      * @param string $name
+     * @param null $default
      *
      * @return mixed
      */
-    public function getParameter(string $name);
+    public function getParameter(string $name, $default = null);
 }
