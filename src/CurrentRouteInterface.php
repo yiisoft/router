@@ -40,7 +40,7 @@ interface CurrentRouteInterface
      * Returns the current route parameter.
      *
      * @param string $name
-     * @param null $default
+     * @param mixed|null $default
      *
      * @return mixed
      */
