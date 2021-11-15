@@ -63,7 +63,7 @@ class CurrentRouteTest extends TestCase
         $this->assertSame('bar', $currentRoute->getParameter('foo'));
     }
 
-    public function testGetParameterWithDefault()
+    public function testGetParameterWithDefault(): void
     {
         $currentRoute = new CurrentRoute();
         $currentRoute->setParameters(['test' => 1]);
@@ -71,7 +71,7 @@ class CurrentRouteTest extends TestCase
         $this->assertSame('bar', $currentRoute->getParameter('foo', 'bar'));
     }
 
-    public function testGetParameterWithNonExist()
+    public function testGetParameterWithNonExist(): void
     {
         $currentRoute = new CurrentRoute();
         $currentRoute->setParameters(['test' => 1]);
@@ -79,7 +79,7 @@ class CurrentRouteTest extends TestCase
         $this->assertNull($currentRoute->getParameter('foo'));
     }
 
-    public function testSetRouteTwice()
+    public function testSetRouteTwice(): void
     {
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Can not set route since it was already set.');
@@ -89,7 +89,7 @@ class CurrentRouteTest extends TestCase
         $currentRoute->setRoute(Route::get('/home')->name('home'));
     }
 
-    public function testSetUriTwice()
+    public function testSetUriTwice(): void
     {
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Can not set URI since it was already set.');
@@ -99,7 +99,7 @@ class CurrentRouteTest extends TestCase
         $currentRoute->setUri(new Uri('home'));
     }
 
-    public function testSetParametersTwice()
+    public function testSetParametersTwice(): void
     {
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Can not set parameters since it was already set.');
