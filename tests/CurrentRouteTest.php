@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router\Tests;
 
+use LogicException;
 use Nyholm\Psr7\Uri;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Router\CurrentRoute;
@@ -76,5 +77,35 @@ class CurrentRouteTest extends TestCase
         $currentRoute->setParameters(['test' => 1]);
 
         $this->assertNull($currentRoute->getParameter('foo'));
+    }
+
+    public function testSetRouteTwice()
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Can not set route since it was already set.');
+
+        $currentRoute = new CurrentRoute();
+        $currentRoute->setRoute(Route::get('')->name('test'));
+        $currentRoute->setRoute(Route::get('/home')->name('home'));
+    }
+
+    public function testSetUriTwice()
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Can not set URI since it was already set.');
+
+        $currentRoute = new CurrentRoute();
+        $currentRoute->setUri(new Uri(''));
+        $currentRoute->setUri(new Uri('home'));
+    }
+
+    public function testSetParametersTwice()
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Can not set parameters since it was already set.');
+
+        $currentRoute = new CurrentRoute();
+        $currentRoute->setParameters(['foo' => 'bar']);
+        $currentRoute->setParameters(['id' => 1]);
     }
 }
