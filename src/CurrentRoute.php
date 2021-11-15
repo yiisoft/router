@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use Psr\Http\Message\UriInterface;
-use RuntimeException;
+use LogicException;
 
 /**
  * Holds information about current route e.g. matched last.
@@ -68,7 +68,7 @@ final class CurrentRoute implements CurrentRouteInterface
             $this->route = $route;
             return;
         }
-        throw new RuntimeException('Can not set route since it was already set.');
+        throw new LogicException('Can not set route since it was already set.');
     }
 
     /**
@@ -80,7 +80,7 @@ final class CurrentRoute implements CurrentRouteInterface
             $this->uri = $uri;
             return;
         }
-        throw new RuntimeException('Can not set URI since it was already set.');
+        throw new LogicException('Can not set URI since it was already set.');
     }
 
     public function getParameters(): array
@@ -99,6 +99,6 @@ final class CurrentRoute implements CurrentRouteInterface
             $this->parameters = $parameters;
             return;
         }
-        throw new RuntimeException('Can not set parameters since it was already set.');
+        throw new LogicException('Can not set parameters since it was already set.');
     }
 }
