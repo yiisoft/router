@@ -93,7 +93,7 @@ final class CurrentRoute implements CurrentRouteInterface
         return $this->parameters[$name] ?? $default;
     }
 
-    public function setParameters(array $parameters)
+    public function setParameters(array $parameters): void
     {
         if ($this->parameters === []) {
             $this->parameters = $parameters;
