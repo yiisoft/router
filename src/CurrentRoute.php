@@ -25,7 +25,7 @@ final class CurrentRoute implements CurrentRouteInterface
     private ?UriInterface $uri = null;
 
     /**
-     * Current Route parameters
+     * Current Route parameters.
      */
     private array $parameters = [];
 
