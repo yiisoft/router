@@ -39,7 +39,7 @@ class CurrentRouteTest extends TestCase
         $this->assertSame($uri, $currentRoute->getUri());
     }
 
-    public function testGetParameters(): void
+    public function testGetArguments(): void
     {
         $parameters = [
             'test' => 'test',
@@ -51,7 +51,7 @@ class CurrentRouteTest extends TestCase
         $this->assertSame($parameters, $currentRoute->getArguments());
     }
 
-    public function testGetParameter(): void
+    public function testGetArgument(): void
     {
         $parameters = [
             'test' => 'test',
@@ -63,7 +63,7 @@ class CurrentRouteTest extends TestCase
         $this->assertSame('bar', $currentRoute->getArgument('foo'));
     }
 
-    public function testGetParameterWithDefault(): void
+    public function testGetArgumentWithDefault(): void
     {
         $currentRoute = new CurrentRoute();
         $currentRoute->setArguments(['test' => 1]);
@@ -71,7 +71,7 @@ class CurrentRouteTest extends TestCase
         $this->assertSame('bar', $currentRoute->getArgument('foo', 'bar'));
     }
 
-    public function testGetParameterWithNonExist(): void
+    public function testGetArgumentWithNonExist(): void
     {
         $currentRoute = new CurrentRoute();
         $currentRoute->setArguments(['test' => 1]);
@@ -99,7 +99,7 @@ class CurrentRouteTest extends TestCase
         $currentRoute->setUri(new Uri('home'));
     }
 
-    public function testSetParametersTwice(): void
+    public function testSetArgumentsTwice(): void
     {
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Can not set arguments since it was already set.');

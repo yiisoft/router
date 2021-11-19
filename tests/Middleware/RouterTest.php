@@ -118,7 +118,7 @@ final class RouterTest extends TestCase
         $this->assertSame($request->getUri(), $currentRoute->getUri());
     }
 
-    public function testGetParameters(): void
+    public function testGetArguments(): void
     {
         $currentRoute = new CurrentRoute();
         $request = new ServerRequest('GET', '/');

@@ -15,7 +15,7 @@ final class MatchingResult implements MiddlewareInterface
 {
     private bool $success;
     private Route $route;
-    private array $parameters = [];
+    private array $arguments = [];
     private array $methods = [];
     private ?MiddlewareDispatcher $dispatcher = null;
 
@@ -30,12 +30,12 @@ final class MatchingResult implements MiddlewareInterface
         return $new;
     }
 
-    public static function fromSuccess(Route $route, array $parameters): self
+    public static function fromSuccess(Route $route, array $arguments): self
     {
         $new = new self();
         $new->success = true;
         $new->route = $route;
-        $new->parameters = $parameters;
+        $new->arguments = $arguments;
         return $new;
     }
 
@@ -57,9 +57,9 @@ final class MatchingResult implements MiddlewareInterface
         return !$this->success && $this->methods !== Method::ALL;
     }
 
-    public function parameters(): array
+    public function arguments(): array
     {
-        return $this->parameters;
+        return $this->arguments;
     }
 
     public function methods(): array

@@ -56,7 +56,7 @@ final class Router implements MiddlewareInterface
         }
 
         $this->currentRoute->setRoute($result->route());
-        $this->currentRoute->setArguments($result->parameters());
+        $this->currentRoute->setArguments($result->arguments());
 
         return $result->withDispatcher($this->dispatcher)->process($request, $handler);
     }

@@ -26,7 +26,7 @@ final class MatchingResultTest extends TestCase
 
         $result = MatchingResult::fromSuccess($route, ['name' => 'Mehdi']);
         $this->assertTrue($result->isSuccess());
-        $this->assertSame(['name' => 'Mehdi'], $result->parameters());
+        $this->assertSame(['name' => 'Mehdi'], $result->arguments());
     }
 
     public function testFromFailureOnMethodFailure(): void
