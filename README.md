@@ -22,6 +22,7 @@ with an adapter package. Currently, the only adapter is available, [FastRoute](h
 ## General usage
 
 ```php
+use Yiisoft\Router\CurrentRouteInterface;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
@@ -39,11 +40,11 @@ $routes = [
             return $response;
         }),
     Route::get('/test/{id:\w+}')
-        ->action(static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
-            $id = $request->getAttribute('id');
+        ->action(static function (CurrentRouteInterface $currentRoute, RequestHandlerInterface $next) use ($responseFactory) {
+            $id = $currentRoute->getArgument('id');
     
             $response = $responseFactory->createResponse();
-            $response->getBody()->write('You are at test with param ' . $id);
+            $response->getBody()->write('You are at test with argument ' . $id);
             return $response;
         })
 ];
@@ -60,7 +61,7 @@ if (!$result->isSuccess()) {
      // 404
 }
 
-// $result->parameters() contains parameters from the match.
+// $result->arguments() contains arguments from the match.
 
 // Run middleware assigned to a route found.
 $response = $result->process($request, $handler);
@@ -120,6 +121,7 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Yiisoft\Yii\Web\SapiEmitter;
 use Yiisoft\Yii\Web\ServerRequestFactory;
 use Yiisoft\Yii\Web\NotFoundHandler;
+use Yiisoft\Router\CurrentRouteInterface;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectorInterface;
@@ -130,10 +132,10 @@ $request = $container->get(ServerRequestFactory::class)->createFromGlobals();
 $responseFactory = $container->get(ResponseFactoryInterface::class);
 $notFoundHandler = new NotFoundHandler($responseFactory);
 $collector = $container->get(RouteCollectorInterface::class);
-$collector->addRoute(Route::get('/test/{id:\w+}')->action(static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
-   $id = $request->getAttribute('id');
+$collector->addRoute(Route::get('/test/{id:\w+}')->action(static function (CurrentRouteInterface $currentRoute, RequestHandlerInterface $next) use ($responseFactory) {
+   $id = $currentRoute->getArgument('id');
    $response = $responseFactory->createResponse();
-   $response->getBody()->write('You are at test with param ' . $id);
+   $response->getBody()->write('You are at test with argument ' . $id);
 
    return $response;
 })->name('test'));
@@ -176,7 +178,7 @@ function getLocaleUrl(UrlGeneratorInterface $urlGenerator, string $locale)
 }
 ```
 
-## Obtain current route and URI
+## Obtain current route, arguments and URI
 
 Current route (matched last) and URI could be obtained the following:
 
@@ -194,6 +196,23 @@ final class MyClass {
             $this->currentUri = $currentRoute->getUri();
     }
 }
+```
+
+Current route arguments could be obtained the following:
+
+```php
+use Yiisoft\Router\CurrentRouteInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
+
+$routes = [
+    Route::get('/posts[/{page:\d+}]')
+            ->action(static function (CurrentRouteInterface $currentRoute, ResponseFactoryInterface $responseFactory) {
+                $page = $currentRoute->getArgument('page', 1);
+                $response = $responseFactory->createResponse();
+                $response->getBody()->write("You are at $page page.");
+                return $response;
+            }),
+];
 ```
 
 ### Unit testing

@@ -30,17 +30,17 @@ interface CurrentRouteInterface
     public function getUri(): ?UriInterface;
 
     /**
-     * Returns the current route parameters.
+     * Returns the current route arguments.
      *
      * @return array
      */
     public function getArguments(): array;
 
     /**
-     * Returns the current route parameter.
+     * Returns the current route argument.
      *
-     * @param string $name
-     * @param mixed $default
+     * @param string $name The argument name.
+     * @param mixed $default The default value.
      *
      * @return mixed
      */
