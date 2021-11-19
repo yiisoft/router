@@ -46,9 +46,9 @@ class CurrentRouteTest extends TestCase
             'foo' => 'bar',
         ];
         $currentRoute = new CurrentRoute();
-        $currentRoute->setParameters($parameters);
+        $currentRoute->setArguments($parameters);
 
-        $this->assertSame($parameters, $currentRoute->getParameters());
+        $this->assertSame($parameters, $currentRoute->getArguments());
     }
 
     public function testGetParameter(): void
@@ -58,25 +58,25 @@ class CurrentRouteTest extends TestCase
             'foo' => 'bar',
         ];
         $currentRoute = new CurrentRoute();
-        $currentRoute->setParameters($parameters);
+        $currentRoute->setArguments($parameters);
 
-        $this->assertSame('bar', $currentRoute->getParameter('foo'));
+        $this->assertSame('bar', $currentRoute->getArgument('foo'));
     }
 
     public function testGetParameterWithDefault(): void
     {
         $currentRoute = new CurrentRoute();
-        $currentRoute->setParameters(['test' => 1]);
+        $currentRoute->setArguments(['test' => 1]);
 
-        $this->assertSame('bar', $currentRoute->getParameter('foo', 'bar'));
+        $this->assertSame('bar', $currentRoute->getArgument('foo', 'bar'));
     }
 
     public function testGetParameterWithNonExist(): void
     {
         $currentRoute = new CurrentRoute();
-        $currentRoute->setParameters(['test' => 1]);
+        $currentRoute->setArguments(['test' => 1]);
 
-        $this->assertNull($currentRoute->getParameter('foo'));
+        $this->assertNull($currentRoute->getArgument('foo'));
     }
 
     public function testSetRouteTwice(): void
@@ -102,10 +102,10 @@ class CurrentRouteTest extends TestCase
     public function testSetParametersTwice(): void
     {
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Can not set parameters since it was already set.');
+        $this->expectExceptionMessage('Can not set arguments since it was already set.');
 
         $currentRoute = new CurrentRoute();
-        $currentRoute->setParameters(['foo' => 'bar']);
-        $currentRoute->setParameters(['id' => 1]);
+        $currentRoute->setArguments(['foo' => 'bar']);
+        $currentRoute->setArguments(['id' => 1]);
     }
 }

@@ -34,7 +34,7 @@ interface CurrentRouteInterface
      *
      * @return array
      */
-    public function getParameters(): array;
+    public function getArguments(): array;
 
     /**
      * Returns the current route parameter.
@@ -44,5 +44,5 @@ interface CurrentRouteInterface
      *
      * @return mixed
      */
-    public function getParameter(string $name, $default = null);
+    public function getArgument(string $name, $default = null);
 }

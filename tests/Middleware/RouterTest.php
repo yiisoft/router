@@ -125,7 +125,7 @@ final class RouterTest extends TestCase
 
         $this->processWithRouter($request, $currentRoute);
 
-        $this->assertSame(['parameter' => 'value'], $currentRoute->getParameters());
+        $this->assertSame(['parameter' => 'value'], $currentRoute->getArguments());
     }
 
     private function getMatcher(): UrlMatcherInterface

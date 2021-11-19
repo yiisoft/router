@@ -25,9 +25,9 @@ final class CurrentRoute implements CurrentRouteInterface
     private ?UriInterface $uri = null;
 
     /**
-     * Current Route parameters.
+     * Current Route arguments.
      */
-    private array $parameters = [];
+    private array $arguments = [];
 
     /**
      * Returns the current route name.
@@ -83,22 +83,22 @@ final class CurrentRoute implements CurrentRouteInterface
         throw new LogicException('Can not set URI since it was already set.');
     }
 
-    public function getParameters(): array
+    public function getArguments(): array
     {
-        return $this->parameters;
+        return $this->arguments;
     }
 
-    public function getParameter(string $name, $default = null): ?string
+    public function getArgument(string $name, $default = null): ?string
     {
-        return $this->parameters[$name] ?? $default;
+        return $this->arguments[$name] ?? $default;
     }
 
-    public function setParameters(array $parameters): void
+    public function setArguments(array $arguments): void
     {
-        if ($this->parameters === []) {
-            $this->parameters = $parameters;
+        if ($this->arguments === []) {
+            $this->arguments = $arguments;
             return;
         }
-        throw new LogicException('Can not set parameters since it was already set.');
+        throw new LogicException('Can not set arguments since it was already set.');
     }
 }
