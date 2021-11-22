@@ -88,7 +88,7 @@ final class CurrentRoute implements CurrentRouteInterface
         return $this->arguments;
     }
 
-    public function getArgument(string $name, $default = null): ?string
+    public function getArgument(string $name, string $default = null): ?string
     {
         return $this->arguments[$name] ?? $default;
     }
