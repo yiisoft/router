@@ -32,7 +32,7 @@ interface CurrentRouteInterface
     /**
      * Returns the current route arguments.
      *
-     * @return array
+     * @return array The current route arguments.
      */
     public function getArguments(): array;
 
@@ -40,9 +40,9 @@ interface CurrentRouteInterface
      * Returns the current route argument.
      *
      * @param string $name The argument name.
-     * @param mixed $default The default value.
+     * @param string|null $default The default value.
      *
-     * @return mixed
+     * @return string|null The current route argument.
      */
-    public function getArgument(string $name, $default = null);
+    public function getArgument(string $name, string $default = null): ?string;
 }
