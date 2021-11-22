@@ -118,6 +118,16 @@ final class RouterTest extends TestCase
         $this->assertSame($request->getUri(), $currentRoute->getUri());
     }
 
+    public function testGetArguments(): void
+    {
+        $currentRoute = new CurrentRoute();
+        $request = new ServerRequest('GET', '/');
+
+        $this->processWithRouter($request, $currentRoute);
+
+        $this->assertSame(['parameter' => 'value'], $currentRoute->getArguments());
+    }
+
     private function getMatcher(): UrlMatcherInterface
     {
         $middleware = $this->createRouteMiddleware();
