@@ -198,7 +198,7 @@ final class MyClass {
 }
 ```
 
-Current route arguments could be obtained the following:
+Current route arguments could be obtained as follows:
 
 ```php
 use Yiisoft\Router\CurrentRouteInterface;
