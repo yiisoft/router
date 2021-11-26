@@ -12,6 +12,7 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Yiisoft\Di\ContainerConfig;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Group;
@@ -301,7 +302,9 @@ final class GroupTest extends TestCase
 
     private function getContainer(array $instances = []): ContainerInterface
     {
-        return new Container($instances);
+        $config = ContainerConfig::create()
+            ->withDefinitions($instances);
+        return new Container($config);
     }
 
     private function assertAllRoutesAndGroupsHaveDispatcher(array $items): void
