@@ -12,7 +12,6 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Yiisoft\Di\ContainerConfig;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
@@ -180,8 +179,6 @@ final class RouteTest extends TestCase
 
     private function getContainer(array $instances = []): ContainerInterface
     {
-        $config = ContainerConfig::create()
-            ->withDefinitions($instances);
-        return new Container($config);
+        return new Container($instances);
     }
 }
