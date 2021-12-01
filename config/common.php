@@ -14,6 +14,7 @@ return [
         'reset' => function () {
             $this->route = null;
             $this->uri = null;
+            $this->arguments = [];
         },
     ],
 ];
