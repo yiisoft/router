@@ -248,7 +248,7 @@ final class GroupTest extends TestCase
         $this->assertContains(Method::OPTIONS, $routeCollection->getRoute('index')->getMethods());
         $this->assertSame([Method::GET, Method::OPTIONS], $routeCollection->getRoute('index')->getMethods());
     }
-    
+
     public function testDispatcherInjected(): void
     {
         $dispatcher = $this->getDispatcher();
