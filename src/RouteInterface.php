@@ -71,4 +71,11 @@ interface RouteInterface
      * @return self
      */
     public function action($middlewareDefinition): self;
+
+    /**
+     * Marks route as pre-flight. When added it will add OPTIONS method to the route.
+     *
+     * @return self
+     */
+    public function preFlight(): self;
 }

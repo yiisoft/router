@@ -12,6 +12,7 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Group;
@@ -233,6 +234,21 @@ final class GroupTest extends TestCase
         $this->assertSame($group->getNamePrefix(), 'api');
     }
 
+    public function testPreFlight(): void
+    {
+        $group = Group::create()->preFlight()->routes(
+            Route::get('/')->name('index')
+        );
+        $collector = new RouteCollector();
+        $collector->addGroup($group);
+
+        $routeCollection = new RouteCollection($collector);
+
+        $this->assertTrue($group->isPreFlight());
+        $this->assertContains(Method::OPTIONS, $routeCollection->getRoute('index')->getMethods());
+        $this->assertSame([Method::GET, Method::OPTIONS], $routeCollection->getRoute('index')->getMethods());
+    }
+    
     public function testDispatcherInjected(): void
     {
         $dispatcher = $this->getDispatcher();

@@ -108,6 +108,10 @@ final class RouteCollection implements RouteCollectionInterface
                 $item = $item->host($group->getHost());
             }
 
+            if ($group->isPreFlight()) {
+                $item = $item->preFlight();
+            }
+
             if ($item instanceof Group) {
                 if (empty($item->getPrefix())) {
                     $this->injectGroup($item, $tree, $prefix, $namePrefix);

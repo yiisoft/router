@@ -45,5 +45,7 @@ interface GroupInterface
 
     public function namePrefix(string $namePrefix): self;
 
+    public function preFlight(): self;
+
     public function routes(...$routes): self;
 }

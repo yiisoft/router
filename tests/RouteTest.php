@@ -35,16 +35,20 @@ final class RouteTest extends TestCase
         $this->assertSame('GET /', $route->getName());
     }
 
+    public function testPreFlight()
+    {
+        $route = Route::get('/')->preFlight();
+
+        $this->assertContainsEquals(Method::OPTIONS, $route->getMethods());
+        $this->assertSame([Method::GET, Method::OPTIONS], $route->getMethods());
+    }
+
     public function testMethods(): void
     {
         $route = Route::methods([Method::POST, Method::HEAD], '/');
 
         $this->assertSame([Method::POST, Method::HEAD], $route->getMethods());
     }
-
-    public const PATCH = 'PATCH';
-    public const HEAD = 'HEAD';
-    public const OPTIONS = 'OPTIONS';
 
     public function testGetMethod(): void
     {

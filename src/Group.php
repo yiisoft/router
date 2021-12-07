@@ -24,6 +24,7 @@ final class Group implements GroupInterface
     private ?string $namePrefix = null;
     private bool $routesAdded = false;
     private bool $middlewareAdded = false;
+    private bool $preFlightAdded = false;
     private array $disabledMiddlewareDefinitions = [];
     private ?MiddlewareDispatcher $dispatcher;
 
@@ -129,6 +130,18 @@ final class Group implements GroupInterface
         $new = clone $this;
         $new->disabledMiddlewareDefinitions[] = $middlewareDefinition;
         return $new;
+    }
+
+    public function preFlight(): GroupInterface
+    {
+        $new = clone $this;
+        $new->preFlightAdded = true;
+        return $new;
+    }
+
+    public function isPreFlight(): bool
+    {
+        return $this->preFlightAdded;
     }
 
     /**

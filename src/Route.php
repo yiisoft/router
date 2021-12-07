@@ -258,6 +258,18 @@ final class Route implements RouteInterface, RouteParametersInterface
         return $route;
     }
 
+    /**
+     * @return self
+     */
+    public function preFlight(): RouteInterface
+    {
+        $route = clone $this;
+        if (!in_array(Method::OPTIONS, $this->methods, true)) {
+            $route->methods[] = Method::OPTIONS;
+        }
+        return $route;
+    }
+
     public function __toString(): string
     {
         $result = '';
