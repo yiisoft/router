@@ -9,6 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Yiisoft\Http\Header;
 use Yiisoft\Http\Method;
 use Yiisoft\Http\Status;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
@@ -43,7 +44,11 @@ final class Router implements MiddlewareInterface
         $this->currentRoute->setUri($request->getUri());
 
         if ($result->isMethodFailure()) {
-            if ($this->autoResponseOptions && $request->getMethod() === Method::OPTIONS) {
+            if (
+                $this->autoResponseOptions
+                && $this->isSameOrigin($request)
+                && $request->getMethod() === Method::OPTIONS
+            ) {
                 return $this->responseFactory->createResponse(Status::NO_CONTENT)
                     ->withHeader('Allow', implode(', ', $result->methods()));
             }
@@ -73,5 +78,21 @@ final class Router implements MiddlewareInterface
         $new = clone $this;
         $new->autoResponseOptions = false;
         return $new;
+    }
+
+    private function isSameOrigin(ServerRequestInterface $request): bool
+    {
+        $origin = $request->getHeaderLine(Header::ORIGIN);
+        if ($origin === '') {
+            return true;
+        }
+
+        $host = $request->getUri()->getHost();
+        $port = $request->getUri()->getPort();
+        if ($port === null) {
+            $port = $request->getUri()->getScheme() === 'https' ? 443 : 80;
+        }
+
+        return $origin === "{$request->getUri()->getScheme()}://$host:$port";
     }
 }

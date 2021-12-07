@@ -82,6 +82,14 @@ final class RouterTest extends TestCase
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
     }
 
+    public function testAutoResponseOptionsWithOrigin(): void
+    {
+        $request = new ServerRequest('OPTIONS', 'http://test.local/', ['Origin' => 'http://test.com']);
+        $response = $this->processWithRouter($request);
+        $this->assertSame(405, $response->getStatusCode());
+        $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
+    }
+
     public function testWithOptionsHandler(): void
     {
         $request = new ServerRequest('OPTIONS', '/options');
