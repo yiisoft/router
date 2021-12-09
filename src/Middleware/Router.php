@@ -23,7 +23,6 @@ final class Router implements MiddlewareInterface
     private ResponseFactoryInterface $responseFactory;
     private MiddlewareDispatcher $dispatcher;
     private CurrentRoute $currentRoute;
-    private ?bool $autoResponseOptions = true;
 
     public function __construct(
         UrlMatcherInterface $matcher,
@@ -44,11 +43,7 @@ final class Router implements MiddlewareInterface
         $this->currentRoute->setUri($request->getUri());
 
         if ($result->isMethodFailure()) {
-            if (
-                $this->autoResponseOptions
-                && $this->isSameOrigin($request)
-                && $request->getMethod() === Method::OPTIONS
-            ) {
+            if ($request->getMethod() === Method::OPTIONS && $this->isSameOrigin($request)) {
                 return $this->responseFactory->createResponse(Status::NO_CONTENT)
                     ->withHeader('Allow', implode(', ', $result->methods()));
             }
@@ -64,20 +59,6 @@ final class Router implements MiddlewareInterface
         $this->currentRoute->setArguments($result->arguments());
 
         return $result->withDispatcher($this->dispatcher)->process($request, $handler);
-    }
-
-    public function withAutoResponseOptions(): self
-    {
-        $new = clone $this;
-        $new->autoResponseOptions = true;
-        return $new;
-    }
-
-    public function withoutAutoResponseOptions(): self
-    {
-        $new = clone $this;
-        $new->autoResponseOptions = false;
-        return $new;
     }
 
     private function isSameOrigin(ServerRequestInterface $request): bool

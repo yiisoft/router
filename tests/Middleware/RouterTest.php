@@ -42,16 +42,6 @@ final class RouterTest extends TestCase
         return $this->createRouterMiddleware($currentRoute)->process($request, $this->createRequestHandler());
     }
 
-    private function processWithRouterWithoutAutoResponse(
-        ServerRequestInterface $request,
-        ?CurrentRoute $currentRoute = null
-    ): ResponseInterface {
-        return $this->createRouterMiddleware($currentRoute)->withoutAutoResponseOptions()->process(
-            $request,
-            $this->createRequestHandler()
-        );
-    }
-
     public function testProcessSuccess(): void
     {
         $request = new ServerRequest('GET', '/');
@@ -95,14 +85,6 @@ final class RouterTest extends TestCase
         $request = new ServerRequest('OPTIONS', '/options');
         $response = $this->processWithRouter($request);
         $this->assertSame(201, $response->getStatusCode());
-    }
-
-    public function testWithoutAutoResponseOptions(): void
-    {
-        $request = new ServerRequest('OPTIONS', '/');
-        $response = $this->processWithRouterWithoutAutoResponse($request);
-        $this->assertSame(405, $response->getStatusCode());
-        $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
     }
 
     public function testGetCurrentRoute(): void
