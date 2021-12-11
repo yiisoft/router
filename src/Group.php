@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use RuntimeException;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
@@ -94,7 +96,7 @@ final class Group implements GroupInterface
             throw new RuntimeException('withAutoOptions() can not be used before routes().');
         }
         $group = clone $this;
-        $pattern = '';
+        $pattern = null;
         foreach ($group->items as $index => $item) {
             if ($item instanceof self) {
                 $item = $item->withAutoOptions(...$middlewares);
@@ -109,7 +111,11 @@ final class Group implements GroupInterface
                 foreach ($middlewares as $middleware) {
                     $route = $route->middleware($middleware);
                 }
-                $group->items[] = $route;
+                $group->items[] = $route->action(
+                    static fn (ServerRequestInterface $request, RequestHandlerInterface $handler) => $handler->handle(
+                        $request
+                    )
+                );
             }
         }
 
