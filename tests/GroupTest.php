@@ -281,6 +281,43 @@ final class GroupTest extends TestCase
         $this->assertAllRoutesAndGroupsHaveDispatcher($items);
     }
 
+    public function testWithAutoOptions(): void
+    {
+        $group = Group::create()->routes(
+            Route::get('/info'),
+            Route::post('/info'),
+        )->withAutoOptions(
+            static function () {
+                return new Response(204);
+            }
+        );
+
+        $this->assertCount(3, $group->getItems());
+    }
+
+    public function testWithAutoOptionsWithNestedGroups(): void
+    {
+        $group = Group::create()->routes(
+            Route::get('/info'),
+            Route::post('/info'),
+            Group::create('/v1')->routes(
+                Route::get('/post'),
+                Route::post('/post'),
+                Route::options('/options'),
+            )
+        )->withAutoOptions(
+            static function () {
+                return new Response(204);
+            }
+        );
+        $collector = new RouteCollector();
+        $collector->addGroup($group);
+
+        $routeCollection = new RouteCollection($collector);
+        $this->assertCount(7, $routeCollection->getRoutes());
+        $this->assertInstanceOf(Route::class, $routeCollection->getRoute('OPTIONS /v1/post'));
+    }
+
     private function getRequestHandler(): RequestHandlerInterface
     {
         return new class () implements RequestHandlerInterface {

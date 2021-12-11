@@ -6,6 +6,7 @@ namespace Yiisoft\Router;
 
 use InvalidArgumentException;
 use RuntimeException;
+use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
 use function get_class;
@@ -81,6 +82,34 @@ final class Group implements GroupInterface
             if (!$item->hasDispatcher()) {
                 $item = $item->withDispatcher($dispatcher);
                 $group->items[$index] = $item;
+            }
+        }
+
+        return $group;
+    }
+
+    public function withAutoOptions(...$middlewares): GroupInterface
+    {
+        if (!$this->routesAdded) {
+            throw new RuntimeException('withAutoOptions() can not be used before routes().');
+        }
+        $group = clone $this;
+        $pattern = '';
+        foreach ($group->items as $index => $item) {
+            if ($item instanceof self) {
+                $item = $item->withAutoOptions(...$middlewares);
+                $group->items[$index] = $item;
+            } else {
+                // Avoid duplicates
+                if ($pattern === $item->getPattern() || in_array(Method::OPTIONS, $item->getMethods(), true)) {
+                    continue;
+                }
+                $pattern = $item->getPattern();
+                $route = Route::options($pattern);
+                foreach ($middlewares as $middleware) {
+                    $route = $route->middleware($middleware);
+                }
+                $group->items[] = $route;
             }
         }
 
