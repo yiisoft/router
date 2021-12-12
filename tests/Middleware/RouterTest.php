@@ -76,7 +76,7 @@ final class RouterTest extends TestCase
     {
         $request = new ServerRequest('OPTIONS', 'http://test.local/', ['Origin' => 'http://test.com']);
         $response = $this->processWithRouter($request);
-        $this->assertSame(405, $response->getStatusCode());
+        $this->assertSame(204, $response->getStatusCode());
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
     }
 
