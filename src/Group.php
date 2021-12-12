@@ -90,7 +90,7 @@ final class Group implements GroupInterface
         return $group;
     }
 
-    public function withAutoOptions(...$middlewares): GroupInterface
+    public function withAutoOptions(): GroupInterface
     {
         if (!$this->routesAdded) {
             throw new RuntimeException('withAutoOptions() can not be used before routes().');
@@ -99,7 +99,7 @@ final class Group implements GroupInterface
         $pattern = null;
         foreach ($group->items as $index => $item) {
             if ($item instanceof self) {
-                $item = $item->withAutoOptions(...$middlewares);
+                $item = $item->withAutoOptions();
                 $group->items[$index] = $item;
             } else {
                 // Avoid duplicates
@@ -108,9 +108,6 @@ final class Group implements GroupInterface
                 }
                 $pattern = $item->getPattern();
                 $route = Route::options($pattern);
-                foreach ($middlewares as $middleware) {
-                    $route = $route->middleware($middleware);
-                }
                 $group->items[] = $route->action(
                     static fn (ServerRequestInterface $request, RequestHandlerInterface $handler) => $handler->handle(
                         $request
