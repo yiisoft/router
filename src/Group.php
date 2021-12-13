@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
 use RuntimeException;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
@@ -127,9 +126,7 @@ final class Group implements GroupInterface
                 }
                 $group->items[$index] = $item;
                 $group->items[] = $route->action(
-                    static fn (ServerRequestInterface $request, RequestHandlerInterface $handler) => $handler->handle(
-                        $request
-                    )
+                    static fn (ResponseFactoryInterface $responseFactory) => $responseFactory->createResponse(204)
                 );
             }
         }
