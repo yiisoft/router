@@ -95,16 +95,12 @@ final class Group implements GroupInterface
             throw new RuntimeException('withAutoOptions() can not be used before routes().');
         }
 
-        if (empty($middlewares)) {
-            throw new InvalidArgumentException('At least one middleware must be specified.');
-        }
-
         $group = clone $this;
         $pattern = null;
         $host = null;
         foreach ($group->items as $index => $item) {
             if ($item instanceof self) {
-                $item = $item->withAutoOptions(...$middlewares);
+                $item = $item->withAutoOptions();
                 $group->items[$index] = $item;
             } else {
                 // Avoid duplicates
@@ -120,15 +116,14 @@ final class Group implements GroupInterface
                 if ($host !== null) {
                     $route = $route->host($host);
                 }
-                foreach ($middlewares as $middleware) {
-                    $route = $route->middleware($middleware);
-                    $item = $item->prependMiddleware($middleware);
-                }
                 $group->items[$index] = $item;
                 $group->items[] = $route->action(
                     static fn (ResponseFactoryInterface $responseFactory) => $responseFactory->createResponse(204)
                 );
             }
+        }
+        foreach ($middlewares as $middleware) {
+            $group = $group->prependMiddleware($middleware);
         }
 
         return $group;
