@@ -90,24 +90,42 @@ final class Group implements GroupInterface
         return $group;
     }
 
-    public function withAutoOptions(): GroupInterface
+    public function withAutoOptions(...$middlewares): GroupInterface
     {
         if (!$this->routesAdded) {
             throw new RuntimeException('withAutoOptions() can not be used before routes().');
         }
+
+        if (empty($middlewares)) {
+            throw new InvalidArgumentException('At least one middleware must be specified.');
+        }
+
         $group = clone $this;
         $pattern = null;
+        $host = null;
         foreach ($group->items as $index => $item) {
             if ($item instanceof self) {
-                $item = $item->withAutoOptions();
+                $item = $item->withAutoOptions(...$middlewares);
                 $group->items[$index] = $item;
             } else {
                 // Avoid duplicates
-                if ($pattern === $item->getPattern() || in_array(Method::OPTIONS, $item->getMethods(), true)) {
+                if (
+                    ($pattern === $item->getPattern() && $host === $item->getHost())
+                    || in_array(Method::OPTIONS, $item->getMethods(), true)
+                ) {
                     continue;
                 }
                 $pattern = $item->getPattern();
+                $host = $item->getHost();
                 $route = Route::options($pattern);
+                if ($host !== null) {
+                    $route = $route->host($host);
+                }
+                foreach ($middlewares as $middleware) {
+                    $route = $route->middleware($middleware);
+                    $item = $item->prependMiddleware($middleware);
+                }
+                $group->items[$index] = $item;
                 $group->items[] = $route->action(
                     static fn (ServerRequestInterface $request, RequestHandlerInterface $handler) => $handler->handle(
                         $request
