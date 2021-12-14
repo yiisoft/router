@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
-use Psr\Http\Message\ResponseFactoryInterface;
 use RuntimeException;
-use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
 use function get_class;
@@ -27,6 +25,7 @@ final class Group implements GroupInterface
     private bool $routesAdded = false;
     private bool $middlewareAdded = false;
     private array $disabledMiddlewareDefinitions = [];
+    private array $autoOptions = [];
     private ?MiddlewareDispatcher $dispatcher;
 
     private function __construct(?string $prefix = null, MiddlewareDispatcher $dispatcher = null)
@@ -91,42 +90,20 @@ final class Group implements GroupInterface
 
     public function withAutoOptions(...$middlewares): GroupInterface
     {
-        if (!$this->routesAdded) {
-            throw new RuntimeException('withAutoOptions() can not be used before routes().');
-        }
-
         $group = clone $this;
-        $pattern = null;
-        $host = null;
-        foreach ($group->items as $index => $item) {
-            if ($item instanceof self) {
-                $item = $item->withAutoOptions();
-                $group->items[$index] = $item;
-            } else {
-                // Avoid duplicates
-                if (
-                    ($pattern === $item->getPattern() && $host === $item->getHost())
-                    || in_array(Method::OPTIONS, $item->getMethods(), true)
-                ) {
-                    continue;
-                }
-                $pattern = $item->getPattern();
-                $host = $item->getHost();
-                $route = Route::options($pattern);
-                if ($host !== null) {
-                    $route = $route->host($host);
-                }
-                $group->items[$index] = $item;
-                $group->items[] = $route->action(
-                    static fn (ResponseFactoryInterface $responseFactory) => $responseFactory->createResponse(204)
-                );
-            }
-        }
-        foreach ($middlewares as $middleware) {
-            $group = $group->prependMiddleware($middleware);
-        }
+        $group->autoOptions = array_merge($group->autoOptions, $middlewares);
 
         return $group;
+    }
+
+    public function getAutoOptions(): array
+    {
+        return $this->autoOptions;
+    }
+
+    public function hasAutoOptions(): bool
+    {
+        return $this->autoOptions !== [];
     }
 
     public function hasDispatcher(): bool

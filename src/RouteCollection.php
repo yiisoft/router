@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Yiisoft\Http\Method;
 
 final class RouteCollection implements RouteCollectionInterface
 {
@@ -96,6 +98,8 @@ final class RouteCollection implements RouteCollectionInterface
         $prefix .= $group->getPrefix();
         $namePrefix .= $group->getNamePrefix();
         $items = $group->getItems();
+        $pattern = null;
+        $host = null;
         foreach ($items as $item) {
             if ($item instanceof Group || $item->hasMiddlewares()) {
                 $groupMiddlewares = $group->getMiddlewareDefinitions();
@@ -109,6 +113,9 @@ final class RouteCollection implements RouteCollectionInterface
             }
 
             if ($item instanceof Group) {
+                if ($group->hasAutoOptions()) {
+                    $item = $item->withAutoOptions(...$group->getAutoOptions());
+                }
                 if (empty($item->getPrefix())) {
                     $this->injectGroup($item, $tree, $prefix, $namePrefix);
                     continue;
@@ -123,6 +130,37 @@ final class RouteCollection implements RouteCollectionInterface
 
             if (strpos($modifiedItem->getName(), implode(', ', $modifiedItem->getMethods())) === false) {
                 $modifiedItem = $modifiedItem->name($namePrefix . $modifiedItem->getName());
+            }
+
+            if ($group->hasAutoOptions()) {
+                // Avoid duplicates
+                if (
+                    ($pattern === $modifiedItem->getPattern() && $host === $modifiedItem->getHost())
+                    || in_array(Method::OPTIONS, $modifiedItem->getMethods(), true)
+                ) {
+                    // Skip OPTIONS route
+                } else {
+                    $pattern = $modifiedItem->getPattern();
+                    $host = $modifiedItem->getHost();
+                    $optionsRoute = Route::options($pattern);
+                    if ($host !== null) {
+                        $optionsRoute = $optionsRoute->host($host);
+                    }
+                    foreach ($group->getAutoOptions() as $middleware) {
+                        $optionsRoute = $optionsRoute->middleware($middleware);
+                        $modifiedItem = $modifiedItem->prependMiddleware($middleware);
+                    }
+
+                    if (empty($tree[$group->getPrefix()])) {
+                        $tree[] = $optionsRoute->getName();
+                    } else {
+                        $tree[$group->getPrefix()][] = $optionsRoute->getName();
+                    }
+
+                    $this->routes[$optionsRoute->getName()] = $optionsRoute->action(
+                        static fn (ResponseFactoryInterface $responseFactory) => $responseFactory->createResponse(204)
+                    );
+                }
             }
 
             if (empty($tree[$group->getPrefix()])) {

@@ -327,6 +327,34 @@ final class GroupTest extends TestCase
                 Route::get('/post')->action(static fn () => 'post'),
                 Route::post('/post')->action(static fn () => 'post'),
                 Route::options('/options')->action(static fn () => 'options'),
+            )->withAutoOptions(
+                static function () {
+                    return new Response(201);
+                }
+            )
+        )->withAutoOptions(
+            static function () {
+                return new Response(204);
+            }
+        );
+
+        $collector = new RouteCollector();
+        $collector->addGroup($group);
+
+        $routeCollection = new RouteCollection($collector);
+        $this->assertCount(7, $routeCollection->getRoutes());
+        $this->assertInstanceOf(Route::class, $routeCollection->getRoute('OPTIONS /v1/post'));
+    }
+
+    public function testWithAutoOptionsWithNestedGroups2(): void
+    {
+        $group = Group::create()->routes(
+            Route::get('/info')->action(static fn () => 'info'),
+            Route::post('/info')->action(static fn () => 'info'),
+            Route::get('/v1/post')->action(static fn () => 'post'),
+            Group::create('/v1')->routes(
+                Route::post('/post')->action(static fn () => 'post'),
+                Route::options('/options')->action(static fn () => 'options'),
             )
         )->withAutoOptions(
             static function () {
