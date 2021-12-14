@@ -17,14 +17,18 @@ use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\CurrentRoute;
+use Yiisoft\Router\Group;
 use Yiisoft\Router\MatchingResult;
 use Yiisoft\Router\Middleware\Router;
 use Yiisoft\Router\Route;
+use Yiisoft\Router\RouteCollection;
+use Yiisoft\Router\RouteCollectionInterface;
+use Yiisoft\Router\RouteCollector;
 use Yiisoft\Router\UrlMatcherInterface;
 
 final class RouterTest extends TestCase
 {
-    private function createRouterMiddleware(?CurrentRoute $currentRoute = null): Router
+    private function createRouterMiddleware(?RouteCollectionInterface $routeCollection = null, ?CurrentRoute $currentRoute = null): Router
     {
         $container = $this->createMock(ContainerInterface::class);
         $dispatcher = new MiddlewareDispatcher(
@@ -32,14 +36,15 @@ final class RouterTest extends TestCase
             $this->createMock(EventDispatcherInterface::class)
         );
 
-        return new Router($this->getMatcher(), new Psr17Factory(), $dispatcher, $currentRoute ?? new CurrentRoute());
+        return new Router($this->getMatcher($routeCollection), new Psr17Factory(), $dispatcher, $currentRoute ?? new CurrentRoute());
     }
 
     private function processWithRouter(
         ServerRequestInterface $request,
+        ?RouteCollectionInterface $routes = null,
         ?CurrentRoute $currentRoute = null
     ): ResponseInterface {
-        return $this->createRouterMiddleware($currentRoute)->process($request, $this->createRequestHandler());
+        return $this->createRouterMiddleware($routes, $currentRoute)->process($request, $this->createRequestHandler());
     }
 
     public function testProcessSuccess(): void
@@ -80,6 +85,26 @@ final class RouterTest extends TestCase
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
     }
 
+    public function testWithAutoOptionsHandlers(): void
+    {
+        $group = Group::create()->routes(
+            Route::post('/post')->action(static fn () => 'post'),
+        )->withAutoOptions(
+            static function () {
+                return new Response(204, ['Test' => 'test from options handler']);
+            }
+        );
+
+        $collector = new RouteCollector();
+        $collector->addGroup($group);
+        $routeCollection = new RouteCollection($collector);
+
+        $request = new ServerRequest('OPTIONS', '/post');
+        $response = $this->processWithRouter($request, $routeCollection);
+        $this->assertSame(204, $response->getStatusCode());
+        $this->assertSame('test from options handler', $response->getHeaderLine('Test'));
+    }
+
     public function testWithOptionsHandler(): void
     {
         $request = new ServerRequest('OPTIONS', '/options');
@@ -92,7 +117,7 @@ final class RouterTest extends TestCase
         $currentRoute = new CurrentRoute();
         $request = new ServerRequest('GET', '/');
 
-        $this->processWithRouter($request, $currentRoute);
+        $this->processWithRouter($request, null, $currentRoute);
 
         $this->assertInstanceOf(Route::class, $currentRoute->getRoute());
         $this->assertEquals('GET /', $currentRoute->getRoute()->getName());
@@ -103,7 +128,7 @@ final class RouterTest extends TestCase
         $currentRoute = new CurrentRoute();
         $request = new ServerRequest('GET', '/');
 
-        $this->processWithRouter($request, $currentRoute);
+        $this->processWithRouter($request, null, $currentRoute);
 
         $this->assertSame($request->getUri(), $currentRoute->getUri());
     }
@@ -113,21 +138,23 @@ final class RouterTest extends TestCase
         $currentRoute = new CurrentRoute();
         $request = new ServerRequest('GET', '/');
 
-        $this->processWithRouter($request, $currentRoute);
+        $this->processWithRouter($request, null, $currentRoute);
 
         $this->assertSame(['parameter' => 'value'], $currentRoute->getArguments());
     }
 
-    private function getMatcher(): UrlMatcherInterface
+    private function getMatcher(?RouteCollectionInterface $routeCollection = null): UrlMatcherInterface
     {
         $middleware = $this->createRouteMiddleware();
 
-        return new class ($middleware) implements UrlMatcherInterface {
+        return new class ($middleware, $routeCollection) implements UrlMatcherInterface {
             private $middleware;
+            private ?RouteCollectionInterface $routeCollection;
 
-            public function __construct($middleware)
+            public function __construct($middleware, ?RouteCollectionInterface $routeCollection = null)
             {
                 $this->middleware = $middleware;
+                $this->routeCollection = $routeCollection;
             }
 
             /**
@@ -139,8 +166,12 @@ final class RouterTest extends TestCase
              */
             public function match(ServerRequestInterface $request): MatchingResult
             {
-                if ($request->getMethod() === 'OPTIONS' && $request->getUri()->getPath() === '/options') {
-                    $route = Route::methods(['OPTIONS'], '/options')->middleware($this->middleware);
+                if ($this->routeCollection !== null) {
+                    $route = $this->routeCollection->getRoute($request->getMethod() . ' ' . $request->getUri()->getPath());
+                    return MatchingResult::fromSuccess($route, ['parameter' => 'value']);
+                }
+                if ($request->getMethod() === Method::OPTIONS && $request->getUri()->getPath() === '/options') {
+                    $route = Route::options('/options')->middleware($this->middleware);
                     return MatchingResult::fromSuccess($route, ['method' => 'options']);
                 }
 
@@ -148,7 +179,7 @@ final class RouterTest extends TestCase
                     return MatchingResult::fromFailure(Method::ALL);
                 }
 
-                if ($request->getMethod() === 'GET') {
+                if ($request->getMethod() === Method::GET) {
                     $route = Route::get('/')->middleware($this->middleware);
                     return MatchingResult::fromSuccess($route, ['parameter' => 'value']);
                 }
