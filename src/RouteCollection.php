@@ -116,6 +116,7 @@ final class RouteCollection implements RouteCollectionInterface
                 if ($group->hasAutoOptions()) {
                     $item = $item->withAutoOptions(...$group->getAutoOptions());
                 }
+                /** @var Group $item */
                 if (empty($item->getPrefix())) {
                     $this->injectGroup($item, $tree, $prefix, $namePrefix);
                     continue;
@@ -142,6 +143,7 @@ final class RouteCollection implements RouteCollectionInterface
                 } else {
                     $pattern = $modifiedItem->getPattern();
                     $host = $modifiedItem->getHost();
+                    /** @var Route $optionsRoute */
                     $optionsRoute = Route::options($pattern);
                     if ($host !== null) {
                         $optionsRoute = $optionsRoute->host($host);
