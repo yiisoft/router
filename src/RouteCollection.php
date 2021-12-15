@@ -151,12 +151,12 @@ final class RouteCollection implements RouteCollectionInterface
 
     private function processAutoOptions($group, &$host, &$pattern, &$modifiedItem, &$tree): void
     {
+        $isNotDupplicate =
+            $group->hasAutoOptions()
+            && !(($pattern === $modifiedItem->getPattern() && $host === $modifiedItem->getHost())
+                || in_array(Method::OPTIONS, $modifiedItem->getMethods(), true));
         foreach ($group->getAutoOptions() as $middleware) {
-            if (
-                $group->hasAutoOptions()
-                && !(($pattern === $modifiedItem->getPattern() && $host === $modifiedItem->getHost())
-                    || in_array(Method::OPTIONS, $modifiedItem->getMethods(), true))
-            ) {
+            if ($isNotDupplicate) {
                 $pattern = $modifiedItem->getPattern();
                 $host = $modifiedItem->getHost();
                 /** @var Route $optionsRoute */
