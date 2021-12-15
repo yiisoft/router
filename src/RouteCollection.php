@@ -155,29 +155,28 @@ final class RouteCollection implements RouteCollectionInterface
             $group->hasAutoOptions()
             && !(($pattern === $modifiedItem->getPattern() && $host === $modifiedItem->getHost())
                 || in_array(Method::OPTIONS, $modifiedItem->getMethods(), true));
+        $pattern = $modifiedItem->getPattern();
+        $host = $modifiedItem->getHost();
+        /** @var Route $optionsRoute */
+        $optionsRoute = Route::options($pattern);
+        if ($host !== null) {
+            $optionsRoute = $optionsRoute->host($host);
+        }
         foreach ($group->getAutoOptions() as $middleware) {
             if ($isNotDupplicate) {
-                $pattern = $modifiedItem->getPattern();
-                $host = $modifiedItem->getHost();
-                /** @var Route $optionsRoute */
-                $optionsRoute = Route::options($pattern);
-                if ($host !== null) {
-                    $optionsRoute = $optionsRoute->host($host);
-                }
-
                 $optionsRoute = $optionsRoute->middleware($middleware);
-
-                if (empty($tree[$group->getPrefix()])) {
-                    $tree[] = $optionsRoute->getName();
-                } else {
-                    $tree[$group->getPrefix()][] = $optionsRoute->getName();
-                }
-
-                $this->routes[$optionsRoute->getName()] = $optionsRoute->action(
-                    static fn(ResponseFactoryInterface $responseFactory) => $responseFactory->createResponse(204)
-                );
             }
             $modifiedItem = $modifiedItem->prependMiddleware($middleware);
+        }
+        if ($isNotDupplicate) {
+            if (empty($tree[$group->getPrefix()])) {
+                $tree[] = $optionsRoute->getName();
+            } else {
+                $tree[$group->getPrefix()][] = $optionsRoute->getName();
+            }
+            $this->routes[$optionsRoute->getName()] = $optionsRoute->action(
+                static fn(ResponseFactoryInterface $responseFactory) => $responseFactory->createResponse(204)
+            );
         }
     }
 
