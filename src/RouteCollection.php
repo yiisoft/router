@@ -151,32 +151,33 @@ final class RouteCollection implements RouteCollectionInterface
 
     private function processAutoOptions($group, &$host, &$pattern, &$modifiedItem, &$tree): void
     {
-        if (
-            $group->hasAutoOptions()
-            && !(($pattern === $modifiedItem->getPattern() && $host === $modifiedItem->getHost())
-                || in_array(Method::OPTIONS, $modifiedItem->getMethods(), true))
-        ) {
-            $pattern = $modifiedItem->getPattern();
-            $host = $modifiedItem->getHost();
-            /** @var Route $optionsRoute */
-            $optionsRoute = Route::options($pattern);
-            if ($host !== null) {
-                $optionsRoute = $optionsRoute->host($host);
-            }
-            foreach ($group->getAutoOptions() as $middleware) {
+        foreach ($group->getAutoOptions() as $middleware) {
+            if (
+                $group->hasAutoOptions()
+                && !(($pattern === $modifiedItem->getPattern() && $host === $modifiedItem->getHost())
+                    || in_array(Method::OPTIONS, $modifiedItem->getMethods(), true))
+            ) {
+                $pattern = $modifiedItem->getPattern();
+                $host = $modifiedItem->getHost();
+                /** @var Route $optionsRoute */
+                $optionsRoute = Route::options($pattern);
+                if ($host !== null) {
+                    $optionsRoute = $optionsRoute->host($host);
+                }
+
                 $optionsRoute = $optionsRoute->middleware($middleware);
-                $modifiedItem = $modifiedItem->prependMiddleware($middleware);
-            }
 
-            if (empty($tree[$group->getPrefix()])) {
-                $tree[] = $optionsRoute->getName();
-            } else {
-                $tree[$group->getPrefix()][] = $optionsRoute->getName();
-            }
+                if (empty($tree[$group->getPrefix()])) {
+                    $tree[] = $optionsRoute->getName();
+                } else {
+                    $tree[$group->getPrefix()][] = $optionsRoute->getName();
+                }
 
-            $this->routes[$optionsRoute->getName()] = $optionsRoute->action(
-                static fn (ResponseFactoryInterface $responseFactory) => $responseFactory->createResponse(204)
-            );
+                $this->routes[$optionsRoute->getName()] = $optionsRoute->action(
+                    static fn(ResponseFactoryInterface $responseFactory) => $responseFactory->createResponse(204)
+                );
+            }
+            $modifiedItem = $modifiedItem->prependMiddleware($middleware);
         }
     }
 
