@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router\Tests\Middleware;
 
+use HttpSoft\Message\ResponseFactory;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -25,12 +26,23 @@ use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectionInterface;
 use Yiisoft\Router\RouteCollector;
 use Yiisoft\Router\UrlMatcherInterface;
+use Yiisoft\Test\Support\Container\SimpleContainer;
 
 final class RouterTest extends TestCase
 {
+    private function createResponseFactory()
+    {
+        return new class () implements ResponseFactoryInterface {
+            public function createResponse(int $code = 200, string $reasonPhrase = ''): ResponseInterface
+            {
+                return new Response($code, [], null, '1.1', $reasonPhrase);
+            }
+        };
+    }
+
     private function createRouterMiddleware(?RouteCollectionInterface $routeCollection = null, ?CurrentRoute $currentRoute = null): Router
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = new SimpleContainer([ResponseFactoryInterface::class => $this->createResponseFactory()]);
         $dispatcher = new MiddlewareDispatcher(
             new MiddlewareFactory($container),
             $this->createMock(EventDispatcherInterface::class)
@@ -43,7 +55,8 @@ final class RouterTest extends TestCase
         ServerRequestInterface $request,
         ?RouteCollectionInterface $routes = null,
         ?CurrentRoute $currentRoute = null
-    ): ResponseInterface {
+    ): ResponseInterface
+    {
         return $this->createRouterMiddleware($routes, $currentRoute)->process($request, $this->createRequestHandler());
     }
 
@@ -88,10 +101,11 @@ final class RouterTest extends TestCase
     public function testWithAutoOptionsHandlers(): void
     {
         $group = Group::create()->routes(
-            Route::post('/post')->action(static fn () => 'post'),
+            Route::post('/post')->action(static fn() => new Response(204)),
         )->withAutoOptions(
-            static function () {
-                return new Response(204, ['Test' => 'test from options handler']);
+            static function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+                $response = $handler->handle($request);
+                return $response->withHeader('Test', 'test from options handler');
             }
         );
 
@@ -100,6 +114,10 @@ final class RouterTest extends TestCase
         $routeCollection = new RouteCollection($collector);
 
         $request = new ServerRequest('OPTIONS', '/post');
+        $response = $this->processWithRouter($request, $routeCollection);
+        $this->assertSame(204, $response->getStatusCode());
+        $this->assertSame('test from options handler', $response->getHeaderLine('Test'));
+        $request = new ServerRequest('POST', '/post');
         $response = $this->processWithRouter($request, $routeCollection);
         $this->assertSame(204, $response->getStatusCode());
         $this->assertSame('test from options handler', $response->getHeaderLine('Test'));
