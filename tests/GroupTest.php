@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router\Tests;
 
+use InvalidArgumentException;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
@@ -12,6 +13,8 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use RuntimeException;
+use stdClass;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Group;
@@ -51,7 +54,7 @@ final class GroupTest extends TestCase
 
         $group = $group->prependMiddleware($middleware1);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('routes() can not be used after prependMiddleware().');
 
         $group->routes(Route::get('/'));
@@ -61,12 +64,12 @@ final class GroupTest extends TestCase
     {
         $group = Group::create();
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(
-            sprintf('Route should be either an instance of Route or Group, %s given.', \stdClass::class)
+            sprintf('Route should be either an instance of Route or Group, %s given.', stdClass::class)
         );
 
-        $group->routes(new \stdClass());
+        $group->routes(new stdClass());
     }
 
     public function testAddNestedMiddleware(): void
@@ -144,7 +147,7 @@ final class GroupTest extends TestCase
     {
         $request = new ServerRequest('GET', '/group/test1');
 
-        $action = static function (ServerRequestInterface $request) {
+        $action = static function () {
             return new Response(200);
         };
         $middleware1 = function () {
@@ -183,7 +186,7 @@ final class GroupTest extends TestCase
             return new Response();
         };
 
-        $root = Group::create(null)
+        $root = Group::create()
             ->routes(
                 Group::create('/api')
                     ->middleware($middleware2)
@@ -219,14 +222,14 @@ final class GroupTest extends TestCase
         $this->assertEmpty($postGroup->getMiddlewareDefinitions());
     }
 
-    public function testHost()
+    public function testHost(): void
     {
         $group = Group::create()->host('https://yiiframework.com/');
 
         $this->assertSame($group->getHost(), 'https://yiiframework.com');
     }
 
-    public function testName()
+    public function testName(): void
     {
         $group = Group::create()->namePrefix('api');
 
@@ -385,14 +388,9 @@ final class GroupTest extends TestCase
     private function getDispatcher(): MiddlewareDispatcher
     {
         return new MiddlewareDispatcher(
-            new MiddlewareFactory($this->getContainer()),
+            new MiddlewareFactory(new Container([])),
             $this->createMock(EventDispatcherInterface::class)
         );
-    }
-
-    private function getContainer(array $instances = []): ContainerInterface
-    {
-        return new Container($instances);
     }
 
     private function assertAllRoutesAndGroupsHaveDispatcher(array $items): void

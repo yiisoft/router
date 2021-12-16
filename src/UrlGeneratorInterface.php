@@ -6,7 +6,7 @@ namespace Yiisoft\Router;
 
 /**
  * UrlGeneratorInterface allows generating URL given route name and parameters.
- * It is preferred to type-hint against it in case you need to generate an URL.
+ * It is preferred to type-hint against it in case you need to generate a URL.
  */
 interface UrlGeneratorInterface
 {

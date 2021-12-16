@@ -25,7 +25,7 @@ final class Group implements GroupInterface
     private bool $routesAdded = false;
     private bool $middlewareAdded = false;
     private array $disabledMiddlewareDefinitions = [];
-    private $corsMiddleware = null;
+    private $corsMiddleware;
     private ?MiddlewareDispatcher $dispatcher;
 
     private function __construct(?string $prefix = null, MiddlewareDispatcher $dispatcher = null)

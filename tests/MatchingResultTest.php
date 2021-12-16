@@ -40,7 +40,7 @@ final class MatchingResultTest extends TestCase
 
     public function testFromFailureOnNotFoundFailure(): void
     {
-        $result = MatchingResult::fromFailure(Method::ANY);
+        $result = MatchingResult::fromFailure(Method::ALL);
 
         $this->assertFalse($result->isSuccess());
         $this->assertFalse($result->isMethodFailure());

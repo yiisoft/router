@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router\Tests;
 
+use InvalidArgumentException;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
@@ -31,7 +32,7 @@ final class RouteCollectionTest extends TestCase
         $collector = new RouteCollector();
         $collector->addGroup($group);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("A route with name 'my-route' already exists.");
         $routeCollection = new RouteCollection($collector);
         $routeCollection->getRoutes();
@@ -48,7 +49,7 @@ final class RouteCollectionTest extends TestCase
         $collector->addGroup($group);
         $collector->addRoute($viewRoute);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("A route with name 'my-route' already exists.");
         $routeCollection = new RouteCollection($collector);
         $routeCollection->getRoutes();
@@ -198,7 +199,7 @@ final class RouteCollectionTest extends TestCase
         $this->assertInstanceOf(Route::class, $route4);
     }
 
-    public function testCollectorMiddlewareFullstackCalled()
+    public function testCollectorMiddlewareFullstackCalled(): void
     {
         $action = fn (ServerRequestInterface $request) => new Response(
             200,
