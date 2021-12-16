@@ -29,7 +29,7 @@ use Yiisoft\Test\Support\Container\SimpleContainer;
 
 final class RouterTest extends TestCase
 {
-    private function createResponseFactory()
+    private function createResponseFactory(): ResponseFactoryInterface
     {
         return new class () implements ResponseFactoryInterface {
             public function createResponse(int $code = 200, string $reasonPhrase = ''): ResponseInterface

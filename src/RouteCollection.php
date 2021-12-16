@@ -62,7 +62,7 @@ final class RouteCollection implements RouteCollectionInterface
      */
     private function injectItems(array $items): void
     {
-        foreach ($items as $index => $item) {
+        foreach ($items as $item) {
             foreach ($this->collector->getMiddlewareDefinitions() as $middlewareDefinition) {
                 $item = $item->prependMiddleware($middlewareDefinition);
             }
@@ -190,7 +190,7 @@ final class RouteCollection implements RouteCollectionInterface
         $tree = [];
         foreach ($items as $key => $item) {
             if (is_array($item)) {
-                $tree[$key] = $this->buildTree($items[$key], $routeAsString);
+                $tree[$key] = $this->buildTree($item, $routeAsString);
             } else {
                 $tree[] = $routeAsString ? (string)$this->getRoute($item) : $this->getRoute($item);
             }
