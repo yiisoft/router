@@ -96,11 +96,17 @@ final class Group implements GroupInterface
         return $group;
     }
 
+    /**
+     * @return mixed Middleware definition for CORS requests.
+     */
     public function getCorsMiddleware()
     {
         return $this->corsMiddleware;
     }
 
+    /**
+     * @return bool Middleware definition for CORS requests.
+     */
     public function hasCorsMiddleware(): bool
     {
         return $this->corsMiddleware !== null;
