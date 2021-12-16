@@ -171,7 +171,7 @@ final class RouteCollection implements RouteCollectionInterface
                 $tree[$group->getPrefix()][] = $optionsRoute->getName();
             }
             $this->routes[$optionsRoute->getName()] = $optionsRoute->action(
-                static fn(ResponseFactoryInterface $responseFactory) => $responseFactory->createResponse(204)
+                static fn (ResponseFactoryInterface $responseFactory) => $responseFactory->createResponse(204)
             );
         }
         $modifiedItem = $modifiedItem->prependMiddleware($middleware);

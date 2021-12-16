@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router\Tests\Middleware;
 
-use HttpSoft\Message\ResponseFactory;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
@@ -55,8 +54,7 @@ final class RouterTest extends TestCase
         ServerRequestInterface $request,
         ?RouteCollectionInterface $routes = null,
         ?CurrentRoute $currentRoute = null
-    ): ResponseInterface
-    {
+    ): ResponseInterface {
         return $this->createRouterMiddleware($routes, $currentRoute)->process($request, $this->createRequestHandler());
     }
 
@@ -101,8 +99,8 @@ final class RouterTest extends TestCase
     public function testWithAutoOptionsHandlers(): void
     {
         $group = Group::create()->routes(
-            Route::put('/post')->action(static fn() => new Response(204)),
-            Route::post('/post')->action(static fn() => new Response(204)),
+            Route::put('/post')->action(static fn () => new Response(204)),
+            Route::post('/post')->action(static fn () => new Response(204)),
         )->withCors(
             static function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
                 $response = $handler->handle($request);

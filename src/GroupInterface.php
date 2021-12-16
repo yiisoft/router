@@ -52,6 +52,7 @@ interface GroupInterface
      * If set, routes for {@see Method::OPTIONS} request will be added automatically.
      *
      * @param mixed $middlewareDefinition Middleware definition for CORS requests.
+     *
      * @return self
      */
     public function withCors($middlewareDefinition): self;
