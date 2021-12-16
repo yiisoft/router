@@ -46,4 +46,14 @@ interface GroupInterface
     public function namePrefix(string $namePrefix): self;
 
     public function routes(...$routes): self;
+
+    /**
+     * Adds a middleware definition that handles CORS requests.
+     * If set, routes for {@see Method::OPTIONS} request will be added automatically.
+     *
+     * @param mixed $middlewareDefinition Middleware definition for CORS requests.
+     *
+     * @return self
+     */
+    public function withCors($middlewareDefinition): self;
 }

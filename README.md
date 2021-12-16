@@ -110,6 +110,32 @@ $routerMiddleware = new Yiisoft\Router\Middleware\Router($router, $responseFacto
 In case of a route match router middleware executes handler middleware attached to the route. If there is no match, next
 application middleware processes the request.
 
+## Automatic OPTIONS response and CORS
+
+By default, router responds automatically to OPTIONS requests based on the routes defined:
+
+```
+HTTP/1.1 204 No Content
+Allow: GET, HEAD
+```
+
+Generally that is fine unless you need [CORS headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS). In this
+case, you can add a middleware for handling it such as [tuupola/cors-middleware](https://github.com/tuupola/cors-middleware):
+
+```php
+use Yiisoft\Router\Group;
+use \Tuupola\Middleware\CorsMiddleware;
+
+return [
+    Group::create('/api')
+        ->withCors(CorsMiddleware::class)
+        ->routes([
+          // ...
+        ]
+    );
+];
+```
+
 ## Creating URLs
 
 URLs could be created using `UrlGeneratorInterface::generate()`. Let's assume a route is defined like the following:
