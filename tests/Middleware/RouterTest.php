@@ -101,6 +101,7 @@ final class RouterTest extends TestCase
     public function testWithAutoOptionsHandlers(): void
     {
         $group = Group::create()->routes(
+            Route::put('/post')->action(static fn() => new Response(204)),
             Route::post('/post')->action(static fn() => new Response(204)),
         )->withAutoOptions(
             static function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
@@ -118,6 +119,10 @@ final class RouterTest extends TestCase
         $this->assertSame(204, $response->getStatusCode());
         $this->assertSame('test from options handler', $response->getHeaderLine('Test'));
         $request = new ServerRequest('POST', '/post');
+        $response = $this->processWithRouter($request, $routeCollection);
+        $this->assertSame(204, $response->getStatusCode());
+        $this->assertSame('test from options handler', $response->getHeaderLine('Test'));
+        $request = new ServerRequest('PUT', '/post');
         $response = $this->processWithRouter($request, $routeCollection);
         $this->assertSame(204, $response->getStatusCode());
         $this->assertSame('test from options handler', $response->getHeaderLine('Test'));
