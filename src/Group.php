@@ -25,6 +25,7 @@ final class Group implements GroupInterface
     private bool $routesAdded = false;
     private bool $middlewareAdded = false;
     private array $disabledMiddlewareDefinitions = [];
+    private $corsMiddleware = null;
     private ?MiddlewareDispatcher $dispatcher;
 
     private function __construct(?string $prefix = null, MiddlewareDispatcher $dispatcher = null)
@@ -85,6 +86,30 @@ final class Group implements GroupInterface
         }
 
         return $group;
+    }
+
+    public function withCors($middlewareDefinition): GroupInterface
+    {
+        $group = clone $this;
+        $group->corsMiddleware = $middlewareDefinition;
+
+        return $group;
+    }
+
+    /**
+     * @return mixed Middleware definition for CORS requests.
+     */
+    public function getCorsMiddleware()
+    {
+        return $this->corsMiddleware;
+    }
+
+    /**
+     * @return bool Middleware definition for CORS requests.
+     */
+    public function hasCorsMiddleware(): bool
+    {
+        return $this->corsMiddleware !== null;
     }
 
     public function hasDispatcher(): bool

@@ -281,6 +281,97 @@ final class GroupTest extends TestCase
         $this->assertAllRoutesAndGroupsHaveDispatcher($items);
     }
 
+    public function testWithCors(): void
+    {
+        $group = Group::create()->routes(
+            Route::get('/info')->action(static fn () => 'info'),
+            Route::post('/info')->action(static fn () => 'info'),
+        )->withCors(
+            static function () {
+                return new Response(204);
+            }
+        );
+
+        $collector = new RouteCollector();
+        $collector->addGroup($group);
+        $routeCollection = new RouteCollection($collector);
+
+        $this->assertCount(3, $routeCollection->getRoutes());
+    }
+
+    public function testWithCorsDoesntDuplicateRoutes(): void
+    {
+        $group = Group::create()->routes(
+            Route::get('/info')->action(static fn () => 'info')->host('yii.dev'),
+            Route::post('/info')->action(static fn () => 'info')->host('yii.dev'),
+            Route::put('/info')->action(static fn () => 'info')->host('yii.test'),
+        )->withCors(
+            static function () {
+                return new Response(204);
+            }
+        );
+
+        $collector = new RouteCollector();
+        $collector->addGroup($group);
+        $routeCollection = new RouteCollection($collector);
+
+        $this->assertCount(5, $routeCollection->getRoutes());
+    }
+
+    public function testWithCorsWithNestedGroups(): void
+    {
+        $group = Group::create()->routes(
+            Route::get('/info')->action(static fn () => 'info'),
+            Route::post('/info')->action(static fn () => 'info'),
+            Group::create('/v1')->routes(
+                Route::get('/post')->action(static fn () => 'post'),
+                Route::post('/post')->action(static fn () => 'post'),
+                Route::options('/options')->action(static fn () => 'options'),
+            )->withCors(
+                static function () {
+                    return new Response(201);
+                }
+            )
+        )->withCors(
+            static function () {
+                return new Response(204);
+            }
+        );
+
+        $collector = new RouteCollector();
+        $collector->addGroup($group);
+
+        $routeCollection = new RouteCollection($collector);
+        $this->assertCount(7, $routeCollection->getRoutes());
+        $this->assertInstanceOf(Route::class, $routeCollection->getRoute('OPTIONS /v1/post'));
+    }
+
+    public function testWithCorsWithNestedGroups2(): void
+    {
+        $group = Group::create()->routes(
+            Route::get('/info')->action(static fn () => 'info'),
+            Route::post('/info')->action(static fn () => 'info'),
+            Route::get('/v1/post')->action(static fn () => 'post'),
+            Group::create('/v1')->routes(
+                Route::post('/post')->action(static fn () => 'post'),
+                Route::options('/options')->action(static fn () => 'options'),
+            ),
+            Group::create('/v1')->routes(
+                Route::put('/post')->action(static fn () => 'post'),
+            )
+        )->withCors(
+            static function () {
+                return new Response(204);
+            }
+        );
+        $collector = new RouteCollector();
+        $collector->addGroup($group);
+
+        $routeCollection = new RouteCollection($collector);
+        $this->assertCount(8, $routeCollection->getRoutes());
+        $this->assertInstanceOf(Route::class, $routeCollection->getRoute('OPTIONS /v1/post'));
+    }
+
     private function getRequestHandler(): RequestHandlerInterface
     {
         return new class () implements RequestHandlerInterface {
