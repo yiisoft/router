@@ -281,7 +281,7 @@ final class GroupTest extends TestCase
         $this->assertAllRoutesAndGroupsHaveDispatcher($items);
     }
 
-    public function testWithAutoOptions(): void
+    public function testWithCors(): void
     {
         $group = Group::create()->routes(
             Route::get('/info')->action(static fn () => 'info'),
@@ -299,7 +299,7 @@ final class GroupTest extends TestCase
         $this->assertCount(3, $routeCollection->getRoutes());
     }
 
-    public function testWithAutoOptionsDoesntDuplicateRoutes(): void
+    public function testWithCorsDoesntDuplicateRoutes(): void
     {
         $group = Group::create()->routes(
             Route::get('/info')->action(static fn () => 'info')->host('yii.dev'),
@@ -318,7 +318,7 @@ final class GroupTest extends TestCase
         $this->assertCount(5, $routeCollection->getRoutes());
     }
 
-    public function testWithAutoOptionsWithNestedGroups(): void
+    public function testWithCorsWithNestedGroups(): void
     {
         $group = Group::create()->routes(
             Route::get('/info')->action(static fn () => 'info'),
@@ -346,7 +346,7 @@ final class GroupTest extends TestCase
         $this->assertInstanceOf(Route::class, $routeCollection->getRoute('OPTIONS /v1/post'));
     }
 
-    public function testWithAutoOptionsWithNestedGroups2(): void
+    public function testWithCorsWithNestedGroups2(): void
     {
         $group = Group::create()->routes(
             Route::get('/info')->action(static fn () => 'info'),

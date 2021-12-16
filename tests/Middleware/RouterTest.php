@@ -96,7 +96,7 @@ final class RouterTest extends TestCase
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
     }
 
-    public function testWithAutoOptionsHandlers(): void
+    public function testWithCorsHandlers(): void
     {
         $group = Group::create()->routes(
             Route::put('/post')->action(static fn () => new Response(204)),
@@ -126,7 +126,7 @@ final class RouterTest extends TestCase
         $this->assertSame('test from options handler', $response->getHeaderLine('Test'));
     }
 
-    public function testWithOptionsHandler(): void
+    public function testWithCorsHandler(): void
     {
         $request = new ServerRequest('OPTIONS', '/options');
         $response = $this->processWithRouter($request);
