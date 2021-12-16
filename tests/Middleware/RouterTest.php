@@ -103,7 +103,7 @@ final class RouterTest extends TestCase
         $group = Group::create()->routes(
             Route::put('/post')->action(static fn() => new Response(204)),
             Route::post('/post')->action(static fn() => new Response(204)),
-        )->withAutoOptions(
+        )->withCors(
             static function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
                 $response = $handler->handle($request);
                 return $response->withHeader('Test', 'test from options handler');

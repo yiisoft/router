@@ -47,5 +47,5 @@ interface GroupInterface
 
     public function routes(...$routes): self;
 
-    public function withAutoOptions(...$middlewares): self;
+    public function withCors($middlewareDefinition): self;
 }

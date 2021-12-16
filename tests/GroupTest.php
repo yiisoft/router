@@ -286,7 +286,7 @@ final class GroupTest extends TestCase
         $group = Group::create()->routes(
             Route::get('/info')->action(static fn () => 'info'),
             Route::post('/info')->action(static fn () => 'info'),
-        )->withAutoOptions(
+        )->withCors(
             static function () {
                 return new Response(204);
             }
@@ -305,7 +305,7 @@ final class GroupTest extends TestCase
             Route::get('/info')->action(static fn () => 'info')->host('yii.dev'),
             Route::post('/info')->action(static fn () => 'info')->host('yii.dev'),
             Route::put('/info')->action(static fn () => 'info')->host('yii.test'),
-        )->withAutoOptions(
+        )->withCors(
             static function () {
                 return new Response(204);
             }
@@ -327,12 +327,12 @@ final class GroupTest extends TestCase
                 Route::get('/post')->action(static fn () => 'post'),
                 Route::post('/post')->action(static fn () => 'post'),
                 Route::options('/options')->action(static fn () => 'options'),
-            )->withAutoOptions(
+            )->withCors(
                 static function () {
                     return new Response(201);
                 }
             )
-        )->withAutoOptions(
+        )->withCors(
             static function () {
                 return new Response(204);
             }
@@ -355,8 +355,11 @@ final class GroupTest extends TestCase
             Group::create('/v1')->routes(
                 Route::post('/post')->action(static fn () => 'post'),
                 Route::options('/options')->action(static fn () => 'options'),
+            ),
+            Group::create('/v1')->routes(
+                Route::put('/post')->action(static fn () => 'post'),
             )
-        )->withAutoOptions(
+        )->withCors(
             static function () {
                 return new Response(204);
             }
@@ -365,7 +368,7 @@ final class GroupTest extends TestCase
         $collector->addGroup($group);
 
         $routeCollection = new RouteCollection($collector);
-        $this->assertCount(7, $routeCollection->getRoutes());
+        $this->assertCount(8, $routeCollection->getRoutes());
         $this->assertInstanceOf(Route::class, $routeCollection->getRoute('OPTIONS /v1/post'));
     }
 

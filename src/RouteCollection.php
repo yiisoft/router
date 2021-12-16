@@ -113,8 +113,8 @@ final class RouteCollection implements RouteCollectionInterface
             }
 
             if ($item instanceof Group) {
-                if ($group->hasAutoOptions()) {
-                    $item = $item->withAutoOptions(...$group->getAutoOptions());
+                if ($group->hasCorsMiddleware()) {
+                    $item = $item->withCors($group->getCorsMiddleware());
                 }
                 /** @var Group $item */
                 if (empty($item->getPrefix())) {
@@ -133,7 +133,7 @@ final class RouteCollection implements RouteCollectionInterface
                 $modifiedItem = $modifiedItem->name($namePrefix . $modifiedItem->getName());
             }
 
-            $this->processAutoOptions($group, $host, $pattern, $modifiedItem, $tree);
+            $this->processCors($group, $host, $pattern, $modifiedItem, $tree);
 
             if (empty($tree[$group->getPrefix()])) {
                 $tree[] = $modifiedItem->getName();
@@ -149,34 +149,31 @@ final class RouteCollection implements RouteCollectionInterface
         }
     }
 
-    private function processAutoOptions($group, &$host, &$pattern, &$modifiedItem, &$tree): void
+    private function processCors($group, &$host, &$pattern, &$modifiedItem, &$tree): void
     {
-        $isNotDupplicate =
-            $group->hasAutoOptions()
-            && !(($pattern === $modifiedItem->getPattern() && $host === $modifiedItem->getHost())
+        if ($group->hasCorsMiddleware()) {
+            $middleware = $group->getCorsMiddleware();
+            $isNotDupplicate = !(($pattern === $modifiedItem->getPattern() && $host === $modifiedItem->getHost())
                 || in_array(Method::OPTIONS, $modifiedItem->getMethods(), true));
-        $pattern = $modifiedItem->getPattern();
-        $host = $modifiedItem->getHost();
-        /** @var Route $optionsRoute */
-        $optionsRoute = Route::options($pattern);
-        if ($host !== null) {
-            $optionsRoute = $optionsRoute->host($host);
-        }
-        foreach ($group->getAutoOptions() as $middleware) {
+            $pattern = $modifiedItem->getPattern();
+            $host = $modifiedItem->getHost();
+            /** @var Route $optionsRoute */
+            $optionsRoute = Route::options($pattern);
+            if ($host !== null) {
+                $optionsRoute = $optionsRoute->host($host);
+            }
             if ($isNotDupplicate) {
                 $optionsRoute = $optionsRoute->middleware($middleware);
+                if (empty($tree[$group->getPrefix()])) {
+                    $tree[] = $optionsRoute->getName();
+                } else {
+                    $tree[$group->getPrefix()][] = $optionsRoute->getName();
+                }
+                $this->routes[$optionsRoute->getName()] = $optionsRoute->action(
+                    static fn(ResponseFactoryInterface $responseFactory) => $responseFactory->createResponse(204)
+                );
             }
             $modifiedItem = $modifiedItem->prependMiddleware($middleware);
-        }
-        if ($isNotDupplicate) {
-            if (empty($tree[$group->getPrefix()])) {
-                $tree[] = $optionsRoute->getName();
-            } else {
-                $tree[$group->getPrefix()][] = $optionsRoute->getName();
-            }
-            $this->routes[$optionsRoute->getName()] = $optionsRoute->action(
-                static fn(ResponseFactoryInterface $responseFactory) => $responseFactory->createResponse(204)
-            );
         }
     }
 
