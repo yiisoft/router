@@ -311,16 +311,13 @@ final class Route
     }
 
     /**
-     * @param string|null $key
+     * @param string $key
      *
      * @return mixed
      */
-    public function getData(string $key = null)
+    public function getData(string $key)
     {
         $dataMap = $this->getDataMap();
-        if ($key === null) {
-            return $dataMap;
-        }
 
         return $dataMap[$key] ?? null;
     }
