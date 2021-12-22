@@ -15,9 +15,9 @@ final class CurrentRoute implements CurrentRouteInterface
     /**
      * Current Route
      *
-     * @var RouteParametersInterface|null
+     * @var Route|null
      */
-    private ?RouteParametersInterface $route = null;
+    private ?Route $route = null;
 
     /**
      * Current URI
@@ -42,9 +42,9 @@ final class CurrentRoute implements CurrentRouteInterface
     /**
      * Returns the current route object.
      *
-     * @return RouteParametersInterface|null The current route.
+     * @return Route|null The current route.
      */
-    public function getRoute(): ?RouteParametersInterface
+    public function getRoute(): ?Route
     {
         return $this->route;
     }
@@ -60,9 +60,9 @@ final class CurrentRoute implements CurrentRouteInterface
     }
 
     /**
-     * @param RouteParametersInterface $route
+     * @param Route $route
      */
-    public function setRoute(RouteParametersInterface $route): void
+    public function setRoute(Route $route): void
     {
         if ($this->route === null) {
             $this->route = $route;

@@ -18,9 +18,9 @@ interface CurrentRouteInterface
     /**
      * Returns the current route object.
      *
-     * @return RouteParametersInterface|null The current route.
+     * @return Route|null The current route.
      */
-    public function getRoute(): ?RouteParametersInterface;
+    public function getRoute(): ?Route;
 
     /**
      * Returns the current URI.

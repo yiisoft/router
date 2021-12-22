@@ -211,10 +211,10 @@ Current route (matched last) and URI could be obtained the following:
 ```php
 use Psr\Http\Message\UriInterface;
 use Yiisoft\Router\CurrentRouteInterface;
-use Yiisoft\Router\RouteParametersInterface;
+use Yiisoft\Router\Route;
 
 final class MyClass {
-    private ?RouteParametersInterface $currentRoute;
+    private ?Route $currentRoute;
     private ?UriInterface $currentUri;
     
     public function __construct(CurrentRouteInterface $currentRoute) {
