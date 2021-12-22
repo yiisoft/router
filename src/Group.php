@@ -14,6 +14,11 @@ use function is_object;
 
 final class Group
 {
+    public const PREFIX = 'prefix';
+    public const NAME_PREFIX = 'namePrefix';
+    public const HOST = 'host';
+    public const ITEMS = 'items';
+    public const CORS_MIDDLEWARE = 'corsMiddleware';
     /**
      * @var Group[]|Route[]
      */
@@ -25,6 +30,9 @@ final class Group
     private bool $routesAdded = false;
     private bool $middlewareAdded = false;
     private array $disabledMiddlewareDefinitions = [];
+    /**
+     * @var mixed Middleware definition for CORS requests.
+     */
     private $corsMiddleware;
     private ?MiddlewareDispatcher $dispatcher;
 
@@ -105,14 +113,6 @@ final class Group
     }
 
     /**
-     * @return mixed Middleware definition for CORS requests.
-     */
-    public function getCorsMiddleware()
-    {
-        return $this->corsMiddleware;
-    }
-
-    /**
      * @return bool Middleware definition for CORS requests.
      */
     public function hasCorsMiddleware(): bool
@@ -190,26 +190,32 @@ final class Group
     }
 
     /**
-     * @return Group[]|Route[]
+     * @param string|null $key
+     *
+     * @return mixed
      */
-    public function getItems(): array
+    public function getData(string $key = null)
     {
-        return $this->items;
+        $dataMap = $this->getDataMap();
+        if ($key === null) {
+            return $dataMap;
+        }
+
+        return $dataMap[$key] ?? null;
     }
 
-    public function getPrefix(): ?string
+    /**
+     * @return array
+     */
+    private function getDataMap(): array
     {
-        return $this->prefix;
-    }
-
-    public function getNamePrefix(): ?string
-    {
-        return $this->namePrefix;
-    }
-
-    public function getHost(): ?string
-    {
-        return $this->host;
+        return [
+            self::PREFIX => $this->prefix,
+            self::NAME_PREFIX => $this->namePrefix,
+            self::HOST => $this->host,
+            self::ITEMS => $this->items,
+            self::CORS_MIDDLEWARE => $this->corsMiddleware,
+        ];
     }
 
     public function getMiddlewareDefinitions(): array

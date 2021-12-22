@@ -36,7 +36,7 @@ final class CurrentRoute implements CurrentRouteInterface
      */
     public function getName(): ?string
     {
-        return $this->route !== null ? $this->route->getName() : null;
+        return $this->route !== null ? $this->route->getData(Route::NAME) : null;
     }
 
     /**

@@ -200,24 +200,25 @@ final class GroupTest extends TestCase
                     ),
             );
 
-        $this->assertCount(1, $root->getItems());
-        $api = $root->getItems()[0];
+        $this->assertCount(1, $root->getData(Group::ITEMS));
+        /** @var Group $api */
+        $api = $root->getData(Group::ITEMS)[0];
 
-        $this->assertSame('/api', $api->getPrefix());
-        $this->assertCount(2, $api->getItems());
-        $this->assertSame($logoutRoute, $api->getItems()[0]);
+        $this->assertSame('/api', $api->getData(Group::PREFIX));
+        $this->assertCount(2, $api->getData(Group::ITEMS));
+        $this->assertSame($logoutRoute, $api->getData(Group::ITEMS)[0]);
 
         /** @var Group $postGroup */
-        $postGroup = $api->getItems()[1];
+        $postGroup = $api->getData(Group::ITEMS)[1];
         $this->assertInstanceOf(Group::class, $postGroup);
         $this->assertCount(2, $api->getMiddlewareDefinitions());
         $this->assertSame($middleware1, $api->getMiddlewareDefinitions()[0]);
         $this->assertSame($middleware2, $api->getMiddlewareDefinitions()[1]);
 
-        $this->assertSame('/post', $postGroup->getPrefix());
-        $this->assertCount(2, $postGroup->getItems());
-        $this->assertSame($listRoute, $postGroup->getItems()[0]);
-        $this->assertSame($viewRoute, $postGroup->getItems()[1]);
+        $this->assertSame('/post', $postGroup->getData(Group::PREFIX));
+        $this->assertCount(2, $postGroup->getData(Group::ITEMS));
+        $this->assertSame($listRoute, $postGroup->getData(Group::ITEMS)[0]);
+        $this->assertSame($viewRoute, $postGroup->getData(Group::ITEMS)[1]);
         $this->assertEmpty($postGroup->getMiddlewareDefinitions());
     }
 
@@ -225,14 +226,14 @@ final class GroupTest extends TestCase
     {
         $group = Group::create()->host('https://yiiframework.com/');
 
-        $this->assertSame($group->getHost(), 'https://yiiframework.com');
+        $this->assertSame($group->getData(Group::HOST), 'https://yiiframework.com');
     }
 
     public function testName(): void
     {
         $group = Group::create()->namePrefix('api');
 
-        $this->assertSame($group->getNamePrefix(), 'api');
+        $this->assertSame($group->getData(Group::NAME_PREFIX), 'api');
     }
 
     public function testDispatcherInjected(): void
@@ -278,7 +279,7 @@ final class GroupTest extends TestCase
                     )
             );
 
-        $items = $apiGroup->getItems();
+        $items = $apiGroup->getData(Group::ITEMS);
 
         $this->assertAllRoutesAndGroupsHaveDispatcher($items);
     }
@@ -397,7 +398,7 @@ final class GroupTest extends TestCase
         $func = function ($item) use (&$func) {
             $this->assertTrue($item->hasDispatcher());
             if ($item instanceof Group) {
-                $items = $item->getItems();
+                $items = $item->getData(Group::ITEMS);
                 array_walk($items, $func);
             }
         };

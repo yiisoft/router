@@ -82,7 +82,7 @@ final class RouteCollectionTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('my-route');
-        $this->assertSame('/{id}', $route->getPattern());
+        $this->assertSame('/{id}', $route->getData(Route::PATTERN));
     }
 
     public function testRouteWithoutAction(): void
@@ -165,8 +165,8 @@ final class RouteCollectionTest extends TestCase
         $routeCollection = new RouteCollection($collector);
         $route1 = $routeCollection->getRoute('image');
         $route2 = $routeCollection->getRoute('project');
-        $this->assertSame('https://yiiframework.com', $route1->getHost());
-        $this->assertSame('https://yiipowered.com', $route2->getHost());
+        $this->assertSame('https://yiiframework.com', $route1->getData(Route::HOST));
+        $this->assertSame('https://yiipowered.com', $route2->getData(Route::HOST));
     }
 
     public function testGroupName(): void

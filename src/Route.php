@@ -13,6 +13,13 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
  */
 final class Route
 {
+    public const NAME = 'name';
+    public const METHODS = 'methods';
+    public const PATTERN = 'pattern';
+    public const HOST = 'host';
+    public const DEFAULTS = 'defaults';
+    public const OVERRIDE = 'override';
+
     private ?string $name = null;
     /** @var string[] */
     private array $methods;
@@ -303,34 +310,34 @@ final class Route
         return $result;
     }
 
-    public function getName(): string
+    /**
+     * @param string|null $key
+     *
+     * @return mixed
+     */
+    public function getData(string $key = null)
     {
-        return $this->name ?? (implode(', ', $this->methods) . ' ' . $this->host . $this->pattern);
+        $dataMap = $this->getDataMap();
+        if ($key === null) {
+            return $dataMap;
+        }
+
+        return $dataMap[$key] ?? null;
     }
 
-    public function getMethods(): array
+    /**
+     * @return array
+     */
+    private function getDataMap(): array
     {
-        return $this->methods;
-    }
-
-    public function getPattern(): string
-    {
-        return $this->pattern;
-    }
-
-    public function getHost(): ?string
-    {
-        return $this->host;
-    }
-
-    public function isOverride(): bool
-    {
-        return $this->override;
-    }
-
-    public function getDefaults(): array
-    {
-        return $this->defaults;
+        return [
+            self::NAME => $this->name ?? (implode(', ', $this->methods) . ' ' . $this->host . $this->pattern),
+            self::PATTERN => $this->pattern,
+            self::HOST => $this->host,
+            self::METHODS => $this->methods,
+            self::DEFAULTS => $this->defaults,
+            self::OVERRIDE => $this->override,
+        ];
     }
 
     public function hasMiddlewares(): bool
