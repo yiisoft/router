@@ -12,7 +12,7 @@ use Yiisoft\Router\Route;
 
 class CurrentRouteTest extends TestCase
 {
-    public function testGetCurrentRoute(): void
+    public function testGetRoute(): void
     {
         $route = Route::get('')->name('test');
         $currentRoute = new CurrentRoute();
@@ -21,13 +21,49 @@ class CurrentRouteTest extends TestCase
         $this->assertSame($route, $currentRoute->getRoute());
     }
 
-    public function testGetCurrentRouteName(): void
+    public function testGetName(): void
     {
         $route = Route::get('')->name('test');
         $currentRoute = new CurrentRoute();
         $currentRoute->setRoute($route);
 
         $this->assertSame($route->getData('name'), $currentRoute->getName());
+    }
+
+    public function testGetHost(): void
+    {
+        $route = Route::get('')->host('test.com');
+        $currentRoute = new CurrentRoute();
+        $currentRoute->setRoute($route);
+
+        $this->assertSame($route->getData('host'), $currentRoute->getHost());
+    }
+
+    public function testGetPattern(): void
+    {
+        $route = Route::get('/home');
+        $currentRoute = new CurrentRoute();
+        $currentRoute->setRoute($route);
+
+        $this->assertSame($route->getData('pattern'), $currentRoute->getPattern());
+    }
+
+    public function testGetMethods(): void
+    {
+        $route = Route::get('');
+        $currentRoute = new CurrentRoute();
+        $currentRoute->setRoute($route);
+
+        $this->assertSame($route->getData('methods'), $currentRoute->getMethods());
+    }
+
+    public function testGetDefaults(): void
+    {
+        $route = Route::get('/page/{page}')->defaults(['page' => 1]);
+        $currentRoute = new CurrentRoute();
+        $currentRoute->setRoute($route);
+
+        $this->assertSame($route->getData('defaults'), $currentRoute->getDefaults());
     }
 
     public function testGetCurrentUri(): void

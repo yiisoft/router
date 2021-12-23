@@ -236,6 +236,16 @@ final class GroupTest extends TestCase
         $this->assertSame($group->getData('namePrefix'), 'api');
     }
 
+    public function testGetDataWithWrongKey(): void
+    {
+        $group = Group::create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unknown data key: wrong');
+
+        $group->getData('wrong');
+    }
+
     public function testDispatcherInjected(): void
     {
         $dispatcher = $this->getDispatcher();

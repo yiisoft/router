@@ -42,9 +42,15 @@ final class RouteTest extends TestCase
         $this->assertSame([Method::POST, Method::HEAD], $route->getData('methods'));
     }
 
-    public const PATCH = 'PATCH';
-    public const HEAD = 'HEAD';
-    public const OPTIONS = 'OPTIONS';
+    public function testGetDataWithWrongKey(): void
+    {
+        $route = Route::get('');
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unknown data key: wrong');
+
+        $route->getData('wrong');
+    }
 
     public function testGetMethod(): void
     {
