@@ -14,11 +14,6 @@ use function is_object;
 
 final class Group
 {
-    public const PREFIX = 'prefix';
-    public const NAME_PREFIX = 'namePrefix';
-    public const HOST = 'host';
-    public const ITEMS = 'items';
-    public const CORS_MIDDLEWARE = 'corsMiddleware';
     /**
      * @var Group[]|Route[]
      */
@@ -196,23 +191,20 @@ final class Group
      */
     public function getData(string $key)
     {
-        $dataMap = $this->getDataMap();
-
-        return $dataMap[$key] ?? null;
-    }
-
-    /**
-     * @return array
-     */
-    private function getDataMap(): array
-    {
-        return [
-            self::PREFIX => $this->prefix,
-            self::NAME_PREFIX => $this->namePrefix,
-            self::HOST => $this->host,
-            self::ITEMS => $this->items,
-            self::CORS_MIDDLEWARE => $this->corsMiddleware,
-        ];
+        switch ($key) {
+            case 'prefix':
+                return $this->prefix;
+            case 'namePrefix':
+                return $this->namePrefix;
+            case 'host':
+                return $this->host;
+            case 'corsMiddleware':
+                return $this->corsMiddleware;
+            case 'items':
+                return $this->items;
+            default:
+                throw new InvalidArgumentException('Unknown data key: ' . $key);
+        }
     }
 
     public function getMiddlewareDefinitions(): array

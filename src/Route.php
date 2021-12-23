@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
+use InvalidArgumentException;
 use RuntimeException;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
@@ -13,13 +14,6 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
  */
 final class Route
 {
-    public const NAME = 'name';
-    public const METHODS = 'methods';
-    public const PATTERN = 'pattern';
-    public const HOST = 'host';
-    public const DEFAULTS = 'defaults';
-    public const OVERRIDE = 'override';
-
     private ?string $name = null;
     /** @var string[] */
     private array $methods;
@@ -317,24 +311,22 @@ final class Route
      */
     public function getData(string $key)
     {
-        $dataMap = $this->getDataMap();
-
-        return $dataMap[$key] ?? null;
-    }
-
-    /**
-     * @return array
-     */
-    private function getDataMap(): array
-    {
-        return [
-            self::NAME => $this->name ?? (implode(', ', $this->methods) . ' ' . $this->host . $this->pattern),
-            self::PATTERN => $this->pattern,
-            self::HOST => $this->host,
-            self::METHODS => $this->methods,
-            self::DEFAULTS => $this->defaults,
-            self::OVERRIDE => $this->override,
-        ];
+        switch ($key) {
+            case 'name':
+                return $this->name ?? (implode(', ', $this->methods) . ' ' . $this->host . $this->pattern);
+            case 'pattern':
+                return $this->pattern;
+            case 'host':
+                return $this->host;
+            case 'methods':
+                return $this->methods;
+            case 'defaults':
+                return $this->defaults;
+            case 'override':
+                return $this->override;
+            default:
+                throw new InvalidArgumentException('Unknown data key: ' . $key);
+        }
     }
 
     public function hasMiddlewares(): bool

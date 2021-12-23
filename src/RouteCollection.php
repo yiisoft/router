@@ -82,9 +82,9 @@ final class RouteCollection implements RouteCollectionInterface
             return;
         }
 
-        $this->items[] = $route->getData(Route::NAME);
-        $routeName = $route->getData(Route::NAME);
-        if (isset($this->routes[$routeName]) && !$route->getData(Route::OVERRIDE)) {
+        $this->items[] = $route->getData('name');
+        $routeName = $route->getData('name');
+        if (isset($this->routes[$routeName]) && !$route->getData('override')) {
             throw new InvalidArgumentException("A route with name '$routeName' already exists.");
         }
         $this->routes[$routeName] = $route;
@@ -95,9 +95,9 @@ final class RouteCollection implements RouteCollectionInterface
      */
     private function injectGroup(Group $group, array &$tree, string $prefix = '', string $namePrefix = ''): void
     {
-        $prefix .= $group->getData(Group::PREFIX);
-        $namePrefix .= $group->getData(Group::NAME_PREFIX);
-        $items = $group->getData(Group::ITEMS);
+        $prefix .= $group->getData('prefix');
+        $namePrefix .= $group->getData('namePrefix');
+        $items = $group->getData('items');
         $pattern = null;
         $host = null;
         foreach ($items as $item) {
@@ -107,43 +107,43 @@ final class RouteCollection implements RouteCollectionInterface
                 }
             }
 
-            if ($group->getData(Group::HOST) !== null && $item->getData(Route::HOST) === null) {
-                $item = $item->host($group->getData(Group::HOST));
+            if ($group->getData('host') !== null && $item->getData('host') === null) {
+                $item = $item->host($group->getData('host'));
             }
 
             if ($item instanceof Group) {
                 if ($group->hasCorsMiddleware()) {
-                    $item = $item->withCors($group->getData(Group::CORS_MIDDLEWARE));
+                    $item = $item->withCors($group->getData('corsMiddleware'));
                 }
                 /** @var Group $item */
-                if (empty($item->getData(Group::PREFIX))) {
+                if (empty($item->getData('prefix'))) {
                     $this->injectGroup($item, $tree, $prefix, $namePrefix);
                     continue;
                 }
-                $tree[$item->getData(Group::PREFIX)] = [];
-                $this->injectGroup($item, $tree[$item->getData(Group::PREFIX)], $prefix, $namePrefix);
+                $tree[$item->getData('prefix')] = [];
+                $this->injectGroup($item, $tree[$item->getData('prefix')], $prefix, $namePrefix);
                 continue;
             }
 
             /** @var Route $modifiedItem */
-            $modifiedItem = $item->pattern($prefix . $item->getData(Route::PATTERN));
+            $modifiedItem = $item->pattern($prefix . $item->getData('pattern'));
 
-            if (strpos($modifiedItem->getData(Route::NAME), implode(', ', $modifiedItem->getData(Route::METHODS))) === false) {
-                $modifiedItem = $modifiedItem->name($namePrefix . $modifiedItem->getData(Route::NAME));
+            if (strpos($modifiedItem->getData('name'), implode(', ', $modifiedItem->getData('methods'))) === false) {
+                $modifiedItem = $modifiedItem->name($namePrefix . $modifiedItem->getData('name'));
             }
 
             if ($group->hasCorsMiddleware()) {
                 $this->processCors($group, $host, $pattern, $modifiedItem, $tree);
             }
 
-            if (empty($tree[$group->getData(Group::PREFIX)])) {
-                $tree[] = $modifiedItem->getData(Route::NAME);
+            if (empty($tree[$group->getData('prefix')])) {
+                $tree[] = $modifiedItem->getData('name');
             } else {
-                $tree[$group->getData(Group::PREFIX)][] = $modifiedItem->getData(Route::NAME);
+                $tree[$group->getData('prefix')][] = $modifiedItem->getData('name');
             }
 
-            $routeName = $modifiedItem->getData(Route::NAME);
-            if (isset($this->routes[$routeName]) && !$modifiedItem->getData(Route::OVERRIDE)) {
+            $routeName = $modifiedItem->getData('name');
+            if (isset($this->routes[$routeName]) && !$modifiedItem->getData('override')) {
                 throw new InvalidArgumentException("A route with name '$routeName' already exists.");
             }
             $this->routes[$routeName] = $modifiedItem;
@@ -152,12 +152,12 @@ final class RouteCollection implements RouteCollectionInterface
 
     private function processCors(Group $group, ?string &$host, ?string &$pattern, Route &$modifiedItem, array &$tree): void
     {
-        $middleware = $group->getData(Group::CORS_MIDDLEWARE);
-        $isNotDuplicate = !in_array(Method::OPTIONS, $modifiedItem->getData(Route::METHODS), true)
-            && ($pattern !== $modifiedItem->getData(Route::PATTERN) || $host !== $modifiedItem->getData(Route::HOST));
+        $middleware = $group->getData('corsMiddleware');
+        $isNotDuplicate = !in_array(Method::OPTIONS, $modifiedItem->getData('methods'), true)
+            && ($pattern !== $modifiedItem->getData('pattern') || $host !== $modifiedItem->getData('host'));
 
-        $pattern = $modifiedItem->getData(Route::PATTERN);
-        $host = $modifiedItem->getData(Route::HOST);
+        $pattern = $modifiedItem->getData('pattern');
+        $host = $modifiedItem->getData('host');
         /** @var Route $optionsRoute */
         $optionsRoute = Route::options($pattern);
         if ($host !== null) {
@@ -165,12 +165,12 @@ final class RouteCollection implements RouteCollectionInterface
         }
         if ($isNotDuplicate) {
             $optionsRoute = $optionsRoute->middleware($middleware);
-            if (empty($tree[$group->getData(Group::PREFIX)])) {
-                $tree[] = $optionsRoute->getData(Route::NAME);
+            if (empty($tree[$group->getData('prefix')])) {
+                $tree[] = $optionsRoute->getData('name');
             } else {
-                $tree[$group->getData(Group::PREFIX)][] = $optionsRoute->getData(Route::NAME);
+                $tree[$group->getData('prefix')][] = $optionsRoute->getData('name');
             }
-            $this->routes[$optionsRoute->getData(Route::NAME)] = $optionsRoute->action(
+            $this->routes[$optionsRoute->getData('name')] = $optionsRoute->action(
                 static fn (ResponseFactoryInterface $responseFactory) => $responseFactory->createResponse(204)
             );
         }

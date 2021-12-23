@@ -27,7 +27,7 @@ class CurrentRouteTest extends TestCase
         $currentRoute = new CurrentRoute();
         $currentRoute->setRoute($route);
 
-        $this->assertSame($route->getData(Route::NAME), $currentRoute->getName());
+        $this->assertSame($route->getData('name'), $currentRoute->getName());
     }
 
     public function testGetCurrentUri(): void
