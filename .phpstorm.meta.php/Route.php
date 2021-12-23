@@ -2,9 +2,7 @@
 
 namespace PHPSTORM_META {
 
-    use Yiisoft\Router\Route;
-
-    expectedArguments(Route::getData(), 0, argumentsSet('routeDataKeys'));
+    expectedArguments(\Yiisoft\Router\Route::getData(), 0, argumentsSet('routeDataKeys'));
 
     registerArgumentsSet(
         'routeDataKeys',
