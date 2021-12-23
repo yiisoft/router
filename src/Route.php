@@ -46,6 +46,10 @@ final class Route
         return $route;
     }
 
+    /**
+     * @return MiddlewareDispatcher
+     * @internal
+     */
     public function getDispatcherWithMiddlewares(): MiddlewareDispatcher
     {
         if ($this->dispatcher->hasMiddlewares()) {
@@ -308,6 +312,7 @@ final class Route
      * @param string $key
      *
      * @return mixed
+     * @internal
      */
     public function getData(string $key)
     {

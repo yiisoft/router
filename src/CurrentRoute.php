@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
-use Psr\Http\Message\UriInterface;
 use LogicException;
+use Psr\Http\Message\UriInterface;
 
 /**
  * Holds information about current route e.g. matched last.
  */
-final class CurrentRoute implements CurrentRouteInterface
+final class CurrentRoute
 {
     /**
      * Current Route
@@ -40,6 +40,56 @@ final class CurrentRoute implements CurrentRouteInterface
     }
 
     /**
+     * Returns the current route host.
+     *
+     * @return string|null The current route host.
+     */
+    public function getHost(): ?string
+    {
+        return $this->route !== null ? $this->route->getData('host') : null;
+    }
+
+    /**
+     * Returns the current route pattern.
+     *
+     * @return string|null The current route pattern.
+     */
+    public function getPattern(): ?string
+    {
+        return $this->route !== null ? $this->route->getData('pattern') : null;
+    }
+
+    /**
+     * Returns the current route methods.
+     *
+     * @return array|null The current route methods.
+     */
+    public function getMethods(): ?array
+    {
+        return $this->route !== null ? $this->route->getData('methods') : null;
+    }
+
+    /**
+     * Returns the current route defaults.
+     *
+     * @return array|null The current route defaults.
+     */
+    public function getDefaults(): ?array
+    {
+        return $this->route !== null ? $this->route->getData('defaults') : null;
+    }
+
+    /**
+     * Returns the current route override.
+     *
+     * @return bool|null The current route override.
+     */
+    public function isOverride(): ?bool
+    {
+        return $this->route !== null ? $this->route->getData('override') : null;
+    }
+
+    /**
      * Returns the current route object.
      *
      * @return Route|null The current route.
@@ -61,6 +111,8 @@ final class CurrentRoute implements CurrentRouteInterface
 
     /**
      * @param Route $route
+     *
+     * @internal
      */
     public function setRoute(Route $route): void
     {
@@ -73,6 +125,8 @@ final class CurrentRoute implements CurrentRouteInterface
 
     /**
      * @param UriInterface $uri
+     *
+     * @internal
      */
     public function setUri(UriInterface $uri): void
     {
@@ -93,6 +147,11 @@ final class CurrentRoute implements CurrentRouteInterface
         return $this->arguments[$name] ?? $default;
     }
 
+    /**
+     * @param array $arguments
+     *
+     * @internal
+     */
     public function setArguments(array $arguments): void
     {
         if ($this->arguments === []) {

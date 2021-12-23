@@ -82,8 +82,8 @@ final class RouteCollection implements RouteCollectionInterface
             return;
         }
 
-        $this->items[] = $route->getData('name');
         $routeName = $route->getData('name');
+        $this->items[] = $routeName;
         if (isset($this->routes[$routeName]) && !$route->getData('override')) {
             throw new InvalidArgumentException("A route with name '$routeName' already exists.");
         }
@@ -150,8 +150,13 @@ final class RouteCollection implements RouteCollectionInterface
         }
     }
 
-    private function processCors(Group $group, ?string &$host, ?string &$pattern, Route &$modifiedItem, array &$tree): void
-    {
+    private function processCors(
+        Group $group,
+        ?string &$host,
+        ?string &$pattern,
+        Route &$modifiedItem,
+        array &$tree
+    ): void {
         $middleware = $group->getData('corsMiddleware');
         $isNotDuplicate = !in_array(Method::OPTIONS, $modifiedItem->getData('methods'), true)
             && ($pattern !== $modifiedItem->getData('pattern') || $host !== $modifiedItem->getData('host'));

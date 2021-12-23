@@ -8,8 +8,8 @@ use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -39,15 +39,22 @@ final class RouterTest extends TestCase
         };
     }
 
-    private function createRouterMiddleware(?RouteCollectionInterface $routeCollection = null, ?CurrentRoute $currentRoute = null): Router
-    {
+    private function createRouterMiddleware(
+        ?RouteCollectionInterface $routeCollection = null,
+        ?CurrentRoute $currentRoute = null
+    ): Router {
         $container = new SimpleContainer([ResponseFactoryInterface::class => $this->createResponseFactory()]);
         $dispatcher = new MiddlewareDispatcher(
             new MiddlewareFactory($container),
             $this->createMock(EventDispatcherInterface::class)
         );
 
-        return new Router($this->getMatcher($routeCollection), new Psr17Factory(), $dispatcher, $currentRoute ?? new CurrentRoute());
+        return new Router(
+            $this->getMatcher($routeCollection),
+            new Psr17Factory(),
+            $dispatcher,
+            $currentRoute ?? new CurrentRoute()
+        );
     }
 
     private function processWithRouter(
@@ -188,7 +195,9 @@ final class RouterTest extends TestCase
             public function match(ServerRequestInterface $request): MatchingResult
             {
                 if ($this->routeCollection !== null) {
-                    $route = $this->routeCollection->getRoute($request->getMethod() . ' ' . $request->getUri()->getPath());
+                    $route = $this->routeCollection->getRoute(
+                        $request->getMethod() . ' ' . $request->getUri()->getPath()
+                    );
                     return MatchingResult::fromSuccess($route, ['parameter' => 'value']);
                 }
                 if ($request->getMethod() === Method::OPTIONS && $request->getUri()->getPath() === '/options') {
