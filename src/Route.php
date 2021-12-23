@@ -48,6 +48,7 @@ final class Route
 
     /**
      * @return MiddlewareDispatcher
+     *
      * @internal
      */
     public function getDispatcherWithMiddlewares(): MiddlewareDispatcher
@@ -312,6 +313,7 @@ final class Route
      * @param string $key
      *
      * @return mixed
+     *
      * @internal
      */
     public function getData(string $key)

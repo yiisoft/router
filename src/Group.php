@@ -188,6 +188,7 @@ final class Group
      * @param string $key
      *
      * @return mixed
+     *
      * @internal
      */
     public function getData(string $key)
@@ -210,6 +211,7 @@ final class Group
 
     /**
      * @return array
+     *
      * @internal
      */
     public function getMiddlewareDefinitions(): array
