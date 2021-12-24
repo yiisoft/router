@@ -58,7 +58,7 @@ final class Group
     }
 
     /**
-     * @param Route|Group ...$routes
+     * @param Group|Route ...$routes
      *
      * @psalm-suppress DocblockTypeContradiction,RedundantConditionGivenDocblockType
      */
