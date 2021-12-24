@@ -25,102 +25,108 @@ final class RouteTest extends TestCase
     {
         $route = Route::get('/')->name('test.route');
 
-        $this->assertSame('test.route', $route->getName());
+        $this->assertSame('test.route', $route->getData('name'));
     }
 
     public function testNameDefault(): void
     {
         $route = Route::get('/');
 
-        $this->assertSame('GET /', $route->getName());
+        $this->assertSame('GET /', $route->getData('name'));
     }
 
     public function testMethods(): void
     {
         $route = Route::methods([Method::POST, Method::HEAD], '/');
 
-        $this->assertSame([Method::POST, Method::HEAD], $route->getMethods());
+        $this->assertSame([Method::POST, Method::HEAD], $route->getData('methods'));
     }
 
-    public const PATCH = 'PATCH';
-    public const HEAD = 'HEAD';
-    public const OPTIONS = 'OPTIONS';
+    public function testGetDataWithWrongKey(): void
+    {
+        $route = Route::get('');
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unknown data key: wrong');
+
+        $route->getData('wrong');
+    }
 
     public function testGetMethod(): void
     {
         $route = Route::get('/');
 
-        $this->assertSame([Method::GET], $route->getMethods());
+        $this->assertSame([Method::GET], $route->getData('methods'));
     }
 
     public function testPostMethod(): void
     {
         $route = Route::post('/');
 
-        $this->assertSame([Method::POST], $route->getMethods());
+        $this->assertSame([Method::POST], $route->getData('methods'));
     }
 
     public function testPutMethod(): void
     {
         $route = Route::put('/');
 
-        $this->assertSame([Method::PUT], $route->getMethods());
+        $this->assertSame([Method::PUT], $route->getData('methods'));
     }
 
     public function testDeleteMethod(): void
     {
         $route = Route::delete('/');
 
-        $this->assertSame([Method::DELETE], $route->getMethods());
+        $this->assertSame([Method::DELETE], $route->getData('methods'));
     }
 
     public function testPatchMethod(): void
     {
         $route = Route::patch('/');
 
-        $this->assertSame([Method::PATCH], $route->getMethods());
+        $this->assertSame([Method::PATCH], $route->getData('methods'));
     }
 
     public function testHeadMethod(): void
     {
         $route = Route::head('/');
 
-        $this->assertSame([Method::HEAD], $route->getMethods());
+        $this->assertSame([Method::HEAD], $route->getData('methods'));
     }
 
     public function testOptionsMethod(): void
     {
         $route = Route::options('/');
 
-        $this->assertSame([Method::OPTIONS], $route->getMethods());
+        $this->assertSame([Method::OPTIONS], $route->getData('methods'));
     }
 
     public function testPattern(): void
     {
         $route = Route::get('/test')->pattern('/test2');
 
-        $this->assertSame('/test2', $route->getPattern());
+        $this->assertSame('/test2', $route->getData('pattern'));
     }
 
     public function testHost(): void
     {
         $route = Route::get('/')->host('https://yiiframework.com/');
 
-        $this->assertSame('https://yiiframework.com', $route->getHost());
+        $this->assertSame('https://yiiframework.com', $route->getData('host'));
     }
 
     public function testDefaults(): void
     {
         $route = Route::get('/{language}')->defaults(['language' => 'en']);
 
-        $this->assertSame(['language' => 'en'], $route->getDefaults());
+        $this->assertSame(['language' => 'en'], $route->getData('defaults'));
     }
 
     public function testOverride(): void
     {
         $route = Route::get('/')->override();
 
-        $this->assertTrue($route->isOverride());
+        $this->assertTrue($route->getData('override'));
     }
 
     public function testToString(): void
@@ -148,7 +154,7 @@ final class RouteTest extends TestCase
         $dispatcher = $this->getDispatcher($container);
         $route = Route::get('/')->action([TestController::class, 'index']);
         $route->injectDispatcher($dispatcher);
-        $response = $route->getDispatcherWithMiddlewares()->dispatch($request, $this->getRequestHandler());
+        $response = $route->getData('dispatcherWithMiddlewares')->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
     }
 

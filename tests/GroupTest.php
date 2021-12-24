@@ -38,9 +38,9 @@ final class GroupTest extends TestCase
         $group = $group
             ->middleware($middleware2)
             ->middleware($middleware1);
-        $this->assertCount(2, $group->getMiddlewareDefinitions());
-        $this->assertSame($middleware1, $group->getMiddlewareDefinitions()[0]);
-        $this->assertSame($middleware2, $group->getMiddlewareDefinitions()[1]);
+        $this->assertCount(2, $group->getData('middlewareDefinitions'));
+        $this->assertSame($middleware1, $group->getData('middlewareDefinitions')[0]);
+        $this->assertSame($middleware2, $group->getData('middlewareDefinitions')[1]);
     }
 
     public function testRoutesAfterMiddleware(): void
@@ -104,7 +104,7 @@ final class GroupTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
-        $response = $route->getDispatcherWithMiddlewares()->dispatch($request, $this->getRequestHandler());
+        $response = $route->getData('dispatcherWithMiddlewares')->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('middleware2', $response->getReasonPhrase());
     }
@@ -137,7 +137,7 @@ final class GroupTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
-        $response = $route->getDispatcherWithMiddlewares()->dispatch($request, $this->getRequestHandler());
+        $response = $route->getData('dispatcherWithMiddlewares')->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('middleware2', $response->getReasonPhrase());
     }
@@ -168,7 +168,7 @@ final class GroupTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
-        $response = $route->getDispatcherWithMiddlewares()->dispatch($request, $this->getRequestHandler());
+        $response = $route->getData('dispatcherWithMiddlewares')->dispatch($request, $this->getRequestHandler());
         $this->assertSame(403, $response->getStatusCode());
     }
 
@@ -200,39 +200,50 @@ final class GroupTest extends TestCase
                     ),
             );
 
-        $this->assertCount(1, $root->getItems());
-        $api = $root->getItems()[0];
+        $this->assertCount(1, $root->getData('items'));
+        /** @var Group $api */
+        $api = $root->getData('items')[0];
 
-        $this->assertSame('/api', $api->getPrefix());
-        $this->assertCount(2, $api->getItems());
-        $this->assertSame($logoutRoute, $api->getItems()[0]);
+        $this->assertSame('/api', $api->getData('prefix'));
+        $this->assertCount(2, $api->getData('items'));
+        $this->assertSame($logoutRoute, $api->getData('items')[0]);
 
         /** @var Group $postGroup */
-        $postGroup = $api->getItems()[1];
+        $postGroup = $api->getData('items')[1];
         $this->assertInstanceOf(Group::class, $postGroup);
-        $this->assertCount(2, $api->getMiddlewareDefinitions());
-        $this->assertSame($middleware1, $api->getMiddlewareDefinitions()[0]);
-        $this->assertSame($middleware2, $api->getMiddlewareDefinitions()[1]);
+        $this->assertCount(2, $api->getData('middlewareDefinitions'));
+        $this->assertSame($middleware1, $api->getData('middlewareDefinitions')[0]);
+        $this->assertSame($middleware2, $api->getData('middlewareDefinitions')[1]);
 
-        $this->assertSame('/post', $postGroup->getPrefix());
-        $this->assertCount(2, $postGroup->getItems());
-        $this->assertSame($listRoute, $postGroup->getItems()[0]);
-        $this->assertSame($viewRoute, $postGroup->getItems()[1]);
-        $this->assertEmpty($postGroup->getMiddlewareDefinitions());
+        $this->assertSame('/post', $postGroup->getData('prefix'));
+        $this->assertCount(2, $postGroup->getData('items'));
+        $this->assertSame($listRoute, $postGroup->getData('items')[0]);
+        $this->assertSame($viewRoute, $postGroup->getData('items')[1]);
+        $this->assertEmpty($postGroup->getData('middlewareDefinitions'));
     }
 
     public function testHost(): void
     {
         $group = Group::create()->host('https://yiiframework.com/');
 
-        $this->assertSame($group->getHost(), 'https://yiiframework.com');
+        $this->assertSame($group->getData('host'), 'https://yiiframework.com');
     }
 
     public function testName(): void
     {
         $group = Group::create()->namePrefix('api');
 
-        $this->assertSame($group->getNamePrefix(), 'api');
+        $this->assertSame($group->getData('namePrefix'), 'api');
+    }
+
+    public function testGetDataWithWrongKey(): void
+    {
+        $group = Group::create();
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unknown data key: wrong');
+
+        $group->getData('wrong');
     }
 
     public function testDispatcherInjected(): void
@@ -278,7 +289,7 @@ final class GroupTest extends TestCase
                     )
             );
 
-        $items = $apiGroup->getItems();
+        $items = $apiGroup->getData('items');
 
         $this->assertAllRoutesAndGroupsHaveDispatcher($items);
     }
@@ -395,9 +406,9 @@ final class GroupTest extends TestCase
     private function assertAllRoutesAndGroupsHaveDispatcher(array $items): void
     {
         $func = function ($item) use (&$func) {
-            $this->assertTrue($item->hasDispatcher());
+            $this->assertTrue($item->getData('hasDispatcher'));
             if ($item instanceof Group) {
-                $items = $item->getItems();
+                $items = $item->getData('items');
                 array_walk($items, $func);
             }
         };

@@ -82,7 +82,7 @@ final class RouteCollectionTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('my-route');
-        $this->assertSame('/{id}', $route->getPattern());
+        $this->assertSame('/{id}', $route->getData('pattern'));
     }
 
     public function testRouteWithoutAction(): void
@@ -99,7 +99,7 @@ final class RouteCollectionTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('image');
-        $this->assertFalse($route->hasMiddlewares());
+        $this->assertFalse($route->getData('hasMiddlewares'));
     }
 
     public function testGetRouterTree(): void
@@ -165,8 +165,8 @@ final class RouteCollectionTest extends TestCase
         $routeCollection = new RouteCollection($collector);
         $route1 = $routeCollection->getRoute('image');
         $route2 = $routeCollection->getRoute('project');
-        $this->assertSame('https://yiiframework.com', $route1->getHost());
-        $this->assertSame('https://yiipowered.com', $route2->getHost());
+        $this->assertSame('https://yiiframework.com', $route1->getData('host'));
+        $this->assertSame('https://yiipowered.com', $route2->getData('host'));
     }
 
     public function testGroupName(): void
@@ -227,8 +227,8 @@ final class RouteCollectionTest extends TestCase
         $route1 = $routeCollection->getRoute('list');
         $route2 = $routeCollection->getRoute('view');
         $request = new ServerRequest('GET', '/');
-        $response1 = $route1->getDispatcherWithMiddlewares()->dispatch($request, $this->getRequestHandler());
-        $response2 = $route2->getDispatcherWithMiddlewares()->dispatch($request, $this->getRequestHandler());
+        $response1 = $route1->getData('dispatcherWithMiddlewares')->dispatch($request, $this->getRequestHandler());
+        $response2 = $route2->getData('dispatcherWithMiddlewares')->dispatch($request, $this->getRequestHandler());
 
         $this->assertEquals('middleware1', $response1->getReasonPhrase());
         $this->assertEquals('middleware1', $response2->getReasonPhrase());
