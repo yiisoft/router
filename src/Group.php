@@ -202,9 +202,6 @@ final class Group
         }
     }
 
-    /**
-     * @return array
-     */
     private function getMiddlewareDefinitions(): array
     {
         foreach ($this->middlewareDefinitions as $index => $definition) {
