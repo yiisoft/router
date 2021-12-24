@@ -101,8 +101,8 @@ final class RouteCollection implements RouteCollectionInterface
         $pattern = null;
         $host = null;
         foreach ($items as $item) {
-            if ($item instanceof Group || $item->hasMiddlewares()) {
-                foreach ($group->getMiddlewareDefinitions() as $middleware) {
+            if ($item instanceof Group || $item->getData('hasMiddlewares')) {
+                foreach ($group->getData('middlewareDefinitions') as $middleware) {
                     $item = $item->prependMiddleware($middleware);
                 }
             }
@@ -112,7 +112,7 @@ final class RouteCollection implements RouteCollectionInterface
             }
 
             if ($item instanceof Group) {
-                if ($group->hasCorsMiddleware()) {
+                if ($group->getData('hasCorsMiddleware')) {
                     $item = $item->withCors($group->getData('corsMiddleware'));
                 }
                 /** @var Group $item */
@@ -132,7 +132,7 @@ final class RouteCollection implements RouteCollectionInterface
                 $modifiedItem = $modifiedItem->name($namePrefix . $modifiedItem->getData('name'));
             }
 
-            if ($group->hasCorsMiddleware()) {
+            if ($group->getData('hasCorsMiddleware')) {
                 $this->processCors($group, $host, $pattern, $modifiedItem, $tree);
             }
 

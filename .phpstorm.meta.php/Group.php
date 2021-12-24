@@ -10,6 +10,9 @@ namespace PHPSTORM_META {
         'namePrefix',
         'host',
         'corsMiddleware',
-        'items'
+        'items',
+        'middlewareDefinitions',
+        'hasDispatcher',
+        'hasCorsMiddleware'
     );
 }

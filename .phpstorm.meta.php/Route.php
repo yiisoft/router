@@ -11,6 +11,9 @@ namespace PHPSTORM_META {
         'pattern',
         'methods',
         'override',
-        'defaults'
+        'defaults',
+        'dispatcherWithMiddlewares',
+        'hasDispatcher',
+        'hasMiddlewares'
     );
 }

@@ -60,7 +60,7 @@ final class Group
         $new = clone $this;
         foreach ($routes as $route) {
             if ($route instanceof Route || $route instanceof self) {
-                if (!$route->hasDispatcher() && $new->hasDispatcher()) {
+                if (!$route->getData('hasDispatcher') && $new->getData('hasDispatcher')) {
                     $route = $route->withDispatcher($new->dispatcher);
                 }
                 $new->items[] = $route;
@@ -82,7 +82,7 @@ final class Group
         $group = clone $this;
         $group->dispatcher = $dispatcher;
         foreach ($group->items as $index => $item) {
-            if (!$item->hasDispatcher()) {
+            if (!$item->getData('hasDispatcher')) {
                 $item = $item->withDispatcher($dispatcher);
                 $group->items[$index] = $item;
             }
@@ -105,19 +105,6 @@ final class Group
         $group->corsMiddleware = $middlewareDefinition;
 
         return $group;
-    }
-
-    /**
-     * @return bool Middleware definition for CORS requests.
-     */
-    public function hasCorsMiddleware(): bool
-    {
-        return $this->corsMiddleware !== null;
-    }
-
-    public function hasDispatcher(): bool
-    {
-        return $this->dispatcher !== null;
     }
 
     /**
@@ -204,6 +191,12 @@ final class Group
                 return $this->corsMiddleware;
             case 'items':
                 return $this->items;
+            case 'hasCorsMiddleware':
+                return $this->corsMiddleware !== null;
+            case 'hasDispatcher':
+                return $this->dispatcher !== null;
+            case 'middlewareDefinitions':
+                return $this->getMiddlewareDefinitions();
             default:
                 throw new InvalidArgumentException('Unknown data key: ' . $key);
         }
@@ -211,10 +204,8 @@ final class Group
 
     /**
      * @return array
-     *
-     * @internal
      */
-    public function getMiddlewareDefinitions(): array
+    private function getMiddlewareDefinitions(): array
     {
         foreach ($this->middlewareDefinitions as $index => $definition) {
             if (in_array($definition, $this->disabledMiddlewareDefinitions, true)) {

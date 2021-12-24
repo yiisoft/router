@@ -47,31 +47,6 @@ final class Route
     }
 
     /**
-     * @return MiddlewareDispatcher
-     *
-     * @internal
-     */
-    public function getDispatcherWithMiddlewares(): MiddlewareDispatcher
-    {
-        if ($this->dispatcher->hasMiddlewares()) {
-            return $this->dispatcher;
-        }
-
-        foreach ($this->middlewareDefinitions as $index => $definition) {
-            if (in_array($definition, $this->disabledMiddlewareDefinitions, true)) {
-                unset($this->middlewareDefinitions[$index]);
-            }
-        }
-
-        return $this->dispatcher = $this->dispatcher->withMiddlewares($this->middlewareDefinitions);
-    }
-
-    public function hasDispatcher(): bool
-    {
-        return $this->dispatcher !== null;
-    }
-
-    /**
      * @param string $pattern
      * @param MiddlewareDispatcher|null $dispatcher
      *
@@ -290,25 +265,6 @@ final class Route
         return $route;
     }
 
-    public function __toString(): string
-    {
-        $result = '';
-
-        if ($this->name !== null) {
-            $result .= '[' . $this->name . '] ';
-        }
-
-        if ($this->methods !== []) {
-            $result .= implode(',', $this->methods) . ' ';
-        }
-        if ($this->host !== null && strrpos($this->pattern, $this->host) === false) {
-            $result .= $this->host;
-        }
-        $result .= $this->pattern;
-
-        return $result;
-    }
-
     /**
      * @param string $key
      *
@@ -331,14 +287,34 @@ final class Route
                 return $this->defaults;
             case 'override':
                 return $this->override;
+            case 'dispatcherWithMiddlewares':
+                return $this->getDispatcherWithMiddlewares();
+            case 'hasMiddlewares':
+                return $this->middlewareDefinitions !== [];
+            case 'hasDispatcher':
+                return $this->dispatcher !== null;
             default:
                 throw new InvalidArgumentException('Unknown data key: ' . $key);
         }
     }
 
-    public function hasMiddlewares(): bool
+    public function __toString(): string
     {
-        return $this->middlewareDefinitions !== [];
+        $result = '';
+
+        if ($this->name !== null) {
+            $result .= '[' . $this->name . '] ';
+        }
+
+        if ($this->methods !== []) {
+            $result .= implode(',', $this->methods) . ' ';
+        }
+        if ($this->host !== null && strrpos($this->pattern, $this->host) === false) {
+            $result .= $this->host;
+        }
+        $result .= $this->pattern;
+
+        return $result;
     }
 
     public function __debugInfo()
@@ -355,5 +331,23 @@ final class Route
             'disabledMiddlewareDefinitions' => $this->disabledMiddlewareDefinitions,
             'middlewareDispatcher' => $this->dispatcher,
         ];
+    }
+
+    /**
+     * @return MiddlewareDispatcher
+     */
+    private function getDispatcherWithMiddlewares(): MiddlewareDispatcher
+    {
+        if ($this->dispatcher->hasMiddlewares()) {
+            return $this->dispatcher;
+        }
+
+        foreach ($this->middlewareDefinitions as $index => $definition) {
+            if (in_array($definition, $this->disabledMiddlewareDefinitions, true)) {
+                unset($this->middlewareDefinitions[$index]);
+            }
+        }
+
+        return $this->dispatcher = $this->dispatcher->withMiddlewares($this->middlewareDefinitions);
     }
 }

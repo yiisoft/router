@@ -154,7 +154,7 @@ final class RouteTest extends TestCase
         $dispatcher = $this->getDispatcher($container);
         $route = Route::get('/')->action([TestController::class, 'index']);
         $route->injectDispatcher($dispatcher);
-        $response = $route->getDispatcherWithMiddlewares()->dispatch($request, $this->getRequestHandler());
+        $response = $route->getData('dispatcherWithMiddlewares')->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
     }
 

@@ -70,36 +70,6 @@ final class CurrentRoute
     }
 
     /**
-     * Returns the current route defaults.
-     *
-     * @return array|null The current route defaults.
-     */
-    public function getDefaults(): ?array
-    {
-        return $this->route !== null ? $this->route->getData('defaults') : null;
-    }
-
-    /**
-     * Returns the current route override.
-     *
-     * @return bool|null The current route override.
-     */
-    public function isOverride(): ?bool
-    {
-        return $this->route !== null ? $this->route->getData('override') : null;
-    }
-
-    /**
-     * Returns the current route object.
-     *
-     * @return Route|null The current route.
-     */
-    public function getRoute(): ?Route
-    {
-        return $this->route;
-    }
-
-    /**
      * Returns the current URI.
      *
      * @return UriInterface|null The current URI.
@@ -111,16 +81,18 @@ final class CurrentRoute
 
     /**
      * @param Route $route
+     * @param array $arguments
      *
      * @internal
      */
-    public function setRoute(Route $route): void
+    public function setRouteWithArguments(Route $route, array $arguments): void
     {
-        if ($this->route === null) {
+        if ($this->route === null && $this->arguments === []) {
             $this->route = $route;
+            $this->arguments = $arguments;
             return;
         }
-        throw new LogicException('Can not set route since it was already set.');
+        throw new LogicException('Can not set route/arguments since it was already set.');
     }
 
     /**
@@ -145,19 +117,5 @@ final class CurrentRoute
     public function getArgument(string $name, string $default = null): ?string
     {
         return $this->arguments[$name] ?? $default;
-    }
-
-    /**
-     * @param array $arguments
-     *
-     * @internal
-     */
-    public function setArguments(array $arguments): void
-    {
-        if ($this->arguments === []) {
-            $this->arguments = $arguments;
-            return;
-        }
-        throw new LogicException('Can not set arguments since it was already set.');
     }
 }
