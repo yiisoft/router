@@ -333,9 +333,6 @@ final class Route
         ];
     }
 
-    /**
-     * @return MiddlewareDispatcher
-     */
     private function getDispatcherWithMiddlewares(): MiddlewareDispatcher
     {
         if ($this->dispatcher->hasMiddlewares()) {
