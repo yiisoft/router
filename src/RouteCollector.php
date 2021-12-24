@@ -10,6 +10,10 @@ final class RouteCollector implements RouteCollectorInterface
      * @var Group[]|Route[]
      */
     private array $items = [];
+
+    /**
+     * @var array[]|callable[]|string[]
+     */
     private array $middlewareDefinitions = [];
 
     public function addRoute(Route $route): RouteCollectorInterface
