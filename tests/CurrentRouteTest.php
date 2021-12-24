@@ -12,22 +12,40 @@ use Yiisoft\Router\Route;
 
 class CurrentRouteTest extends TestCase
 {
-    public function testGetCurrentRoute(): void
+    public function testGetName(): void
     {
         $route = Route::get('')->name('test');
         $currentRoute = new CurrentRoute();
-        $currentRoute->setRoute($route);
+        $currentRoute->setRouteWithArguments($route, []);
 
-        $this->assertSame($route, $currentRoute->getRoute());
+        $this->assertSame($route->getData('name'), $currentRoute->getName());
     }
 
-    public function testGetCurrentRouteName(): void
+    public function testGetHost(): void
     {
-        $route = Route::get('')->name('test');
+        $route = Route::get('')->host('test.com');
         $currentRoute = new CurrentRoute();
-        $currentRoute->setRoute($route);
+        $currentRoute->setRouteWithArguments($route, []);
 
-        $this->assertSame($route->getName(), $currentRoute->getName());
+        $this->assertSame($route->getData('host'), $currentRoute->getHost());
+    }
+
+    public function testGetPattern(): void
+    {
+        $route = Route::get('/home');
+        $currentRoute = new CurrentRoute();
+        $currentRoute->setRouteWithArguments($route, []);
+
+        $this->assertSame($route->getData('pattern'), $currentRoute->getPattern());
+    }
+
+    public function testGetMethods(): void
+    {
+        $route = Route::get('');
+        $currentRoute = new CurrentRoute();
+        $currentRoute->setRouteWithArguments($route, []);
+
+        $this->assertSame($route->getData('methods'), $currentRoute->getMethods());
     }
 
     public function testGetCurrentUri(): void
@@ -46,7 +64,7 @@ class CurrentRouteTest extends TestCase
             'foo' => 'bar',
         ];
         $currentRoute = new CurrentRoute();
-        $currentRoute->setArguments($parameters);
+        $currentRoute->setRouteWithArguments(Route::get(''), $parameters);
 
         $this->assertSame($parameters, $currentRoute->getArguments());
     }
@@ -58,7 +76,7 @@ class CurrentRouteTest extends TestCase
             'foo' => 'bar',
         ];
         $currentRoute = new CurrentRoute();
-        $currentRoute->setArguments($parameters);
+        $currentRoute->setRouteWithArguments(Route::get(''), $parameters);
 
         $this->assertSame('bar', $currentRoute->getArgument('foo'));
     }
@@ -66,7 +84,7 @@ class CurrentRouteTest extends TestCase
     public function testGetArgumentWithDefault(): void
     {
         $currentRoute = new CurrentRoute();
-        $currentRoute->setArguments(['test' => 1]);
+        $currentRoute->setRouteWithArguments(Route::get(''), ['test' => 1]);
 
         $this->assertSame('bar', $currentRoute->getArgument('foo', 'bar'));
     }
@@ -74,7 +92,7 @@ class CurrentRouteTest extends TestCase
     public function testGetArgumentWithNonExist(): void
     {
         $currentRoute = new CurrentRoute();
-        $currentRoute->setArguments(['test' => 1]);
+        $currentRoute->setRouteWithArguments(Route::get(''), ['test' => 1]);
 
         $this->assertNull($currentRoute->getArgument('foo'));
     }
@@ -82,11 +100,11 @@ class CurrentRouteTest extends TestCase
     public function testSetRouteTwice(): void
     {
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Can not set route since it was already set.');
+        $this->expectExceptionMessage('Can not set route/arguments since it was already set.');
 
         $currentRoute = new CurrentRoute();
-        $currentRoute->setRoute(Route::get('')->name('test'));
-        $currentRoute->setRoute(Route::get('/home')->name('home'));
+        $currentRoute->setRouteWithArguments(Route::get('')->name('test'), []);
+        $currentRoute->setRouteWithArguments(Route::get('/home')->name('home'), []);
     }
 
     public function testSetUriTwice(): void
@@ -102,10 +120,10 @@ class CurrentRouteTest extends TestCase
     public function testSetArgumentsTwice(): void
     {
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Can not set arguments since it was already set.');
+        $this->expectExceptionMessage('Can not set route/arguments since it was already set.');
 
         $currentRoute = new CurrentRoute();
-        $currentRoute->setArguments(['foo' => 'bar']);
-        $currentRoute->setArguments(['id' => 1]);
+        $currentRoute->setRouteWithArguments(Route::get(''), ['foo' => 'bar']);
+        $currentRoute->setRouteWithArguments(Route::get(''), ['id' => 1]);
     }
 }

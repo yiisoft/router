@@ -34,7 +34,12 @@ interface UrlGeneratorInterface
      *
      * @return string URL generated
      */
-    public function generateAbsolute(string $name, array $parameters = [], string $scheme = null, string $host = null): string;
+    public function generateAbsolute(
+        string $name,
+        array $parameters = [],
+        string $scheme = null,
+        string $host = null
+    ): string;
 
     public function getUriPrefix(): string;
 

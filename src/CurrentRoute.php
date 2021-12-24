@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
-use Psr\Http\Message\UriInterface;
 use LogicException;
+use Psr\Http\Message\UriInterface;
 
 /**
  * Holds information about current route e.g. matched last.
  */
-final class CurrentRoute implements CurrentRouteInterface
+final class CurrentRoute
 {
     /**
      * Current Route
      *
-     * @var RouteParametersInterface|null
+     * @var Route|null
      */
-    private ?RouteParametersInterface $route = null;
+    private ?Route $route = null;
 
     /**
      * Current URI
@@ -36,17 +36,37 @@ final class CurrentRoute implements CurrentRouteInterface
      */
     public function getName(): ?string
     {
-        return $this->route !== null ? $this->route->getName() : null;
+        return $this->route !== null ? $this->route->getData('name') : null;
     }
 
     /**
-     * Returns the current route object.
+     * Returns the current route host.
      *
-     * @return RouteParametersInterface|null The current route.
+     * @return string|null The current route host.
      */
-    public function getRoute(): ?RouteParametersInterface
+    public function getHost(): ?string
     {
-        return $this->route;
+        return $this->route !== null ? $this->route->getData('host') : null;
+    }
+
+    /**
+     * Returns the current route pattern.
+     *
+     * @return string|null The current route pattern.
+     */
+    public function getPattern(): ?string
+    {
+        return $this->route !== null ? $this->route->getData('pattern') : null;
+    }
+
+    /**
+     * Returns the current route methods.
+     *
+     * @return array|null The current route methods.
+     */
+    public function getMethods(): ?array
+    {
+        return $this->route !== null ? $this->route->getData('methods') : null;
     }
 
     /**
@@ -60,19 +80,25 @@ final class CurrentRoute implements CurrentRouteInterface
     }
 
     /**
-     * @param RouteParametersInterface $route
+     * @param Route $route
+     * @param array $arguments
+     *
+     * @internal
      */
-    public function setRoute(RouteParametersInterface $route): void
+    public function setRouteWithArguments(Route $route, array $arguments): void
     {
-        if ($this->route === null) {
+        if ($this->route === null && $this->arguments === []) {
             $this->route = $route;
+            $this->arguments = $arguments;
             return;
         }
-        throw new LogicException('Can not set route since it was already set.');
+        throw new LogicException('Can not set route/arguments since it was already set.');
     }
 
     /**
      * @param UriInterface $uri
+     *
+     * @internal
      */
     public function setUri(UriInterface $uri): void
     {
@@ -91,14 +117,5 @@ final class CurrentRoute implements CurrentRouteInterface
     public function getArgument(string $name, string $default = null): ?string
     {
         return $this->arguments[$name] ?? $default;
-    }
-
-    public function setArguments(array $arguments): void
-    {
-        if ($this->arguments === []) {
-            $this->arguments = $arguments;
-            return;
-        }
-        throw new LogicException('Can not set arguments since it was already set.');
     }
 }
