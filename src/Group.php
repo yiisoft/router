@@ -52,6 +52,11 @@ final class Group
         return new self($prefix, $dispatcher);
     }
 
+    /**
+     * @param Route|Group ...$routes
+     *
+     * @psalm-suppress DocblockTypeContradiction,RedundantConditionGivenDocblockType
+     */
     public function routes(...$routes): self
     {
         if ($this->middlewareAdded) {
@@ -60,7 +65,7 @@ final class Group
         $new = clone $this;
         foreach ($routes as $route) {
             if ($route instanceof Route || $route instanceof self) {
-                if (!$route->getData('hasDispatcher') && $new->getData('hasDispatcher')) {
+                if ($new->dispatcher !== null && !$route->getData('hasDispatcher')) {
                     $route = $route->withDispatcher($new->dispatcher);
                 }
                 $new->items[] = $route;
@@ -177,6 +182,17 @@ final class Group
      * @return mixed
      *
      * @internal
+     *
+     * @psalm-template T
+     * @psalm-param T $key
+     * @psalm-return (
+     *   T is ('prefix'|'namePrefix'|'host') ? string|null :
+     *   (T is 'items' ? Group[]|Route[] :
+     *     (T is ('hasCorsMiddleware'|'hasDispatcher') ? bool :
+     *       (T is 'middlewareDefinitions' ? array : mixed)
+     *     )
+     *   )
+     * )
      */
     public function getData(string $key)
     {

@@ -14,8 +14,6 @@ final class CurrentRoute
 {
     /**
      * Current Route
-     *
-     * @var Route|null
      */
     private ?Route $route = null;
 
@@ -62,7 +60,7 @@ final class CurrentRoute
     /**
      * Returns the current route methods.
      *
-     * @return array|null The current route methods.
+     * @return string[]|null The current route methods.
      */
     public function getMethods(): ?array
     {

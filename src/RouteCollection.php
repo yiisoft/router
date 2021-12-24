@@ -108,6 +108,7 @@ final class RouteCollection implements RouteCollectionInterface
             }
 
             if ($group->getData('host') !== null && $item->getData('host') === null) {
+                /** @psalm-suppress PossiblyNullArgument Checked group host on not null above */
                 $item = $item->host($group->getData('host'));
             }
 
@@ -115,17 +116,17 @@ final class RouteCollection implements RouteCollectionInterface
                 if ($group->getData('hasCorsMiddleware')) {
                     $item = $item->withCors($group->getData('corsMiddleware'));
                 }
-                /** @var Group $item */
                 if (empty($item->getData('prefix'))) {
                     $this->injectGroup($item, $tree, $prefix, $namePrefix);
                     continue;
                 }
+                /** @psalm-suppress PossiblyNullArrayOffset Checked group prefix on not empty above */
                 $tree[$item->getData('prefix')] = [];
+                /** @psalm-suppress PossiblyNullArrayOffset Checked group prefix on not empty above */
                 $this->injectGroup($item, $tree[$item->getData('prefix')], $prefix, $namePrefix);
                 continue;
             }
 
-            /** @var Route $modifiedItem */
             $modifiedItem = $item->pattern($prefix . $item->getData('pattern'));
 
             if (strpos($modifiedItem->getData('name'), implode(', ', $modifiedItem->getData('methods'))) === false) {
@@ -139,6 +140,7 @@ final class RouteCollection implements RouteCollectionInterface
             if (empty($tree[$group->getData('prefix')])) {
                 $tree[] = $modifiedItem->getData('name');
             } else {
+                /** @psalm-suppress PossiblyNullArrayOffset Checked group prefix on not empty above */
                 $tree[$group->getData('prefix')][] = $modifiedItem->getData('name');
             }
 
@@ -163,7 +165,6 @@ final class RouteCollection implements RouteCollectionInterface
 
         $pattern = $modifiedItem->getData('pattern');
         $host = $modifiedItem->getData('host');
-        /** @var Route $optionsRoute */
         $optionsRoute = Route::options($pattern);
         if ($host !== null) {
             $optionsRoute = $optionsRoute->host($host);
@@ -173,6 +174,7 @@ final class RouteCollection implements RouteCollectionInterface
             if (empty($tree[$group->getData('prefix')])) {
                 $tree[] = $optionsRoute->getData('name');
             } else {
+                /** @psalm-suppress PossiblyNullArrayOffset Checked group prefix on not empty above */
                 $tree[$group->getData('prefix')][] = $optionsRoute->getData('name');
             }
             $this->routes[$optionsRoute->getData('name')] = $optionsRoute->action(

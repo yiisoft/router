@@ -26,11 +26,16 @@ final class Route
     private array $disabledMiddlewareDefinitions = [];
     private array $defaults = [];
 
-    private function __construct(?MiddlewareDispatcher $dispatcher = null)
+    private function __construct(array $methods, string $pattern, ?MiddlewareDispatcher $dispatcher = null)
     {
+        $this->methods = $methods;
+        $this->pattern = $pattern;
         $this->dispatcher = $dispatcher;
     }
 
+    /**
+     * @psalm-assert MiddlewareDispatcher $this->dispatcher
+     */
     public function injectDispatcher(MiddlewareDispatcher $dispatcher): void
     {
         $this->dispatcher = $dispatcher;
@@ -135,11 +140,7 @@ final class Route
         string $pattern,
         ?MiddlewareDispatcher $dispatcher = null
     ): self {
-        $route = new self($dispatcher);
-        $route->methods = $methods;
-        $route->pattern = $pattern;
-
-        return $route;
+        return new self($methods, $pattern, $dispatcher);
     }
 
     /**
@@ -271,6 +272,21 @@ final class Route
      * @return mixed
      *
      * @internal
+     *
+     * @psalm-template T as string
+     * @psalm-param T $key
+     * @psalm-return (
+     *   T is 'name' ? string :
+     *     (T is 'host' ? string|null :
+     *       (T is 'methods' ? array<array-key,string> :
+     *         (T is 'defaults' ? array :
+     *           (T is ('override'|'hasMiddlewares'|'hasDispatcher') ? bool :
+     *             (T is 'dispatcherWithMiddlewares' ? MiddlewareDispatcher : mixed)
+     *           )
+     *         )
+     *       )
+     *     )
+     * )
      */
     public function getData(string $key)
     {
@@ -335,6 +351,10 @@ final class Route
 
     private function getDispatcherWithMiddlewares(): MiddlewareDispatcher
     {
+        if ($this->dispatcher === null) {
+            throw new RuntimeException('Route do not container middleware dispatcher.');
+        }
+
         if ($this->dispatcher->hasMiddlewares()) {
             return $this->dispatcher;
         }
