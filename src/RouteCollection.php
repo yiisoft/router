@@ -8,10 +8,16 @@ use InvalidArgumentException;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Yiisoft\Http\Method;
 
+/**
+ * @psalm-type Items = array<array-key,array|string>
+ */
 final class RouteCollection implements RouteCollectionInterface
 {
     private RouteCollectorInterface $collector;
 
+    /**
+     * @psalm-var Items
+     */
     private array $items = [];
 
     /**
@@ -92,11 +98,13 @@ final class RouteCollection implements RouteCollectionInterface
 
     /**
      * Inject a Group instance into route and item arrays.
+     *
+     * @psalm-param Items $tree
      */
     private function injectGroup(Group $group, array &$tree, string $prefix = '', string $namePrefix = ''): void
     {
-        $prefix .= $group->getData('prefix');
-        $namePrefix .= $group->getData('namePrefix');
+        $prefix .= (string) $group->getData('prefix');
+        $namePrefix .= (string) $group->getData('namePrefix');
         $items = $group->getData('items');
         $pattern = null;
         $host = null;
@@ -122,7 +130,11 @@ final class RouteCollection implements RouteCollectionInterface
                 }
                 /** @psalm-suppress PossiblyNullArrayOffset Checked group prefix on not empty above */
                 $tree[$item->getData('prefix')] = [];
-                /** @psalm-suppress PossiblyNullArrayOffset Checked group prefix on not empty above */
+                /**
+                 * @psalm-suppress MixedArgumentTypeCoercion
+                 * @psalm-suppress MixedArgument,PossiblyNullArrayOffset
+                 * Checked group prefix on not empty above
+                 */
                 $this->injectGroup($item, $tree[$item->getData('prefix')], $prefix, $namePrefix);
                 continue;
             }
@@ -140,7 +152,10 @@ final class RouteCollection implements RouteCollectionInterface
             if (empty($tree[$group->getData('prefix')])) {
                 $tree[] = $modifiedItem->getData('name');
             } else {
-                /** @psalm-suppress PossiblyNullArrayOffset Checked group prefix on not empty above */
+                /**
+                 * @psalm-suppress MixedArrayAssignment,PossiblyNullArrayOffset
+                 * Checked group prefix on not empty above
+                 */
                 $tree[$group->getData('prefix')][] = $modifiedItem->getData('name');
             }
 
@@ -152,6 +167,9 @@ final class RouteCollection implements RouteCollectionInterface
         }
     }
 
+    /**
+     * @psalm-param Items $tree
+     */
     private function processCors(
         Group $group,
         ?string &$host,
@@ -159,6 +177,7 @@ final class RouteCollection implements RouteCollectionInterface
         Route &$modifiedItem,
         array &$tree
     ): void {
+        /** @var array|callable|string $middleware */
         $middleware = $group->getData('corsMiddleware');
         $isNotDuplicate = !in_array(Method::OPTIONS, $modifiedItem->getData('methods'), true)
             && ($pattern !== $modifiedItem->getData('pattern') || $host !== $modifiedItem->getData('host'));
@@ -174,7 +193,10 @@ final class RouteCollection implements RouteCollectionInterface
             if (empty($tree[$group->getData('prefix')])) {
                 $tree[] = $optionsRoute->getData('name');
             } else {
-                /** @psalm-suppress PossiblyNullArrayOffset Checked group prefix on not empty above */
+                /**
+                 * @psalm-suppress MixedArrayAssignment,PossiblyNullArrayOffset
+                 * Checked group prefix on not empty above
+                 */
                 $tree[$group->getData('prefix')][] = $optionsRoute->getData('name');
             }
             $this->routes[$optionsRoute->getData('name')] = $optionsRoute->action(
@@ -190,6 +212,8 @@ final class RouteCollection implements RouteCollectionInterface
      * @param array $items
      * @param bool $routeAsString
      *
+     * @psalm-param Items $items
+     *
      * @return array
      */
     private function buildTree(array $items, bool $routeAsString): array
@@ -197,6 +221,7 @@ final class RouteCollection implements RouteCollectionInterface
         $tree = [];
         foreach ($items as $key => $item) {
             if (is_array($item)) {
+                /** @psalm-var Items $item */
                 $tree[$key] = $this->buildTree($item, $routeAsString);
             } else {
                 $tree[] = $routeAsString ? (string)$this->getRoute($item) : $this->getRoute($item);

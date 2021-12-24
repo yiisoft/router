@@ -15,8 +15,17 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 final class MatchingResult implements MiddlewareInterface
 {
     private ?Route $route;
+
+    /**
+     * @var string[]
+     */
     private array $arguments = [];
+
+    /**
+     * @var string[]
+     */
     private array $methods = [];
+
     private ?MiddlewareDispatcher $dispatcher = null;
 
     private function __construct(?Route $route)
@@ -31,6 +40,9 @@ final class MatchingResult implements MiddlewareInterface
         return $new;
     }
 
+    /**
+     * @param string[] $arguments
+     */
     public static function fromSuccess(Route $route, array $arguments): self
     {
         $new = new self($route);
@@ -38,6 +50,9 @@ final class MatchingResult implements MiddlewareInterface
         return $new;
     }
 
+    /**
+     * @param string[] $methods
+     */
     public static function fromFailure(array $methods): self
     {
         $new = new self(null);
@@ -58,11 +73,17 @@ final class MatchingResult implements MiddlewareInterface
         return $this->route === null && $this->methods !== Method::ALL;
     }
 
+    /**
+     * @return string[]
+     */
     public function arguments(): array
     {
         return $this->arguments;
     }
 
+    /**
+     * @return string[]
+     */
     public function methods(): array
     {
         return $this->methods;

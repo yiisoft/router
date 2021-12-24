@@ -19,16 +19,21 @@ final class Group
      */
     private array $items = [];
     private ?string $prefix;
+
+    /**
+     * @var array[]|callable[]|string[]
+     */
     private array $middlewareDefinitions = [];
+
     private ?string $host = null;
     private ?string $namePrefix = null;
     private bool $routesAdded = false;
     private bool $middlewareAdded = false;
     private array $disabledMiddlewareDefinitions = [];
     /**
-     * @var mixed Middleware definition for CORS requests.
+     * @var array|callable|string|null Middleware definition for CORS requests.
      */
-    private $corsMiddleware;
+    private $corsMiddleware = null;
     private ?MiddlewareDispatcher $dispatcher;
 
     private function __construct(?string $prefix = null, MiddlewareDispatcher $dispatcher = null)
@@ -100,7 +105,7 @@ final class Group
      * Adds a middleware definition that handles CORS requests.
      * If set, routes for {@see Method::OPTIONS} request will be added automatically.
      *
-     * @param mixed $middlewareDefinition Middleware definition for CORS requests.
+     * @param array|callable|string|null $middlewareDefinition Middleware definition for CORS requests.
      *
      * @return self
      */
@@ -116,7 +121,7 @@ final class Group
      * Appends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed first.
      *
-     * @param mixed $middlewareDefinition
+     * @param array|callable|string $middlewareDefinition
      *
      * @return self
      */
@@ -134,7 +139,7 @@ final class Group
      * Prepends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed last.
      *
-     * @param mixed $middlewareDefinition
+     * @param array|callable|string $middlewareDefinition
      *
      * @return self
      */
@@ -183,13 +188,15 @@ final class Group
      *
      * @internal
      *
-     * @psalm-template T
+     * @psalm-template T as string
      * @psalm-param T $key
      * @psalm-return (
      *   T is ('prefix'|'namePrefix'|'host') ? string|null :
      *   (T is 'items' ? Group[]|Route[] :
      *     (T is ('hasCorsMiddleware'|'hasDispatcher') ? bool :
-     *       (T is 'middlewareDefinitions' ? array : mixed)
+     *       (T is 'middlewareDefinitions' ? array<array-key,array|callable|string> :
+     *         (T is 'corsMiddleware' ? array|callable|string|null : mixed)
+     *       )
      *     )
      *   )
      * )
@@ -220,6 +227,7 @@ final class Group
 
     private function getMiddlewareDefinitions(): array
     {
+        /** @var mixed $definition */
         foreach ($this->middlewareDefinitions as $index => $definition) {
             if (in_array($definition, $this->disabledMiddlewareDefinitions, true)) {
                 unset($this->middlewareDefinitions[$index]);

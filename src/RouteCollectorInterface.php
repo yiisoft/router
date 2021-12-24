@@ -38,7 +38,7 @@ interface RouteCollectorInterface
      * Appends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed first.
      *
-     * @param mixed $middlewareDefinition
+     * @param array|callable|string $middlewareDefinition
      *
      * @return self
      */
@@ -48,7 +48,7 @@ interface RouteCollectorInterface
      * Prepends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed last.
      *
-     * @param mixed $middlewareDefinition
+     * @param array|callable|string $middlewareDefinition
      *
      * @return self
      */
@@ -59,5 +59,8 @@ interface RouteCollectorInterface
      */
     public function getItems(): array;
 
+    /**
+     * @return array[]|callable[]|string[]
+     */
     public function getMiddlewareDefinitions(): array;
 }
