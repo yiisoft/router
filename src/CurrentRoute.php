@@ -14,8 +14,6 @@ final class CurrentRoute
 {
     /**
      * Current Route
-     *
-     * @var Route|null
      */
     private ?Route $route = null;
 
@@ -26,6 +24,8 @@ final class CurrentRoute
 
     /**
      * Current Route arguments.
+     *
+     * @var string[]
      */
     private array $arguments = [];
 
@@ -62,7 +62,7 @@ final class CurrentRoute
     /**
      * Returns the current route methods.
      *
-     * @return array|null The current route methods.
+     * @return string[]|null The current route methods.
      */
     public function getMethods(): ?array
     {
@@ -81,7 +81,7 @@ final class CurrentRoute
 
     /**
      * @param Route $route
-     * @param array $arguments
+     * @param string[] $arguments
      *
      * @internal
      */
@@ -114,7 +114,7 @@ final class CurrentRoute
         return $this->arguments;
     }
 
-    public function getArgument(string $name, string $default = null): ?string
+    public function getArgument(string $name, ?string $default = null): ?string
     {
         return $this->arguments[$name] ?? $default;
     }

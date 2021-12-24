@@ -8,19 +8,29 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use RuntimeException;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
 final class MatchingResult implements MiddlewareInterface
 {
-    private bool $success;
-    private Route $route;
+    private ?Route $route;
+
+    /**
+     * @var string[]
+     */
     private array $arguments = [];
+
+    /**
+     * @var string[]
+     */
     private array $methods = [];
+
     private ?MiddlewareDispatcher $dispatcher = null;
 
-    private function __construct()
+    private function __construct(?Route $route)
     {
+        $this->route = $route;
     }
 
     public function withDispatcher(MiddlewareDispatcher $dispatcher): self
@@ -30,38 +40,50 @@ final class MatchingResult implements MiddlewareInterface
         return $new;
     }
 
+    /**
+     * @param string[] $arguments
+     */
     public static function fromSuccess(Route $route, array $arguments): self
     {
-        $new = new self();
-        $new->success = true;
-        $new->route = $route;
+        $new = new self($route);
         $new->arguments = $arguments;
         return $new;
     }
 
+    /**
+     * @param string[] $methods
+     */
     public static function fromFailure(array $methods): self
     {
-        $new = new self();
+        $new = new self(null);
         $new->methods = $methods;
-        $new->success = false;
         return $new;
     }
 
+    /**
+     * @psalm-assert-if-true !null $this->route
+     */
     public function isSuccess(): bool
     {
-        return $this->success;
+        return $this->route !== null;
     }
 
     public function isMethodFailure(): bool
     {
-        return !$this->success && $this->methods !== Method::ALL;
+        return $this->route === null && $this->methods !== Method::ALL;
     }
 
+    /**
+     * @return string[]
+     */
     public function arguments(): array
     {
         return $this->arguments;
     }
 
+    /**
+     * @return string[]
+     */
     public function methods(): array
     {
         return $this->methods;
@@ -69,6 +91,10 @@ final class MatchingResult implements MiddlewareInterface
 
     public function route(): Route
     {
+        if ($this->route === null) {
+            throw new RuntimeException('There is no route in the matching result.');
+        }
+
         return $this->route;
     }
 
@@ -77,12 +103,11 @@ final class MatchingResult implements MiddlewareInterface
         if (!$this->isSuccess()) {
             return $handler->handle($request);
         }
-        $route = $this->route;
 
-        if ($this->dispatcher !== null && !$route->getData('hasDispatcher')) {
-            $route->injectDispatcher($this->dispatcher);
+        if ($this->dispatcher !== null && !$this->route->getData('hasDispatcher')) {
+            $this->route->injectDispatcher($this->dispatcher);
         }
 
-        return $route->getData('dispatcherWithMiddlewares')->dispatch($request, $handler);
+        return $this->route->getData('dispatcherWithMiddlewares')->dispatch($request, $handler);
     }
 }

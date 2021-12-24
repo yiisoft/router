@@ -15,22 +15,39 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 final class Route
 {
     private ?string $name = null;
-    /** @var string[] */
+
+    /**
+     * @var string[]
+     */
     private array $methods;
+
     private string $pattern;
     private ?string $host = null;
     private bool $override = false;
     private ?MiddlewareDispatcher $dispatcher;
     private bool $actionAdded = false;
+
+    /**
+     * @var array[]|callable[]|string[]
+     */
     private array $middlewareDefinitions = [];
+
     private array $disabledMiddlewareDefinitions = [];
     private array $defaults = [];
 
-    private function __construct(?MiddlewareDispatcher $dispatcher = null)
+    /**
+     * @param string[] $methods
+     */
+    private function __construct(array $methods, string $pattern, ?MiddlewareDispatcher $dispatcher = null)
     {
+        $this->methods = $methods;
+        $this->pattern = $pattern;
         $this->dispatcher = $dispatcher;
     }
 
+    /**
+     * @psalm-assert MiddlewareDispatcher $this->dispatcher
+     */
     public function injectDispatcher(MiddlewareDispatcher $dispatcher): void
     {
         $this->dispatcher = $dispatcher;
@@ -124,7 +141,7 @@ final class Route
     }
 
     /**
-     * @param array $methods
+     * @param string[] $methods
      * @param string $pattern
      * @param MiddlewareDispatcher|null $dispatcher
      *
@@ -135,11 +152,7 @@ final class Route
         string $pattern,
         ?MiddlewareDispatcher $dispatcher = null
     ): self {
-        $route = new self($dispatcher);
-        $route->methods = $methods;
-        $route->pattern = $pattern;
-
-        return $route;
+        return new self($methods, $pattern, $dispatcher);
     }
 
     /**
@@ -202,7 +215,7 @@ final class Route
      * Appends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed first.
      *
-     * @param mixed $middlewareDefinition
+     * @param array|callable|string $middlewareDefinition
      *
      * @return self
      */
@@ -220,7 +233,7 @@ final class Route
      * Prepends a handler middleware definition that should be invoked for a matched route.
      * Last added handler will be executed first.
      *
-     * @param mixed $middlewareDefinition
+     * @param array|callable|string $middlewareDefinition
      *
      * @return self
      */
@@ -237,7 +250,7 @@ final class Route
     /**
      * Appends action handler. It is a primary middleware definition that should be invoked last for a matched route.
      *
-     * @param mixed $middlewareDefinition
+     * @param array|callable|string $middlewareDefinition
      *
      * @return self
      */
@@ -271,12 +284,28 @@ final class Route
      * @return mixed
      *
      * @internal
+     *
+     * @psalm-template T as string
+     * @psalm-param T $key
+     * @psalm-return (
+     *   T is ('name'|'pattern') ? string :
+     *     (T is 'host' ? string|null :
+     *       (T is 'methods' ? array<array-key,string> :
+     *         (T is 'defaults' ? array :
+     *           (T is ('override'|'hasMiddlewares'|'hasDispatcher') ? bool :
+     *             (T is 'dispatcherWithMiddlewares' ? MiddlewareDispatcher : mixed)
+     *           )
+     *         )
+     *       )
+     *     )
+     * )
      */
     public function getData(string $key)
     {
         switch ($key) {
             case 'name':
-                return $this->name ?? (implode(', ', $this->methods) . ' ' . $this->host . $this->pattern);
+                return $this->name ??
+                    (implode(', ', $this->methods) . ' ' . (string) $this->host . $this->pattern);
             case 'pattern':
                 return $this->pattern;
             case 'host':
@@ -335,10 +364,15 @@ final class Route
 
     private function getDispatcherWithMiddlewares(): MiddlewareDispatcher
     {
+        if ($this->dispatcher === null) {
+            throw new RuntimeException(sprintf('There is no dispatcher in the route %s', $this->getData('name')));
+        }
+
         if ($this->dispatcher->hasMiddlewares()) {
             return $this->dispatcher;
         }
 
+        /** @var mixed $definition */
         foreach ($this->middlewareDefinitions as $index => $definition) {
             if (in_array($definition, $this->disabledMiddlewareDefinitions, true)) {
                 unset($this->middlewareDefinitions[$index]);
