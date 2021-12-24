@@ -92,7 +92,7 @@ final class MatchingResult implements MiddlewareInterface
     public function route(): Route
     {
         if ($this->route === null) {
-            throw new RuntimeException('There is no route to match.');
+            throw new RuntimeException('There is no route in the matching result.');
         }
 
         return $this->route;
