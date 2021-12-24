@@ -365,7 +365,7 @@ final class Route
     private function getDispatcherWithMiddlewares(): MiddlewareDispatcher
     {
         if ($this->dispatcher === null) {
-            throw new RuntimeException('There is no dispatcher on the route.');
+            throw new RuntimeException(sprintf('There is no dispatcher in the route %s', $this->getData('name')));
         }
 
         if ($this->dispatcher->hasMiddlewares()) {
