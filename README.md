@@ -22,7 +22,7 @@ with an adapter package. Currently, the only adapter is available, [FastRoute](h
 ## General usage
 
 ```php
-use Yiisoft\Router\CurrentRouteInterface;
+use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
@@ -40,7 +40,7 @@ $routes = [
             return $response;
         }),
     Route::get('/test/{id:\w+}')
-        ->action(static function (CurrentRouteInterface $currentRoute, RequestHandlerInterface $next) use ($responseFactory) {
+        ->action(static function (CurrentRoute $currentRoute, RequestHandlerInterface $next) use ($responseFactory) {
             $id = $currentRoute->getArgument('id');
     
             $response = $responseFactory->createResponse();
@@ -147,7 +147,7 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Yiisoft\Yii\Http\Handler\NotFoundHandler;
 use Yiisoft\Yii\Runner\Http\SapiEmitter;
 use Yiisoft\Yii\Runner\Http\ServerRequestFactory;
-use Yiisoft\Router\CurrentRouteInterface;
+use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectorInterface;
@@ -158,7 +158,7 @@ $request = $container->get(ServerRequestFactory::class)->createFromGlobals();
 $responseFactory = $container->get(ResponseFactoryInterface::class);
 $notFoundHandler = new NotFoundHandler($responseFactory);
 $collector = $container->get(RouteCollectorInterface::class);
-$collector->addRoute(Route::get('/test/{id:\w+}')->action(static function (CurrentRouteInterface $currentRoute, RequestHandlerInterface $next) use ($responseFactory) {
+$collector->addRoute(Route::get('/test/{id:\w+}')->action(static function (CurrentRoute $currentRoute, RequestHandlerInterface $next) use ($responseFactory) {
    $id = $currentRoute->getArgument('id');
    $response = $responseFactory->createResponse();
    $response->getBody()->write('You are at test with argument ' . $id);
@@ -210,14 +210,14 @@ Current route (matched last) and URI could be obtained the following:
 
 ```php
 use Psr\Http\Message\UriInterface;
-use Yiisoft\Router\CurrentRouteInterface;
+use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\Route;
 
 final class MyClass {
     private ?Route $currentRoute;
     private ?UriInterface $currentUri;
     
-    public function __construct(CurrentRouteInterface $currentRoute) {
+    public function __construct(CurrentRoute $currentRoute) {
             $this->currentRoute = $currentRoute->getRoute();
             $this->currentUri = $currentRoute->getUri();
     }
@@ -227,12 +227,12 @@ final class MyClass {
 Current route arguments could be obtained as follows:
 
 ```php
-use Yiisoft\Router\CurrentRouteInterface;
+use Yiisoft\Router\CurrentRoute;
 use Psr\Http\Message\ResponseFactoryInterface;
 
 $routes = [
     Route::get('/posts[/{page:\d+}]')
-            ->action(static function (CurrentRouteInterface $currentRoute, ResponseFactoryInterface $responseFactory) {
+            ->action(static function (CurrentRoute $currentRoute, ResponseFactoryInterface $responseFactory) {
                 $page = $currentRoute->getArgument('page', 1);
                 $response = $responseFactory->createResponse();
                 $response->getBody()->write("You are at $page page.");
