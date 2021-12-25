@@ -8,6 +8,8 @@ use InvalidArgumentException;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Yiisoft\Http\Method;
 
+use function array_key_exists;
+
 /**
  * @psalm-type Items = array<array-key,array|string>
  */
