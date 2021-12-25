@@ -12,6 +12,7 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use RuntimeException;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
@@ -69,6 +70,15 @@ final class MatchingResultTest extends TestCase
             ->process($request, $this->getRequestHandler());
 
         $this->assertSame(404, $response->getStatusCode());
+    }
+
+    public function testRouteOnFailure(): void
+    {
+        $result = MatchingResult::fromFailure([Method::GET, Method::HEAD]);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('There is no route in the matching result.');
+        $result->route();
     }
 
     private function getMiddleware(): callable

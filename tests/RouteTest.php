@@ -12,6 +12,7 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use RuntimeException;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
@@ -156,6 +157,24 @@ final class RouteTest extends TestCase
         $route->injectDispatcher($dispatcher);
         $response = $route->getData('dispatcherWithMiddlewares')->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testMiddlewareAfterAction(): void
+    {
+        $route = Route::get('/')->action([TestController::class, 'index']);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('middleware() can not be used after action().');
+        $route->middleware(static fn () => new Response());
+    }
+
+    public function testPrependMiddlewareBeforeAction(): void
+    {
+        $route = Route::get('/');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('prependMiddleware() can not be used before action().');
+        $route->prependMiddleware(static fn () => new Response());
     }
 
     private function getRequestHandler(): RequestHandlerInterface
