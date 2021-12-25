@@ -9,6 +9,7 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Yiisoft\Http\Method;
 
 use function array_key_exists;
+use function is_array;
 
 /**
  * @psalm-type Items = array<array-key,array|string>

@@ -9,6 +9,8 @@ use RuntimeException;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
+use function in_array;
+
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
  */
