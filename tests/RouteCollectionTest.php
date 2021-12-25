@@ -112,13 +112,18 @@ final class RouteCollectionTest extends TestCase
                     ->routes(
                         Route::get('/posts', $this->getDispatcher())->name('/posts'),
                         Route::get('/post/{sile}')->name('/post/view')
-                    )->namePrefix('/v1')
+                    )->namePrefix('/v1'),
+                Group::create('/v1')
+                    ->routes(
+                        Route::get('/tags', $this->getDispatcher())->name('/tags'),
+                        Route::get('/tag/{slug}')->name('/tag/view'),
+                    )->namePrefix('/v1'),
             )->namePrefix('/api');
 
         $group2 = Group::create('/api')
             ->routes(
                 Route::get('/posts', $this->getDispatcher())->name('/posts'),
-                Route::get('/post/{sile}')->name('/post/view')
+                Route::get('/post/{sile}')->name('/post/view'),
             )->namePrefix('/api');
 
         $collector = new RouteCollector();
@@ -127,8 +132,22 @@ final class RouteCollectionTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $routeTree = $routeCollection->getRouteTree();
-        $this->assertCount(5, $routeTree);
-        $this->assertArrayHasKey('/v1', $routeTree);
+
+        $this->assertSame(
+            [
+                '[/api/test] GET /api/test',
+                '[/api/image] GET /api/images/{sile}',
+                '/v1' => [
+                    '[/api/v1/posts] GET /api/v1/posts',
+                    '[/api/v1/post/view] GET /api/v1/post/{sile}',
+                    '[/api/v1/tags] GET /api/v1/tags',
+                    '[/api/v1/tag/view] GET /api/v1/tag/{slug}',
+                ],
+                '[/api/posts] GET /api/posts',
+                '[/api/post/view] GET /api/post/{sile}',
+            ],
+            $routeTree
+        );
     }
 
     public function testGetRoutes(): void

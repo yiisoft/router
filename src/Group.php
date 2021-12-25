@@ -9,6 +9,7 @@ use RuntimeException;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
 use function get_class;
+use function gettype;
 use function in_array;
 use function is_object;
 
