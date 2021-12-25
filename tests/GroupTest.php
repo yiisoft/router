@@ -385,6 +385,15 @@ final class GroupTest extends TestCase
         $this->assertInstanceOf(Route::class, $routeCollection->getRoute('OPTIONS /v1/post'));
     }
 
+    public function testMiddlewareAfterRoutes(): void
+    {
+        $group = Group::create()->routes(Route::get('/info')->action(static fn () => 'info'));
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('middleware() can not be used after routes().');
+        $group->middleware(static fn () => new Response());
+    }
+
     private function getRequestHandler(): RequestHandlerInterface
     {
         return new class () implements RequestHandlerInterface {
