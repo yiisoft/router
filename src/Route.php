@@ -370,10 +370,6 @@ final class Route
             throw new RuntimeException(sprintf('There is no dispatcher in the route %s.', $this->getData('name')));
         }
 
-        if ($this->dispatcher->hasMiddlewares()) {
-            return $this->dispatcher;
-        }
-
         /** @var mixed $definition */
         foreach ($this->middlewareDefinitions as $index => $definition) {
             if (in_array($definition, $this->disabledMiddlewareDefinitions, true)) {
