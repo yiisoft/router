@@ -132,7 +132,7 @@ final class Group
             throw new RuntimeException('middleware() can not be used after routes().');
         }
         $new = clone $this;
-        array_unshift(
+        array_push(
             $new->middlewareDefinitions,
             ...array_values($middlewareDefinition)
         );
@@ -150,7 +150,7 @@ final class Group
     public function prependMiddleware(...$middlewareDefinition): self
     {
         $new = clone $this;
-        array_push(
+        array_unshift(
             $new->middlewareDefinitions,
             ...array_values($middlewareDefinition)
         );

@@ -259,7 +259,18 @@ final class RouteCollectionTest extends TestCase
         $this->assertEquals('middleware1', $response2->getReasonPhrase());
     }
 
-    public function testMiddlewaresOrder(): void
+    public function dataMiddlewaresOrder(): array
+    {
+        return [
+            [true],
+            [false],
+        ];
+    }
+
+    /**
+     * @dataProvider dataMiddlewaresOrder
+     */
+    public function testMiddlewaresOrder(bool $groupWrapped): void
     {
         $request = new ServerRequest('GET', '/');
 
@@ -278,12 +289,18 @@ final class RouteCollectionTest extends TestCase
             ->middleware(TestMiddleware2::class)
             ->prependMiddleware(TestMiddleware1::class);
 
-        $collector->addRoute(
-            Route::get('/')
-                ->middleware(TestMiddleware3::class)
-                ->action([TestController::class, 'index'])
-                ->name('main')
-        );
+        $rawRoute = Route::get('/')
+            ->middleware(TestMiddleware3::class)
+            ->action([TestController::class, 'index'])
+            ->name('main');
+
+        if ($groupWrapped) {
+            $collector->addGroup(
+                Group::create()->routes($rawRoute)
+            );
+        } else {
+            $collector->addRoute($rawRoute);
+        }
 
         $route = (new RouteCollection($collector))->getRoute('main');
         $route->injectDispatcher($injectDispatcher);
