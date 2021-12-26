@@ -22,6 +22,7 @@ use Yiisoft\Router\Tests\Support\Container;
 use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
 use Yiisoft\Router\Tests\Support\TestController;
+use Yiisoft\Router\Tests\Support\TestMiddleware3;
 
 final class RouteTest extends TestCase
 {
@@ -190,15 +191,15 @@ final class RouteTest extends TestCase
             $this->getContainer([
                 TestMiddleware1::class => new TestMiddleware1(),
                 TestMiddleware2::class => new TestMiddleware2(),
+                TestMiddleware3::class => new TestMiddleware3(),
                 TestController::class => new TestController(),
             ])
         );
 
         $route = Route::get('/')
-            ->middleware(TestMiddleware1::class)
-            ->middleware(TestMiddleware2::class)
+            ->middleware(TestMiddleware1::class, TestMiddleware2::class, TestMiddleware3::class)
             ->action([TestController::class, 'index'])
-            ->disableMiddleware(TestMiddleware1::class);
+            ->disableMiddleware(TestMiddleware1::class, TestMiddleware3::class);
         $route->injectDispatcher($injectDispatcher);
 
         $dispatcher = $route->getData('dispatcherWithMiddlewares');
@@ -206,6 +207,32 @@ final class RouteTest extends TestCase
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('2', (string) $response->getBody());
+    }
+
+    public function testPrependMiddlewareDefinitions(): void
+    {
+        $request = new ServerRequest('GET', '/');
+
+        $injectDispatcher = $this->getDispatcher(
+            $this->getContainer([
+                TestMiddleware1::class => new TestMiddleware1(),
+                TestMiddleware2::class => new TestMiddleware2(),
+                TestMiddleware3::class => new TestMiddleware3(),
+                TestController::class => new TestController(),
+            ])
+        );
+
+        $route = Route::get('/')
+            ->middleware(TestMiddleware3::class)
+            ->action([TestController::class, 'index'])
+            ->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class);
+        $route->injectDispatcher($injectDispatcher);
+
+        $dispatcher = $route->getData('dispatcherWithMiddlewares');
+
+        $response = $dispatcher->dispatch($request, $this->getRequestHandler());
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('123', (string) $response->getBody());
     }
 
     public function testGetDispatcherWithoutDispatcher(): void

@@ -217,17 +217,20 @@ final class Route
      * Appends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed first.
      *
-     * @param array|callable|string $middlewareDefinition
+     * @param array|callable|string ...$middlewareDefinition
      *
      * @return self
      */
-    public function middleware($middlewareDefinition): self
+    public function middleware(...$middlewareDefinition): self
     {
         if ($this->actionAdded) {
             throw new RuntimeException('middleware() can not be used after action().');
         }
         $route = clone $this;
-        $route->middlewareDefinitions[] = $middlewareDefinition;
+        array_push(
+            $route->middlewareDefinitions,
+            ...array_values($middlewareDefinition)
+        );
         return $route;
     }
 
@@ -235,17 +238,20 @@ final class Route
      * Prepends a handler middleware definition that should be invoked for a matched route.
      * Last added handler will be executed first.
      *
-     * @param array|callable|string $middlewareDefinition
+     * @param array|callable|string ...$middlewareDefinition
      *
      * @return self
      */
-    public function prependMiddleware($middlewareDefinition): self
+    public function prependMiddleware(...$middlewareDefinition): self
     {
         if (!$this->actionAdded) {
             throw new RuntimeException('prependMiddleware() can not be used before action().');
         }
         $route = clone $this;
-        array_unshift($route->middlewareDefinitions, $middlewareDefinition);
+        array_unshift(
+            $route->middlewareDefinitions,
+            ...array_values($middlewareDefinition)
+        );
         return $route;
     }
 
@@ -269,14 +275,17 @@ final class Route
      * It is useful to avoid invoking one of the parent group middleware for
      * a certain route.
      *
-     * @param mixed $middlewareDefinition
+     * @param mixed ...$middlewareDefinition
      *
      * @return self
      */
-    public function disableMiddleware($middlewareDefinition): self
+    public function disableMiddleware(...$middlewareDefinition): self
     {
         $route = clone $this;
-        $route->disabledMiddlewareDefinitions[] = $middlewareDefinition;
+        array_push(
+            $route->disabledMiddlewareDefinitions,
+            ...array_values($middlewareDefinition)
+        );
         return $route;
     }
 
