@@ -229,18 +229,19 @@ final class RouteTest extends TestCase
             ])
         )->withMiddlewares([
             TestMiddleware1::class,
-            TestMiddleware2::class,
             [TestController::class, 'index'],
         ]);
 
-        $route = Route::get('/');
+        $route = Route::get('/')
+            ->middleware(TestMiddleware2::class)
+            ->action([TestController::class, 'index']);
         $route->injectDispatcher($injectDispatcher);
 
         $dispatcher = $route->getData('dispatcherWithMiddlewares');
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame('12', (string) $response->getBody());
+        $this->assertSame('2', (string) $response->getBody());
     }
 
     public function testDebugInfo(): void
