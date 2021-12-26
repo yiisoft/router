@@ -65,11 +65,11 @@ final class RouteCollectorTest extends TestCase
     {
         $collector = new RouteCollector();
 
-        $middleware1 = static fn() => new Response();
-        $middleware2 = static fn() => new Response();
-        $middleware3 = static fn() => new Response();
-        $middleware4 = static fn() => new Response();
-        $middleware5 = static fn() => new Response();
+        $middleware1 = static fn () => new Response();
+        $middleware2 = static fn () => new Response();
+        $middleware3 = static fn () => new Response();
+        $middleware4 = static fn () => new Response();
+        $middleware5 = static fn () => new Response();
 
         $collector
             ->middleware($middleware3, $middleware4)
