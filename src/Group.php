@@ -122,17 +122,20 @@ final class Group
      * Appends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed first.
      *
-     * @param array|callable|string $middlewareDefinition
+     * @param array|callable|string ...$middlewareDefinition
      *
      * @return self
      */
-    public function middleware($middlewareDefinition): self
+    public function middleware(...$middlewareDefinition): self
     {
         if ($this->routesAdded) {
             throw new RuntimeException('middleware() can not be used after routes().');
         }
         $new = clone $this;
-        array_unshift($new->middlewareDefinitions, $middlewareDefinition);
+        array_unshift(
+            $new->middlewareDefinitions,
+            ...array_values($middlewareDefinition)
+        );
         return $new;
     }
 
@@ -140,14 +143,17 @@ final class Group
      * Prepends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed last.
      *
-     * @param array|callable|string $middlewareDefinition
+     * @param array|callable|string ...$middlewareDefinition
      *
      * @return self
      */
-    public function prependMiddleware($middlewareDefinition): self
+    public function prependMiddleware(...$middlewareDefinition): self
     {
         $new = clone $this;
-        $new->middlewareDefinitions[] = $middlewareDefinition;
+        array_push(
+            $new->middlewareDefinitions,
+            ...array_values($middlewareDefinition)
+        );
         $new->middlewareAdded = true;
         return $new;
     }
@@ -171,14 +177,17 @@ final class Group
      * It is useful to avoid invoking one of the parent group middleware for
      * a certain route.
      *
-     * @param mixed $middlewareDefinition
+     * @param mixed ...$middlewareDefinition
      *
      * @return self
      */
-    public function disableMiddleware($middlewareDefinition): self
+    public function disableMiddleware(...$middlewareDefinition): self
     {
         $new = clone $this;
-        $new->disabledMiddlewareDefinitions[] = $middlewareDefinition;
+        array_push(
+            $new->disabledMiddlewareDefinitions,
+            ...array_values($middlewareDefinition),
+        );
         return $new;
     }
 
@@ -195,7 +204,7 @@ final class Group
      *   T is ('prefix'|'namePrefix'|'host') ? string|null :
      *   (T is 'items' ? Group[]|Route[] :
      *     (T is ('hasCorsMiddleware'|'hasDispatcher') ? bool :
-     *       (T is 'middlewareDefinitions' ? array<array-key,array|callable|string> :
+     *       (T is 'middlewareDefinitions' ? list<array|callable|string> :
      *         (T is 'corsMiddleware' ? array|callable|string|null : mixed)
      *       )
      *     )
@@ -235,6 +244,6 @@ final class Group
             }
         }
 
-        return $this->middlewareDefinitions;
+        return array_values($this->middlewareDefinitions);
     }
 }

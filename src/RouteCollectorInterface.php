@@ -9,11 +9,11 @@ interface RouteCollectorInterface
     /**
      * Add a route
      *
-     * @param Route $route
+     * @param Route ...$route
      *
      * @return self
      */
-    public function addRoute(Route $route): self;
+    public function addRoute(Route ...$route): self;
 
     /**
      * Add a group of routes
@@ -28,31 +28,31 @@ interface RouteCollectorInterface
      * $routeCollector->addGroup($group);
      * ```
      *
-     * @param Group $group a group to add
+     * @param Group ...$group a group to add
      *
      * @return self
      */
-    public function addGroup(Group $group): self;
+    public function addGroup(Group ...$group): self;
 
     /**
      * Appends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed first.
      *
-     * @param array|callable|string $middlewareDefinition
+     * @param array|callable|string ...$middlewareDefinition
      *
      * @return self
      */
-    public function middleware($middlewareDefinition): self;
+    public function middleware(...$middlewareDefinition): self;
 
     /**
      * Prepends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed last.
      *
-     * @param array|callable|string $middlewareDefinition
+     * @param array|callable|string ...$middlewareDefinition
      *
      * @return self
      */
-    public function prependMiddleware($middlewareDefinition): self;
+    public function prependMiddleware(...$middlewareDefinition): self;
 
     /**
      * @return Group[]|Route[]
