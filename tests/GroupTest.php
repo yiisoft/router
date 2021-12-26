@@ -23,6 +23,7 @@ use Yiisoft\Router\RouteCollector;
 use Yiisoft\Router\Tests\Support\Container;
 use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
+use Yiisoft\Router\Tests\Support\TestMiddleware3;
 
 final class GroupTest extends TestCase
 {
@@ -48,9 +49,9 @@ final class GroupTest extends TestCase
     public function testDisabledMiddlewareDefinitions(): void
     {
         $group = Group::create()
-            ->middleware(TestMiddleware1::class)
-            ->middleware(TestMiddleware2::class)
-            ->disableMiddleware(TestMiddleware1::class);
+            ->middleware(TestMiddleware3::class)
+            ->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class)
+            ->disableMiddleware(TestMiddleware1::class, TestMiddleware3::class);
 
         $this->assertCount(1, $group->getData('middlewareDefinitions'));
         $this->assertSame(TestMiddleware2::class, $group->getData('middlewareDefinitions')[0]);

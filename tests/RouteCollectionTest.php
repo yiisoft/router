@@ -12,6 +12,7 @@ use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use RuntimeException;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Group;
@@ -19,6 +20,11 @@ use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollector;
 use Yiisoft\Router\RouteNotFoundException;
+use Yiisoft\Router\Tests\Support\TestController;
+use Yiisoft\Router\Tests\Support\TestMiddleware1;
+use Yiisoft\Router\Tests\Support\TestMiddleware2;
+use Yiisoft\Router\Tests\Support\TestMiddleware3;
+use Yiisoft\Test\Support\Container\SimpleContainer;
 
 final class RouteCollectionTest extends TestCase
 {
@@ -253,6 +259,69 @@ final class RouteCollectionTest extends TestCase
         $this->assertEquals('middleware1', $response2->getReasonPhrase());
     }
 
+    public function testMiddlewaresOrder(): void
+    {
+        $request = new ServerRequest('GET', '/');
+
+        $injectDispatcher = $this->getDispatcher(
+            new SimpleContainer([
+                TestMiddleware1::class => new TestMiddleware1(),
+                TestMiddleware2::class => new TestMiddleware2(),
+                TestMiddleware3::class => new TestMiddleware3(),
+                TestController::class => new TestController(),
+            ])
+        );
+
+        $collector = new RouteCollector();
+
+        $collector
+            ->middleware(TestMiddleware2::class)
+            ->prependMiddleware(TestMiddleware1::class);
+
+        $collector->addRoute(
+            Route::get('/')
+                ->middleware(TestMiddleware3::class)
+                ->action([TestController::class, 'index'])
+                ->name('main')
+        );
+
+        $route = (new RouteCollection($collector))->getRoute('main');
+        $route->injectDispatcher($injectDispatcher);
+
+        $dispatcher = $route->getData('dispatcherWithMiddlewares');
+
+        $response = $dispatcher->dispatch($request, $this->getRequestHandler());
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('123', (string) $response->getBody());
+    }
+
+    public function testStaticRouteWithCollectorMiddlewares(): void
+    {
+        $request = new ServerRequest('GET', '/');
+
+        $injectDispatcher = $this->getDispatcher(
+            new SimpleContainer([
+                TestMiddleware1::class => new TestMiddleware1(),
+            ])
+        );
+
+        $collector = new RouteCollector();
+        $collector->middleware(TestMiddleware1::class);
+
+        $collector->addRoute(
+            Route::get('i/{image}')->name('image')
+        );
+
+        $route = (new RouteCollection($collector))->getRoute('image');
+        $route->injectDispatcher($injectDispatcher);
+
+        $dispatcher = $route->getData('dispatcherWithMiddlewares');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Stack is empty.');
+        $dispatcher->dispatch($request, $this->getRequestHandler());
+    }
+
     private function getRequestHandler(): RequestHandlerInterface
     {
         return new class () implements RequestHandlerInterface {
@@ -263,10 +332,10 @@ final class RouteCollectionTest extends TestCase
         };
     }
 
-    private function getDispatcher(): MiddlewareDispatcher
+    private function getDispatcher(ContainerInterface $container = null): MiddlewareDispatcher
     {
         return new MiddlewareDispatcher(
-            new MiddlewareFactory($this->createMock(ContainerInterface::class)),
+            new MiddlewareFactory($container ?? $this->createMock(ContainerInterface::class)),
             $this->createMock(EventDispatcherInterface::class)
         );
     }
