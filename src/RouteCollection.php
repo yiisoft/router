@@ -114,9 +114,7 @@ final class RouteCollection implements RouteCollectionInterface
         $host = null;
         foreach ($items as $item) {
             if (!$this->isStaticRoute($item)) {
-                foreach ($group->getData('middlewareDefinitions') as $middleware) {
-                    $item = $item->prependMiddleware($middleware);
-                }
+                $item = $item->prependMiddleware(...$group->getData('middlewareDefinitions'));
             }
 
             if ($group->getData('host') !== null && $item->getData('host') === null) {
