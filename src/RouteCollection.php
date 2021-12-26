@@ -73,8 +73,8 @@ final class RouteCollection implements RouteCollectionInterface
     private function injectItems(array $items): void
     {
         foreach ($items as $item) {
-            foreach ($this->collector->getMiddlewareDefinitions() as $middlewareDefinition) {
-                $item = $item->prependMiddleware($middlewareDefinition);
+            if (!$this->isStaticRoute($item)) {
+                $item = $item->prependMiddleware(...$this->collector->getMiddlewareDefinitions());
             }
             $this->injectItem($item);
         }
@@ -113,7 +113,7 @@ final class RouteCollection implements RouteCollectionInterface
         $pattern = null;
         $host = null;
         foreach ($items as $item) {
-            if ($item instanceof Group || $item->getData('hasMiddlewares')) {
+            if (!$this->isStaticRoute($item)) {
                 foreach ($group->getData('middlewareDefinitions') as $middleware) {
                     $item = $item->prependMiddleware($middleware);
                 }
@@ -215,9 +215,17 @@ final class RouteCollection implements RouteCollectionInterface
                 /** @psalm-var Items $item */
                 $tree[$key] = $this->buildTree($item, $routeAsString);
             } else {
-                $tree[] = $routeAsString ? (string)$this->getRoute($item) : $this->getRoute($item);
+                $tree[] = $routeAsString ? (string) $this->getRoute($item) : $this->getRoute($item);
             }
         }
         return $tree;
+    }
+
+    /**
+     * @param Group|Route $item
+     */
+    private function isStaticRoute($item): bool
+    {
+        return $item instanceof Route && !$item->getData('hasMiddlewares');
     }
 }
