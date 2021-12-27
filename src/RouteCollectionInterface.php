@@ -19,7 +19,7 @@ interface RouteCollectionInterface
     public function getRoute(string $name): Route;
 
     /**
-     * Returns routes tree array
+     * Returns routes tree array.
      *
      * @return array
      */

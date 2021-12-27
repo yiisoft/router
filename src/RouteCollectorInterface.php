@@ -7,7 +7,7 @@ namespace Yiisoft\Router;
 interface RouteCollectorInterface
 {
     /**
-     * Add a route
+     * Add a route.
      *
      * @param Route ...$route
      *
@@ -16,7 +16,7 @@ interface RouteCollectorInterface
     public function addRoute(Route ...$route): self;
 
     /**
-     * Add a group of routes
+     * Add a group of routes.
      *
      * ```php
      * $group = Group::create('/api')
@@ -28,7 +28,7 @@ interface RouteCollectorInterface
      * $routeCollector->addGroup($group);
      * ```
      *
-     * @param Group ...$group a group to add
+     * @param Group ...$group A group to add.
      *
      * @return self
      */
