@@ -104,6 +104,8 @@ final class MatchingResult implements MiddlewareInterface
             return $handler->handle($request);
         }
 
+        // Inject dispatcher only if we have not previously injected.
+        // This improves performance in event-loop applications.
         if ($this->dispatcher !== null && !$this->route->getData('hasDispatcher')) {
             $this->route->injectDispatcher($this->dispatcher);
         }

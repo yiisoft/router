@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router\Tests\Middleware;
 
+use LogicException;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
@@ -29,42 +30,6 @@ use Yiisoft\Test\Support\Container\SimpleContainer;
 
 final class RouterTest extends TestCase
 {
-    private function createResponseFactory(): ResponseFactoryInterface
-    {
-        return new class () implements ResponseFactoryInterface {
-            public function createResponse(int $code = 200, string $reasonPhrase = ''): ResponseInterface
-            {
-                return new Response($code, [], null, '1.1', $reasonPhrase);
-            }
-        };
-    }
-
-    private function createRouterMiddleware(
-        ?RouteCollectionInterface $routeCollection = null,
-        ?CurrentRoute $currentRoute = null
-    ): Router {
-        $container = new SimpleContainer([ResponseFactoryInterface::class => $this->createResponseFactory()]);
-        $dispatcher = new MiddlewareDispatcher(
-            new MiddlewareFactory($container),
-            $this->createMock(EventDispatcherInterface::class)
-        );
-
-        return new Router(
-            $this->getMatcher($routeCollection),
-            new Psr17Factory(),
-            $dispatcher,
-            $currentRoute ?? new CurrentRoute()
-        );
-    }
-
-    private function processWithRouter(
-        ServerRequestInterface $request,
-        ?RouteCollectionInterface $routes = null,
-        ?CurrentRoute $currentRoute = null
-    ): ResponseInterface {
-        return $this->createRouterMiddleware($routes, $currentRoute)->process($request, $this->createRequestHandler());
-    }
-
     public function testProcessSuccess(): void
     {
         $request = new ServerRequest('GET', '/');
@@ -170,6 +135,22 @@ final class RouterTest extends TestCase
         $this->assertSame(['parameter' => 'value'], $currentRoute->getArguments());
     }
 
+    public function testMiddlewareDispatcherWithMiddlewares(): void
+    {
+        $dispatcher = (new MiddlewareDispatcher(
+            new MiddlewareFactory(new SimpleContainer()),
+            $this->createMock(EventDispatcherInterface::class)
+        ))->withMiddlewares([static fn () => new Response()]);
+
+        $matcher = $this->getMatcher(new RouteCollection(new RouteCollector()));
+        $responseFactory = new Psr17Factory();
+        $currentRoute = new CurrentRoute();
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Middleware dispatcher must not contain middleware for using in router.');
+        new Router($matcher, $responseFactory, $dispatcher, $currentRoute);
+    }
+
     private function getMatcher(?RouteCollectionInterface $routeCollection = null): UrlMatcherInterface
     {
         $middleware = $this->createRouteMiddleware();
@@ -216,6 +197,42 @@ final class RouterTest extends TestCase
                 return MatchingResult::fromFailure([Method::GET, Method::HEAD]);
             }
         };
+    }
+
+    private function createResponseFactory(): ResponseFactoryInterface
+    {
+        return new class () implements ResponseFactoryInterface {
+            public function createResponse(int $code = 200, string $reasonPhrase = ''): ResponseInterface
+            {
+                return new Response($code, [], null, '1.1', $reasonPhrase);
+            }
+        };
+    }
+
+    private function createRouterMiddleware(
+        ?RouteCollectionInterface $routeCollection = null,
+        ?CurrentRoute $currentRoute = null
+    ): Router {
+        $container = new SimpleContainer([ResponseFactoryInterface::class => $this->createResponseFactory()]);
+        $dispatcher = new MiddlewareDispatcher(
+            new MiddlewareFactory($container),
+            $this->createMock(EventDispatcherInterface::class)
+        );
+
+        return new Router(
+            $this->getMatcher($routeCollection),
+            new Psr17Factory(),
+            $dispatcher,
+            $currentRoute ?? new CurrentRoute()
+        );
+    }
+
+    private function processWithRouter(
+        ServerRequestInterface $request,
+        ?RouteCollectionInterface $routes = null,
+        ?CurrentRoute $currentRoute = null
+    ): ResponseInterface {
+        return $this->createRouterMiddleware($routes, $currentRoute)->process($request, $this->createRequestHandler());
     }
 
     private function createRequestHandler(): RequestHandlerInterface

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router\Middleware;
 
+use LogicException;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -30,7 +31,12 @@ final class Router implements MiddlewareInterface
     ) {
         $this->matcher = $matcher;
         $this->responseFactory = $responseFactory;
+
+        if ($dispatcher->hasMiddlewares()) {
+            throw new LogicException('Middleware dispatcher must not contain middleware for using in router.');
+        }
         $this->dispatcher = $dispatcher;
+
         $this->currentRoute = $currentRoute;
     }
 
