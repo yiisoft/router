@@ -11,28 +11,28 @@ namespace Yiisoft\Router;
 interface UrlGeneratorInterface
 {
     /**
-     * Generates URL from named route and parameters
+     * Generates URL from named route and parameters.
      *
-     * @param string $name name of the route
-     * @param array $parameters parameter-value set
+     * @param string $name Name of the route.
+     * @param array $parameters Parameter-value set.
      *
-     * @throws RouteNotFoundException in case there is no route with the name specified
+     * @throws RouteNotFoundException In case there is no route with the name specified.
      *
-     * @return string URL generated
+     * @return string URL generated.
      */
     public function generate(string $name, array $parameters = []): string;
 
     /**
-     * Generates absolute URL from named route and parameters
+     * Generates absolute URL from named route and parameters.
      *
-     * @param string $name name of the route
-     * @param array $parameters parameter-value set
-     * @param string|null $scheme host scheme
-     * @param string|null $host host for manual setup
+     * @param string $name Name of the route.
+     * @param array $parameters Parameter-value set.
+     * @param string|null $scheme Host scheme.
+     * @param string|null $host Host for manual setup.
      *
-     * @throws RouteNotFoundException in case there is no route with the name specified
+     * @throws RouteNotFoundException In case there is no route with the name specified.
      *
-     * @return string URL generated
+     * @return string URL generated.
      */
     public function generateAbsolute(
         string $name,

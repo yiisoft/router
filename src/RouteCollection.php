@@ -25,7 +25,7 @@ final class RouteCollection implements RouteCollectionInterface
     private array $items = [];
 
     /**
-     * All attached routes as Route instances
+     * All attached routes as Route instances.
      *
      * @var Route[]
      */
@@ -66,7 +66,7 @@ final class RouteCollection implements RouteCollectionInterface
     }
 
     /**
-     * Build routes array
+     * Build routes array.
      *
      * @param Group[]|Route[] $items
      */
@@ -81,7 +81,7 @@ final class RouteCollection implements RouteCollectionInterface
     }
 
     /**
-     * Add an item into routes array
+     * Add an item into routes array.
      *
      * @param Group|Route $route
      */
@@ -118,7 +118,7 @@ final class RouteCollection implements RouteCollectionInterface
             }
 
             if ($group->getData('host') !== null && $item->getData('host') === null) {
-                /** @psalm-suppress PossiblyNullArgument Checked group host on not null above */
+                /** @psalm-suppress PossiblyNullArgument Checked group host on not null above. */
                 $item = $item->host($group->getData('host'));
             }
 
@@ -130,14 +130,14 @@ final class RouteCollection implements RouteCollectionInterface
                     $this->injectGroup($item, $tree, $prefix, $namePrefix);
                     continue;
                 }
-                /** @psalm-suppress PossiblyNullArrayOffset Checked group prefix on not empty above */
+                /** @psalm-suppress PossiblyNullArrayOffset Checked group prefix on not empty above. */
                 if (!isset($tree[$item->getData('prefix')])) {
                     $tree[$item->getData('prefix')] = [];
                 }
                 /**
                  * @psalm-suppress MixedArgumentTypeCoercion
                  * @psalm-suppress MixedArgument,PossiblyNullArrayOffset
-                 * Checked group prefix on not empty above
+                 * Checked group prefix on not empty above.
                  */
                 $this->injectGroup($item, $tree[$item->getData('prefix')], $prefix, $namePrefix);
                 continue;
@@ -196,7 +196,7 @@ final class RouteCollection implements RouteCollectionInterface
     }
 
     /**
-     * Builds route tree from items
+     * Builds route tree from items.
      *
      * @param array $items
      * @param bool $routeAsString

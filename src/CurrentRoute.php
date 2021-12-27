@@ -13,12 +13,12 @@ use Psr\Http\Message\UriInterface;
 final class CurrentRoute
 {
     /**
-     * Current Route
+     * Current Route.
      */
     private ?Route $route = null;
 
     /**
-     * Current URI
+     * Current URI.
      */
     private ?UriInterface $uri = null;
 
