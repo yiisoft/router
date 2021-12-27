@@ -196,8 +196,6 @@ final class Group
      *
      * @return mixed
      *
-     * @internal
-     *
      * @psalm-template T as string
      * @psalm-param T $key
      * @psalm-return (
