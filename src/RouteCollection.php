@@ -8,6 +8,10 @@ use InvalidArgumentException;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Yiisoft\Http\Method;
 
+use function array_key_exists;
+use function in_array;
+use function is_array;
+
 /**
  * @psalm-type Items = array<array-key,array|string>
  */
@@ -69,8 +73,8 @@ final class RouteCollection implements RouteCollectionInterface
     private function injectItems(array $items): void
     {
         foreach ($items as $item) {
-            foreach ($this->collector->getMiddlewareDefinitions() as $middlewareDefinition) {
-                $item = $item->prependMiddleware($middlewareDefinition);
+            if (!$this->isStaticRoute($item)) {
+                $item = $item->prependMiddleware(...$this->collector->getMiddlewareDefinitions());
             }
             $this->injectItem($item);
         }
@@ -109,10 +113,8 @@ final class RouteCollection implements RouteCollectionInterface
         $pattern = null;
         $host = null;
         foreach ($items as $item) {
-            if ($item instanceof Group || $item->getData('hasMiddlewares')) {
-                foreach ($group->getData('middlewareDefinitions') as $middleware) {
-                    $item = $item->prependMiddleware($middleware);
-                }
+            if (!$this->isStaticRoute($item)) {
+                $item = $item->prependMiddleware(...$group->getData('middlewareDefinitions'));
             }
 
             if ($group->getData('host') !== null && $item->getData('host') === null) {
@@ -129,7 +131,9 @@ final class RouteCollection implements RouteCollectionInterface
                     continue;
                 }
                 /** @psalm-suppress PossiblyNullArrayOffset Checked group prefix on not empty above */
-                $tree[$item->getData('prefix')] = [];
+                if (!isset($tree[$item->getData('prefix')])) {
+                    $tree[$item->getData('prefix')] = [];
+                }
                 /**
                  * @psalm-suppress MixedArgumentTypeCoercion
                  * @psalm-suppress MixedArgument,PossiblyNullArrayOffset
@@ -149,17 +153,8 @@ final class RouteCollection implements RouteCollectionInterface
                 $this->processCors($group, $host, $pattern, $modifiedItem, $tree);
             }
 
-            if (empty($tree[$group->getData('prefix')])) {
-                $tree[] = $modifiedItem->getData('name');
-            } else {
-                /**
-                 * @psalm-suppress MixedArrayAssignment,PossiblyNullArrayOffset
-                 * Checked group prefix on not empty above
-                 */
-                $tree[$group->getData('prefix')][] = $modifiedItem->getData('name');
-            }
-
             $routeName = $modifiedItem->getData('name');
+            $tree[] = $routeName;
             if (isset($this->routes[$routeName]) && !$modifiedItem->getData('override')) {
                 throw new InvalidArgumentException("A route with name '$routeName' already exists.");
             }
@@ -190,16 +185,10 @@ final class RouteCollection implements RouteCollectionInterface
         }
         if ($isNotDuplicate) {
             $optionsRoute = $optionsRoute->middleware($middleware);
-            if (empty($tree[$group->getData('prefix')])) {
-                $tree[] = $optionsRoute->getData('name');
-            } else {
-                /**
-                 * @psalm-suppress MixedArrayAssignment,PossiblyNullArrayOffset
-                 * Checked group prefix on not empty above
-                 */
-                $tree[$group->getData('prefix')][] = $optionsRoute->getData('name');
-            }
-            $this->routes[$optionsRoute->getData('name')] = $optionsRoute->action(
+
+            $routeName = $optionsRoute->getData('name');
+            $tree[] = $routeName;
+            $this->routes[$routeName] = $optionsRoute->action(
                 static fn (ResponseFactoryInterface $responseFactory) => $responseFactory->createResponse(204)
             );
         }
@@ -224,9 +213,17 @@ final class RouteCollection implements RouteCollectionInterface
                 /** @psalm-var Items $item */
                 $tree[$key] = $this->buildTree($item, $routeAsString);
             } else {
-                $tree[] = $routeAsString ? (string)$this->getRoute($item) : $this->getRoute($item);
+                $tree[] = $routeAsString ? (string) $this->getRoute($item) : $this->getRoute($item);
             }
         }
         return $tree;
+    }
+
+    /**
+     * @param Group|Route $item
+     */
+    private function isStaticRoute($item): bool
+    {
+        return $item instanceof Route && !$item->getData('hasMiddlewares');
     }
 }

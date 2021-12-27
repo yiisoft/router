@@ -12,6 +12,7 @@ use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use RuntimeException;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Group;
@@ -19,6 +20,11 @@ use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollector;
 use Yiisoft\Router\RouteNotFoundException;
+use Yiisoft\Router\Tests\Support\TestController;
+use Yiisoft\Router\Tests\Support\TestMiddleware1;
+use Yiisoft\Router\Tests\Support\TestMiddleware2;
+use Yiisoft\Router\Tests\Support\TestMiddleware3;
+use Yiisoft\Test\Support\Container\SimpleContainer;
 
 final class RouteCollectionTest extends TestCase
 {
@@ -112,13 +118,18 @@ final class RouteCollectionTest extends TestCase
                     ->routes(
                         Route::get('/posts', $this->getDispatcher())->name('/posts'),
                         Route::get('/post/{sile}')->name('/post/view')
-                    )->namePrefix('/v1')
+                    )->namePrefix('/v1'),
+                Group::create('/v1')
+                    ->routes(
+                        Route::get('/tags', $this->getDispatcher())->name('/tags'),
+                        Route::get('/tag/{slug}')->name('/tag/view'),
+                    )->namePrefix('/v1'),
             )->namePrefix('/api');
 
         $group2 = Group::create('/api')
             ->routes(
                 Route::get('/posts', $this->getDispatcher())->name('/posts'),
-                Route::get('/post/{sile}')->name('/post/view')
+                Route::get('/post/{sile}')->name('/post/view'),
             )->namePrefix('/api');
 
         $collector = new RouteCollector();
@@ -127,8 +138,22 @@ final class RouteCollectionTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $routeTree = $routeCollection->getRouteTree();
-        $this->assertCount(5, $routeTree);
-        $this->assertArrayHasKey('/v1', $routeTree);
+
+        $this->assertSame(
+            [
+                '[/api/test] GET /api/test',
+                '[/api/image] GET /api/images/{sile}',
+                '/v1' => [
+                    '[/api/v1/posts] GET /api/v1/posts',
+                    '[/api/v1/post/view] GET /api/v1/post/{sile}',
+                    '[/api/v1/tags] GET /api/v1/tags',
+                    '[/api/v1/tag/view] GET /api/v1/tag/{slug}',
+                ],
+                '[/api/posts] GET /api/posts',
+                '[/api/post/view] GET /api/post/{sile}',
+            ],
+            $routeTree
+        );
     }
 
     public function testGetRoutes(): void
@@ -234,6 +259,86 @@ final class RouteCollectionTest extends TestCase
         $this->assertEquals('middleware1', $response2->getReasonPhrase());
     }
 
+    public function dataMiddlewaresOrder(): array
+    {
+        return [
+            [true],
+            [false],
+        ];
+    }
+
+    /**
+     * @dataProvider dataMiddlewaresOrder
+     */
+    public function testMiddlewaresOrder(bool $groupWrapped): void
+    {
+        $request = new ServerRequest('GET', '/');
+
+        $injectDispatcher = $this->getDispatcher(
+            new SimpleContainer([
+                TestMiddleware1::class => new TestMiddleware1(),
+                TestMiddleware2::class => new TestMiddleware2(),
+                TestMiddleware3::class => new TestMiddleware3(),
+                TestController::class => new TestController(),
+            ])
+        );
+
+        $collector = new RouteCollector();
+
+        $collector
+            ->middleware(TestMiddleware2::class)
+            ->prependMiddleware(TestMiddleware1::class);
+
+        $rawRoute = Route::get('/')
+            ->middleware(TestMiddleware3::class)
+            ->action([TestController::class, 'index'])
+            ->name('main');
+
+        if ($groupWrapped) {
+            $collector->addGroup(
+                Group::create()->routes($rawRoute)
+            );
+        } else {
+            $collector->addRoute($rawRoute);
+        }
+
+        $route = (new RouteCollection($collector))->getRoute('main');
+        $route->injectDispatcher($injectDispatcher);
+
+        $dispatcher = $route->getData('dispatcherWithMiddlewares');
+
+        $response = $dispatcher->dispatch($request, $this->getRequestHandler());
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('123', (string) $response->getBody());
+    }
+
+    public function testStaticRouteWithCollectorMiddlewares(): void
+    {
+        $request = new ServerRequest('GET', '/');
+
+        $injectDispatcher = $this->getDispatcher(
+            new SimpleContainer([
+                TestMiddleware1::class => new TestMiddleware1(),
+            ])
+        );
+
+        $collector = new RouteCollector();
+        $collector->middleware(TestMiddleware1::class);
+
+        $collector->addRoute(
+            Route::get('i/{image}')->name('image')
+        );
+
+        $route = (new RouteCollection($collector))->getRoute('image');
+        $route->injectDispatcher($injectDispatcher);
+
+        $dispatcher = $route->getData('dispatcherWithMiddlewares');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Stack is empty.');
+        $dispatcher->dispatch($request, $this->getRequestHandler());
+    }
+
     private function getRequestHandler(): RequestHandlerInterface
     {
         return new class () implements RequestHandlerInterface {
@@ -244,10 +349,10 @@ final class RouteCollectionTest extends TestCase
         };
     }
 
-    private function getDispatcher(): MiddlewareDispatcher
+    private function getDispatcher(ContainerInterface $container = null): MiddlewareDispatcher
     {
         return new MiddlewareDispatcher(
-            new MiddlewareFactory($this->createMock(ContainerInterface::class)),
+            new MiddlewareFactory($container ?? $this->createMock(ContainerInterface::class)),
             $this->createMock(EventDispatcherInterface::class)
         );
     }

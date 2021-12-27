@@ -12,15 +12,22 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use RuntimeException;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Route;
+use Yiisoft\Router\Tests\Support\AssertTrait;
 use Yiisoft\Router\Tests\Support\Container;
+use Yiisoft\Router\Tests\Support\TestMiddleware1;
+use Yiisoft\Router\Tests\Support\TestMiddleware2;
 use Yiisoft\Router\Tests\Support\TestController;
+use Yiisoft\Router\Tests\Support\TestMiddleware3;
 
 final class RouteTest extends TestCase
 {
+    use AssertTrait;
+
     public function testName(): void
     {
         $route = Route::get('/')->name('test.route');
@@ -156,6 +163,157 @@ final class RouteTest extends TestCase
         $route->injectDispatcher($dispatcher);
         $response = $route->getData('dispatcherWithMiddlewares')->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testMiddlewareAfterAction(): void
+    {
+        $route = Route::get('/')->action([TestController::class, 'index']);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('middleware() can not be used after action().');
+        $route->middleware(static fn () => new Response());
+    }
+
+    public function testPrependMiddlewareBeforeAction(): void
+    {
+        $route = Route::get('/');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('prependMiddleware() can not be used before action().');
+        $route->prependMiddleware(static fn () => new Response());
+    }
+
+    public function testDisabledMiddlewareDefinitions(): void
+    {
+        $request = new ServerRequest('GET', '/');
+
+        $injectDispatcher = $this->getDispatcher(
+            $this->getContainer([
+                TestMiddleware1::class => new TestMiddleware1(),
+                TestMiddleware2::class => new TestMiddleware2(),
+                TestMiddleware3::class => new TestMiddleware3(),
+                TestController::class => new TestController(),
+            ])
+        );
+
+        $route = Route::get('/')
+            ->middleware(TestMiddleware1::class, TestMiddleware2::class, TestMiddleware3::class)
+            ->action([TestController::class, 'index'])
+            ->disableMiddleware(TestMiddleware1::class, TestMiddleware3::class);
+        $route->injectDispatcher($injectDispatcher);
+
+        $dispatcher = $route->getData('dispatcherWithMiddlewares');
+
+        $response = $dispatcher->dispatch($request, $this->getRequestHandler());
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('2', (string) $response->getBody());
+    }
+
+    public function testPrependMiddlewareDefinitions(): void
+    {
+        $request = new ServerRequest('GET', '/');
+
+        $injectDispatcher = $this->getDispatcher(
+            $this->getContainer([
+                TestMiddleware1::class => new TestMiddleware1(),
+                TestMiddleware2::class => new TestMiddleware2(),
+                TestMiddleware3::class => new TestMiddleware3(),
+                TestController::class => new TestController(),
+            ])
+        );
+
+        $route = Route::get('/')
+            ->middleware(TestMiddleware3::class)
+            ->action([TestController::class, 'index'])
+            ->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class);
+        $route->injectDispatcher($injectDispatcher);
+
+        $dispatcher = $route->getData('dispatcherWithMiddlewares');
+
+        $response = $dispatcher->dispatch($request, $this->getRequestHandler());
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('123', (string) $response->getBody());
+    }
+
+    public function testGetDispatcherWithoutDispatcher(): void
+    {
+        $route = Route::get('/')->name('test');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('There is no dispatcher in the route test.');
+        $route->getData('dispatcherWithMiddlewares');
+    }
+
+    public function testGetDispatcherWithMiddlewares(): void
+    {
+        $request = new ServerRequest('GET', '/');
+
+        $injectDispatcher = $this->getDispatcher(
+            $this->getContainer([
+                TestMiddleware1::class => new TestMiddleware1(),
+                TestMiddleware2::class => new TestMiddleware2(),
+                TestController::class => new TestController(),
+            ])
+        )->withMiddlewares([
+            TestMiddleware1::class,
+            TestMiddleware2::class,
+            [TestController::class, 'index'],
+        ]);
+
+        $route = Route::get('/');
+        $route->injectDispatcher($injectDispatcher);
+
+        $dispatcher = $route->getData('dispatcherWithMiddlewares');
+
+        $response = $dispatcher->dispatch($request, $this->getRequestHandler());
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('12', (string) $response->getBody());
+    }
+
+    public function testDebugInfo(): void
+    {
+        $route = Route::get('/')
+            ->name('test')
+            ->host('example.com')
+            ->defaults(['age' => 42])
+            ->override()
+            ->middleware(TestMiddleware1::class)
+            ->disableMiddleware(TestMiddleware2::class);
+
+        $expected = <<<EOL
+Yiisoft\Router\Route Object
+(
+    [name] => test
+    [methods] => Array
+        (
+            [0] => GET
+        )
+
+    [pattern] => /
+    [host] => example.com
+    [defaults] => Array
+        (
+            [age] => 42
+        )
+
+    [override] => 1
+    [actionAdded] =>
+    [middlewareDefinitions] => Array
+        (
+            [0] => Yiisoft\Router\Tests\Support\TestMiddleware1
+        )
+
+    [disabledMiddlewareDefinitions] => Array
+        (
+            [0] => Yiisoft\Router\Tests\Support\TestMiddleware2
+        )
+
+    [middlewareDispatcher] =>
+)
+
+EOL;
+
+        $this->assertSameStringsIgnoringLineEndingsAndSpaces($expected, print_r($route, true));
     }
 
     private function getRequestHandler(): RequestHandlerInterface

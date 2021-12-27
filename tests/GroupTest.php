@@ -21,6 +21,9 @@ use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollector;
 use Yiisoft\Router\Tests\Support\Container;
+use Yiisoft\Router\Tests\Support\TestMiddleware1;
+use Yiisoft\Router\Tests\Support\TestMiddleware2;
+use Yiisoft\Router\Tests\Support\TestMiddleware3;
 
 final class GroupTest extends TestCase
 {
@@ -28,19 +31,26 @@ final class GroupTest extends TestCase
     {
         $group = Group::create();
 
-        $middleware1 = static function () {
-            return new Response();
-        };
-        $middleware2 = static function () {
-            return new Response();
-        };
+        $middleware1 = static fn () => new Response();
+        $middleware2 = static fn () => new Response();
 
         $group = $group
-            ->middleware($middleware2)
-            ->middleware($middleware1);
+            ->middleware($middleware1)
+            ->middleware($middleware2);
         $this->assertCount(2, $group->getData('middlewareDefinitions'));
         $this->assertSame($middleware1, $group->getData('middlewareDefinitions')[0]);
         $this->assertSame($middleware2, $group->getData('middlewareDefinitions')[1]);
+    }
+
+    public function testDisabledMiddlewareDefinitions(): void
+    {
+        $group = Group::create()
+            ->middleware(TestMiddleware3::class)
+            ->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class)
+            ->disableMiddleware(TestMiddleware1::class, TestMiddleware3::class);
+
+        $this->assertCount(1, $group->getData('middlewareDefinitions'));
+        $this->assertSame(TestMiddleware2::class, $group->getData('middlewareDefinitions')[0]);
     }
 
     public function testRoutesAfterMiddleware(): void
@@ -178,18 +188,14 @@ final class GroupTest extends TestCase
         $listRoute = Route::get('/');
         $viewRoute = Route::get('/{id}');
 
-        $middleware1 = static function () {
-            return new Response();
-        };
-        $middleware2 = static function () {
-            return new Response();
-        };
+        $middleware1 = static fn () => new Response();
+        $middleware2 = static fn () => new Response();
 
         $root = Group::create()
             ->routes(
                 Group::create('/api')
-                    ->middleware($middleware2)
                     ->middleware($middleware1)
+                    ->middleware($middleware2)
                     ->routes(
                         $logoutRoute,
                         Group::create('/post')
@@ -201,6 +207,7 @@ final class GroupTest extends TestCase
             );
 
         $this->assertCount(1, $root->getData('items'));
+
         /** @var Group $api */
         $api = $root->getData('items')[0];
 
@@ -383,6 +390,15 @@ final class GroupTest extends TestCase
         $routeCollection = new RouteCollection($collector);
         $this->assertCount(8, $routeCollection->getRoutes());
         $this->assertInstanceOf(Route::class, $routeCollection->getRoute('OPTIONS /v1/post'));
+    }
+
+    public function testMiddlewareAfterRoutes(): void
+    {
+        $group = Group::create()->routes(Route::get('/info')->action(static fn () => 'info'));
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('middleware() can not be used after routes().');
+        $group->middleware(static fn () => new Response());
     }
 
     private function getRequestHandler(): RequestHandlerInterface
