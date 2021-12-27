@@ -379,6 +379,8 @@ final class Route
             throw new RuntimeException(sprintf('There is no dispatcher in the route %s.', $this->getData('name')));
         }
 
+        // Don't add middlewares to dispatcher if we did it earlier.
+        // This improves performance in event-loop applications.
         if ($this->dispatcher->hasMiddlewares()) {
             return $this->dispatcher;
         }
