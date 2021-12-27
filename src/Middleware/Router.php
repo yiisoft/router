@@ -32,8 +32,10 @@ final class Router implements MiddlewareInterface
         $this->matcher = $matcher;
         $this->responseFactory = $responseFactory;
 
+        // Middleware dispatcher must not contain middlewares. It is necessary
+        // for improve performance in event-loop applications.
         if ($dispatcher->hasMiddlewares()) {
-            throw new LogicException('Middleware dispatcher must not contain middleware for using in router.');
+            throw new LogicException('Middleware dispatcher must not contain middlewares for using in router.');
         }
         $this->dispatcher = $dispatcher;
 

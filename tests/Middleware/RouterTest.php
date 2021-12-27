@@ -147,7 +147,7 @@ final class RouterTest extends TestCase
         $currentRoute = new CurrentRoute();
 
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Middleware dispatcher must not contain middleware for using in router.');
+        $this->expectExceptionMessage('Middleware dispatcher must not contain middlewares for using in router.');
         new Router($matcher, $responseFactory, $dispatcher, $currentRoute);
     }
 
