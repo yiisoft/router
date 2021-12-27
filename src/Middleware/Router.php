@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router\Middleware;
 
-use LogicException;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -13,6 +13,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Http\Method;
 use Yiisoft\Http\Status;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
+use Yiisoft\Middleware\Dispatcher\MiddlewareFactoryInterface;
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\UrlMatcherInterface;
 
@@ -26,19 +27,13 @@ final class Router implements MiddlewareInterface
     public function __construct(
         UrlMatcherInterface $matcher,
         ResponseFactoryInterface $responseFactory,
-        MiddlewareDispatcher $dispatcher,
-        CurrentRoute $currentRoute
+        MiddlewareFactoryInterface $middlewareFactory,
+        CurrentRoute $currentRoute,
+        ?EventDispatcherInterface $eventDispatcher = null
     ) {
         $this->matcher = $matcher;
         $this->responseFactory = $responseFactory;
-
-        // Middleware dispatcher must not contain middlewares. It is necessary
-        // for improve performance in event-loop applications.
-        if ($dispatcher->hasMiddlewares()) {
-            throw new LogicException('Middleware dispatcher must not contain middlewares for using in router.');
-        }
-        $this->dispatcher = $dispatcher;
-
+        $this->dispatcher = new MiddlewareDispatcher($middlewareFactory, $eventDispatcher);
         $this->currentRoute = $currentRoute;
     }
 

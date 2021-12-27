@@ -4,18 +4,15 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router\Tests\Middleware;
 
-use LogicException;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
-use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Http\Method;
-use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\Group;
@@ -135,22 +132,6 @@ final class RouterTest extends TestCase
         $this->assertSame(['parameter' => 'value'], $currentRoute->getArguments());
     }
 
-    public function testMiddlewareDispatcherWithMiddlewares(): void
-    {
-        $dispatcher = (new MiddlewareDispatcher(
-            new MiddlewareFactory(new SimpleContainer()),
-            $this->createMock(EventDispatcherInterface::class)
-        ))->withMiddlewares([static fn () => new Response()]);
-
-        $matcher = $this->getMatcher(new RouteCollection(new RouteCollector()));
-        $responseFactory = new Psr17Factory();
-        $currentRoute = new CurrentRoute();
-
-        $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Middleware dispatcher must not contain middlewares for using in router.');
-        new Router($matcher, $responseFactory, $dispatcher, $currentRoute);
-    }
-
     private function getMatcher(?RouteCollectionInterface $routeCollection = null): UrlMatcherInterface
     {
         $middleware = $this->createRouteMiddleware();
@@ -214,15 +195,11 @@ final class RouterTest extends TestCase
         ?CurrentRoute $currentRoute = null
     ): Router {
         $container = new SimpleContainer([ResponseFactoryInterface::class => $this->createResponseFactory()]);
-        $dispatcher = new MiddlewareDispatcher(
-            new MiddlewareFactory($container),
-            $this->createMock(EventDispatcherInterface::class)
-        );
 
         return new Router(
             $this->getMatcher($routeCollection),
             new Psr17Factory(),
-            $dispatcher,
+            new MiddlewareFactory($container),
             $currentRoute ?? new CurrentRoute()
         );
     }
