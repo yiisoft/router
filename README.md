@@ -161,7 +161,7 @@ Defaults for parameters could be provided via `defaults()` method:
 ```php
 use Yiisoft\Router\Route;
 
-Route::get('/api/v{version}')
+Route::get('/api[/v{version}]')
     ->name('api-index')
     ->action(ApiAction::class)
     ->defaults(['version' => 1]);
