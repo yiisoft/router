@@ -49,5 +49,7 @@ interface UrlGeneratorInterface
 
     public function setLocales(array $locales): void;
 
+    public function setLocale(string $locale): void;
+
     public function setLocaleParameterName(string $localeParameterName): void;
 }
