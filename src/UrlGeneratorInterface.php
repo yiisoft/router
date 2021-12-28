@@ -45,11 +45,14 @@ interface UrlGeneratorInterface
         string $host = null
     ): string;
 
-    public function generateFromCurrent(array $replacedParams, string $fallbackRouteName = null): string;
+    public function generateFromCurrent(array $replacedParameters, ?string $fallbackRouteName = null): string;
 
     public function getUriPrefix(): string;
 
     public function setUriPrefix(string $name): void;
 
+    /**
+     * @psalm-param null|object|scalar $value
+     */
     public function setDefault(string $name, $value): void;
 }
