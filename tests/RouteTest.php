@@ -322,6 +322,23 @@ EOL;
         $this->assertSameStringsIgnoringLineEndingsAndSpaces($expected, print_r($route, true));
     }
 
+    public function testHasMiddlewares(): void
+    {
+        $route = Route::get('/')
+            ->middleware(TestMiddleware1::class);
+
+        $this->assertTrue($route->getData('hasMiddlewares'));
+    }
+
+    public function testHasMiddlewaresWithDisabled(): void
+    {
+        $route = Route::get('/')
+            ->middleware(TestMiddleware1::class)
+            ->disableMiddleware(TestMiddleware1::class);
+
+        $this->assertFalse($route->getData('hasMiddlewares'));
+    }
+
     private function getRequestHandler(): RequestHandlerInterface
     {
         return new class () implements RequestHandlerInterface {

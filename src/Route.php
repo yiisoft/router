@@ -334,7 +334,7 @@ final class Route
             case 'dispatcherWithMiddlewares':
                 return $this->getDispatcherWithMiddlewares();
             case 'hasMiddlewares':
-                return $this->middlewareDefinitions !== [];
+                return $this->hasMiddlewares();
             case 'hasDispatcher':
                 return $this->dispatcher !== null;
             default:
@@ -397,5 +397,15 @@ final class Route
         }
 
         return $this->dispatcher = $this->dispatcher->withMiddlewares($this->middlewareDefinitions);
+    }
+
+    private function hasMiddlewares(): bool
+    {
+        $activeMiddlewares = array_filter(
+            $this->middlewareDefinitions,
+            fn ($middleware) => false === in_array($middleware, $this->disabledMiddlewareDefinitions, true)
+        );
+
+        return $activeMiddlewares !== [];
     }
 }
