@@ -45,7 +45,7 @@ interface UrlGeneratorInterface
         string $host = null
     ): string;
 
-    public function generateCurrent(array $replacedParams, string $fallbackRouteName = null): string;
+    public function generateFromCurrent(array $replacedParams, string $fallbackRouteName = null): string;
 
     public function getUriPrefix(): string;
 
