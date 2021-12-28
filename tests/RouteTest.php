@@ -124,9 +124,15 @@ final class RouteTest extends TestCase
 
     public function testDefaults(): void
     {
-        $route = Route::get('/{language}')->defaults(['language' => 'en']);
+        $route = Route::get('/{language}')->defaults([
+            'language' => 'en',
+            'age' => 42,
+        ]);
 
-        $this->assertSame(['language' => 'en'], $route->getData('defaults'));
+        $this->assertSame([
+            'language' => 'en',
+            'age' => '42',
+        ], $route->getData('defaults'));
     }
 
     public function testOverride(): void

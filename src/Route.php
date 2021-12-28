@@ -35,6 +35,10 @@ final class Route
     private array $middlewareDefinitions = [];
 
     private array $disabledMiddlewareDefinitions = [];
+
+    /**
+     * @var string[]
+     */
     private array $defaults = [];
 
     /**
@@ -204,12 +208,14 @@ final class Route
      *
      * @param array $defaults
      *
+     * @psalm-param array<string,null|object|scalar> $defaults
+     *
      * @return self
      */
     public function defaults(array $defaults): self
     {
         $route = clone $this;
-        $route->defaults = $defaults;
+        $route->defaults = array_map('\strval', $defaults);
         return $route;
     }
 
@@ -300,7 +306,7 @@ final class Route
      *   T is ('name'|'pattern') ? string :
      *     (T is 'host' ? string|null :
      *       (T is 'methods' ? array<array-key,string> :
-     *         (T is 'defaults' ? array :
+     *         (T is 'defaults' ? string[] :
      *           (T is ('override'|'hasMiddlewares'|'hasDispatcher') ? bool :
      *             (T is 'dispatcherWithMiddlewares' ? MiddlewareDispatcher : mixed)
      *           )

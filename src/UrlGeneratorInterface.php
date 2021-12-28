@@ -19,6 +19,8 @@ interface UrlGeneratorInterface
      * @throws RouteNotFoundException In case there is no route with the name specified.
      *
      * @return string URL generated.
+     *
+     * @psalm-param array<string,null|object|scalar> $parameters
      */
     public function generate(string $name, array $parameters = []): string;
 
@@ -33,6 +35,8 @@ interface UrlGeneratorInterface
      * @throws RouteNotFoundException In case there is no route with the name specified.
      *
      * @return string URL generated.
+     *
+     * @psalm-param array<string,null|object|scalar> $parameters
      */
     public function generateAbsolute(
         string $name,
