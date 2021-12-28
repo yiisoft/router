@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
+use Stringable;
+
 /**
  * UrlGeneratorInterface allows generating URL given route name and parameters.
  * It is preferred to type-hint against it in case you need to generate a URL.
@@ -16,11 +18,11 @@ interface UrlGeneratorInterface
      * @param string $name Name of the route.
      * @param array $parameters Parameter-value set.
      *
-     * @throws RouteNotFoundException In case there is no route with the name specified.
-     *
      * @return string URL generated.
      *
-     * @psalm-param array<string,null|object|scalar> $parameters
+     * @psalm-param array<string,null|Stringable|scalar> $parameters
+     *@throws RouteNotFoundException In case there is no route with the name specified.
+     *
      */
     public function generate(string $name, array $parameters = []): string;
 
@@ -45,6 +47,13 @@ interface UrlGeneratorInterface
         string $host = null
     ): string;
 
+    /**
+     * Generate URL from the current route replacing some of its parameters with values specified.
+     *
+     * @param array $replacedParameters New parameter values indexed by replaced parameter names.
+     * @psalm-param array<string, Stringable|null|scalar> $replacedParameters
+     * @param ?string $fallbackRouteName Name of a route that should be used if current route can not be determined.
+     */
     public function generateFromCurrent(array $replacedParameters, ?string $fallbackRouteName = null): string;
 
     public function getUriPrefix(): string;
@@ -52,6 +61,10 @@ interface UrlGeneratorInterface
     public function setUriPrefix(string $name): void;
 
     /**
+     * Set default parameter value.
+     *
+     * @param string $name Name of parameter to provide default value for.
+     * @param mixed $value Default value.
      * @psalm-param null|object|scalar $value
      */
     public function setDefault(string $name, $value): void;
