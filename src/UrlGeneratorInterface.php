@@ -45,6 +45,8 @@ interface UrlGeneratorInterface
         string $host = null
     ): string;
 
+    public function generateCurrent(array $replacedParams): string;
+
     public function getUriPrefix(): string;
 
     public function setUriPrefix(string $name): void;
