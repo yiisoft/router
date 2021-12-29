@@ -167,8 +167,7 @@ Route::get('/api[/v{version}]')
     ->defaults(['version' => 1]);
 ```
 
-In the above we specify that if version parameter is not provided during either URL matching or URL generation
-explicitly then it will be `1`.
+In the above we specify that if "version" is not obtained from URL during matching then it will be `1`.
 
 Besides action, additional middleware to execute before the action itself could be defined:
 
@@ -279,13 +278,17 @@ $request = $container->get(ServerRequestFactory::class)->createFromGlobals();
 $responseFactory = $container->get(ResponseFactoryInterface::class);
 $notFoundHandler = new NotFoundHandler($responseFactory);
 $collector = $container->get(RouteCollectorInterface::class);
-$collector->addRoute(Route::get('/test/{id:\w+}')->action(static function (CurrentRoute $currentRoute, RequestHandlerInterface $next) use ($responseFactory) {
-   $id = $currentRoute->getArgument('id');
-   $response = $responseFactory->createResponse();
-   $response->getBody()->write('You are at test with argument ' . $id);
+$collector->addRoute(
+   Route::get('/test/{id:\w+}')
+       ->action(static function (CurrentRoute $currentRoute, RequestHandlerInterface $next) use ($responseFactory) {
+           $id = $currentRoute->getArgument('id');
+           $response = $responseFactory->createResponse();
+           $response->getBody()->write('You are at test with argument ' . $id);
 
-   return $response;
-})->name('test'));
+           return $response;
+       })
+       ->name('test')
+);
 $router = new UrlMatcher(new RouteCollection($collector));
 $route = $router->match($request);
 $response = $route->process($request, $notFoundHandler);
@@ -304,26 +307,31 @@ function getUrl(UrlGeneratorInterface $urlGenerator, $parameters = [])
 }
 ```
 
-### Creating locale-based URLs
-
-Locale based URLs can be configured the following:
-
-```php
-
-$urlGenerator->setLocales(['en' => 'en-US', 'ru' => 'ru-RU', 'uz' => 'uz-UZ']);
-$urlGenerator->setLocaleParameterName('_locale');
-```
-
-Then that is how locale URL could be obtained for it:
+Absolute URL cold be generated using `UrlGeneratorInterface::generateAbsolute()`:
 
 ```php
 use Yiisoft\Router\UrlGeneratorInterface;
 
-function getLocaleUrl(UrlGeneratorInterface $urlGenerator, string $locale)
+function getUrl(UrlGeneratorInterface $urlGenerator, $parameters = [])
 {
-    return $urlGenerator->generate('test', ['_locale' => $locale]);
+    return $urlGenerator->generateAbsolute('test', $parameters);
 }
 ```
+
+Also, there is a handy `UrlGeneratorInterface::generateFromCurrent()` method. It allows generating a URL that is
+a modified version of the current URL:
+
+```php
+use Yiisoft\Router\UrlGeneratorInterface;
+
+function getUrl(UrlGeneratorInterface $urlGenerator, $id)
+{
+    return $urlGenerator->generateFromCurrent(['id' => 42]);
+}
+```
+
+In the above, ID will be replaced with 42 and the rest of the parameters will stay the same. That is useful for
+modifying URLs for filtering and/or sorting.
 
 ## Obtaining current route information
 
