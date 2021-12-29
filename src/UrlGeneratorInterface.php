@@ -55,9 +55,9 @@ interface UrlGeneratorInterface
      * @param string|null $fallbackRouteName Name of a route that should be used if current route
      * can not be determined.
      *
-     * @psalm-param array<string,null|Stringable|scalar> $replacedParameters
+     * @psalm-param array<string,null|Stringable|scalar> $replacedArguments
      */
-    public function generateFromCurrent(array $replacedParameters, ?string $fallbackRouteName = null): string;
+    public function generateFromCurrent(array $replacedArguments, ?string $fallbackRouteName = null): string;
 
     public function getUriPrefix(): string;
 
