@@ -7,30 +7,32 @@ namespace Yiisoft\Router;
 use Stringable;
 
 /**
- * UrlGeneratorInterface allows generating URL given route name and parameters.
+ * UrlGeneratorInterface allows generating URL given route name and arguments.
  * It is preferred to type-hint against it in case you need to generate a URL.
  */
 interface UrlGeneratorInterface
 {
     /**
-     * Generates URL from named route and parameters.
+     * Generates URL from named route and arguments.
      *
      * @param string $name Name of the route.
-     * @param array $parameters Parameter-value set.
+     * @param array $arguments Argument-value set.
+     * @param array $queryParameters Argument-value set.
      *
      * @return string URL generated.
      *
-     * @psalm-param array<string,null|Stringable|scalar> $parameters
+     * @psalm-param array<string,null|Stringable|scalar> $arguments
      *
      * @throws RouteNotFoundException In case there is no route with the name specified.
      */
     public function generate(string $name, array $arguments = [], array $queryParameters = []): string;
 
     /**
-     * Generates absolute URL from named route and parameters.
+     * Generates absolute URL from named route and arguments.
      *
      * @param string $name Name of the route.
-     * @param array $parameters Parameter-value set.
+     * @param array $arguments Argument-value set.
+     * @param array $queryParameters Parameter-value set.
      * @param string|null $scheme Host scheme.
      * @param string|null $host Host for manual setup.
      *
@@ -38,7 +40,7 @@ interface UrlGeneratorInterface
      *
      * @return string URL generated.
      *
-     * @psalm-param array<string,null|Stringable|scalar> $parameters
+     * @psalm-param array<string,null|Stringable|scalar> $arguments
      */
     public function generateAbsolute(
         string $name,
