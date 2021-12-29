@@ -7,17 +7,16 @@ namespace Yiisoft\Router;
 use Stringable;
 
 /**
- * UrlGeneratorInterface allows generating URL given route name and arguments.
- * It is preferred to type-hint against it in case you need to generate a URL.
+ * UrlGeneratorInterface allows generating URL given route name, arguments, and query parameters.
  */
 interface UrlGeneratorInterface
 {
     /**
-     * Generates URL from named route and arguments.
+     * Generates URL from named route, arguments, and query parameters.
      *
      * @param string $name Name of the route.
      * @param array $arguments Argument-value set.
-     * @param array $queryParameters Argument-value set.
+     * @param array $queryParameters Parameter-value set.
      *
      * @return string URL generated.
      *
@@ -28,7 +27,7 @@ interface UrlGeneratorInterface
     public function generate(string $name, array $arguments = [], array $queryParameters = []): string;
 
     /**
-     * Generates absolute URL from named route and arguments.
+     * Generates absolute URL from named route, arguments, and query parameters.
      *
      * @param string $name Name of the route.
      * @param array $arguments Argument-value set.
