@@ -20,9 +20,9 @@ interface UrlGeneratorInterface
      *
      * @return string URL generated.
      *
-     * @psalm-param array<string,null|Stringable|scalar> $parameters
-     *@throws RouteNotFoundException In case there is no route with the name specified.
+     * @psalm-param array<null|Stringable|scalar> $parameters
      *
+     * @throws RouteNotFoundException In case there is no route with the name specified.
      */
     public function generate(string $name, array $parameters = []): string;
 
@@ -38,7 +38,7 @@ interface UrlGeneratorInterface
      *
      * @return string URL generated.
      *
-     * @psalm-param array<string,null|object|scalar> $parameters
+     * @psalm-param array<null|Stringable|scalar> $parameters
      */
     public function generateAbsolute(
         string $name,
@@ -51,8 +51,10 @@ interface UrlGeneratorInterface
      * Generate URL from the current route replacing some of its parameters with values specified.
      *
      * @param array $replacedParameters New parameter values indexed by replaced parameter names.
-     * @psalm-param array<string, Stringable|null|scalar> $replacedParameters
-     * @param ?string $fallbackRouteName Name of a route that should be used if current route can not be determined.
+     * @param string|null $fallbackRouteName Name of a route that should be used if current route
+     * can not be determined.
+     *
+     * @psalm-param array<null|Stringable|scalar> $replacedParameters
      */
     public function generateFromCurrent(array $replacedParameters, ?string $fallbackRouteName = null): string;
 
@@ -65,7 +67,8 @@ interface UrlGeneratorInterface
      *
      * @param string $name Name of parameter to provide default value for.
      * @param mixed $value Default value.
-     * @psalm-param null|object|scalar $value
+     *
+     * @psalm-param null|Stringable|scalar $value
      */
     public function setDefault(string $name, $value): void;
 }

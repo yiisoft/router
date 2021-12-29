@@ -26,7 +26,8 @@ final class CurrentRoute
      * Current Route arguments.
      *
      * @var string[]
-     * @psalm-var array<string, ?string>
+     *
+     * @psalm-var array<string, string>
      */
     private array $arguments = [];
 
@@ -84,13 +85,14 @@ final class CurrentRoute
      * @param Route $route
      * @param string[] $arguments
      *
+     * @psalm-param array<string,string> $arguments
+     *
      * @internal
      */
     public function setRouteWithArguments(Route $route, array $arguments): void
     {
         if ($this->route === null && $this->arguments === []) {
             $this->route = $route;
-            /** @var array<string, null|string> $arguments */
             $this->arguments = $arguments;
             return;
         }
@@ -113,7 +115,7 @@ final class CurrentRoute
 
     /**
      * @return string[] Arguments.
-     * @psalm-return array<string, ?string>
+     * @psalm-return array<string, string>
      */
     public function getArguments(): array
     {
