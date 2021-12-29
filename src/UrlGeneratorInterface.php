@@ -49,9 +49,9 @@ interface UrlGeneratorInterface
     ): string;
 
     /**
-     * Generate URL from the current route replacing some of its parameters with values specified.
+     * Generate URL from the current route replacing some of its arguments with values specified.
      *
-     * @param array $replacedParameters New parameter values indexed by replaced parameter names.
+     * @param array $replacedArguments New argument values indexed by replaced argument names.
      * @param string|null $fallbackRouteName Name of a route that should be used if current route
      * can not be determined.
      *
