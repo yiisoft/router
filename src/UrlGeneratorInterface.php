@@ -24,7 +24,7 @@ interface UrlGeneratorInterface
      *
      * @throws RouteNotFoundException In case there is no route with the name specified.
      */
-    public function generate(string $name, array $parameters = []): string;
+    public function generate(string $name, array $arguments = [], array $queryParameters = []): string;
 
     /**
      * Generates absolute URL from named route and parameters.
@@ -42,7 +42,8 @@ interface UrlGeneratorInterface
      */
     public function generateAbsolute(
         string $name,
-        array $parameters = [],
+        array $arguments = [],
+        array $queryParameters = [],
         string $scheme = null,
         string $host = null
     ): string;
@@ -63,12 +64,12 @@ interface UrlGeneratorInterface
     public function setUriPrefix(string $name): void;
 
     /**
-     * Set default parameter value.
+     * Set default argument value.
      *
-     * @param string $name Name of parameter to provide default value for.
+     * @param string $name Name of argument to provide default value for.
      * @param mixed $value Default value.
      *
      * @psalm-param null|Stringable|scalar $value
      */
-    public function setDefault(string $name, $value): void;
+    public function setDefaultArgument(string $name, $value): void;
 }
