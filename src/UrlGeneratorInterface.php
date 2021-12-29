@@ -18,11 +18,11 @@ interface UrlGeneratorInterface
      * @param array $arguments Argument-value set.
      * @param array $queryParameters Parameter-value set.
      *
+     * @throws RouteNotFoundException In case there is no route with the name specified.
+     *
      * @return string URL generated.
      *
      * @psalm-param array<string,null|Stringable|scalar> $arguments
-     *
-     * @throws RouteNotFoundException In case there is no route with the name specified.
      */
     public function generate(string $name, array $arguments = [], array $queryParameters = []): string;
 
