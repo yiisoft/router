@@ -26,6 +26,8 @@ final class CurrentRoute
      * Current Route arguments.
      *
      * @var string[]
+     *
+     * @psalm-var array<string, string>
      */
     private array $arguments = [];
 
@@ -83,6 +85,8 @@ final class CurrentRoute
      * @param Route $route
      * @param string[] $arguments
      *
+     * @psalm-param array<string,string> $arguments
+     *
      * @internal
      */
     public function setRouteWithArguments(Route $route, array $arguments): void
@@ -109,6 +113,10 @@ final class CurrentRoute
         throw new LogicException('Can not set URI since it was already set.');
     }
 
+    /**
+     * @return string[] Arguments.
+     * @psalm-return array<string, string>
+     */
     public function getArguments(): array
     {
         return $this->arguments;

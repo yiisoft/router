@@ -6,6 +6,7 @@ namespace Yiisoft\Router;
 
 use InvalidArgumentException;
 use RuntimeException;
+use Stringable;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
@@ -38,6 +39,7 @@ final class Route
 
     /**
      * @var string[]
+     * @psalm-var array<string,string>
      */
     private array $defaults = [];
 
@@ -208,7 +210,7 @@ final class Route
      *
      * @param array $defaults
      *
-     * @psalm-param array<string,null|object|scalar> $defaults
+     * @psalm-param array<string,null|Stringable|scalar> $defaults
      *
      * @return self
      */
@@ -306,7 +308,7 @@ final class Route
      *   T is ('name'|'pattern') ? string :
      *     (T is 'host' ? string|null :
      *       (T is 'methods' ? array<array-key,string> :
-     *         (T is 'defaults' ? string[] :
+     *         (T is 'defaults' ? array<string,string> :
      *           (T is ('override'|'hasMiddlewares'|'hasDispatcher') ? bool :
      *             (T is 'dispatcherWithMiddlewares' ? MiddlewareDispatcher : mixed)
      *           )
