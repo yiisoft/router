@@ -20,7 +20,7 @@ interface UrlGeneratorInterface
      *
      * @return string URL generated.
      *
-     * @psalm-param array<null|Stringable|scalar> $parameters
+     * @psalm-param array<string,null|Stringable|scalar> $parameters
      *
      * @throws RouteNotFoundException In case there is no route with the name specified.
      */
@@ -38,7 +38,7 @@ interface UrlGeneratorInterface
      *
      * @return string URL generated.
      *
-     * @psalm-param array<null|Stringable|scalar> $parameters
+     * @psalm-param array<string,null|Stringable|scalar> $parameters
      */
     public function generateAbsolute(
         string $name,
@@ -54,7 +54,7 @@ interface UrlGeneratorInterface
      * @param string|null $fallbackRouteName Name of a route that should be used if current route
      * can not be determined.
      *
-     * @psalm-param array<null|Stringable|scalar> $replacedParameters
+     * @psalm-param array<string,null|Stringable|scalar> $replacedParameters
      */
     public function generateFromCurrent(array $replacedParameters, ?string $fallbackRouteName = null): string;
 
