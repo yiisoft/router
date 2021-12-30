@@ -52,9 +52,6 @@
         "yiisoft/router-fastroute": "Router implementation based on nikic/FastRoute"
     },
     "extra": {
-        "branch-alias": {
-            "dev-master": "3.0.x-dev"
-        },
         "config-plugin-options": {
             "source-directory": "config"
         },
