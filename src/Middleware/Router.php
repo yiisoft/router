@@ -45,10 +45,12 @@ final class Router implements MiddlewareInterface
 
         if ($result->isMethodFailure()) {
             if ($request->getMethod() === Method::OPTIONS) {
-                return $this->responseFactory->createResponse(Status::NO_CONTENT)
+                return $this->responseFactory
+                    ->createResponse(Status::NO_CONTENT)
                     ->withHeader('Allow', implode(', ', $result->methods()));
             }
-            return $this->responseFactory->createResponse(Status::METHOD_NOT_ALLOWED)
+            return $this->responseFactory
+                ->createResponse(Status::METHOD_NOT_ALLOWED)
                 ->withHeader('Allow', implode(', ', $result->methods()));
         }
 
@@ -58,6 +60,8 @@ final class Router implements MiddlewareInterface
 
         $this->currentRoute->setRouteWithArguments($result->route(), $result->arguments());
 
-        return $result->withDispatcher($this->dispatcher)->process($request, $handler);
+        return $result
+            ->withDispatcher($this->dispatcher)
+            ->process($request, $handler);
     }
 }

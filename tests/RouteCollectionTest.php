@@ -79,7 +79,9 @@ final class RouteCollectionTest extends TestCase
     public function testRouteOverride(): void
     {
         $listRoute = Route::get('/')->name('my-route');
-        $viewRoute = Route::get('/{id}')->name('my-route')->override();
+        $viewRoute = Route::get('/{id}')
+            ->name('my-route')
+            ->override();
 
         $group = Group::create()->routes($listRoute, $viewRoute);
 
@@ -96,7 +98,9 @@ final class RouteCollectionTest extends TestCase
         $group = Group::create()
             ->middleware(fn () => 1)
             ->routes(
-                Route::get('/test', $this->getDispatcher())->action(fn () => 2)->name('test'),
+                Route::get('/test', $this->getDispatcher())
+                    ->action(fn () => 2)
+                    ->name('test'),
                 Route::get('/images/{sile}')->name('image')
             );
 
@@ -112,7 +116,9 @@ final class RouteCollectionTest extends TestCase
     {
         $group1 = Group::create('/api')
             ->routes(
-                Route::get('/test', $this->getDispatcher())->action(fn () => 2)->name('/test'),
+                Route::get('/test', $this->getDispatcher())
+                    ->action(fn () => 2)
+                    ->name('/test'),
                 Route::get('/images/{sile}')->name('/image'),
                 Group::create('/v1')
                     ->routes(
@@ -161,7 +167,9 @@ final class RouteCollectionTest extends TestCase
         $group = Group::create()
             ->middleware(fn () => 1)
             ->routes(
-                Route::get('/test', $this->getDispatcher())->action(fn () => 2)->name('test'),
+                Route::get('/test', $this->getDispatcher())
+                    ->action(fn () => 2)
+                    ->name('test'),
                 Route::get('/images/{sile}')->name('image')
             );
 
@@ -178,9 +186,11 @@ final class RouteCollectionTest extends TestCase
     {
         $group = Group::create()
             ->routes(
-                Group::create()->routes(
-                    Route::get('/project/{name}')->name('project')
-                )->host('https://yiipowered.com/'),
+                Group::create()
+                    ->routes(
+                        Route::get('/project/{name}')->name('project')
+                    )
+                    ->host('https://yiipowered.com/'),
                 Route::get('/images/{name}')->name('image')
             )->host('https://yiiframework.com/');
 
@@ -199,9 +209,11 @@ final class RouteCollectionTest extends TestCase
         $group = Group::create('api')
             ->routes(
                 Group::create()->routes(
-                    Group::create('/v1')->routes(
-                        Route::get('/package/downloads/{package}')->name('/package/downloads')
-                    )->namePrefix('/v1'),
+                    Group::create('/v1')
+                        ->routes(
+                            Route::get('/package/downloads/{package}')->name('/package/downloads')
+                        )
+                        ->namePrefix('/v1'),
                     Group::create()->routes(
                         Route::get('')->name('/index')
                     ),
@@ -233,8 +245,12 @@ final class RouteCollectionTest extends TestCase
             '1.1',
             implode($request->getAttributes())
         );
-        $listRoute = Route::get('/')->action($action)->name('list');
-        $viewRoute = Route::get('/{id}', $this->getDispatcher())->action($action)->name('view');
+        $listRoute = Route::get('/')
+            ->action($action)
+            ->name('list');
+        $viewRoute = Route::get('/{id}', $this->getDispatcher())
+            ->action($action)
+            ->name('view');
 
         $group = Group::create(null, $this->getDispatcher())->routes($listRoute);
 
@@ -252,8 +268,12 @@ final class RouteCollectionTest extends TestCase
         $route1 = $routeCollection->getRoute('list');
         $route2 = $routeCollection->getRoute('view');
         $request = new ServerRequest('GET', '/');
-        $response1 = $route1->getData('dispatcherWithMiddlewares')->dispatch($request, $this->getRequestHandler());
-        $response2 = $route2->getData('dispatcherWithMiddlewares')->dispatch($request, $this->getRequestHandler());
+        $response1 = $route1
+            ->getData('dispatcherWithMiddlewares')
+            ->dispatch($request, $this->getRequestHandler());
+        $response2 = $route2
+            ->getData('dispatcherWithMiddlewares')
+            ->dispatch($request, $this->getRequestHandler());
 
         $this->assertEquals('middleware1', $response1->getReasonPhrase());
         $this->assertEquals('middleware1', $response2->getReasonPhrase());
