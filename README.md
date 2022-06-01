@@ -64,7 +64,9 @@ $routes = [
     Route::get('/')
         ->action(static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
             $response = $responseFactory->createResponse();
-            $response->getBody()->write('You are at homepage.');
+            $response
+                ->getBody()
+                ->write('You are at homepage.');
             return $response;
         }),
     Route::get('/test/{id:\w+}')
@@ -72,7 +74,9 @@ $routes = [
             $id = $currentRoute->getArgument('id');
     
             $response = $responseFactory->createResponse();
-            $response->getBody()->write('You are at test with argument ' . $id);
+            $response
+                ->getBody()
+                ->write('You are at test with argument ' . $id);
             return $response;
         })
 ];
@@ -274,20 +278,24 @@ use Yiisoft\Router\RouteCollectorInterface;
 use Yiisoft\Router\Fastroute\UrlMatcher;
 
 
-$request = $container->get(ServerRequestFactory::class)->createFromGlobals();
+$request = $container
+    ->get(ServerRequestFactory::class)
+    ->createFromGlobals();
 $responseFactory = $container->get(ResponseFactoryInterface::class);
 $notFoundHandler = new NotFoundHandler($responseFactory);
 $collector = $container->get(RouteCollectorInterface::class);
 $collector->addRoute(
-   Route::get('/test/{id:\w+}')
-       ->action(static function (CurrentRoute $currentRoute, RequestHandlerInterface $next) use ($responseFactory) {
-           $id = $currentRoute->getArgument('id');
-           $response = $responseFactory->createResponse();
-           $response->getBody()->write('You are at test with argument ' . $id);
+    Route::get('/test/{id:\w+}')
+        ->action(static function (CurrentRoute $currentRoute, RequestHandlerInterface $next) use ($responseFactory) {
+            $id = $currentRoute->getArgument('id');
+            $response = $responseFactory->createResponse();
+            $response
+                ->getBody()
+                ->write('You are at test with argument ' . $id);
 
            return $response;
-       })
-       ->name('test')
+        })
+        ->name('test')
 );
 $router = new UrlMatcher(new RouteCollection($collector));
 $route = $router->match($request);

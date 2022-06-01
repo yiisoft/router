@@ -105,7 +105,9 @@ final class GroupTest extends TestCase
                 Group::create('/innergroup')
                     ->middleware($middleware2)
                     ->routes(
-                        Route::get('/test1')->action($action)->name('request1'),
+                        Route::get('/test1')
+                            ->action($action)
+                            ->name('request1'),
                     )
             );
 
@@ -114,7 +116,9 @@ final class GroupTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
-        $response = $route->getData('dispatcherWithMiddlewares')->dispatch($request, $this->getRequestHandler());
+        $response = $route
+            ->getData('dispatcherWithMiddlewares')
+            ->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('middleware2', $response->getReasonPhrase());
     }
@@ -139,7 +143,9 @@ final class GroupTest extends TestCase
             ->middleware($middleware1)
             ->middleware($middleware2)
             ->routes(
-                Route::get('/test1')->action($action)->name('request1'),
+                Route::get('/test1')
+                    ->action($action)
+                    ->name('request1'),
             );
 
         $collector = new RouteCollector();
@@ -147,7 +153,9 @@ final class GroupTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
-        $response = $route->getData('dispatcherWithMiddlewares')->dispatch($request, $this->getRequestHandler());
+        $response = $route
+            ->getData('dispatcherWithMiddlewares')
+            ->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('middleware2', $response->getReasonPhrase());
     }
@@ -170,7 +178,9 @@ final class GroupTest extends TestCase
             ->middleware($middleware1)
             ->middleware($middleware2)
             ->routes(
-                Route::get('/test1')->action($action)->name('request1')
+                Route::get('/test1')
+                    ->action($action)
+                    ->name('request1')
             );
 
         $collector = new RouteCollector();
@@ -178,7 +188,9 @@ final class GroupTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
-        $response = $route->getData('dispatcherWithMiddlewares')->dispatch($request, $this->getRequestHandler());
+        $response = $route
+            ->getData('dispatcherWithMiddlewares')
+            ->dispatch($request, $this->getRequestHandler());
         $this->assertSame(403, $response->getStatusCode());
     }
 
@@ -322,9 +334,15 @@ final class GroupTest extends TestCase
     public function testWithCorsDoesntDuplicateRoutes(): void
     {
         $group = Group::create()->routes(
-            Route::get('/info')->action(static fn () => 'info')->host('yii.dev'),
-            Route::post('/info')->action(static fn () => 'info')->host('yii.dev'),
-            Route::put('/info')->action(static fn () => 'info')->host('yii.test'),
+            Route::get('/info')
+                ->action(static fn () => 'info')
+                ->host('yii.dev'),
+            Route::post('/info')
+                ->action(static fn () => 'info')
+                ->host('yii.dev'),
+            Route::put('/info')
+                ->action(static fn () => 'info')
+                ->host('yii.test'),
         )->withCors(
             static function () {
                 return new Response(204);
