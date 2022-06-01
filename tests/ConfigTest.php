@@ -32,7 +32,9 @@ final class ConfigTest extends TestCase
         $currentRoute->setRouteWithArguments(Route::get('/main'), ['name' => 'hello']);
         $currentRoute->setUri(new Uri('http://example.com/'));
 
-        $container->get(StateResetter::class)->reset();
+        $container
+            ->get(StateResetter::class)
+            ->reset();
 
         $this->assertNull($currentRoute->getName());
         $this->assertNull($currentRoute->getUri());

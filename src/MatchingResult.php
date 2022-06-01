@@ -113,6 +113,8 @@ final class MatchingResult implements MiddlewareInterface
             $this->route->injectDispatcher($this->dispatcher);
         }
 
-        return $this->route->getData('dispatcherWithMiddlewares')->dispatch($request, $handler);
+        return $this->route
+            ->getData('dispatcherWithMiddlewares')
+            ->dispatch($request, $handler);
     }
 }

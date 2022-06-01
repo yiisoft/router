@@ -67,15 +67,17 @@ final class RouterTest extends TestCase
 
     public function testWithCorsHandlers(): void
     {
-        $group = Group::create()->routes(
-            Route::put('/post')->action(static fn () => new Response(204)),
-            Route::post('/post')->action(static fn () => new Response(204)),
-        )->withCors(
-            static function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
-                $response = $handler->handle($request);
-                return $response->withHeader('Test', 'test from options handler');
-            }
-        );
+        $group = Group::create()
+            ->routes(
+                Route::put('/post')->action(static fn () => new Response(204)),
+                Route::post('/post')->action(static fn () => new Response(204)),
+            )
+            ->withCors(
+                static function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+                    $response = $handler->handle($request);
+                    return $response->withHeader('Test', 'test from options handler');
+                }
+            );
 
         $collector = new RouteCollector();
         $collector->addGroup($group);
@@ -157,16 +159,22 @@ final class RouterTest extends TestCase
             {
                 if ($this->routeCollection !== null) {
                     $route = $this->routeCollection->getRoute(
-                        $request->getMethod() . ' ' . $request->getUri()->getPath()
+                        $request->getMethod() . ' ' . $request
+                            ->getUri()
+                            ->getPath()
                     );
                     return MatchingResult::fromSuccess($route, ['parameter' => 'value']);
                 }
-                if ($request->getMethod() === Method::OPTIONS && $request->getUri()->getPath() === '/options') {
+                if ($request->getMethod() === Method::OPTIONS && $request
+                        ->getUri()
+                        ->getPath() === '/options') {
                     $route = Route::options('/options')->middleware($this->middleware);
                     return MatchingResult::fromSuccess($route, ['method' => 'options']);
                 }
 
-                if ($request->getUri()->getPath() !== '/') {
+                if ($request
+                        ->getUri()
+                        ->getPath() !== '/') {
                     return MatchingResult::fromFailure(Method::ALL);
                 }
 
@@ -209,7 +217,9 @@ final class RouterTest extends TestCase
         ?RouteCollectionInterface $routes = null,
         ?CurrentRoute $currentRoute = null
     ): ResponseInterface {
-        return $this->createRouterMiddleware($routes, $currentRoute)->process($request, $this->createRequestHandler());
+        return $this
+            ->createRouterMiddleware($routes, $currentRoute)
+            ->process($request, $this->createRequestHandler());
     }
 
     private function createRequestHandler(): RequestHandlerInterface
