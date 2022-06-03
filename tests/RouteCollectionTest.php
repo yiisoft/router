@@ -124,19 +124,22 @@ final class RouteCollectionTest extends TestCase
                     ->routes(
                         Route::get('/posts', $this->getDispatcher())->name('/posts'),
                         Route::get('/post/{sile}')->name('/post/view')
-                    )->namePrefix('/v1'),
+                    )
+                    ->namePrefix('/v1'),
                 Group::create('/v1')
                     ->routes(
                         Route::get('/tags', $this->getDispatcher())->name('/tags'),
                         Route::get('/tag/{slug}')->name('/tag/view'),
-                    )->namePrefix('/v1'),
+                    )
+                    ->namePrefix('/v1'),
             )->namePrefix('/api');
 
         $group2 = Group::create('/api')
             ->routes(
                 Route::get('/posts', $this->getDispatcher())->name('/posts'),
                 Route::get('/post/{sile}')->name('/post/view'),
-            )->namePrefix('/api');
+            )
+            ->namePrefix('/api');
 
         $collector = new RouteCollector();
         $collector->addGroup($group1);
@@ -192,7 +195,8 @@ final class RouteCollectionTest extends TestCase
                     )
                     ->host('https://yiipowered.com/'),
                 Route::get('/images/{name}')->name('image')
-            )->host('https://yiiframework.com/');
+            )
+            ->host('https://yiiframework.com/');
 
         $collector = new RouteCollector();
         $collector->addGroup($group);
