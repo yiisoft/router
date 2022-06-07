@@ -25,7 +25,7 @@ final class Route
     private array $methods;
 
     private string $pattern;
-    private ?string $host = null;
+    private ?array $hosts = null;
     private bool $override = false;
     private ?MiddlewareDispatcher $dispatcher;
     private bool $actionAdded = false;
@@ -189,8 +189,39 @@ final class Route
     public function host(string $host): self
     {
         $route = clone $this;
-        $route->host = rtrim($host, '/');
+        $route->hosts = [];
+
+        return $route->addHosts($host);
+    }
+
+    /**
+     * @return self
+     */
+    public function addHosts(string $host, string ...$hosts): self
+    {
+        $route = clone $this;
+        array_unshift($hosts, $host);
+
+        foreach ($hosts as $host) {
+            $host = rtrim($host, '/');
+
+            if (empty($route->hosts)) {
+                $route->hosts = [$host];
+            } elseif (!in_array($host, $route->hosts, true)) {
+                if (preg_match('/\{.+\}/', $host)) {
+                    throw new RuntimeException('Submasks not allowed with multiple host names.');
+                }
+
+                $route->hosts[] = $host;
+            }
+        }
+
         return $route;
+    }
+
+    public function isMultiHost(): bool
+    {
+        return $this->hosts === null ? false : count($this->hosts) > 1;
     }
 
     /**
@@ -307,13 +338,15 @@ final class Route
      * @psalm-return (
      *   T is ('name'|'pattern') ? string :
      *     (T is 'host' ? string|null :
-     *       (T is 'methods' ? array<array-key,string> :
-     *         (T is 'defaults' ? array<string,string> :
-     *           (T is ('override'|'hasMiddlewares'|'hasDispatcher') ? bool :
-     *             (T is 'dispatcherWithMiddlewares' ? MiddlewareDispatcher : mixed)
+     *        (T is 'hosts' ? string|null :
+     *           (T is 'methods' ? array<array-key,string> :
+     *              (T is 'defaults' ? array<string,string> :
+     *                 (T is ('override'|'hasMiddlewares'|'hasDispatcher') ? bool :
+     *                    (T is 'dispatcherWithMiddlewares' ? MiddlewareDispatcher : mixed)
+     *                 )
+     *              )
      *           )
-     *         )
-     *       )
+     *        )
      *     )
      * )
      */
@@ -322,11 +355,15 @@ final class Route
         switch ($key) {
             case 'name':
                 return $this->name ??
-                    (implode(', ', $this->methods) . ' ' . (string) $this->host . $this->pattern);
+                    (implode(', ', $this->methods) . ' ' . (string) $this->getData('hosts') . $this->pattern);
             case 'pattern':
                 return $this->pattern;
             case 'host':
-                return $this->host;
+                /** @var string $this->hosts[0] */
+                return $this->hosts[0] ?? null;
+            case 'hosts':
+                /** @var array<array-key, string> $this->hosts */
+                return $this->hosts ? implode('|', $this->hosts) : null;
             case 'methods':
                 return $this->methods;
             case 'defaults':
@@ -347,6 +384,7 @@ final class Route
     public function __toString(): string
     {
         $result = '';
+        $hosts = $this->getData('hosts');
 
         if ($this->name !== null) {
             $result .= '[' . $this->name . '] ';
@@ -355,8 +393,8 @@ final class Route
         if ($this->methods !== []) {
             $result .= implode(',', $this->methods) . ' ';
         }
-        if ($this->host !== null && strrpos($this->pattern, $this->host) === false) {
-            $result .= $this->host;
+        if ($hosts !== null && !preg_match('/' . $hosts . '/', $this->pattern)) {
+            $result .= $hosts;
         }
         $result .= $this->pattern;
 
@@ -369,7 +407,8 @@ final class Route
             'name' => $this->name,
             'methods' => $this->methods,
             'pattern' => $this->pattern,
-            'host' => $this->host,
+            'host' => $this->getData('host'),
+            'hosts' => $this->hosts,
             'defaults' => $this->defaults,
             'override' => $this->override,
             'actionAdded' => $this->actionAdded,

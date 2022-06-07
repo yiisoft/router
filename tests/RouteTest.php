@@ -122,6 +122,25 @@ final class RouteTest extends TestCase
         $this->assertSame('https://yiiframework.com', $route->getData('host'));
     }
 
+    public function testHosts(): void
+    {
+        $route = Route::get('/')
+            ->host('https://yiiframework.com/')
+            ->addHosts('yf.com', 'yii.com', 'yf.ru');
+
+        $this->assertSame('https://yiiframework.com|yf.com|yii.com|yf.ru', $route->getData('hosts'));
+    }
+
+    public function testHostException(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Submasks not allowed with multiple host names.');
+
+        Route::get('/')
+            ->host('https://yiiframework.com/')
+            ->addHosts('yf.com', '{user}.yii.com');
+    }
+
     public function testDefaults(): void
     {
         $route = Route::get('/{language}')->defaults([
@@ -301,6 +320,11 @@ Yiisoft\Router\Route Object
 
     [pattern] => /
     [host] => example.com
+    [hosts] => Array
+        (
+            [0] => example.com
+        )
+
     [defaults] => Array
         (
             [age] => 42
