@@ -25,7 +25,7 @@ final class Route
     private array $methods;
 
     private string $pattern;
-    private ?array $hosts = null;
+    private array $hosts = [];
     private bool $override = false;
     private ?MiddlewareDispatcher $dispatcher;
     private bool $actionAdded = false;
@@ -186,32 +186,15 @@ final class Route
     /**
      * @return self
      */
-    public function host(string $host): self
+    public function host(string ...$hosts): self
     {
         $route = clone $this;
         $route->hosts = [];
 
-        return $route->addHosts($host);
-    }
-
-    /**
-     * @return self
-     */
-    public function addHosts(string $host, string ...$hosts): self
-    {
-        $route = clone $this;
-        array_unshift($hosts, $host);
-
         foreach ($hosts as $host) {
             $host = rtrim($host, '/');
 
-            if (empty($route->hosts)) {
-                $route->hosts = [$host];
-            } elseif (!in_array($host, $route->hosts, true)) {
-                if (preg_match('/\{.+\}/', $host)) {
-                    throw new RuntimeException('Submasks not allowed with multiple host names.');
-                }
-
+            if (!in_array($host, $route->hosts, true)) {
                 $route->hosts[] = $host;
             }
         }
@@ -221,7 +204,7 @@ final class Route
 
     public function isMultiHost(): bool
     {
-        return $this->hosts === null ? false : count($this->hosts) > 1;
+        return isset($this->hosts[1]);
     }
 
     /**

@@ -125,20 +125,28 @@ final class RouteTest extends TestCase
     public function testHosts(): void
     {
         $route = Route::get('/')
-            ->host('https://yiiframework.com/')
-            ->addHosts('yf.com', 'yii.com', 'yf.ru');
+            ->host(
+                'https://yiiframework.com/',
+                'yf.com',
+                'yii.com',
+                'yf.ru'
+            );
 
         $this->assertSame('https://yiiframework.com|yf.com|yii.com|yf.ru', $route->getData('hosts'));
     }
 
-    public function testHostException(): void
+    public function testMultipleHosts(): void
     {
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Submasks not allowed with multiple host names.');
+        $route = Route::get('/')
+            ->host('https://yiiframework.com/');
+        $multipleRoute = Route::get('/')
+            ->host(
+                'https://yiiframework.com/',
+                'https://yiiframework.ru/'
+            );
 
-        Route::get('/')
-            ->host('https://yiiframework.com/')
-            ->addHosts('yf.com', '{user}.yii.com');
+        $this->assertFalse($route->isMultiHost());
+        $this->assertTrue($multipleRoute->isMultiHost());
     }
 
     public function testDefaults(): void
