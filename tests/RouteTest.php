@@ -258,17 +258,19 @@ final class RouteTest extends TestCase
     {
         $request = new ServerRequest('GET', '/');
 
-        $injectDispatcher = $this->getDispatcher(
-            $this->getContainer([
-                TestMiddleware1::class => new TestMiddleware1(),
-                TestMiddleware2::class => new TestMiddleware2(),
-                TestController::class => new TestController(),
-            ])
-        )->withMiddlewares([
-            TestMiddleware1::class,
-            TestMiddleware2::class,
-            [TestController::class, 'index'],
-        ]);
+        $injectDispatcher = $this
+            ->getDispatcher(
+                $this->getContainer([
+                    TestMiddleware1::class => new TestMiddleware1(),
+                    TestMiddleware2::class => new TestMiddleware2(),
+                    TestController::class => new TestController(),
+                ])
+            )
+            ->withMiddlewares([
+                TestMiddleware1::class,
+                TestMiddleware2::class,
+                [TestController::class, 'index'],
+            ]);
 
         $route = Route::get('/');
         $route->injectDispatcher($injectDispatcher);

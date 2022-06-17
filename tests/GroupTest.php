@@ -315,14 +315,16 @@ final class GroupTest extends TestCase
 
     public function testWithCors(): void
     {
-        $group = Group::create()->routes(
-            Route::get('/info')->action(static fn () => 'info'),
-            Route::post('/info')->action(static fn () => 'info'),
-        )->withCors(
-            static function () {
-                return new Response(204);
-            }
-        );
+        $group = Group::create()
+            ->routes(
+                Route::get('/info')->action(static fn () => 'info'),
+                Route::post('/info')->action(static fn () => 'info'),
+            )
+            ->withCors(
+                static function () {
+                    return new Response(204);
+                }
+            );
 
         $collector = new RouteCollector();
         $collector->addGroup($group);
@@ -333,21 +335,23 @@ final class GroupTest extends TestCase
 
     public function testWithCorsDoesntDuplicateRoutes(): void
     {
-        $group = Group::create()->routes(
-            Route::get('/info')
-                ->action(static fn () => 'info')
-                ->host('yii.dev'),
-            Route::post('/info')
-                ->action(static fn () => 'info')
-                ->host('yii.dev'),
-            Route::put('/info')
-                ->action(static fn () => 'info')
-                ->host('yii.test'),
-        )->withCors(
-            static function () {
-                return new Response(204);
-            }
-        );
+        $group = Group::create()
+            ->routes(
+                Route::get('/info')
+                    ->action(static fn () => 'info')
+                    ->host('yii.dev'),
+                Route::post('/info')
+                    ->action(static fn () => 'info')
+                    ->host('yii.dev'),
+                Route::put('/info')
+                    ->action(static fn () => 'info')
+                    ->host('yii.test'),
+            )
+            ->withCors(
+                static function () {
+                    return new Response(204);
+                }
+            );
 
         $collector = new RouteCollector();
         $collector->addGroup($group);
@@ -361,15 +365,17 @@ final class GroupTest extends TestCase
         $group = Group::create()->routes(
             Route::get('/info')->action(static fn () => 'info'),
             Route::post('/info')->action(static fn () => 'info'),
-            Group::create('/v1')->routes(
-                Route::get('/post')->action(static fn () => 'post'),
-                Route::post('/post')->action(static fn () => 'post'),
-                Route::options('/options')->action(static fn () => 'options'),
-            )->withCors(
-                static function () {
-                    return new Response(201);
-                }
-            )
+            Group::create('/v1')
+                ->routes(
+                    Route::get('/post')->action(static fn () => 'post'),
+                    Route::post('/post')->action(static fn () => 'post'),
+                    Route::options('/options')->action(static fn () => 'options'),
+                )
+                ->withCors(
+                    static function () {
+                        return new Response(201);
+                    }
+                )
         )->withCors(
             static function () {
                 return new Response(204);
