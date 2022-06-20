@@ -125,14 +125,22 @@ final class RouteTest extends TestCase
     public function testHosts(): void
     {
         $route = Route::get('/')
-            ->host(
+            ->hosts(
                 'https://yiiframework.com/',
                 'yf.com',
                 'yii.com',
                 'yf.ru'
             );
 
-        $this->assertSame('https://yiiframework.com|yf.com|yii.com|yf.ru', $route->getData('hosts'));
+        $this->assertSame(
+            [
+                'https://yiiframework.com',
+                'yf.com',
+                'yii.com',
+                'yf.ru',
+            ],
+            $route->getData('hosts')
+        );
     }
 
     public function testMultipleHosts(): void
@@ -140,13 +148,13 @@ final class RouteTest extends TestCase
         $route = Route::get('/')
             ->host('https://yiiframework.com/');
         $multipleRoute = Route::get('/')
-            ->host(
+            ->hosts(
                 'https://yiiframework.com/',
                 'https://yiiframework.ru/'
             );
 
-        $this->assertFalse($route->isMultiHost());
-        $this->assertTrue($multipleRoute->isMultiHost());
+        $this->assertCount(1, $route->getData('hosts'));
+        $this->assertCount(2, $multipleRoute->getData('hosts'));
     }
 
     public function testDefaults(): void
@@ -327,7 +335,6 @@ Yiisoft\Router\Route Object
         )
 
     [pattern] => /
-    [host] => example.com
     [hosts] => Array
         (
             [0] => example.com
@@ -360,7 +367,7 @@ EOL;
 
     private function getRequestHandler(): RequestHandlerInterface
     {
-        return new class () implements RequestHandlerInterface {
+        return new class() implements RequestHandlerInterface {
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
                 return new Response(404);

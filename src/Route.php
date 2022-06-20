@@ -25,6 +25,10 @@ final class Route
     private array $methods;
 
     private string $pattern;
+
+    /**
+     * @var string[]
+     */
     private array $hosts = [];
     private bool $override = false;
     private ?MiddlewareDispatcher $dispatcher;
@@ -186,7 +190,15 @@ final class Route
     /**
      * @return self
      */
-    public function host(string ...$hosts): self
+    public function host(string $host): self
+    {
+        return $this->hosts($host);
+    }
+
+    /**
+     * @return self
+     */
+    public function hosts(string ...$hosts): self
     {
         $route = clone $this;
         $route->hosts = [];
@@ -194,17 +206,12 @@ final class Route
         foreach ($hosts as $host) {
             $host = rtrim($host, '/');
 
-            if (!in_array($host, $route->hosts, true)) {
+            if ($host !== '' && !in_array($host, $route->hosts, true)) {
                 $route->hosts[] = $host;
             }
         }
 
         return $route;
-    }
-
-    public function isMultiHost(): bool
-    {
-        return isset($this->hosts[1]);
     }
 
     /**
@@ -320,33 +327,32 @@ final class Route
      * @psalm-param T $key
      * @psalm-return (
      *   T is ('name'|'pattern') ? string :
-     *     (T is 'host' ? string|null :
-     *        (T is 'hosts' ? string|null :
-     *           (T is 'methods' ? array<array-key,string> :
-     *              (T is 'defaults' ? array<string,string> :
-     *                 (T is ('override'|'hasMiddlewares'|'hasDispatcher') ? bool :
-     *                    (T is 'dispatcherWithMiddlewares' ? MiddlewareDispatcher : mixed)
-     *                 )
-     *              )
+     *       (T is 'host' ? string|null :
+     *           (T is 'hosts' ? array<array-key, string> :
+     *               (T is 'methods' ? array<array-key,string> :
+     *                   (T is 'defaults' ? array<string,string> :
+     *                       (T is ('override'|'hasMiddlewares'|'hasDispatcher') ? bool :
+     *                           (T is 'dispatcherWithMiddlewares' ? MiddlewareDispatcher : mixed)
+     *                       )
+     *                   )
+     *               )
      *           )
-     *        )
-     *     )
-     * )
+     *       )
+     *    )
      */
     public function getData(string $key)
     {
         switch ($key) {
             case 'name':
                 return $this->name ??
-                    (implode(', ', $this->methods) . ' ' . (string) $this->getData('hosts') . $this->pattern);
+                    (implode(', ', $this->methods) . ' ' . implode('|', $this->hosts) . $this->pattern);
             case 'pattern':
                 return $this->pattern;
             case 'host':
                 /** @var string $this->hosts[0] */
                 return $this->hosts[0] ?? null;
             case 'hosts':
-                /** @var array<array-key, string> $this->hosts */
-                return $this->hosts ? implode('|', $this->hosts) : null;
+                return $this->hosts;
             case 'methods':
                 return $this->methods;
             case 'defaults':
@@ -367,7 +373,6 @@ final class Route
     public function __toString(): string
     {
         $result = '';
-        $hosts = $this->getData('hosts');
 
         if ($this->name !== null) {
             $result .= '[' . $this->name . '] ';
@@ -376,9 +381,15 @@ final class Route
         if ($this->methods !== []) {
             $result .= implode(',', $this->methods) . ' ';
         }
-        if ($hosts !== null && !preg_match('/' . $hosts . '/', $this->pattern)) {
-            $result .= $hosts;
+
+        if ($this->hosts) {
+            $quoted = array_map(static fn ($host) => preg_quote($host), $this->hosts);
+
+            if (!preg_match('/' . implode('|', $quoted) . '/', $this->pattern)) {
+                $result .= implode('|', $this->hosts);
+            }
         }
+
         $result .= $this->pattern;
 
         return $result;
@@ -390,7 +401,6 @@ final class Route
             'name' => $this->name,
             'methods' => $this->methods,
             'pattern' => $this->pattern,
-            'host' => $this->getData('host'),
             'hosts' => $this->hosts,
             'defaults' => $this->defaults,
             'override' => $this->override,
