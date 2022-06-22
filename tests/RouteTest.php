@@ -369,7 +369,7 @@ EOL;
 
     private function getRequestHandler(): RequestHandlerInterface
     {
-        return new class() implements RequestHandlerInterface {
+        return new class () implements RequestHandlerInterface {
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
                 return new Response(404);
