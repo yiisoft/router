@@ -122,6 +122,41 @@ final class RouteTest extends TestCase
         $this->assertSame('https://yiiframework.com', $route->getData('host'));
     }
 
+    public function testHosts(): void
+    {
+        $route = Route::get('/')
+            ->hosts(
+                'https://yiiframework.com/',
+                'yf.com',
+                'yii.com',
+                'yf.ru'
+            );
+
+        $this->assertSame(
+            [
+                'https://yiiframework.com',
+                'yf.com',
+                'yii.com',
+                'yf.ru',
+            ],
+            $route->getData('hosts')
+        );
+    }
+
+    public function testMultipleHosts(): void
+    {
+        $route = Route::get('/')
+            ->host('https://yiiframework.com/');
+        $multipleRoute = Route::get('/')
+            ->hosts(
+                'https://yiiframework.com/',
+                'https://yiiframework.ru/'
+            );
+
+        $this->assertCount(1, $route->getData('hosts'));
+        $this->assertCount(2, $multipleRoute->getData('hosts'));
+    }
+
     public function testDefaults(): void
     {
         $route = Route::get('/{language}')->defaults([
@@ -302,7 +337,11 @@ Yiisoft\Router\Route Object
         )
 
     [pattern] => /
-    [host] => example.com
+    [hosts] => Array
+        (
+            [0] => example.com
+        )
+
     [defaults] => Array
         (
             [age] => 42
@@ -330,7 +369,7 @@ EOL;
 
     private function getRequestHandler(): RequestHandlerInterface
     {
-        return new class () implements RequestHandlerInterface {
+        return new class() implements RequestHandlerInterface {
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
                 return new Response(404);
