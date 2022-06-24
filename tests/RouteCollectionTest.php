@@ -193,7 +193,11 @@ final class RouteCollectionTest extends TestCase
                     ->routes(
                         Route::get('/project/{name}')->name('project')
                     )
-                    ->host('https://yiipowered.com/'),
+                    ->hosts('https://yiipowered.com/', 'https://yiiframework.ru/'),
+                Group::create()
+                    ->routes(
+                        Route::get('/user/{username}')->name('user')
+                    ),
                 Route::get('/images/{name}')->name('image')
             )
             ->host('https://yiiframework.com/');
@@ -204,8 +208,11 @@ final class RouteCollectionTest extends TestCase
         $routeCollection = new RouteCollection($collector);
         $route1 = $routeCollection->getRoute('image');
         $route2 = $routeCollection->getRoute('project');
+        $route3 = $routeCollection->getRoute('user');
         $this->assertSame('https://yiiframework.com', $route1->getData('host'));
-        $this->assertSame('https://yiipowered.com', $route2->getData('host'));
+        $this->assertCount(3, $route2->getData('hosts'));
+        $this->assertSame(['https://yiipowered.com', 'https://yiiframework.ru', 'https://yiiframework.com'], $route2->getData('hosts'));
+        $this->assertSame('https://yiiframework.com', $route3->getData('host'));
     }
 
     public function testGroupName(): void
