@@ -117,7 +117,7 @@ final class RouteCollection implements RouteCollectionInterface
                 $item = $item->prependMiddleware(...$group->getData('middlewareDefinitions'));
             }
 
-            if (!empty($group->getData('hosts'))) {
+            if (!empty($group->getData('hosts')) && empty($item->getData('hosts'))) {
                 $item = $item->hosts(...$group->getData('hosts'));
             }
 
