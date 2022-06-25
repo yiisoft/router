@@ -210,8 +210,8 @@ final class RouteCollectionTest extends TestCase
         $route2 = $routeCollection->getRoute('project');
         $route3 = $routeCollection->getRoute('user');
         $this->assertSame('https://yiiframework.com', $route1->getData('host'));
-        $this->assertCount(3, $route2->getData('hosts'));
-        $this->assertSame(['https://yiipowered.com', 'https://yiiframework.ru', 'https://yiiframework.com'], $route2->getData('hosts'));
+        $this->assertCount(2, $route2->getData('hosts'));
+        $this->assertSame(['https://yiipowered.com', 'https://yiiframework.ru'], $route2->getData('hosts'));
         $this->assertSame('https://yiiframework.com', $route3->getData('host'));
     }
 
