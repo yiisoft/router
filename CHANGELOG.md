@@ -1,5 +1,9 @@
 # Yii Router Change Log
 
+## 1.1.1 under development
+
+- no changes in this release.
+
 ## 1.1.0 June 27, 2022
 
 - Chg #167: Move `psr/container` dependency to dev requirements (@vjik)
