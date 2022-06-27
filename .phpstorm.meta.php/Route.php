@@ -8,6 +8,7 @@ namespace PHPSTORM_META {
         'routeDataKeys',
         'name',
         'host',
+        'hosts',
         'pattern',
         'methods',
         'override',
