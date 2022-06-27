@@ -111,15 +111,14 @@ final class RouteCollection implements RouteCollectionInterface
         $namePrefix .= (string) $group->getData('namePrefix');
         $items = $group->getData('items');
         $pattern = null;
-        $host = null;
+        $hosts = [];
         foreach ($items as $item) {
             if (!$this->isStaticRoute($item)) {
                 $item = $item->prependMiddleware(...$group->getData('middlewareDefinitions'));
             }
 
-            if ($group->getData('host') !== null && $item->getData('host') === null) {
-                /** @psalm-suppress PossiblyNullArgument Checked group host on not null above. */
-                $item = $item->host($group->getData('host'));
+            if (!empty($group->getData('hosts')) && empty($item->getData('hosts'))) {
+                $item = $item->hosts(...$group->getData('hosts'));
             }
 
             if ($item instanceof Group) {
@@ -150,7 +149,7 @@ final class RouteCollection implements RouteCollectionInterface
             }
 
             if ($group->getData('hasCorsMiddleware')) {
-                $this->processCors($group, $host, $pattern, $modifiedItem, $tree);
+                $this->processCors($group, $hosts, $pattern, $modifiedItem, $tree);
             }
 
             $routeName = $modifiedItem->getData('name');
@@ -167,7 +166,7 @@ final class RouteCollection implements RouteCollectionInterface
      */
     private function processCors(
         Group $group,
-        ?string &$host,
+        array &$hosts,
         ?string &$pattern,
         Route &$modifiedItem,
         array &$tree
@@ -175,13 +174,13 @@ final class RouteCollection implements RouteCollectionInterface
         /** @var array|callable|string $middleware */
         $middleware = $group->getData('corsMiddleware');
         $isNotDuplicate = !in_array(Method::OPTIONS, $modifiedItem->getData('methods'), true)
-            && ($pattern !== $modifiedItem->getData('pattern') || $host !== $modifiedItem->getData('host'));
+            && ($pattern !== $modifiedItem->getData('pattern') || $hosts !== $modifiedItem->getData('hosts'));
 
         $pattern = $modifiedItem->getData('pattern');
-        $host = $modifiedItem->getData('host');
+        $hosts = $modifiedItem->getData('hosts');
         $optionsRoute = Route::options($pattern);
-        if ($host !== null) {
-            $optionsRoute = $optionsRoute->host($host);
+        if (!empty($hosts)) {
+            $optionsRoute = $optionsRoute->hosts(...$hosts);
         }
         if ($isNotDuplicate) {
             $optionsRoute = $optionsRoute->middleware($middleware);

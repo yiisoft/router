@@ -26,7 +26,10 @@ final class Group
      */
     private array $middlewareDefinitions = [];
 
-    private ?string $host = null;
+    /**
+     * @var string[]
+     */
+    private array $hosts = [];
     private ?string $namePrefix = null;
     private bool $routesAdded = false;
     private bool $middlewareAdded = false;
@@ -167,8 +170,26 @@ final class Group
 
     public function host(string $host): self
     {
+        return $this->hosts($host);
+    }
+
+    /**
+     * @param string ...$hosts
+     *
+     * @return self
+     */
+    public function hosts(string ...$hosts): self
+    {
         $new = clone $this;
-        $new->host = rtrim($host, '/');
+
+        foreach ($hosts as $host) {
+            $host = rtrim($host, '/');
+
+            if ($host !== '' && !in_array($host, $new->hosts, true)) {
+                $new->hosts[] = $host;
+            }
+        }
+
         return $new;
     }
 
@@ -201,9 +222,11 @@ final class Group
      * @psalm-return (
      *   T is ('prefix'|'namePrefix'|'host') ? string|null :
      *   (T is 'items' ? Group[]|Route[] :
-     *     (T is ('hasCorsMiddleware'|'hasDispatcher') ? bool :
-     *       (T is 'middlewareDefinitions' ? list<array|callable|string> :
-     *         (T is 'corsMiddleware' ? array|callable|string|null : mixed)
+     *     (T is 'hosts' ? array<array-key, string> :
+     *       (T is ('hasCorsMiddleware'|'hasDispatcher') ? bool :
+     *         (T is 'middlewareDefinitions' ? list<array|callable|string> :
+     *           (T is 'corsMiddleware' ? array|callable|string|null : mixed)
+     *         )
      *       )
      *     )
      *   )
@@ -217,7 +240,9 @@ final class Group
             case 'namePrefix':
                 return $this->namePrefix;
             case 'host':
-                return $this->host;
+                return $this->hosts[0] ?? null;
+            case 'hosts':
+                return $this->hosts;
             case 'corsMiddleware':
                 return $this->corsMiddleware;
             case 'items':
