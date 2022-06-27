@@ -245,14 +245,21 @@ final class GroupTest extends TestCase
     {
         $group = Group::create()->host('https://yiiframework.com/');
 
-        $this->assertSame($group->getData('host'), 'https://yiiframework.com');
+        $this->assertSame('https://yiiframework.com', $group->getData('host'));
+    }
+
+    public function testHosts(): void
+    {
+        $group = Group::create()->hosts('https://yiiframework.com/', 'https://yiiframework.ru/');
+
+        $this->assertSame(['https://yiiframework.com', 'https://yiiframework.ru'], $group->getData('hosts'));
     }
 
     public function testName(): void
     {
         $group = Group::create()->namePrefix('api');
 
-        $this->assertSame($group->getData('namePrefix'), 'api');
+        $this->assertSame('api', $group->getData('namePrefix'));
     }
 
     public function testGetDataWithWrongKey(): void
