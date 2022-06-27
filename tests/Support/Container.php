@@ -24,7 +24,7 @@ final class Container implements ContainerInterface
         throw new NotFoundException("$id was not found in container");
     }
 
-    public function has($id)
+    public function has(string $id): bool
     {
         return array_key_exists($id, $this->instances);
     }
