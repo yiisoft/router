@@ -38,7 +38,7 @@
         "vimeo/psalm": "^4.23",
         "yiisoft/di": "^1.0",
         "yiisoft/dummy-provider": "^1.0.0",
-        "yiisoft/test-support": "^1.4"
+        "yiisoft/test-support": "^3.0"
     },
     "autoload": {
         "psr-4": {
