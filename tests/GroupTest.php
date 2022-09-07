@@ -16,6 +16,7 @@ use RuntimeException;
 use stdClass;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
+use Yiisoft\Middleware\Dispatcher\WrapperFactory;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
@@ -445,7 +446,7 @@ final class GroupTest extends TestCase
     private function getDispatcher(): MiddlewareDispatcher
     {
         return new MiddlewareDispatcher(
-            new MiddlewareFactory(new Container([])),
+            new MiddlewareFactory(new Container([]), new WrapperFactory(new Container([]))),
             $this->createMock(EventDispatcherInterface::class)
         );
     }

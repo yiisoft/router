@@ -16,6 +16,7 @@ use RuntimeException;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
+use Yiisoft\Middleware\Dispatcher\WrapperFactory;
 use Yiisoft\Router\MatchingResult;
 use Yiisoft\Router\Route;
 
@@ -51,7 +52,7 @@ final class MatchingResultTest extends TestCase
     {
         $container = $this->createMock(ContainerInterface::class);
         $dispatcher = new MiddlewareDispatcher(
-            new MiddlewareFactory($container),
+            new MiddlewareFactory($container, new WrapperFactory($container)),
             $this->createMock(EventDispatcherInterface::class)
         );
         $route = Route::post('/', $dispatcher)->middleware($this->getMiddleware());
