@@ -13,7 +13,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Http\Method;
 use Yiisoft\Http\Status;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
-use Yiisoft\Middleware\Dispatcher\MiddlewareFactoryInterface;
+use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\UrlMatcherInterface;
 
@@ -27,7 +27,7 @@ final class Router implements MiddlewareInterface
     public function __construct(
         UrlMatcherInterface $matcher,
         ResponseFactoryInterface $responseFactory,
-        MiddlewareFactoryInterface $middlewareFactory,
+        MiddlewareFactory $middlewareFactory,
         CurrentRoute $currentRoute,
         ?EventDispatcherInterface $eventDispatcher = null
     ) {
