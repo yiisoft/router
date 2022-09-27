@@ -82,7 +82,6 @@ final class CurrentRoute
     }
 
     /**
-     * @param Route $route
      * @param string[] $arguments
      *
      * @psalm-param array<string,string> $arguments
@@ -100,8 +99,6 @@ final class CurrentRoute
     }
 
     /**
-     * @param UriInterface $uri
-     *
      * @internal
      */
     public function setUri(UriInterface $uri): void

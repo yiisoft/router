@@ -8,10 +8,7 @@ use InvalidArgumentException;
 use RuntimeException;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
-use function get_class;
-use function gettype;
 use function in_array;
-use function is_object;
 
 final class Group
 {
@@ -19,7 +16,6 @@ final class Group
      * @var Group[]|Route[]
      */
     private array $items = [];
-    private ?string $prefix;
 
     /**
      * @var array[]|callable[]|string[]
@@ -38,12 +34,9 @@ final class Group
      * @var array|callable|string|null Middleware definition for CORS requests.
      */
     private $corsMiddleware = null;
-    private ?MiddlewareDispatcher $dispatcher;
 
-    private function __construct(?string $prefix = null, MiddlewareDispatcher $dispatcher = null)
+    private function __construct(private ?string $prefix = null, private ?MiddlewareDispatcher $dispatcher = null)
     {
-        $this->dispatcher = $dispatcher;
-        $this->prefix = $prefix;
     }
 
     /**
@@ -51,8 +44,6 @@ final class Group
      *
      * @param string|null $prefix URL prefix to prepend to all routes of the group.
      * @param MiddlewareDispatcher|null $dispatcher Middleware dispatcher to use for the group.
-     *
-     * @return self
      */
     public static function create(
         ?string $prefix = null,
@@ -62,11 +53,9 @@ final class Group
     }
 
     /**
-     * @param Group|Route ...$routes
-     *
      * @psalm-suppress DocblockTypeContradiction,RedundantConditionGivenDocblockType
      */
-    public function routes(...$routes): self
+    public function routes(self|Route ...$routes): self
     {
         if ($this->middlewareAdded) {
             throw new RuntimeException('routes() can not be used after prependMiddleware().');
@@ -79,7 +68,7 @@ final class Group
                 }
                 $new->items[] = $route;
             } else {
-                $type = is_object($route) ? get_class($route) : gettype($route);
+                $type = get_debug_type($route);
                 throw new InvalidArgumentException(
                     sprintf('Route should be either an instance of Route or Group, %s given.', $type)
                 );
@@ -110,8 +99,6 @@ final class Group
      * If set, routes for {@see Method::OPTIONS} request will be added automatically.
      *
      * @param array|callable|string|null $middlewareDefinition Middleware definition for CORS requests.
-     *
-     * @return self
      */
     public function withCors($middlewareDefinition): self
     {
@@ -124,12 +111,8 @@ final class Group
     /**
      * Appends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed first.
-     *
-     * @param array|callable|string ...$middlewareDefinition
-     *
-     * @return self
      */
-    public function middleware(...$middlewareDefinition): self
+    public function middleware(array|callable|string ...$middlewareDefinition): self
     {
         if ($this->routesAdded) {
             throw new RuntimeException('middleware() can not be used after routes().');
@@ -145,12 +128,8 @@ final class Group
     /**
      * Prepends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed last.
-     *
-     * @param array|callable|string ...$middlewareDefinition
-     *
-     * @return self
      */
-    public function prependMiddleware(...$middlewareDefinition): self
+    public function prependMiddleware(array|callable|string ...$middlewareDefinition): self
     {
         $new = clone $this;
         array_unshift(
@@ -173,11 +152,6 @@ final class Group
         return $this->hosts($host);
     }
 
-    /**
-     * @param string ...$hosts
-     *
-     * @return self
-     */
     public function hosts(string ...$hosts): self
     {
         $new = clone $this;
@@ -197,12 +171,8 @@ final class Group
      * Excludes middleware from being invoked when action is handled.
      * It is useful to avoid invoking one of the parent group middleware for
      * a certain route.
-     *
-     * @param mixed ...$middlewareDefinition
-     *
-     * @return self
      */
-    public function disableMiddleware(...$middlewareDefinition): self
+    public function disableMiddleware(mixed ...$middlewareDefinition): self
     {
         $new = clone $this;
         array_push(
@@ -213,8 +183,6 @@ final class Group
     }
 
     /**
-     * @param string $key
-     *
      * @return mixed
      *
      * @psalm-template T as string
@@ -234,28 +202,18 @@ final class Group
      */
     public function getData(string $key)
     {
-        switch ($key) {
-            case 'prefix':
-                return $this->prefix;
-            case 'namePrefix':
-                return $this->namePrefix;
-            case 'host':
-                return $this->hosts[0] ?? null;
-            case 'hosts':
-                return $this->hosts;
-            case 'corsMiddleware':
-                return $this->corsMiddleware;
-            case 'items':
-                return $this->items;
-            case 'hasCorsMiddleware':
-                return $this->corsMiddleware !== null;
-            case 'hasDispatcher':
-                return $this->dispatcher !== null;
-            case 'middlewareDefinitions':
-                return $this->getMiddlewareDefinitions();
-            default:
-                throw new InvalidArgumentException('Unknown data key: ' . $key);
-        }
+        return match ($key) {
+            'prefix' => $this->prefix,
+            'namePrefix' => $this->namePrefix,
+            'host' => $this->hosts[0] ?? null,
+            'hosts' => $this->hosts,
+            'corsMiddleware' => $this->corsMiddleware,
+            'items' => $this->items,
+            'hasCorsMiddleware' => $this->corsMiddleware !== null,
+            'hasDispatcher' => $this->dispatcher !== null,
+            'middlewareDefinitions' => $this->getMiddlewareDefinitions(),
+            default => throw new InvalidArgumentException('Unknown data key: ' . $key),
+        };
     }
 
     private function getMiddlewareDefinitions(): array
