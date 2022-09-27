@@ -27,7 +27,7 @@ final class MatchingResult implements MiddlewareInterface
 
     private ?MiddlewareDispatcher $dispatcher = null;
 
-    private function __construct(private ?\Yiisoft\Router\Route $route)
+    private function __construct(private ?Route $route)
     {
     }
 

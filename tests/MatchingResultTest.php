@@ -84,7 +84,7 @@ final class MatchingResultTest extends TestCase
 
     private function getMiddleware(): callable
     {
-        return static fn() => new Response(201);
+        return static fn () => new Response(201);
     }
 
     private function getRequestHandler(): RequestHandlerInterface

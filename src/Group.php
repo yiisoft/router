@@ -8,10 +8,7 @@ use InvalidArgumentException;
 use RuntimeException;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
-use function get_class;
-use function gettype;
 use function in_array;
-use function is_object;
 
 final class Group
 {
@@ -38,7 +35,7 @@ final class Group
      */
     private $corsMiddleware = null;
 
-    private function __construct(private ?string $prefix = null, private ?\Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher $dispatcher = null)
+    private function __construct(private ?string $prefix = null, private ?MiddlewareDispatcher $dispatcher = null)
     {
     }
 
@@ -58,7 +55,7 @@ final class Group
     /**
      * @psalm-suppress DocblockTypeContradiction,RedundantConditionGivenDocblockType
      */
-    public function routes(\Yiisoft\Router\Group|\Yiisoft\Router\Route ...$routes): self
+    public function routes(self|Route ...$routes): self
     {
         if ($this->middlewareAdded) {
             throw new RuntimeException('routes() can not be used after prependMiddleware().');
@@ -178,8 +175,6 @@ final class Group
      * Excludes middleware from being invoked when action is handled.
      * It is useful to avoid invoking one of the parent group middleware for
      * a certain route.
-     *
-     *
      */
     public function disableMiddleware(mixed ...$middlewareDefinition): self
     {
@@ -192,7 +187,6 @@ final class Group
     }
 
     /**
-     *
      * @return mixed
      *
      * @psalm-template T as string

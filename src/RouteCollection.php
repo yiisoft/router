@@ -80,7 +80,7 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * Add an item into routes array.
      */
-    private function injectItem(\Yiisoft\Router\Group|\Yiisoft\Router\Route $route): void
+    private function injectItem(Group|Route $route): void
     {
         if ($route instanceof Group) {
             $this->injectGroup($route, $this->items);
@@ -192,9 +192,7 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * Builds route tree from items.
      *
-     *
      * @psalm-param Items $items
-     *
      */
     private function buildTree(array $items, bool $routeAsString): array
     {
@@ -210,7 +208,7 @@ final class RouteCollection implements RouteCollectionInterface
         return $tree;
     }
 
-    private function isStaticRoute(\Yiisoft\Router\Group|\Yiisoft\Router\Route $item): bool
+    private function isStaticRoute(Group|Route $item): bool
     {
         return $item instanceof Route && !$item->getData('hasMiddlewares');
     }

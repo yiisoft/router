@@ -42,7 +42,7 @@ final class Route implements \Stringable
     /**
      * @param string[] $methods
      */
-    private function __construct(private array $methods, private string $pattern, private ?\Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher $dispatcher = null)
+    private function __construct(private array $methods, private string $pattern, private ?MiddlewareDispatcher $dispatcher = null)
     {
     }
 
@@ -98,7 +98,6 @@ final class Route implements \Stringable
 
     /**
      * @param string[] $methods
-     *
      */
     public static function methods(
         array $methods,
@@ -156,9 +155,7 @@ final class Route implements \Stringable
     /**
      * Parameter default values indexed by parameter names.
      *
-     *
      * @psalm-param array<string,null|Stringable|scalar> $defaults
-     *
      */
     public function defaults(array $defaults): self
     {
@@ -222,8 +219,6 @@ final class Route implements \Stringable
      * Excludes middleware from being invoked when action is handled.
      * It is useful to avoid invoking one of the parent group middleware for
      * a certain route.
-     *
-     *
      */
     public function disableMiddleware(mixed ...$middlewareDefinition): self
     {
@@ -236,7 +231,6 @@ final class Route implements \Stringable
     }
 
     /**
-     *
      * @return mixed
      *
      * @psalm-template T as string

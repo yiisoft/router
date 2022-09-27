@@ -140,14 +140,12 @@ final class RouterTest extends TestCase
         $middleware = $this->createRouteMiddleware();
 
         return new class ($middleware, $routeCollection) implements UrlMatcherInterface {
-            public function __construct(private $middleware, private ?\Yiisoft\Router\RouteCollectionInterface $routeCollection = null)
+            public function __construct(private $middleware, private ?RouteCollectionInterface $routeCollection = null)
             {
             }
 
             /**
              * Emulates router with a single `GET /` route
-             *
-             *
              */
             public function match(ServerRequestInterface $request): MatchingResult
             {
@@ -228,6 +226,6 @@ final class RouterTest extends TestCase
 
     private function createRouteMiddleware(): callable
     {
-        return static fn() => new Response(201);
+        return static fn () => new Response(201);
     }
 }

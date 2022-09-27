@@ -85,6 +85,7 @@ final class CurrentRoute
      * @param string[] $arguments
      *
      * @psalm-param array<string,string> $arguments
+     *
      * @internal
      */
     public function setRouteWithArguments(Route $route, array $arguments): void
