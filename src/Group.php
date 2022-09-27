@@ -111,8 +111,6 @@ final class Group
     /**
      * Appends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed first.
-     *
-     * @param array|callable|string ...$middlewareDefinition
      */
     public function middleware(array|callable|string ...$middlewareDefinition): self
     {
@@ -130,8 +128,6 @@ final class Group
     /**
      * Prepends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed last.
-     *
-     * @param array|callable|string ...$middlewareDefinition
      */
     public function prependMiddleware(array|callable|string ...$middlewareDefinition): self
     {

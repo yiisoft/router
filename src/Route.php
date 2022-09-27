@@ -167,8 +167,6 @@ final class Route implements \Stringable
     /**
      * Appends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed first.
-     *
-     * @param array|callable|string ...$middlewareDefinition
      */
     public function middleware(array|callable|string ...$middlewareDefinition): self
     {
@@ -186,8 +184,6 @@ final class Route implements \Stringable
     /**
      * Prepends a handler middleware definition that should be invoked for a matched route.
      * Last added handler will be executed first.
-     *
-     * @param array|callable|string ...$middlewareDefinition
      */
     public function prependMiddleware(array|callable|string ...$middlewareDefinition): self
     {
@@ -204,8 +200,6 @@ final class Route implements \Stringable
 
     /**
      * Appends action handler. It is a primary middleware definition that should be invoked last for a matched route.
-     *
-     * @param array|callable|string $middlewareDefinition
      */
     public function action(array|callable|string $middlewareDefinition): self
     {
