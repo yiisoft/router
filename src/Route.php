@@ -15,23 +15,15 @@ use function in_array;
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
  */
-final class Route
+final class Route implements \Stringable
 {
     private ?string $name = null;
 
     /**
      * @var string[]
      */
-    private array $methods;
-
-    private string $pattern;
-
-    /**
-     * @var string[]
-     */
     private array $hosts = [];
     private bool $override = false;
-    private ?MiddlewareDispatcher $dispatcher;
     private bool $actionAdded = false;
 
     /**
@@ -50,11 +42,8 @@ final class Route
     /**
      * @param string[] $methods
      */
-    private function __construct(array $methods, string $pattern, ?MiddlewareDispatcher $dispatcher = null)
+    private function __construct(private array $methods, private string $pattern, private ?\Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher $dispatcher = null)
     {
-        $this->methods = $methods;
-        $this->pattern = $pattern;
-        $this->dispatcher = $dispatcher;
     }
 
     /**
@@ -65,9 +54,6 @@ final class Route
         $this->dispatcher = $dispatcher;
     }
 
-    /**
-     * @return self
-     */
     public function withDispatcher(MiddlewareDispatcher $dispatcher): self
     {
         $route = clone $this;
@@ -75,78 +61,36 @@ final class Route
         return $route;
     }
 
-    /**
-     * @param string $pattern
-     * @param MiddlewareDispatcher|null $dispatcher
-     *
-     * @return self
-     */
     public static function get(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
     {
         return self::methods([Method::GET], $pattern, $dispatcher);
     }
 
-    /**
-     * @param string $pattern
-     * @param MiddlewareDispatcher|null $dispatcher
-     *
-     * @return self
-     */
     public static function post(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
     {
         return self::methods([Method::POST], $pattern, $dispatcher);
     }
 
-    /**
-     * @param string $pattern
-     * @param MiddlewareDispatcher|null $dispatcher
-     *
-     * @return self
-     */
     public static function put(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
     {
         return self::methods([Method::PUT], $pattern, $dispatcher);
     }
 
-    /**
-     * @param string $pattern
-     * @param MiddlewareDispatcher|null $dispatcher
-     *
-     * @return self
-     */
     public static function delete(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
     {
         return self::methods([Method::DELETE], $pattern, $dispatcher);
     }
 
-    /**
-     * @param string $pattern
-     * @param MiddlewareDispatcher|null $dispatcher
-     *
-     * @return self
-     */
     public static function patch(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
     {
         return self::methods([Method::PATCH], $pattern, $dispatcher);
     }
 
-    /**
-     * @param string $pattern
-     * @param MiddlewareDispatcher|null $dispatcher
-     *
-     * @return self
-     */
     public static function head(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
     {
         return self::methods([Method::HEAD], $pattern, $dispatcher);
     }
 
-    /**
-     * @param string $pattern
-     * @param MiddlewareDispatcher|null $dispatcher
-     *
-     * @return self
-     */
     public static function options(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
     {
         return self::methods([Method::OPTIONS], $pattern, $dispatcher);
@@ -154,10 +98,7 @@ final class Route
 
     /**
      * @param string[] $methods
-     * @param string $pattern
-     * @param MiddlewareDispatcher|null $dispatcher
      *
-     * @return self
      */
     public static function methods(
         array $methods,
@@ -167,9 +108,6 @@ final class Route
         return new self($methods, $pattern, $dispatcher);
     }
 
-    /**
-     * @return self
-     */
     public function name(string $name): self
     {
         $route = clone $this;
@@ -177,9 +115,6 @@ final class Route
         return $route;
     }
 
-    /**
-     * @return self
-     */
     public function pattern(string $pattern): self
     {
         $new = clone $this;
@@ -187,17 +122,11 @@ final class Route
         return $new;
     }
 
-    /**
-     * @return self
-     */
     public function host(string $host): self
     {
         return $this->hosts($host);
     }
 
-    /**
-     * @return self
-     */
     public function hosts(string ...$hosts): self
     {
         $route = clone $this;
@@ -216,8 +145,6 @@ final class Route
 
     /**
      * Marks route as override. When added it will replace existing route with the same name.
-     *
-     * @return self
      */
     public function override(): self
     {
@@ -229,11 +156,9 @@ final class Route
     /**
      * Parameter default values indexed by parameter names.
      *
-     * @param array $defaults
      *
      * @psalm-param array<string,null|Stringable|scalar> $defaults
      *
-     * @return self
      */
     public function defaults(array $defaults): self
     {
@@ -247,10 +172,8 @@ final class Route
      * First added handler will be executed first.
      *
      * @param array|callable|string ...$middlewareDefinition
-     *
-     * @return self
      */
-    public function middleware(...$middlewareDefinition): self
+    public function middleware(array|callable|string ...$middlewareDefinition): self
     {
         if ($this->actionAdded) {
             throw new RuntimeException('middleware() can not be used after action().');
@@ -268,10 +191,8 @@ final class Route
      * Last added handler will be executed first.
      *
      * @param array|callable|string ...$middlewareDefinition
-     *
-     * @return self
      */
-    public function prependMiddleware(...$middlewareDefinition): self
+    public function prependMiddleware(array|callable|string ...$middlewareDefinition): self
     {
         if (!$this->actionAdded) {
             throw new RuntimeException('prependMiddleware() can not be used before action().');
@@ -288,10 +209,8 @@ final class Route
      * Appends action handler. It is a primary middleware definition that should be invoked last for a matched route.
      *
      * @param array|callable|string $middlewareDefinition
-     *
-     * @return self
      */
-    public function action($middlewareDefinition): self
+    public function action(array|callable|string $middlewareDefinition): self
     {
         $route = clone $this;
         $route->middlewareDefinitions[] = $middlewareDefinition;
@@ -304,11 +223,9 @@ final class Route
      * It is useful to avoid invoking one of the parent group middleware for
      * a certain route.
      *
-     * @param mixed ...$middlewareDefinition
      *
-     * @return self
      */
-    public function disableMiddleware(...$middlewareDefinition): self
+    public function disableMiddleware(mixed ...$middlewareDefinition): self
     {
         $route = clone $this;
         array_push(
@@ -319,7 +236,6 @@ final class Route
     }
 
     /**
-     * @param string $key
      *
      * @return mixed
      *
@@ -342,32 +258,20 @@ final class Route
      */
     public function getData(string $key)
     {
-        switch ($key) {
-            case 'name':
-                return $this->name ??
-                    (implode(', ', $this->methods) . ' ' . implode('|', $this->hosts) . $this->pattern);
-            case 'pattern':
-                return $this->pattern;
-            case 'host':
-                /** @var string $this->hosts[0] */
-                return $this->hosts[0] ?? null;
-            case 'hosts':
-                return $this->hosts;
-            case 'methods':
-                return $this->methods;
-            case 'defaults':
-                return $this->defaults;
-            case 'override':
-                return $this->override;
-            case 'dispatcherWithMiddlewares':
-                return $this->getDispatcherWithMiddlewares();
-            case 'hasMiddlewares':
-                return $this->middlewareDefinitions !== [];
-            case 'hasDispatcher':
-                return $this->dispatcher !== null;
-            default:
-                throw new InvalidArgumentException('Unknown data key: ' . $key);
-        }
+        return match ($key) {
+            'name' => $this->name ??
+                (implode(', ', $this->methods) . ' ' . implode('|', $this->hosts) . $this->pattern),
+            'pattern' => $this->pattern,
+            'host' => $this->hosts[0] ?? null,
+            'hosts' => $this->hosts,
+            'methods' => $this->methods,
+            'defaults' => $this->defaults,
+            'override' => $this->override,
+            'dispatcherWithMiddlewares' => $this->getDispatcherWithMiddlewares(),
+            'hasMiddlewares' => $this->middlewareDefinitions !== [],
+            'hasDispatcher' => $this->dispatcher !== null,
+            default => throw new InvalidArgumentException('Unknown data key: ' . $key),
+        };
     }
 
     public function __toString(): string
