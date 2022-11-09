@@ -52,9 +52,6 @@ final class Group
         return new self($prefix, $dispatcher);
     }
 
-    /**
-     * @psalm-suppress DocblockTypeContradiction,RedundantConditionGivenDocblockType
-     */
     public function routes(self|Route ...$routes): self
     {
         if ($this->middlewareAdded) {
@@ -62,17 +59,10 @@ final class Group
         }
         $new = clone $this;
         foreach ($routes as $route) {
-            if ($route instanceof Route || $route instanceof self) {
-                if ($new->dispatcher !== null && !$route->getData('hasDispatcher')) {
-                    $route = $route->withDispatcher($new->dispatcher);
-                }
-                $new->items[] = $route;
-            } else {
-                $type = get_debug_type($route);
-                throw new InvalidArgumentException(
-                    sprintf('Route should be either an instance of Route or Group, %s given.', $type)
-                );
+            if ($new->dispatcher !== null && !$route->getData('hasDispatcher')) {
+                $route = $route->withDispatcher($new->dispatcher);
             }
+            $new->items[] = $route;
         }
 
         $new->routesAdded = true;
@@ -183,8 +173,6 @@ final class Group
     }
 
     /**
-     * @return mixed
-     *
      * @psalm-template T as string
      * @psalm-param T $key
      * @psalm-return (
@@ -200,7 +188,7 @@ final class Group
      *   )
      * )
      */
-    public function getData(string $key)
+    public function getData(string $key): mixed
     {
         return match ($key) {
             'prefix' => $this->prefix,

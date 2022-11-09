@@ -68,18 +68,6 @@ final class GroupTest extends TestCase
         $group->routes(Route::get('/'));
     }
 
-    public function testRoutesWithNull(): void
-    {
-        $group = Group::create();
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage(
-            sprintf('Route should be either an instance of Route or Group, %s given.', stdClass::class)
-        );
-
-        $group->routes(new stdClass());
-    }
-
     public function testAddNestedMiddleware(): void
     {
         $request = new ServerRequest('GET', '/outergroup/innergroup/test1');
