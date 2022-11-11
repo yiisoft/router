@@ -19,22 +19,16 @@ use Yiisoft\Router\UrlMatcherInterface;
 
 final class Router implements MiddlewareInterface
 {
-    private UrlMatcherInterface $matcher;
-    private ResponseFactoryInterface $responseFactory;
     private MiddlewareDispatcher $dispatcher;
-    private CurrentRoute $currentRoute;
 
     public function __construct(
-        UrlMatcherInterface $matcher,
-        ResponseFactoryInterface $responseFactory,
+        private UrlMatcherInterface $matcher,
+        private ResponseFactoryInterface $responseFactory,
         MiddlewareFactory $middlewareFactory,
-        CurrentRoute $currentRoute,
+        private CurrentRoute $currentRoute,
         ?EventDispatcherInterface $eventDispatcher = null
     ) {
-        $this->matcher = $matcher;
-        $this->responseFactory = $responseFactory;
         $this->dispatcher = new MiddlewareDispatcher($middlewareFactory, $eventDispatcher);
-        $this->currentRoute = $currentRoute;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

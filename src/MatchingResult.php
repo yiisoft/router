@@ -14,8 +14,6 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
 final class MatchingResult implements MiddlewareInterface
 {
-    private ?Route $route;
-
     /**
      * @var string[]
      * @psalm-var array<string,string>
@@ -29,9 +27,8 @@ final class MatchingResult implements MiddlewareInterface
 
     private ?MiddlewareDispatcher $dispatcher = null;
 
-    private function __construct(?Route $route)
+    private function __construct(private ?Route $route)
     {
-        $this->route = $route;
     }
 
     public function withDispatcher(MiddlewareDispatcher $dispatcher): self
