@@ -15,8 +15,7 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 final class MatchingResult implements MiddlewareInterface
 {
     /**
-     * @var string[]
-     * @psalm-var array<string,string>
+     * @var array<string,string>
      */
     private array $arguments = [];
 
@@ -39,8 +38,7 @@ final class MatchingResult implements MiddlewareInterface
     }
 
     /**
-     * @param string[] $arguments
-     * @psalm-param array<string,string> $arguments
+     * @param array<string,string> $arguments
      */
     public static function fromSuccess(Route $route, array $arguments): self
     {
@@ -73,8 +71,7 @@ final class MatchingResult implements MiddlewareInterface
     }
 
     /**
-     * @return string[]
-     * @psalm-return array<string,string>
+     * @return array<string,string>
      */
     public function arguments(): array
     {

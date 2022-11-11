@@ -39,7 +39,7 @@ with an adapter package. Currently, the only adapter available is [FastRoute](ht
 The package could be installed with composer:
 
 ```shell
-composer require yiisoft/router --prefer-dist
+composer require yiisoft/router
 ```
 
 Additionally, you will need an adapter such as [FastRoute](https://github.com/yiisoft/router-fastroute).

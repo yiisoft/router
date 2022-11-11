@@ -1,5 +1,0 @@
-{
-    "scan-files": [
-        "src/*.php"
-    ]
-}

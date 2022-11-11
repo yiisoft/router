@@ -15,7 +15,7 @@ use function in_array;
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
  */
-final class Route implements \Stringable
+final class Route implements Stringable
 {
     private ?string $name = null;
 
@@ -34,8 +34,7 @@ final class Route implements \Stringable
     private array $disabledMiddlewareDefinitions = [];
 
     /**
-     * @var string[]
-     * @psalm-var array<string,string>
+     * @var array<string,string>
      */
     private array $defaults = [];
 
@@ -225,8 +224,6 @@ final class Route implements \Stringable
     }
 
     /**
-     * @return mixed
-     *
      * @psalm-template T as string
      * @psalm-param T $key
      * @psalm-return (
@@ -244,7 +241,7 @@ final class Route implements \Stringable
      *       )
      *    )
      */
-    public function getData(string $key)
+    public function getData(string $key): mixed
     {
         return match ($key) {
             'name' => $this->name ??
