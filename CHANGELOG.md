@@ -3,6 +3,7 @@
 ## 2.0.0 under development
 
 - Enh #173: Raise minimum PHP version to 8.0 (@xepozz, @rustamwin)
+- Enh #176: Add support for `yiisoft/middleware-dispatcher` version `^4.0` (@vjik)
 
 ## 1.2.0 September 07, 2022
 
