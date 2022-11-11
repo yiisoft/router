@@ -41,8 +41,11 @@ final class Route implements Stringable
     /**
      * @param string[] $methods
      */
-    private function __construct(private array $methods, private string $pattern, private ?MiddlewareDispatcher $dispatcher = null)
-    {
+    private function __construct(
+        private array $methods,
+        private string $pattern,
+        private ?MiddlewareDispatcher $dispatcher = null
+    ) {
     }
 
     /**
@@ -261,18 +264,16 @@ final class Route implements Stringable
 
     public function __toString(): string
     {
-        $result = '';
-
-        if ($this->name !== null) {
-            $result .= '[' . $this->name . '] ';
-        }
+        $result = $this->name === null
+            ? ''
+            : '[' . $this->name . '] ';
 
         if ($this->methods !== []) {
             $result .= implode(',', $this->methods) . ' ';
         }
 
         if ($this->hosts) {
-            $quoted = array_map(static fn ($host) => preg_quote($host), $this->hosts);
+            $quoted = array_map(static fn($host) => preg_quote($host, '/'), $this->hosts);
 
             if (!preg_match('/' . implode('|', $quoted) . '/', $this->pattern)) {
                 $result .= implode('|', $this->hosts);
