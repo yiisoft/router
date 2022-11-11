@@ -1,8 +1,8 @@
 # Yii Router Change Log
 
-## 1.2.1 under development
+## 2.0.0 under development
 
-- Enh: Add composer require checker into CI
+- Enh #173: Raise minimum PHP version to 8.0 (@xepozz, @rustamwin)
 
 ## 1.2.0 September 07, 2022
 

@@ -17,8 +17,6 @@ use function is_array;
  */
 final class RouteCollection implements RouteCollectionInterface
 {
-    private RouteCollectorInterface $collector;
-
     /**
      * @psalm-var Items
      */
@@ -31,9 +29,8 @@ final class RouteCollection implements RouteCollectionInterface
      */
     private array $routes = [];
 
-    public function __construct(RouteCollectorInterface $collector)
+    public function __construct(private RouteCollectorInterface $collector)
     {
-        $this->collector = $collector;
     }
 
     public function getRoutes(): array
@@ -82,10 +79,8 @@ final class RouteCollection implements RouteCollectionInterface
 
     /**
      * Add an item into routes array.
-     *
-     * @param Group|Route $route
      */
-    private function injectItem($route): void
+    private function injectItem(Group|Route $route): void
     {
         if ($route instanceof Group) {
             $this->injectGroup($route, $this->items);
@@ -144,7 +139,7 @@ final class RouteCollection implements RouteCollectionInterface
 
             $modifiedItem = $item->pattern($prefix . $item->getData('pattern'));
 
-            if (strpos($modifiedItem->getData('name'), implode(', ', $modifiedItem->getData('methods'))) === false) {
+            if (!str_contains($modifiedItem->getData('name'), implode(', ', $modifiedItem->getData('methods')))) {
                 $modifiedItem = $modifiedItem->name($namePrefix . $modifiedItem->getData('name'));
             }
 
@@ -197,12 +192,7 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * Builds route tree from items.
      *
-     * @param array $items
-     * @param bool $routeAsString
-     *
      * @psalm-param Items $items
-     *
-     * @return array
      */
     private function buildTree(array $items, bool $routeAsString): array
     {
@@ -218,10 +208,7 @@ final class RouteCollection implements RouteCollectionInterface
         return $tree;
     }
 
-    /**
-     * @param Group|Route $item
-     */
-    private function isStaticRoute($item): bool
+    private function isStaticRoute(Group|Route $item): bool
     {
         return $item instanceof Route && !$item->getData('hasMiddlewares');
     }

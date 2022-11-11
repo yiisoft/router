@@ -8,11 +8,8 @@ use Psr\Container\ContainerInterface;
 
 final class Container implements ContainerInterface
 {
-    private array $instances;
-
-    public function __construct(array $instances)
+    public function __construct(private array $instances)
     {
-        $this->instances = $instances;
     }
 
     public function get($id)
