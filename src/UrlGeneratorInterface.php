@@ -69,8 +69,6 @@ interface UrlGeneratorInterface
      *
      * @param string $name Name of argument to provide default value for.
      * @param null|Stringable|int|float|string|bool $value Default value.
-     *
-     * @psalm-param null|Stringable|scalar $value
      */
     public function setDefaultArgument(string $name, null|Stringable|int|float|string|bool $value): void;
 }
