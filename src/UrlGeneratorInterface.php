@@ -53,12 +53,13 @@ interface UrlGeneratorInterface
      * Generate URL from the current route replacing some of its arguments with values specified.
      *
      * @param array $replacedArguments New argument values indexed by replaced argument names.
-     * @param string|null $fallbackRouteName Name of a route that should be used if current route
+     * @param array $queryParameters Parameter-value set.
+     * @param string|null $fallbackRouteName Name of a route that should be used if current route.
      * can not be determined.
      *
      * @psalm-param array<string,null|Stringable|scalar> $replacedArguments
      */
-    public function generateFromCurrent(array $replacedArguments, ?string $fallbackRouteName = null): string;
+    public function generateFromCurrent(array $replacedArguments, array $queryParameters = [], ?string $fallbackRouteName = null): string;
 
     public function getUriPrefix(): string;
 
