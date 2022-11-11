@@ -15,7 +15,7 @@ interface UrlGeneratorInterface
      * Generates URL from named route, arguments, and query parameters.
      *
      * @param string $name Name of the route.
-     * @param array<string,null|Stringable|scalar> $arguments Argument-value set.
+     * @param array<string,scalar|Stringable|null> $arguments Argument-value set.
      * @param array $queryParameters Parameter-value set.
      *
      * @throws RouteNotFoundException In case there is no route with the name specified.
@@ -28,7 +28,7 @@ interface UrlGeneratorInterface
      * Generates absolute URL from named route, arguments, and query parameters.
      *
      * @param string $name Name of the route.
-     * @param array<string,null|Stringable|scalar> $arguments Argument-value set.
+     * @param array<string,scalar|Stringable|null> $arguments Argument-value set.
      * @param array $queryParameters Parameter-value set.
      * @param string|null $scheme Host scheme.
      * @param string|null $host Host for manual setup.
@@ -48,7 +48,7 @@ interface UrlGeneratorInterface
     /**
      * Generate URL from the current route replacing some of its arguments with values specified.
      *
-     * @param array<string,null|Stringable|scalar> $replacedArguments New argument values indexed by replaced argument
+     * @param array<string,scalar|Stringable|null> $replacedArguments New argument values indexed by replaced argument
      * names.
      * @param array $queryParameters Parameter-value set.
      * @param string|null $fallbackRouteName Name of a route that should be used if current route.
@@ -68,7 +68,7 @@ interface UrlGeneratorInterface
      * Set default argument value.
      *
      * @param string $name Name of argument to provide default value for.
-     * @param null|Stringable|int|float|string|bool $value Default value.
+     * @param bool|float|int|string|Stringable|null $value Default value.
      *
      * @psalm-param null|Stringable|scalar $value
      */
