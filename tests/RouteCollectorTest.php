@@ -20,7 +20,7 @@ final class RouteCollectorTest extends TestCase
 
         $collector = new RouteCollector();
         $collector->addRoute($listRoute, $viewRoute);
-        $collector->addRoute($topRoute);
+        $collector->addRoute(top: $topRoute);
 
         $this->assertCount(3, $collector->getItems());
         $this->assertSame($listRoute, $collector->getItems()[0]);
@@ -55,7 +55,7 @@ final class RouteCollectorTest extends TestCase
 
         $collector = new RouteCollector();
         $collector->addGroup($rootGroup, $postGroup);
-        $collector->addGroup($testGroup);
+        $collector->addGroup(test: $testGroup);
 
         $this->assertCount(3, $collector->getItems());
         $this->assertContainsOnlyInstancesOf(Group::class, $collector->getItems());
@@ -81,5 +81,19 @@ final class RouteCollectorTest extends TestCase
         $this->assertSame($middleware3, $collector->getMiddlewareDefinitions()[2]);
         $this->assertSame($middleware4, $collector->getMiddlewareDefinitions()[3]);
         $this->assertSame($middleware5, $collector->getMiddlewareDefinitions()[4]);
+    }
+
+    public function testNamedArgumentsInMiddlewareMethods(): void
+    {
+        $collector = new RouteCollector();
+
+        $middleware1 = static fn () => new Response();
+        $middleware2 = static fn () => new Response();
+
+        $collector
+            ->middleware(a: $middleware2)
+            ->prependMiddleware(b: $middleware1);
+        $this->assertSame($middleware1, $collector->getMiddlewareDefinitions()[0]);
+        $this->assertSame($middleware2, $collector->getMiddlewareDefinitions()[1]);
     }
 }
