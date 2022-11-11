@@ -140,21 +140,12 @@ final class RouterTest extends TestCase
         $middleware = $this->createRouteMiddleware();
 
         return new class ($middleware, $routeCollection) implements UrlMatcherInterface {
-            private $middleware;
-            private ?RouteCollectionInterface $routeCollection;
-
-            public function __construct($middleware, ?RouteCollectionInterface $routeCollection = null)
+            public function __construct(private $middleware, private ?RouteCollectionInterface $routeCollection = null)
             {
-                $this->middleware = $middleware;
-                $this->routeCollection = $routeCollection;
             }
 
             /**
              * Emulates router with a single `GET /` route
-             *
-             * @param ServerRequestInterface $request
-             *
-             * @return MatchingResult
              */
             public function match(ServerRequestInterface $request): MatchingResult
             {
@@ -235,8 +226,6 @@ final class RouterTest extends TestCase
 
     private function createRouteMiddleware(): callable
     {
-        return static function () {
-            return new Response(201);
-        };
+        return static fn () => new Response(201);
     }
 }

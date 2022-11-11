@@ -72,5 +72,5 @@ interface UrlGeneratorInterface
      *
      * @psalm-param null|Stringable|scalar $value
      */
-    public function setDefaultArgument(string $name, $value): void;
+    public function setDefaultArgument(string $name, mixed $value): void;
 }
