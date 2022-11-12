@@ -24,6 +24,7 @@ use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
 use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware3;
+use Yiisoft\Test\Support\Container\SimpleContainer;
 
 final class RouteTest extends TestCase
 {
@@ -41,6 +42,13 @@ final class RouteTest extends TestCase
         $route = Route::get('/');
 
         $this->assertSame('GET /', $route->getData('name'));
+    }
+
+    public function testNameDefaultWithHosts(): void
+    {
+        $route = Route::get('/')->hosts('a.com', 'b.com');
+
+        $this->assertSame('GET a.com|b.com/', $route->getData('name'));
     }
 
     public function testMethods(): void
@@ -178,13 +186,24 @@ final class RouteTest extends TestCase
         $this->assertTrue($route->getData('override'));
     }
 
-    public function testToString(): void
+    public function dataToString(): array
     {
-        $route = Route::methods([Method::GET, Method::POST], '/')
+        return [
+            ['yiiframework.com/', '/'],
+            ['yiiframework.com/yiiframeworkXcom', '/yiiframeworkXcom'],
+        ];
+    }
+
+    /**
+     * @dataProvider dataToString
+     */
+    public function testToString(string $expected, string $pattern): void
+    {
+        $route = Route::methods([Method::GET, Method::POST], $pattern)
             ->name('test.route')
             ->host('yiiframework.com');
 
-        $this->assertSame('[test.route] GET,POST yiiframework.com/', (string)$route);
+        $this->assertSame('[test.route] GET,POST ' . $expected, (string)$route);
     }
 
     public function testToStringSimple(): void
@@ -325,8 +344,10 @@ final class RouteTest extends TestCase
             ->host('example.com')
             ->defaults(['age' => 42])
             ->override()
-            ->middleware(TestMiddleware1::class)
-            ->disableMiddleware(TestMiddleware2::class);
+            ->middleware(middleware: TestMiddleware1::class)
+            ->disableMiddleware(middleware: TestMiddleware2::class)
+            ->action('go')
+            ->prependMiddleware(middleware: TestMiddleware3::class);
 
         $expected = <<<EOL
 Yiisoft\Router\Route Object
@@ -349,10 +370,12 @@ Yiisoft\Router\Route Object
         )
 
     [override] => 1
-    [actionAdded] =>
+    [actionAdded] => 1
     [middlewareDefinitions] => Array
         (
-            [0] => Yiisoft\Router\Tests\Support\TestMiddleware1
+            [0] => Yiisoft\Router\Tests\Support\TestMiddleware3
+            [1] => Yiisoft\Router\Tests\Support\TestMiddleware1
+            [2] => go
         )
 
     [disabledMiddlewareDefinitions] => Array
@@ -366,6 +389,36 @@ Yiisoft\Router\Route Object
 EOL;
 
         $this->assertSameStringsIgnoringLineEndingsAndSpaces($expected, print_r($route, true));
+    }
+
+    public function testDuplicateHosts(): void
+    {
+        $route = Route::get('/')->hosts('a.com', 'b.com', 'a.com');
+
+        $this->assertSame(['a.com', 'b.com'], $route->getData('hosts'));
+    }
+
+    public function testImmutability(): void
+    {
+        $container = new SimpleContainer();
+        $middlewareDispatcher = new MiddlewareDispatcher(
+            new MiddlewareFactory($container, new WrapperFactory($container)),
+        );
+
+        $route = Route::get('/');
+        $routeWithAction = $route->action('');
+
+        $this->assertNotSame($route, $route->withDispatcher($middlewareDispatcher));
+        $this->assertNotSame($route, $route->name(''));
+        $this->assertNotSame($route, $route->pattern(''));
+        $this->assertNotSame($route, $route->host(''));
+        $this->assertNotSame($route, $route->hosts(''));
+        $this->assertNotSame($route, $route->override());
+        $this->assertNotSame($route, $route->defaults([]));
+        $this->assertNotSame($route, $route->middleware());
+        $this->assertNotSame($route, $route->action(''));
+        $this->assertNotSame($routeWithAction, $routeWithAction->prependMiddleware());
+        $this->assertNotSame($route, $route->disableMiddleware(''));
     }
 
     private function getRequestHandler(): RequestHandlerInterface

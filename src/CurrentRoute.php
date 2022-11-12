@@ -25,9 +25,7 @@ final class CurrentRoute
     /**
      * Current Route arguments.
      *
-     * @var string[]
-     *
-     * @psalm-var array<string, string>
+     * @var array<string, string>
      */
     private array $arguments = [];
 
@@ -38,7 +36,7 @@ final class CurrentRoute
      */
     public function getName(): ?string
     {
-        return $this->route !== null ? $this->route->getData('name') : null;
+        return $this->route?->getData('name');
     }
 
     /**
@@ -48,7 +46,7 @@ final class CurrentRoute
      */
     public function getHost(): ?string
     {
-        return $this->route !== null ? $this->route->getData('host') : null;
+        return $this->route?->getData('host');
     }
 
     /**
@@ -58,7 +56,7 @@ final class CurrentRoute
      */
     public function getPattern(): ?string
     {
-        return $this->route !== null ? $this->route->getData('pattern') : null;
+        return $this->route?->getData('pattern');
     }
 
     /**
@@ -68,7 +66,7 @@ final class CurrentRoute
      */
     public function getMethods(): ?array
     {
-        return $this->route !== null ? $this->route->getData('methods') : null;
+        return $this->route?->getData('methods');
     }
 
     /**
@@ -82,9 +80,7 @@ final class CurrentRoute
     }
 
     /**
-     * @param string[] $arguments
-     *
-     * @psalm-param array<string,string> $arguments
+     * @param array<string,string> $arguments
      *
      * @internal
      */
@@ -111,8 +107,7 @@ final class CurrentRoute
     }
 
     /**
-     * @return string[] Arguments.
-     * @psalm-return array<string, string>
+     * @return array<string, string> Arguments.
      */
     public function getArguments(): array
     {

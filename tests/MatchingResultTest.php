@@ -19,6 +19,7 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Middleware\Dispatcher\WrapperFactory;
 use Yiisoft\Router\MatchingResult;
 use Yiisoft\Router\Route;
+use Yiisoft\Test\Support\Container\SimpleContainer;
 
 final class MatchingResultTest extends TestCase
 {
@@ -80,6 +81,18 @@ final class MatchingResultTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('There is no route in the matching result.');
         $result->route();
+    }
+
+    public function testImmutability(): void
+    {
+        $container = new SimpleContainer();
+        $middlewareDispatcher = new MiddlewareDispatcher(
+            new MiddlewareFactory($container, new WrapperFactory($container)),
+        );
+
+        $result = MatchingResult::fromFailure([Method::GET]);
+
+        $this->assertNotSame($result, $result->withDispatcher($middlewareDispatcher));
     }
 
     private function getMiddleware(): callable

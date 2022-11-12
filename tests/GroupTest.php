@@ -24,6 +24,7 @@ use Yiisoft\Router\Tests\Support\Container;
 use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
 use Yiisoft\Router\Tests\Support\TestMiddleware3;
+use Yiisoft\Test\Support\Container\SimpleContainer;
 
 final class GroupTest extends TestCase
 {
@@ -48,6 +49,17 @@ final class GroupTest extends TestCase
             ->middleware(TestMiddleware3::class)
             ->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class)
             ->disableMiddleware(TestMiddleware1::class, TestMiddleware3::class);
+
+        $this->assertCount(1, $group->getData('middlewareDefinitions'));
+        $this->assertSame(TestMiddleware2::class, $group->getData('middlewareDefinitions')[0]);
+    }
+
+    public function testNamedArgumentsInMiddlewareMethods(): void
+    {
+        $group = Group::create()
+            ->middleware(middleware: TestMiddleware3::class)
+            ->prependMiddleware(middleware1: TestMiddleware1::class, middleware2: TestMiddleware2::class)
+            ->disableMiddleware(middleware1: TestMiddleware1::class, middleware2: TestMiddleware3::class);
 
         $this->assertCount(1, $group->getData('middlewareDefinitions'));
         $this->assertSame(TestMiddleware2::class, $group->getData('middlewareDefinitions')[0]);
@@ -396,6 +408,32 @@ final class GroupTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('middleware() can not be used after routes().');
         $group->middleware(static fn () => new Response());
+    }
+
+    public function testDuplicateHosts(): void
+    {
+        $route = Group::create()->hosts('a.com', 'b.com', 'a.com');
+
+        $this->assertSame(['a.com', 'b.com'], $route->getData('hosts'));
+    }
+
+    public function testImmutability(): void
+    {
+        $container = new SimpleContainer();
+        $middlewareDispatcher = new MiddlewareDispatcher(
+            new MiddlewareFactory($container, new WrapperFactory($container)),
+        );
+
+        $group = Group::create();
+
+        $this->assertNotSame($group, $group->routes());
+        $this->assertNotSame($group, $group->withDispatcher($middlewareDispatcher));
+        $this->assertNotSame($group, $group->withCors(null));
+        $this->assertNotSame($group, $group->middleware());
+        $this->assertNotSame($group, $group->prependMiddleware());
+        $this->assertNotSame($group, $group->namePrefix(''));
+        $this->assertNotSame($group, $group->hosts());
+        $this->assertNotSame($group, $group->disableMiddleware());
     }
 
     private function getRequestHandler(): RequestHandlerInterface

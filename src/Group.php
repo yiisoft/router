@@ -30,6 +30,7 @@ final class Group
     private bool $routesAdded = false;
     private bool $middlewareAdded = false;
     private array $disabledMiddlewareDefinitions = [];
+
     /**
      * @var array|callable|string|null Middleware definition for CORS requests.
      */
@@ -90,7 +91,7 @@ final class Group
      *
      * @param array|callable|string|null $middlewareDefinition Middleware definition for CORS requests.
      */
-    public function withCors($middlewareDefinition): self
+    public function withCors(array|callable|string|null $middlewareDefinition): self
     {
         $group = clone $this;
         $group->corsMiddleware = $middlewareDefinition;

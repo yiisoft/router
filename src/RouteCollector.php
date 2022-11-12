@@ -34,7 +34,7 @@ final class RouteCollector implements RouteCollectorInterface
         return $this;
     }
 
-    public function middleware(...$middlewareDefinition): RouteCollectorInterface
+    public function middleware(array|callable|string ...$middlewareDefinition): RouteCollectorInterface
     {
         array_push(
             $this->middlewareDefinitions,
@@ -43,7 +43,7 @@ final class RouteCollector implements RouteCollectorInterface
         return $this;
     }
 
-    public function prependMiddleware(...$middlewareDefinition): RouteCollectorInterface
+    public function prependMiddleware(array|callable|string ...$middlewareDefinition): RouteCollectorInterface
     {
         array_unshift(
             $this->middlewareDefinitions,
