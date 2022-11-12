@@ -1,5 +1,9 @@
 # Yii Router Change Log
 
+## 2.0.1 under development
+
+- no changes in this release.
+
 ## 2.0.0 November 12, 2022
 
 - Chg #178: Move type hints from annotations to methods signature (@vjik)
