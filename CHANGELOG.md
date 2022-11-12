@@ -5,6 +5,7 @@
 - Enh #173: Raise minimum PHP version to 8.0 (@xepozz, @rustamwin)
 - Enh #176: Add support for `yiisoft/middleware-dispatcher` version `^4.0` (@vjik)
 - Enh #175: Add `$queryParameters` parameter to `UrlGeneratorInterface::generateFromCurrent()` method (@rustamwin)
+- Chg #178: Move type hints from annotations to methods signature (@vjik)
 
 ## 1.2.0 September 07, 2022
 

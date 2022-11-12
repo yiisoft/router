@@ -15,7 +15,7 @@ use function in_array;
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
  */
-final class Route implements \Stringable
+final class Route implements Stringable
 {
     private ?string $name = null;
 
@@ -34,16 +34,18 @@ final class Route implements \Stringable
     private array $disabledMiddlewareDefinitions = [];
 
     /**
-     * @var string[]
-     * @psalm-var array<string,string>
+     * @var array<string,string>
      */
     private array $defaults = [];
 
     /**
      * @param string[] $methods
      */
-    private function __construct(private array $methods, private string $pattern, private ?MiddlewareDispatcher $dispatcher = null)
-    {
+    private function __construct(
+        private array $methods,
+        private string $pattern,
+        private ?MiddlewareDispatcher $dispatcher = null
+    ) {
     }
 
     /**
@@ -225,8 +227,6 @@ final class Route implements \Stringable
     }
 
     /**
-     * @return mixed
-     *
      * @psalm-template T as string
      * @psalm-param T $key
      * @psalm-return (
@@ -244,7 +244,7 @@ final class Route implements \Stringable
      *       )
      *    )
      */
-    public function getData(string $key)
+    public function getData(string $key): mixed
     {
         return match ($key) {
             'name' => $this->name ??
@@ -264,18 +264,16 @@ final class Route implements \Stringable
 
     public function __toString(): string
     {
-        $result = '';
-
-        if ($this->name !== null) {
-            $result .= '[' . $this->name . '] ';
-        }
+        $result = $this->name === null
+            ? ''
+            : '[' . $this->name . '] ';
 
         if ($this->methods !== []) {
             $result .= implode(',', $this->methods) . ' ';
         }
 
         if ($this->hosts) {
-            $quoted = array_map(static fn ($host) => preg_quote($host), $this->hosts);
+            $quoted = array_map(static fn ($host) => preg_quote($host, '/'), $this->hosts);
 
             if (!preg_match('/' . implode('|', $quoted) . '/', $this->pattern)) {
                 $result .= implode('|', $this->hosts);
