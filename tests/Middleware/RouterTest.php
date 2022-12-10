@@ -125,6 +125,24 @@ final class RouterTest extends TestCase
         $this->assertSame($request->getUri(), $currentRoute->getUri());
     }
 
+    public function testCurrentRouteInRequest(): void
+    {
+        $route = Route::get('/')
+                      ->action(
+                          function (ServerRequestInterface $request) {
+                              $this->assertInstanceOf(CurrentRoute::class, $request->getAttribute(CurrentRoute::class));
+                              return new Response(200);
+                          }
+                      );
+
+        $collector = new RouteCollector();
+        $collector->addRoute($route);
+        $routeCollection = new RouteCollection($collector);
+
+        $request = new ServerRequest('GET', '/');
+        $response = $this->processWithRouter($request, $routeCollection);
+    }
+
     public function testGetArguments(): void
     {
         $currentRoute = new CurrentRoute();
