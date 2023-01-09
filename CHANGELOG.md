@@ -1,6 +1,6 @@
 # Yii Router Change Log
 
-## 2.1.0 under development
+## 2.1.0 January 09, 2023
 
 - Chg #185: Update `yiisoft/middleware-dispatcher` version to `^5.0` (@rustamwin)
 
