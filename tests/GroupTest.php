@@ -15,7 +15,6 @@ use Psr\Http\Server\RequestHandlerInterface;
 use RuntimeException;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
-use Yiisoft\Middleware\Dispatcher\WrapperFactory;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
@@ -421,7 +420,7 @@ final class GroupTest extends TestCase
     {
         $container = new SimpleContainer();
         $middlewareDispatcher = new MiddlewareDispatcher(
-            new MiddlewareFactory($container, new WrapperFactory($container)),
+            new MiddlewareFactory($container),
         );
 
         $group = Group::create();
@@ -449,9 +448,8 @@ final class GroupTest extends TestCase
     private function getDispatcher(): MiddlewareDispatcher
     {
         $container = new Container([]);
-        $wrapperFactory = new WrapperFactory($container);
         return new MiddlewareDispatcher(
-            new MiddlewareFactory($container, $wrapperFactory),
+            new MiddlewareFactory($container),
             $this->createMock(EventDispatcherInterface::class)
         );
     }

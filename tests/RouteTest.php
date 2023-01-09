@@ -16,7 +16,6 @@ use RuntimeException;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
-use Yiisoft\Middleware\Dispatcher\WrapperFactory;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\Tests\Support\AssertTrait;
 use Yiisoft\Router\Tests\Support\Container;
@@ -402,7 +401,7 @@ EOL;
     {
         $container = new SimpleContainer();
         $middlewareDispatcher = new MiddlewareDispatcher(
-            new MiddlewareFactory($container, new WrapperFactory($container)),
+            new MiddlewareFactory($container),
         );
 
         $route = Route::get('/');
@@ -435,13 +434,13 @@ EOL;
     {
         if ($container === null) {
             return new MiddlewareDispatcher(
-                new MiddlewareFactory($this->getContainer(), new WrapperFactory($this->getContainer())),
+                new MiddlewareFactory($this->getContainer()),
                 $this->createMock(EventDispatcherInterface::class)
             );
         }
 
         return new MiddlewareDispatcher(
-            new MiddlewareFactory($container, new WrapperFactory($container)),
+            new MiddlewareFactory($container),
             $this->createMock(EventDispatcherInterface::class)
         );
     }
