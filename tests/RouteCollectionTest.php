@@ -15,7 +15,6 @@ use Psr\Http\Server\RequestHandlerInterface;
 use RuntimeException;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
-use Yiisoft\Middleware\Dispatcher\WrapperFactory;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
@@ -385,7 +384,7 @@ final class RouteCollectionTest extends TestCase
     {
         $container ??= $this->createMock(ContainerInterface::class);
         return new MiddlewareDispatcher(
-            new MiddlewareFactory($container, new WrapperFactory($container)),
+            new MiddlewareFactory($container),
             $this->createMock(EventDispatcherInterface::class)
         );
     }
