@@ -1,8 +1,8 @@
 # Yii Router Change Log
 
-## 2.1.1 under development
+## 3.0.0 under development
 
-- no changes in this release.
+- Chg #187: Adapt configuration group names to Yii conventions (@vjik)
 
 ## 2.1.0 January 09, 2023
 
