@@ -45,14 +45,14 @@ final class ConfigTest extends TestCase
     {
         return new Container(
             ContainerConfig::create()->withDefinitions(
-                $this->getCommonDefinitions()
+                $this->getContainerDefinitions()
             )
         );
     }
 
-    private function getCommonDefinitions(): array
+    private function getContainerDefinitions(): array
     {
         $params = [];
-        return require dirname(__DIR__) . '/config/common.php';
+        return require dirname(__DIR__) . '/config/di.php';
     }
 }
