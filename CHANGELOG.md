@@ -1,6 +1,6 @@
 # Yii Router Change Log
 
-## 3.0.0 under development
+## 3.0.0 February 17, 2023
 
 - Chg #187: Adapt configuration group names to Yii conventions (@vjik)
 
