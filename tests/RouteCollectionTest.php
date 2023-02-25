@@ -40,10 +40,11 @@ final class RouteCollectionTest extends TestCase
         $collector->addRoute($route2);
 
         $routeCollection = new RouteCollection($collector);
-        $routeCollection->setUriPrefix('/api');
+        $routeCollection->setUriPrefix($prefix = '/api');
 
-        $this->assertStringStartsWith('/api', $routeCollection->getRoute('route1')->getData('pattern'));
-        $this->assertStringStartsWith('/api', $routeCollection->getRoute('route2')->getData('pattern'));
+        $this->assertSame($prefix, $routeCollection->getUriPrefix());
+        $this->assertStringStartsWith($prefix, $routeCollection->getRoute('route1')->getData('pattern'));
+        $this->assertStringStartsWith($prefix, $routeCollection->getRoute('route2')->getData('pattern'));
     }
 
     public function testAddRouteWithDuplicateName(): void
