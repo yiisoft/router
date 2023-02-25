@@ -8,6 +8,7 @@ interface RouteCollectionInterface
 {
     /**
      * Returns URI prefix.
+     *
      * @see setUriPrefix()
      */
     public function getUriPrefix(): string;
