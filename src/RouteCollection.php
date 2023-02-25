@@ -62,9 +62,9 @@ final class RouteCollection implements RouteCollectionInterface
         return $this->uriPrefix;
     }
 
-    public function setUriPrefix(string $name): void
+    public function setUriPrefix(string $prefix): void
     {
-        $this->uriPrefix = $name;
+        $this->uriPrefix = $prefix;
     }
 
     private function ensureItemsInjected(): void
