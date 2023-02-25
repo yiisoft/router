@@ -17,6 +17,8 @@ use function is_array;
  */
 final class RouteCollection implements RouteCollectionInterface
 {
+    private string $uriPrefix = '';
+
     /**
      * @psalm-var Items
      */
@@ -55,6 +57,16 @@ final class RouteCollection implements RouteCollectionInterface
         return $this->buildTree($this->items, $routeAsString);
     }
 
+    public function getUriPrefix(): string
+    {
+        return $this->uriPrefix;
+    }
+
+    public function setUriPrefix(string $name): void
+    {
+        $this->uriPrefix = $name;
+    }
+
     private function ensureItemsInjected(): void
     {
         if ($this->items === []) {
@@ -83,10 +95,11 @@ final class RouteCollection implements RouteCollectionInterface
     private function injectItem(Group|Route $route): void
     {
         if ($route instanceof Group) {
-            $this->injectGroup($route, $this->items);
+            $this->injectGroup($route, $this->items, $this->uriPrefix);
             return;
         }
 
+        $route = $route->pattern($this->uriPrefix . $route->getData('pattern'));
         $routeName = $route->getData('name');
         $this->items[] = $routeName;
         if (isset($this->routes[$routeName]) && !$route->getData('override')) {

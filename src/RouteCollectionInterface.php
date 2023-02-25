@@ -7,6 +7,17 @@ namespace Yiisoft\Router;
 interface RouteCollectionInterface
 {
     /**
+     * Returns URI prefix.
+     * @see setUriPrefix()
+     */
+    public function getUriPrefix(): string;
+
+    /**
+     * Sets the URI prefix so that all routes are registered to this path after the domain part.
+     */
+    public function setUriPrefix(string $prefix): void;
+
+    /**
      * @return Route[]
      */
     public function getRoutes(): array;

@@ -28,6 +28,24 @@ use Yiisoft\Test\Support\Container\SimpleContainer;
 
 final class RouteCollectionTest extends TestCase
 {
+    public function testUriPrefix(): void
+    {
+        $route1 = Route::get('/')->name('route1');
+        $route2 = Route::get('/{id}')->name('route2');
+
+        $group = Group::create()->routes($route1);
+
+        $collector = new RouteCollector();
+        $collector->addGroup($group);
+        $collector->addRoute($route2);
+
+        $routeCollection = new RouteCollection($collector);
+        $routeCollection->setUriPrefix('/api');
+
+        $this->assertStringStartsWith('/api', $routeCollection->getRoute('route1')->getData('pattern'));
+        $this->assertStringStartsWith('/api', $routeCollection->getRoute('route2')->getData('pattern'));
+    }
+
     public function testAddRouteWithDuplicateName(): void
     {
         $listRoute = Route::get('/')->name('my-route');
