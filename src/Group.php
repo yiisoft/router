@@ -153,7 +153,9 @@ final class Group
 
     /**
      * @psalm-template T as string
+     *
      * @psalm-param T $key
+     *
      * @psalm-return (
      *   T is ('prefix'|'namePrefix'|'host') ? string|null :
      *   (T is 'items' ? Group[]|Route[] :
