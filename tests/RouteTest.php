@@ -212,23 +212,6 @@ final class RouteTest extends TestCase
         $this->assertSame('GET /', (string)$route);
     }
 
-    public function testDispatcherInjecting(): void
-    {
-        $request = new ServerRequest('GET', '/');
-        $container = $this->getContainer(
-            [
-                TestController::class => new TestController(),
-            ]
-        );
-        $dispatcher = $this->getDispatcher($container);
-        $route = Route::get('/')->action([TestController::class, 'index']);
-        $route->injectDispatcher($dispatcher);
-        $response = $route
-            ->getData('dispatcherWithMiddlewares')
-            ->dispatch($request, $this->getRequestHandler());
-        $this->assertSame(200, $response->getStatusCode());
-    }
-
     public function testMiddlewareAfterAction(): void
     {
         $route = Route::get('/')->action([TestController::class, 'index']);
@@ -264,9 +247,8 @@ final class RouteTest extends TestCase
             ->middleware(TestMiddleware1::class, TestMiddleware2::class, TestMiddleware3::class)
             ->action([TestController::class, 'index'])
             ->disableMiddleware(TestMiddleware1::class, TestMiddleware3::class);
-        $route->injectDispatcher($injectDispatcher);
 
-        $dispatcher = $route->getData('dispatcherWithMiddlewares');
+        $dispatcher = $injectDispatcher->withMiddlewares($route->middlewares);
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
@@ -290,9 +272,8 @@ final class RouteTest extends TestCase
             ->middleware(TestMiddleware3::class)
             ->action([TestController::class, 'index'])
             ->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class);
-        $route->injectDispatcher($injectDispatcher);
 
-        $dispatcher = $route->getData('dispatcherWithMiddlewares');
+        $dispatcher = $injectDispatcher->withMiddlewares($route->middlewares);
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
@@ -326,12 +307,7 @@ final class RouteTest extends TestCase
                 [TestController::class, 'index'],
             ]);
 
-        $route = Route::get('/');
-        $route->injectDispatcher($injectDispatcher);
-
-        $dispatcher = $route->getData('dispatcherWithMiddlewares');
-
-        $response = $dispatcher->dispatch($request, $this->getRequestHandler());
+        $response = $injectDispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('12', (string) $response->getBody());
     }

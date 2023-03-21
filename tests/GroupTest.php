@@ -259,54 +259,6 @@ final class GroupTest extends TestCase
         $group->getData('wrong');
     }
 
-    public function testDispatcherInjected(): void
-    {
-        $dispatcher = $this->getDispatcher();
-
-        $apiGroup = Group::create('/api', $dispatcher)
-            ->routes(
-                Route::get('/info')->name('api-info'),
-                Group::create('/v1')
-                    ->routes(
-                        Route::get('/user')->name('api-v1-user/index'),
-                        Route::get('/user/{id}')->name('api-v1-user/view'),
-                        Group::create('/news')
-                            ->routes(
-                                Route::get('/post')->name('api-v1-news-post/index'),
-                                Route::get('/post/{id}')->name('api-v1-news-post/view'),
-                            ),
-                        Group::create('/blog')
-                            ->routes(
-                                Route::get('/post')->name('api-v1-blog-post/index'),
-                                Route::get('/post/{id}')->name('api-v1-blog-post/view'),
-                            ),
-                        Route::get('/note')->name('api-v1-note/index'),
-                        Route::get('/note/{id}')->name('api-v1-note/view'),
-                    ),
-                Group::create('/v2')
-                    ->routes(
-                        Route::get('/user')->name('api-v2-user/index'),
-                        Route::get('/user/{id}')->name('api-v2-user/view'),
-                        Group::create('/news')
-                            ->routes(
-                                Route::get('/post')->name('api-v2-news-post/index'),
-                                Route::get('/post/{id}')->name('api-v2-news-post/view'),
-                                Group::create('/blog')
-                                    ->routes(
-                                        Route::get('/post')->name('api-v2-blog-post/index'),
-                                        Route::get('/post/{id}')->name('api-v2-blog-post/view'),
-                                        Route::get('/note')->name('api-v2-note/index'),
-                                        Route::get('/note/{id}')->name('api-v2-note/view')
-                                    )
-                            )
-                    )
-            );
-
-        $items = $apiGroup->getData('items');
-
-        $this->assertAllRoutesAndGroupsHaveDispatcher($items);
-    }
-
     public function testWithCors(): void
     {
         $group = Group::create()
@@ -452,17 +404,5 @@ final class GroupTest extends TestCase
             new MiddlewareFactory($container),
             $this->createMock(EventDispatcherInterface::class)
         );
-    }
-
-    private function assertAllRoutesAndGroupsHaveDispatcher(array $items): void
-    {
-        $func = function ($item) use (&$func) {
-            $this->assertTrue($item->getData('hasDispatcher'));
-            if ($item instanceof Group) {
-                $items = $item->getData('items');
-                array_walk($items, $func);
-            }
-        };
-        array_walk($items, $func);
     }
 }
