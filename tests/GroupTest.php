@@ -80,6 +80,7 @@ final class GroupTest extends TestCase
 
     public function testAddNestedMiddleware(): void
     {
+        $dispatcher = $this->getDispatcher();
         $request = new ServerRequest('GET', '/outergroup/innergroup/test1');
 
         $action = static fn (ServerRequestInterface $request) => new Response(200, [], null, '1.1', implode($request->getAttributes()));
@@ -94,7 +95,7 @@ final class GroupTest extends TestCase
             return $handler->handle($request);
         };
 
-        $group = Group::create('/outergroup', $this->getDispatcher())
+        $group = Group::create('/outergroup')
             ->middleware($middleware1)
             ->routes(
                 Group::create('/innergroup')
@@ -111,8 +112,8 @@ final class GroupTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
-        $response = $route
-            ->getData('dispatcherWithMiddlewares')
+        $response = $dispatcher
+            ->withMiddlewares($route->getMiddlewares())
             ->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('middleware2', $response->getReasonPhrase());
@@ -120,6 +121,7 @@ final class GroupTest extends TestCase
 
     public function testGroupMiddlewareFullStackCalled(): void
     {
+        $dispatcher = $this->getDispatcher();
         $request = new ServerRequest('GET', '/group/test1');
 
         $action = static fn (ServerRequestInterface $request) => new Response(200, [], null, '1.1', implode($request->getAttributes()));
@@ -132,7 +134,7 @@ final class GroupTest extends TestCase
             return $handler->handle($request);
         };
 
-        $group = Group::create('/group', $this->getDispatcher())
+        $group = Group::create('/group')
             ->middleware($middleware1)
             ->middleware($middleware2)
             ->routes(
@@ -146,8 +148,8 @@ final class GroupTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
-        $response = $route
-            ->getData('dispatcherWithMiddlewares')
+        $response = $dispatcher
+            ->withMiddlewares($route->getMiddlewares())
             ->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('middleware2', $response->getReasonPhrase());
@@ -155,13 +157,14 @@ final class GroupTest extends TestCase
 
     public function testGroupMiddlewareStackInterrupted(): void
     {
+        $dispatcher = $this->getDispatcher();
         $request = new ServerRequest('GET', '/group/test1');
 
         $action = static fn () => new Response(200);
         $middleware1 = fn () => new Response(403);
         $middleware2 = fn () => new Response(405);
 
-        $group = Group::create('/group', $this->getDispatcher())
+        $group = Group::create('/group')
             ->middleware($middleware1)
             ->middleware($middleware2)
             ->routes(
@@ -175,8 +178,8 @@ final class GroupTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
-        $response = $route
-            ->getData('dispatcherWithMiddlewares')
+        $response = $dispatcher
+            ->withMiddlewares($route->getMiddlewares())
             ->dispatch($request, $this->getRequestHandler());
         $this->assertSame(403, $response->getStatusCode());
     }
@@ -370,15 +373,9 @@ final class GroupTest extends TestCase
 
     public function testImmutability(): void
     {
-        $container = new SimpleContainer();
-        $middlewareDispatcher = new MiddlewareDispatcher(
-            new MiddlewareFactory($container),
-        );
-
         $group = Group::create();
 
         $this->assertNotSame($group, $group->routes());
-        $this->assertNotSame($group, $group->withDispatcher($middlewareDispatcher));
         $this->assertNotSame($group, $group->withCors(null));
         $this->assertNotSame($group, $group->middleware());
         $this->assertNotSame($group, $group->prependMiddleware());

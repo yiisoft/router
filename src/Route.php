@@ -18,7 +18,9 @@ use function in_array;
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 final class Route implements Stringable
 {
-    private $actionAdded;
+    private bool $actionAdded = false;
+    private array $builtMiddlewares = [];
+
     /**
      * @param string[] $methods
      * @param string[] $hosts
@@ -29,13 +31,13 @@ final class Route implements Stringable
         public array $methods,
         public string $pattern,
         public ?string $name = null,
-        public array $middlewares = [],
+        private array $middlewares = [],
         /**
          * Excludes middleware from being invoked when action is handled.
          * It is useful to avoid invoking one of the parent group middleware for
          * a certain route.
          */
-        public array $disabledMiddlewareDefinitions = [],
+        private array $disabledMiddlewareDefinitions = [],
         public array $hosts = [],
         /**
          * Marks route as override. When added it will replace existing route with the same name.
@@ -166,6 +168,7 @@ final class Route implements Stringable
             $route->middlewares,
             ...array_values($middlewareDefinition)
         );
+        $route->builtMiddlewares = [];
         return $route;
     }
 
@@ -183,6 +186,7 @@ final class Route implements Stringable
             $route->middlewares,
             ...array_values($middlewareDefinition)
         );
+        $route->builtMiddlewares = [];
         return $route;
     }
 
@@ -193,6 +197,7 @@ final class Route implements Stringable
     {
         $route = clone $this;
         $route->middlewares[] = $middlewareDefinition;
+        $route->builtMiddlewares = [];
         $route->actionAdded = true;
         return $route;
     }
@@ -209,6 +214,7 @@ final class Route implements Stringable
             $route->disabledMiddlewareDefinitions,
             ...array_values($middlewareDefinition)
         );
+        $route->builtMiddlewares = [];
         return $route;
     }
 
@@ -278,7 +284,22 @@ final class Route implements Stringable
             'override' => $this->override,
             'actionAdded' => $this->actionAdded,
             'middlewareDefinitions' => $this->middlewares,
+            'builtMiddlewares' => $this->builtMiddlewares,
             'disabledMiddlewareDefinitions' => $this->disabledMiddlewareDefinitions,
         ];
+    }
+
+    public function getMiddlewares(): array
+    {
+        $result = $this->middlewares;
+        /** @var mixed $definition */
+        foreach ($result as $index => $definition) {
+            if (in_array($definition, $this->disabledMiddlewareDefinitions, true)) {
+                unset($result[$index]);
+            }
+        }
+        $this->builtMiddlewares = $result;
+
+        return $result;
     }
 }

@@ -248,7 +248,7 @@ final class RouteTest extends TestCase
             ->action([TestController::class, 'index'])
             ->disableMiddleware(TestMiddleware1::class, TestMiddleware3::class);
 
-        $dispatcher = $injectDispatcher->withMiddlewares($route->middlewares);
+        $dispatcher = $injectDispatcher->withMiddlewares($route->getMiddlewares());
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
@@ -273,20 +273,11 @@ final class RouteTest extends TestCase
             ->action([TestController::class, 'index'])
             ->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class);
 
-        $dispatcher = $injectDispatcher->withMiddlewares($route->middlewares);
+        $dispatcher = $injectDispatcher->withMiddlewares($route->getMiddlewares());
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('123', (string) $response->getBody());
-    }
-
-    public function testGetDispatcherWithoutDispatcher(): void
-    {
-        $route = Route::get('/')->name('test');
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('There is no dispatcher in the route test.');
-        $route->getData('dispatcherWithMiddlewares');
     }
 
     public function testGetDispatcherWithMiddlewares(): void
@@ -353,12 +344,14 @@ Yiisoft\Router\Route Object
             [2] => go
         )
 
+    [builtMiddlewares] => Array
+        (
+        )
+
     [disabledMiddlewareDefinitions] => Array
         (
             [0] => Yiisoft\Router\Tests\Support\TestMiddleware2
         )
-
-    [middlewareDispatcher] =>
 )
 
 EOL;
@@ -383,7 +376,6 @@ EOL;
         $route = Route::get('/');
         $routeWithAction = $route->action('');
 
-        $this->assertNotSame($route, $route->withDispatcher($middlewareDispatcher));
         $this->assertNotSame($route, $route->name(''));
         $this->assertNotSame($route, $route->pattern(''));
         $this->assertNotSame($route, $route->host(''));

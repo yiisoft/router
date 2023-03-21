@@ -119,13 +119,6 @@ final class MatchingResult implements MiddlewareInterface
             return $dispatcher;
         }
 
-        /** @var mixed $definition */
-        foreach ($route->middlewares as $index => $definition) {
-            if (in_array($definition, $route->disabledMiddlewareDefinitions, true)) {
-                unset($route->middlewares[$index]);
-            }
-        }
-
-        return $dispatcher->withMiddlewares($route->middlewares);
+        return $dispatcher->withMiddlewares($route->getMiddlewares());
     }
 }
