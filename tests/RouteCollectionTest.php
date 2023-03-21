@@ -122,13 +122,13 @@ final class RouteCollectionTest extends TestCase
                 Route::get('/images/{sile}')->name('/image'),
                 Group::create('/v1')
                     ->routes(
-                        Route::get('/posts', $this->getDispatcher())->name('/posts'),
+                        Route::get('/posts')->name('/posts'),
                         Route::get('/post/{sile}')->name('/post/view')
                     )
                     ->namePrefix('/v1'),
                 Group::create('/v1')
                     ->routes(
-                        Route::get('/tags', $this->getDispatcher())->name('/tags'),
+                        Route::get('/tags')->name('/tags'),
                         Route::get('/tag/{slug}')->name('/tag/view'),
                     )
                     ->namePrefix('/v1'),
@@ -136,7 +136,7 @@ final class RouteCollectionTest extends TestCase
 
         $group2 = Group::create('/api')
             ->routes(
-                Route::get('/posts', $this->getDispatcher())->name('/posts'),
+                Route::get('/posts')->name('/posts'),
                 Route::get('/post/{sile}')->name('/post/view'),
             )
             ->namePrefix('/api');
