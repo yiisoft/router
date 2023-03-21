@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
+use Attribute;
 use InvalidArgumentException;
 use RuntimeException;
 use Stringable;
@@ -15,36 +16,39 @@ use function in_array;
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
  */
+#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 final class Route implements Stringable
 {
-    private ?string $name = null;
-
-    /**
-     * @var string[]
-     */
-    private array $hosts = [];
-    private bool $override = false;
-    private bool $actionAdded = false;
-
-    /**
-     * @var array[]|callable[]|string[]
-     */
-    private array $middlewareDefinitions = [];
-
-    private array $disabledMiddlewareDefinitions = [];
-
-    /**
-     * @var array<string,string>
-     */
-    private array $defaults = [];
-
+    private $actionAdded;
+    private $dispatcher;
     /**
      * @param string[] $methods
+     * @param string[] $hosts
+     * @param array[]|callable[]|string[] $middlewares
+     * @param array<string,string> $defaults
      */
-    private function __construct(
-        private array $methods,
-        private string $pattern,
-        private ?MiddlewareDispatcher $dispatcher = null
+    public function __construct(
+        public array $methods,
+        public string $pattern,
+        public ?string $name = null,
+        public array $middlewares = [],
+        /**
+         * Excludes middleware from being invoked when action is handled.
+         * It is useful to avoid invoking one of the parent group middleware for
+         * a certain route.
+         */
+        public array $disabledMiddlewareDefinitions = [],
+        public array $hosts = [],
+        /**
+         * Marks route as override. When added it will replace existing route with the same name.
+         */
+        public bool $override = false,
+        /**
+         * Parameter default values indexed by parameter names.
+         *
+         * @psalm-param array<string,null|Stringable|scalar> $defaults
+         */
+        public array $defaults = [],
     ) {
     }
 
@@ -63,34 +67,34 @@ final class Route implements Stringable
         return $route;
     }
 
-    public static function get(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function get(string $pattern): self
     {
-        return self::methods([Method::GET], $pattern, $dispatcher);
+        return self::methods([Method::GET], $pattern);
     }
 
-    public static function post(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function post(string $pattern): self
     {
-        return self::methods([Method::POST], $pattern, $dispatcher);
+        return self::methods([Method::POST], $pattern);
     }
 
-    public static function put(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function put(string $pattern): self
     {
-        return self::methods([Method::PUT], $pattern, $dispatcher);
+        return self::methods([Method::PUT], $pattern);
     }
 
-    public static function delete(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function delete(string $pattern): self
     {
-        return self::methods([Method::DELETE], $pattern, $dispatcher);
+        return self::methods([Method::DELETE], $pattern);
     }
 
-    public static function patch(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function patch(string $pattern): self
     {
-        return self::methods([Method::PATCH], $pattern, $dispatcher);
+        return self::methods([Method::PATCH], $pattern);
     }
 
-    public static function head(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function head(string $pattern): self
     {
-        return self::methods([Method::HEAD], $pattern, $dispatcher);
+        return self::methods([Method::HEAD], $pattern);
     }
 
     public static function options(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
@@ -104,9 +108,8 @@ final class Route implements Stringable
     public static function methods(
         array $methods,
         string $pattern,
-        ?MiddlewareDispatcher $dispatcher = null
     ): self {
-        return new self($methods, $pattern, $dispatcher);
+        return new self($methods, $pattern);
     }
 
     public function name(string $name): self
@@ -177,7 +180,7 @@ final class Route implements Stringable
         }
         $route = clone $this;
         array_push(
-            $route->middlewareDefinitions,
+            $route->middlewares,
             ...array_values($middlewareDefinition)
         );
         return $route;
@@ -194,7 +197,7 @@ final class Route implements Stringable
         }
         $route = clone $this;
         array_unshift(
-            $route->middlewareDefinitions,
+            $route->middlewares,
             ...array_values($middlewareDefinition)
         );
         return $route;
@@ -206,7 +209,7 @@ final class Route implements Stringable
     public function action(array|callable|string $middlewareDefinition): self
     {
         $route = clone $this;
-        $route->middlewareDefinitions[] = $middlewareDefinition;
+        $route->middlewares[] = $middlewareDefinition;
         $route->actionAdded = true;
         return $route;
     }
@@ -256,7 +259,7 @@ final class Route implements Stringable
             'defaults' => $this->defaults,
             'override' => $this->override,
             'dispatcherWithMiddlewares' => $this->getDispatcherWithMiddlewares(),
-            'hasMiddlewares' => $this->middlewareDefinitions !== [],
+            'hasMiddlewares' => $this->middlewares !== [],
             'hasDispatcher' => $this->dispatcher !== null,
             default => throw new InvalidArgumentException('Unknown data key: ' . $key),
         };
@@ -295,7 +298,7 @@ final class Route implements Stringable
             'defaults' => $this->defaults,
             'override' => $this->override,
             'actionAdded' => $this->actionAdded,
-            'middlewareDefinitions' => $this->middlewareDefinitions,
+            'middlewareDefinitions' => $this->middlewares,
             'disabledMiddlewareDefinitions' => $this->disabledMiddlewareDefinitions,
             'middlewareDispatcher' => $this->dispatcher,
         ];
@@ -314,12 +317,12 @@ final class Route implements Stringable
         }
 
         /** @var mixed $definition */
-        foreach ($this->middlewareDefinitions as $index => $definition) {
+        foreach ($this->middlewares as $index => $definition) {
             if (in_array($definition, $this->disabledMiddlewareDefinitions, true)) {
-                unset($this->middlewareDefinitions[$index]);
+                unset($this->middlewares[$index]);
             }
         }
 
-        return $this->dispatcher = $this->dispatcher->withMiddlewares($this->middlewareDefinitions);
+        return $this->dispatcher = $this->dispatcher->withMiddlewares($this->middlewares);
     }
 }

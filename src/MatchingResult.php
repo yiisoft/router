@@ -97,18 +97,35 @@ final class MatchingResult implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if (!$this->isSuccess()) {
-            return $handler->handle($request);
+        if ($this->isSuccess() && $this->dispatcher !== null) {
+            return $this->buildDispatcher($this->dispatcher, $this->route)
+                ->dispatch($request, $handler);
         }
 
-        // Inject dispatcher only if we have not previously injected.
+        return $handler->handle($request);
+    }
+
+    private function buildDispatcher(
+        ?MiddlewareDispatcher $dispatcher,
+        Route $route,
+    ): MiddlewareDispatcher {
+        if ($dispatcher === null) {
+            throw new RuntimeException(sprintf('There is no dispatcher in the route %s.', $route->name));
+        }
+
+        // Don't add middlewares to dispatcher if we did it earlier.
         // This improves performance in event-loop applications.
-        if ($this->dispatcher !== null && !$this->route->getData('hasDispatcher')) {
-            $this->route->injectDispatcher($this->dispatcher);
+        if ($dispatcher->hasMiddlewares()) {
+            return $dispatcher;
         }
 
-        return $this->route
-            ->getData('dispatcherWithMiddlewares')
-            ->dispatch($request, $handler);
+        /** @var mixed $definition */
+        foreach ($route->middlewares as $index => $definition) {
+            if (in_array($definition, $route->disabledMiddlewareDefinitions, true)) {
+                unset($route->middlewares[$index]);
+            }
+        }
+
+        return $dispatcher->withMiddlewares($route->middlewares);
     }
 }
