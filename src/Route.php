@@ -228,7 +228,9 @@ final class Route implements Stringable
 
     /**
      * @psalm-template T as string
+     *
      * @psalm-param T $key
+     *
      * @psalm-return (
      *   T is ('name'|'pattern') ? string :
      *       (T is 'host' ? string|null :
