@@ -386,6 +386,30 @@ In addition to commonly used `getArgument()` method, the following methods are a
 - `getMethods()` - To get route methods.
 - `getUri()` - To get current URI.
 
+## Attributes
+
+`Route` class can be used as an attribute:
+
+```php
+use Yiisoft\Router\Route;
+
+class Controller
+{
+    #[Route(
+        methods: ['GET', 'POST'], 
+        pattern: '/',
+    )]
+    public function view()
+    {
+        // ...    
+    }
+}
+```
+
+Only two properties are required: `methods` and `pattern`. The rest properties are optional.
+
+> Parsing attributes is up to user. The package does not provide a solution for parsing and constructing routes tree.
+
 ## Testing
 
 ### Unit testing
