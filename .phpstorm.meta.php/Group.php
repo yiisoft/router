@@ -13,7 +13,6 @@ namespace PHPSTORM_META {
         'corsMiddleware',
         'items',
         'middlewareDefinitions',
-        'hasDispatcher',
         'hasCorsMiddleware'
     );
 }
