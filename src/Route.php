@@ -18,6 +18,16 @@ use function in_array;
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 final class Route implements Stringable
 {
+    private const POSSIBLE_METHODS = [
+        Method::GET,
+        Method::POST,
+        Method::PUT,
+        Method::DELETE,
+        Method::PATCH,
+        Method::HEAD,
+        Method::OPTIONS,
+    ];
+
     private bool $actionAdded = false;
     private array $builtMiddlewares = [];
 
@@ -28,9 +38,9 @@ final class Route implements Stringable
      * @param array<string,string> $defaults
      */
     public function __construct(
-        public array $methods,
-        public string $pattern,
-        public ?string $name = null,
+        private array $methods,
+        private string $pattern,
+        private ?string $name = null,
         private array $middlewares = [],
         /**
          * Excludes middleware from being invoked when action is handled.
@@ -38,18 +48,21 @@ final class Route implements Stringable
          * a certain route.
          */
         private array $disabledMiddlewareDefinitions = [],
-        public array $hosts = [],
+        private array $hosts = [],
         /**
          * Marks route as override. When added it will replace existing route with the same name.
          */
-        public bool $override = false,
+        private bool $override = false,
         /**
          * Parameter default values indexed by parameter names.
          *
          * @psalm-param array<string,null|Stringable|scalar> $defaults
          */
-        public array $defaults = [],
+        private array $defaults = [],
     ) {
+        $this->methods = $this->processMethods($this->methods);
+        $this->hosts = $this->processHosts($this->hosts);
+        $this->defaults = $this->processDefaults($this->defaults);
     }
 
     public static function get(string $pattern): self
@@ -119,15 +132,8 @@ final class Route implements Stringable
     public function hosts(string ...$hosts): self
     {
         $route = clone $this;
-        $route->hosts = [];
 
-        foreach ($hosts as $host) {
-            $host = rtrim($host, '/');
-
-            if ($host !== '' && !in_array($host, $route->hosts, true)) {
-                $route->hosts[] = $host;
-            }
-        }
+        $route->hosts = $this->processHosts($hosts);
 
         return $route;
     }
@@ -150,7 +156,7 @@ final class Route implements Stringable
     public function defaults(array $defaults): self
     {
         $route = clone $this;
-        $route->defaults = array_map('\strval', $defaults);
+        $route->defaults = $this->processDefaults($defaults);
         return $route;
     }
 
@@ -302,6 +308,43 @@ final class Route implements Stringable
         }
         $this->builtMiddlewares = $result;
 
+        return $result;
+    }
+
+    private function processDefaults(array $defaults): array
+    {
+        return array_map('\strval', $defaults);
+    }
+
+    private function processHosts(array $hosts): array
+    {
+        $result = [];
+        foreach ($hosts as $host) {
+            $host = rtrim($host, '/');
+
+            if ($host !== '' && !in_array($host, $result, true)) {
+                $result[] = $host;
+            }
+        }
+        return $result;
+    }
+
+    private function processMethods(array $methods): array
+    {
+        $result = [];
+        foreach ($methods as $method) {
+            $method = strtoupper($method);
+            if (!in_array($method, self::POSSIBLE_METHODS, true)) {
+                throw new \InvalidArgumentException(
+                    sprintf(
+                        'Method "%s" is not supported. Possible methods: "%s".',
+                        $method,
+                        implode('", "', self::POSSIBLE_METHODS),
+                    )
+                );
+            }
+            $result[] = $method;
+        }
         return $result;
     }
 }
