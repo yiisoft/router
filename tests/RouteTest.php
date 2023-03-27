@@ -368,11 +368,6 @@ EOL;
 
     public function testImmutability(): void
     {
-        $container = new SimpleContainer();
-        $middlewareDispatcher = new MiddlewareDispatcher(
-            new MiddlewareFactory($container),
-        );
-
         $route = Route::get('/');
         $routeWithAction = $route->action('');
 
@@ -386,6 +381,40 @@ EOL;
         $this->assertNotSame($route, $route->action(''));
         $this->assertNotSame($routeWithAction, $routeWithAction->prependMiddleware());
         $this->assertNotSame($route, $route->disableMiddleware(''));
+    }
+
+    public function testAttributes(): void
+    {
+        $methods = ['GET', 'poSt'];
+        $pattern = 'user/{id}/{method}';
+        $name = 'user-method';
+        $middlewares = [];
+        $disabledMiddlewareDefinitions = [];
+        $hosts = ['localhost/', '127.0.0.*///'];
+        $override = true;
+        $defaults = ['id' => 123, 'method' => 'delete', 'flag1' => true, 'flag2' => false];
+
+        $route = new Route(
+            methods: $methods,
+            pattern: $pattern,
+            name: $name,
+            middlewares: $middlewares,
+            disabledMiddlewareDefinitions: $disabledMiddlewareDefinitions,
+            hosts: $hosts,
+            override: $override,
+            defaults: $defaults,
+        );
+
+        $this->assertSame(['GET', 'POST'], $route->getData('methods'));
+        $this->assertSame($pattern, $route->getData('pattern'));
+        $this->assertSame($name, $route->getData('name'));
+        $this->assertSame(false, $route->getData('hasMiddlewares'));
+        $this->assertSame(['localhost', '127.0.0.*'], $route->getData('hosts'));
+        $this->assertSame($override, $route->getData('override'));
+        $this->assertSame(
+            ['id' => '123', 'method' => 'delete', 'flag1' => '1', 'flag2' => ''],
+            $route->getData('defaults'),
+        );
     }
 
     private function getRequestHandler(): RequestHandlerInterface
