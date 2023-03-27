@@ -27,7 +27,7 @@ final class RouterCollectorTest extends AbstractCollectorTestCase
     /**
      * @param CollectorInterface|RouterCollector $collector
      */
-    protected function collectTestData(CollectorInterface $collector): void
+    protected function collectTestData(CollectorInterface|RouterCollector $collector): void
     {
         $routes = $this->createRoutes();
         $this->routeCollector
