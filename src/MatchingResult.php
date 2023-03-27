@@ -98,7 +98,8 @@ final class MatchingResult implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if ($this->isSuccess() && $this->dispatcher !== null) {
-            return $this->buildDispatcher($this->dispatcher, $this->route)
+            return $this
+                ->buildDispatcher($this->dispatcher, $this->route)
                 ->dispatch($request, $handler);
         }
 
@@ -110,7 +111,7 @@ final class MatchingResult implements MiddlewareInterface
         Route $route,
     ): MiddlewareDispatcher {
         if ($dispatcher === null) {
-            throw new RuntimeException(sprintf('There is no dispatcher in the route %s.', $route->name));
+            throw new RuntimeException(sprintf('There is no dispatcher in the route %s.', $route->getData('name')));
         }
 
         // Don't add middlewares to dispatcher if we did it earlier.
