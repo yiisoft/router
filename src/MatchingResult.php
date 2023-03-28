@@ -12,7 +12,7 @@ use RuntimeException;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
-final class MatchingResult implements MiddlewareInterface
+final class MatchingResult
 {
     /**
      * @var array<string,string>
@@ -24,17 +24,8 @@ final class MatchingResult implements MiddlewareInterface
      */
     private array $methods = [];
 
-    private ?MiddlewareDispatcher $dispatcher = null;
-
     private function __construct(private ?Route $route)
     {
-    }
-
-    public function withDispatcher(MiddlewareDispatcher $dispatcher): self
-    {
-        $new = clone $this;
-        $new->dispatcher = $dispatcher;
-        return $new;
     }
 
     /**
@@ -86,6 +77,9 @@ final class MatchingResult implements MiddlewareInterface
         return $this->methods;
     }
 
+    /**
+     * @psalm-assert-if-true true $this->isSuccess()
+     */
     public function route(): Route
     {
         if ($this->route === null) {
@@ -93,22 +87,5 @@ final class MatchingResult implements MiddlewareInterface
         }
 
         return $this->route;
-    }
-
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-    {
-        if (!$this->isSuccess()) {
-            return $handler->handle($request);
-        }
-
-        // Inject dispatcher only if we have not previously injected.
-        // This improves performance in event-loop applications.
-        if ($this->dispatcher !== null && !$this->route->getData('hasDispatcher')) {
-            $this->route->injectDispatcher($this->dispatcher);
-        }
-
-        return $this->route
-            ->getData('dispatcherWithMiddlewares')
-            ->dispatch($request, $handler);
     }
 }

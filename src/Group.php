@@ -4,53 +4,64 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
+use Attribute;
 use InvalidArgumentException;
 use RuntimeException;
-use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
 use function in_array;
 
+#[Attribute(Attribute::TARGET_CLASS)]
 final class Group
 {
     /**
      * @var Group[]|Route[]
      */
-    private array $items = [];
-
-    /**
-     * @var array[]|callable[]|string[]
-     */
-    private array $middlewareDefinitions = [];
-
-    /**
-     * @var string[]
-     */
-    private array $hosts = [];
-    private ?string $namePrefix = null;
+    private array $routes = [];
     private bool $routesAdded = false;
     private bool $middlewareAdded = false;
-    private array $disabledMiddlewareDefinitions = [];
-
+    private array $builtMiddlewares = [];
     /**
      * @var array|callable|string|null Middleware definition for CORS requests.
      */
-    private $corsMiddleware = null;
+    private $corsMiddleware;
 
-    private function __construct(private ?string $prefix = null, private ?MiddlewareDispatcher $dispatcher = null)
-    {
+    /**
+     * @param array $disabledMiddlewares Excludes middleware from being invoked when action is handled.
+     * It is useful to avoid invoking one of the parent group middleware for
+     * a certain route.
+     */
+    public function __construct(
+        private ?string $prefix = null,
+        private array $middlewares = [],
+        private array $hosts = [],
+        private ?string $namePrefix = null,
+        private array $disabledMiddlewares = [],
+        array|callable|string|null $corsMiddleware = null
+    ) {
+        $this->corsMiddleware = $corsMiddleware;
     }
 
     /**
      * Create a new group instance.
      *
      * @param string|null $prefix URL prefix to prepend to all routes of the group.
-     * @param MiddlewareDispatcher|null $dispatcher Middleware dispatcher to use for the group.
      */
     public static function create(
         ?string $prefix = null,
-        MiddlewareDispatcher $dispatcher = null
+        array $middlewares = [],
+        array $hosts = [],
+        ?string $namePrefix = null,
+        array $disabledMiddlewares = [],
+        array|callable|string|null $corsMiddleware = null
     ): self {
-        return new self($prefix, $dispatcher);
+        return new self(
+            prefix: $prefix,
+            middlewares: $middlewares,
+            hosts: $hosts,
+            namePrefix: $namePrefix,
+            disabledMiddlewares: $disabledMiddlewares,
+            corsMiddleware: $corsMiddleware
+        );
     }
 
     public function routes(self|Route ...$routes): self
@@ -59,30 +70,10 @@ final class Group
             throw new RuntimeException('routes() can not be used after prependMiddleware().');
         }
         $new = clone $this;
-        foreach ($routes as $route) {
-            if ($new->dispatcher !== null && !$route->getData('hasDispatcher')) {
-                $route = $route->withDispatcher($new->dispatcher);
-            }
-            $new->items[] = $route;
-        }
-
+        $new->routes = $routes;
         $new->routesAdded = true;
 
         return $new;
-    }
-
-    public function withDispatcher(MiddlewareDispatcher $dispatcher): self
-    {
-        $group = clone $this;
-        $group->dispatcher = $dispatcher;
-        foreach ($group->items as $index => $item) {
-            if (!$item->getData('hasDispatcher')) {
-                $item = $item->withDispatcher($dispatcher);
-                $group->items[$index] = $item;
-            }
-        }
-
-        return $group;
     }
 
     /**
@@ -110,9 +101,10 @@ final class Group
         }
         $new = clone $this;
         array_push(
-            $new->middlewareDefinitions,
+            $new->middlewares,
             ...array_values($middlewareDefinition)
         );
+        $new->builtMiddlewares = [];
         return $new;
     }
 
@@ -124,10 +116,11 @@ final class Group
     {
         $new = clone $this;
         array_unshift(
-            $new->middlewareDefinitions,
+            $new->middlewares,
             ...array_values($middlewareDefinition)
         );
         $new->middlewareAdded = true;
+        $new->builtMiddlewares = [];
         return $new;
     }
 
@@ -167,9 +160,10 @@ final class Group
     {
         $new = clone $this;
         array_push(
-            $new->disabledMiddlewareDefinitions,
+            $new->disabledMiddlewares,
             ...array_values($middlewareDefinition),
         );
+        $new->builtMiddlewares = [];
         return $new;
     }
 
@@ -178,10 +172,10 @@ final class Group
      * @psalm-param T $key
      * @psalm-return (
      *   T is ('prefix'|'namePrefix'|'host') ? string|null :
-     *   (T is 'items' ? Group[]|Route[] :
+     *   (T is 'routes' ? Group[]|Route[] :
      *     (T is 'hosts' ? array<array-key, string> :
-     *       (T is ('hasCorsMiddleware'|'hasDispatcher') ? bool :
-     *         (T is 'middlewareDefinitions' ? list<array|callable|string> :
+     *       (T is 'hasCorsMiddleware' ? bool :
+     *         (T is 'middlewares' ? list<array|callable|string> :
      *           (T is 'corsMiddleware' ? array|callable|string|null : mixed)
      *         )
      *       )
@@ -197,23 +191,28 @@ final class Group
             'host' => $this->hosts[0] ?? null,
             'hosts' => $this->hosts,
             'corsMiddleware' => $this->corsMiddleware,
-            'items' => $this->items,
+            'routes' => $this->routes,
             'hasCorsMiddleware' => $this->corsMiddleware !== null,
-            'hasDispatcher' => $this->dispatcher !== null,
-            'middlewareDefinitions' => $this->getMiddlewareDefinitions(),
+            'middlewares' => $this->getBuiltMiddlewares(),
             default => throw new InvalidArgumentException('Unknown data key: ' . $key),
         };
     }
 
-    private function getMiddlewareDefinitions(): array
+    private function getBuiltMiddlewares(): array
     {
+        if ($this->builtMiddlewares !== []) {
+            return $this->builtMiddlewares;
+        }
+
+        $builtMiddlewares = $this->middlewares;
+
         /** @var mixed $definition */
-        foreach ($this->middlewareDefinitions as $index => $definition) {
-            if (in_array($definition, $this->disabledMiddlewareDefinitions, true)) {
-                unset($this->middlewareDefinitions[$index]);
+        foreach ($builtMiddlewares as $index => $definition) {
+            if (in_array($definition, $this->disabledMiddlewares, true)) {
+                unset($builtMiddlewares[$index]);
             }
         }
 
-        return array_values($this->middlewareDefinitions);
+        return $this->builtMiddlewares = array_values($builtMiddlewares);
     }
 }

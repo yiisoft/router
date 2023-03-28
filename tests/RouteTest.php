@@ -212,23 +212,6 @@ final class RouteTest extends TestCase
         $this->assertSame('GET /', (string)$route);
     }
 
-    public function testDispatcherInjecting(): void
-    {
-        $request = new ServerRequest('GET', '/');
-        $container = $this->getContainer(
-            [
-                TestController::class => new TestController(),
-            ]
-        );
-        $dispatcher = $this->getDispatcher($container);
-        $route = Route::get('/')->action([TestController::class, 'index']);
-        $route->injectDispatcher($dispatcher);
-        $response = $route
-            ->getData('dispatcherWithMiddlewares')
-            ->dispatch($request, $this->getRequestHandler());
-        $this->assertSame(200, $response->getStatusCode());
-    }
-
     public function testMiddlewareAfterAction(): void
     {
         $route = Route::get('/')->action([TestController::class, 'index']);
@@ -264,9 +247,8 @@ final class RouteTest extends TestCase
             ->middleware(TestMiddleware1::class, TestMiddleware2::class, TestMiddleware3::class)
             ->action([TestController::class, 'index'])
             ->disableMiddleware(TestMiddleware1::class, TestMiddleware3::class);
-        $route->injectDispatcher($injectDispatcher);
 
-        $dispatcher = $route->getData('dispatcherWithMiddlewares');
+        $dispatcher = $injectDispatcher->withMiddlewares($route->getBuiltMiddlewares());
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
@@ -290,50 +272,12 @@ final class RouteTest extends TestCase
             ->middleware(TestMiddleware3::class)
             ->action([TestController::class, 'index'])
             ->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class);
-        $route->injectDispatcher($injectDispatcher);
 
-        $dispatcher = $route->getData('dispatcherWithMiddlewares');
+        $dispatcher = $injectDispatcher->withMiddlewares($route->getBuiltMiddlewares());
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('123', (string) $response->getBody());
-    }
-
-    public function testGetDispatcherWithoutDispatcher(): void
-    {
-        $route = Route::get('/')->name('test');
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('There is no dispatcher in the route test.');
-        $route->getData('dispatcherWithMiddlewares');
-    }
-
-    public function testGetDispatcherWithMiddlewares(): void
-    {
-        $request = new ServerRequest('GET', '/');
-
-        $injectDispatcher = $this
-            ->getDispatcher(
-                $this->getContainer([
-                    TestMiddleware1::class => new TestMiddleware1(),
-                    TestMiddleware2::class => new TestMiddleware2(),
-                    TestController::class => new TestController(),
-                ])
-            )
-            ->withMiddlewares([
-                TestMiddleware1::class,
-                TestMiddleware2::class,
-                [TestController::class, 'index'],
-            ]);
-
-        $route = Route::get('/');
-        $route->injectDispatcher($injectDispatcher);
-
-        $dispatcher = $route->getData('dispatcherWithMiddlewares');
-
-        $response = $dispatcher->dispatch($request, $this->getRequestHandler());
-        $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame('12', (string) $response->getBody());
     }
 
     public function testDebugInfo(): void
@@ -370,19 +314,21 @@ Yiisoft\Router\Route Object
 
     [override] => 1
     [actionAdded] => 1
-    [middlewareDefinitions] => Array
+    [middlewares] => Array
         (
             [0] => Yiisoft\Router\Tests\Support\TestMiddleware3
             [1] => Yiisoft\Router\Tests\Support\TestMiddleware1
             [2] => go
         )
 
-    [disabledMiddlewareDefinitions] => Array
+    [builtMiddlewares] => Array
+        (
+        )
+
+    [disabledMiddlewares] => Array
         (
             [0] => Yiisoft\Router\Tests\Support\TestMiddleware2
         )
-
-    [middlewareDispatcher] =>
 )
 
 EOL;
@@ -399,15 +345,9 @@ EOL;
 
     public function testImmutability(): void
     {
-        $container = new SimpleContainer();
-        $middlewareDispatcher = new MiddlewareDispatcher(
-            new MiddlewareFactory($container),
-        );
-
         $route = Route::get('/');
         $routeWithAction = $route->action('');
 
-        $this->assertNotSame($route, $route->withDispatcher($middlewareDispatcher));
         $this->assertNotSame($route, $route->name(''));
         $this->assertNotSame($route, $route->pattern(''));
         $this->assertNotSame($route, $route->host(''));

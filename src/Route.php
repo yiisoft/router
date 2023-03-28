@@ -4,98 +4,190 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
+use Attribute;
 use InvalidArgumentException;
 use RuntimeException;
 use Stringable;
 use Yiisoft\Http\Method;
-use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
 use function in_array;
 
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
  */
-final class Route implements Stringable
+#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
+class Route implements Stringable
 {
-    private ?string $name = null;
-
-    /**
-     * @var string[]
-     */
-    private array $hosts = [];
-    private bool $override = false;
     private bool $actionAdded = false;
+    /**
+     * @var callable[]|array[]|string[]
+     */
+    private array $builtMiddlewares = [];
 
     /**
-     * @var array[]|callable[]|string[]
+     * @param array $defaults Parameter default values indexed by parameter names.
+     * @param bool $override Marks route as override. When added it will replace existing route with the same name.
+     * @param array $disabledMiddlewares Excludes middleware from being invoked when action is handled.
+     * It is useful to avoid invoking one of the parent group middleware for
+     * a certain route.
      */
-    private array $middlewareDefinitions = [];
-
-    private array $disabledMiddlewareDefinitions = [];
-
-    /**
-     * @var array<string,string>
-     */
-    private array $defaults = [];
-
-    /**
-     * @param string[] $methods
-     */
-    private function __construct(
+    public function __construct(
         private array $methods,
         private string $pattern,
-        private ?MiddlewareDispatcher $dispatcher = null
+        private ?string $name = null,
+        private array $middlewares = [],
+        private array $defaults = [],
+        private array $hosts = [],
+        private bool $override = false,
+        private array $disabledMiddlewares = [],
     ) {
     }
 
-    /**
-     * @psalm-assert MiddlewareDispatcher $this->dispatcher
-     */
-    public function injectDispatcher(MiddlewareDispatcher $dispatcher): void
-    {
-        $this->dispatcher = $dispatcher;
+    public static function get(
+        string $pattern,
+        ?string $name = null,
+        array $middlewares = [],
+        array $defaults = [],
+        array $hosts = [],
+        bool $override = false,
+        array $disabledMiddlewares = []
+    ): self {
+        return self::methods(
+            [Method::GET],
+            $pattern,
+            $name,
+            $middlewares,
+            $defaults,
+            $hosts,
+            $override,
+            $disabledMiddlewares
+        );
     }
 
-    public function withDispatcher(MiddlewareDispatcher $dispatcher): self
-    {
-        $route = clone $this;
-        $route->dispatcher = $dispatcher;
-        return $route;
+    public static function post(
+        string $pattern,
+        ?string $name = null,
+        array $middlewares = [],
+        array $defaults = [],
+        array $hosts = [],
+        bool $override = false,
+        array $disabledMiddlewares = []
+    ): self {
+        return self::methods(
+            [Method::POST],
+            $pattern,
+            $name,
+            $middlewares,
+            $defaults,
+            $hosts,
+            $override,
+            $disabledMiddlewares
+        );
     }
 
-    public static function get(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
-    {
-        return self::methods([Method::GET], $pattern, $dispatcher);
+    public static function put(
+        string $pattern,
+        ?string $name = null,
+        array $middlewares = [],
+        array $defaults = [],
+        array $hosts = [],
+        bool $override = false,
+        array $disabledMiddlewares = []
+    ): self {
+        return self::methods(
+            [Method::PUT],
+            $pattern,
+            $name,
+            $middlewares,
+            $defaults,
+            $hosts,
+            $override,
+            $disabledMiddlewares
+        );
     }
 
-    public static function post(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
-    {
-        return self::methods([Method::POST], $pattern, $dispatcher);
+    public static function delete(
+        string $pattern,
+        ?string $name = null,
+        array $middlewares = [],
+        array $defaults = [],
+        array $hosts = [],
+        bool $override = false,
+        array $disabledMiddlewares = []
+    ): self {
+        return self::methods(
+            [Method::DELETE],
+            $pattern,
+            $name,
+            $middlewares,
+            $defaults,
+            $hosts,
+            $override,
+            $disabledMiddlewares
+        );
     }
 
-    public static function put(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
-    {
-        return self::methods([Method::PUT], $pattern, $dispatcher);
+    public static function patch(
+        string $pattern,
+        ?string $name = null,
+        array $middlewares = [],
+        array $defaults = [],
+        array $hosts = [],
+        bool $override = false,
+        array $disabledMiddlewares = []
+    ): self {
+        return self::methods(
+            [Method::PATCH],
+            $pattern,
+            $name,
+            $middlewares,
+            $defaults,
+            $hosts,
+            $override,
+            $disabledMiddlewares
+        );
     }
 
-    public static function delete(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
-    {
-        return self::methods([Method::DELETE], $pattern, $dispatcher);
+    public static function head(
+        string $pattern,
+        ?string $name = null,
+        array $middlewares = [],
+        array $defaults = [],
+        array $hosts = [],
+        bool $override = false,
+        array $disabledMiddlewares = []
+    ): self {
+        return self::methods(
+            [Method::HEAD],
+            $pattern,
+            $name,
+            $middlewares,
+            $defaults,
+            $hosts,
+            $override,
+            $disabledMiddlewares
+        );
     }
 
-    public static function patch(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
-    {
-        return self::methods([Method::PATCH], $pattern, $dispatcher);
-    }
-
-    public static function head(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
-    {
-        return self::methods([Method::HEAD], $pattern, $dispatcher);
-    }
-
-    public static function options(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
-    {
-        return self::methods([Method::OPTIONS], $pattern, $dispatcher);
+    public static function options(
+        string $pattern,
+        ?string $name = null,
+        array $middlewares = [],
+        array $defaults = [],
+        array $hosts = [],
+        bool $override = false,
+        array $disabledMiddlewares = []
+    ): self {
+        return self::methods(
+            [Method::OPTIONS],
+            $pattern,
+            $name,
+            $middlewares,
+            $defaults,
+            $hosts,
+            $override,
+            $disabledMiddlewares
+        );
     }
 
     /**
@@ -104,9 +196,23 @@ final class Route implements Stringable
     public static function methods(
         array $methods,
         string $pattern,
-        ?MiddlewareDispatcher $dispatcher = null
+        ?string $name = null,
+        array $middlewares = [],
+        array $defaults = [],
+        array $hosts = [],
+        bool $override = false,
+        array $disabledMiddlewares = []
     ): self {
-        return new self($methods, $pattern, $dispatcher);
+        return new self(
+            methods: $methods,
+            pattern: $pattern,
+            name: $name,
+            middlewares: $middlewares,
+            defaults: $defaults,
+            hosts: $hosts,
+            override: $override,
+            disabledMiddlewares: $disabledMiddlewares
+        );
     }
 
     public function name(string $name): self
@@ -177,9 +283,10 @@ final class Route implements Stringable
         }
         $route = clone $this;
         array_push(
-            $route->middlewareDefinitions,
+            $route->middlewares,
             ...array_values($middlewareDefinition)
         );
+        $route->builtMiddlewares = [];
         return $route;
     }
 
@@ -194,9 +301,10 @@ final class Route implements Stringable
         }
         $route = clone $this;
         array_unshift(
-            $route->middlewareDefinitions,
+            $route->middlewares,
             ...array_values($middlewareDefinition)
         );
+        $route->builtMiddlewares = [];
         return $route;
     }
 
@@ -206,8 +314,9 @@ final class Route implements Stringable
     public function action(array|callable|string $middlewareDefinition): self
     {
         $route = clone $this;
-        $route->middlewareDefinitions[] = $middlewareDefinition;
+        $route->middlewares[] = $middlewareDefinition;
         $route->actionAdded = true;
+        $route->builtMiddlewares = [];
         return $route;
     }
 
@@ -220,9 +329,10 @@ final class Route implements Stringable
     {
         $route = clone $this;
         array_push(
-            $route->disabledMiddlewareDefinitions,
+            $route->disabledMiddlewares,
             ...array_values($middlewareDefinition)
         );
+        $route->builtMiddlewares = [];
         return $route;
     }
 
@@ -235,9 +345,7 @@ final class Route implements Stringable
      *           (T is 'hosts' ? array<array-key, string> :
      *               (T is 'methods' ? array<array-key,string> :
      *                   (T is 'defaults' ? array<string,string> :
-     *                       (T is ('override'|'hasMiddlewares'|'hasDispatcher') ? bool :
-     *                           (T is 'dispatcherWithMiddlewares' ? MiddlewareDispatcher : mixed)
-     *                       )
+     *                       (T is ('override'|'hasMiddlewares') ? bool : mixed)
      *                   )
      *               )
      *           )
@@ -255,9 +363,7 @@ final class Route implements Stringable
             'methods' => $this->methods,
             'defaults' => $this->defaults,
             'override' => $this->override,
-            'dispatcherWithMiddlewares' => $this->getDispatcherWithMiddlewares(),
-            'hasMiddlewares' => $this->middlewareDefinitions !== [],
-            'hasDispatcher' => $this->dispatcher !== null,
+            'hasMiddlewares' => $this->middlewares !== [],
             default => throw new InvalidArgumentException('Unknown data key: ' . $key),
         };
     }
@@ -295,31 +401,31 @@ final class Route implements Stringable
             'defaults' => $this->defaults,
             'override' => $this->override,
             'actionAdded' => $this->actionAdded,
-            'middlewareDefinitions' => $this->middlewareDefinitions,
-            'disabledMiddlewareDefinitions' => $this->disabledMiddlewareDefinitions,
-            'middlewareDispatcher' => $this->dispatcher,
+            'middlewares' => $this->middlewares,
+            'builtMiddlewares' => $this->builtMiddlewares,
+            'disabledMiddlewares' => $this->disabledMiddlewares,
         ];
     }
 
-    private function getDispatcherWithMiddlewares(): MiddlewareDispatcher
+    /**
+     * @return callable[]|array[]|string[]
+     */
+    public function getBuiltMiddlewares(): array
     {
-        if ($this->dispatcher === null) {
-            throw new RuntimeException(sprintf('There is no dispatcher in the route %s.', $this->getData('name')));
-        }
-
-        // Don't add middlewares to dispatcher if we did it earlier.
+        // Don't build middlewares if we did it earlier.
         // This improves performance in event-loop applications.
-        if ($this->dispatcher->hasMiddlewares()) {
-            return $this->dispatcher;
+        if ($this->builtMiddlewares !== []) {
+            return $this->builtMiddlewares;
         }
 
-        /** @var mixed $definition */
-        foreach ($this->middlewareDefinitions as $index => $definition) {
-            if (in_array($definition, $this->disabledMiddlewareDefinitions, true)) {
-                unset($this->middlewareDefinitions[$index]);
+        $builtMiddlewares = $this->middlewares;
+
+        foreach ($builtMiddlewares as $index => $definition) {
+            if (in_array($definition, $this->disabledMiddlewares, true)) {
+                unset($builtMiddlewares[$index]);
             }
         }
 
-        return $this->dispatcher = $this->dispatcher->withMiddlewares($this->middlewareDefinitions);
+        return $this->builtMiddlewares = $builtMiddlewares;
     }
 }
