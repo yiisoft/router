@@ -73,7 +73,7 @@ final class MatchingResult
     }
 
     /**
-     * @psalm-assert-if-true true $this->isSuccess()
+     * @psalm-assert-if-true !null $this->route
      */
     public function route(): Route
     {
