@@ -23,7 +23,6 @@ use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
 use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware3;
-use Yiisoft\Test\Support\Container\SimpleContainer;
 
 final class RouteTest extends TestCase
 {

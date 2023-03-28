@@ -20,7 +20,7 @@ class Route implements Stringable
 {
     private bool $actionAdded = false;
     /**
-     * @var callable[]|array[]|string[]
+     * @var array[]|callable[]|string[]
      */
     private array $builtMiddlewares = [];
 
@@ -338,7 +338,9 @@ class Route implements Stringable
 
     /**
      * @psalm-template T as string
+     *
      * @psalm-param T $key
+     *
      * @psalm-return (
      *   T is ('name'|'pattern') ? string :
      *       (T is 'host' ? string|null :
@@ -408,7 +410,7 @@ class Route implements Stringable
     }
 
     /**
-     * @return callable[]|array[]|string[]
+     * @return array[]|callable[]|string[]
      */
     public function getBuiltMiddlewares(): array
     {
