@@ -380,6 +380,17 @@ final class GroupTest extends TestCase
         $this->assertNotSame($group, $group->disableMiddleware());
     }
 
+    public function testBuiltMiddlewares(): void
+    {
+        $group = Group::create()
+            ->middleware(static fn () => new Response(200))
+            ->prependMiddleware(TestMiddleware1::class);
+
+        $builtMiddlewares = $group->getData('middlewares');
+
+        $this->assertSame($builtMiddlewares, $group->getData('middlewares'));
+    }
+
     private function getRequestHandler(): RequestHandlerInterface
     {
         return new class () implements RequestHandlerInterface {

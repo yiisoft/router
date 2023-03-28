@@ -359,6 +359,17 @@ EOL;
         $this->assertNotSame($route, $route->disableMiddleware(''));
     }
 
+    public function testBuiltMiddlewares(): void
+    {
+        $route = Route::get('')
+            ->middleware(TestMiddleware1::class)
+            ->action(static fn () => new Response(200));
+
+        $builtMiddlewares = $route->getBuiltMiddlewares();
+
+        $this->assertSame($builtMiddlewares, $route->getBuiltMiddlewares());
+    }
+
     private function getRequestHandler(): RequestHandlerInterface
     {
         return new class () implements RequestHandlerInterface {
