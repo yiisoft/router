@@ -19,9 +19,9 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\Tests\Support\AssertTrait;
 use Yiisoft\Router\Tests\Support\Container;
+use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
-use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware3;
 
 final class RouteTest extends TestCase
@@ -398,7 +398,7 @@ EOL;
             pattern: $pattern,
             name: $name,
             middlewares: $middlewares,
-            disabledMiddlewareDefinitions: $disabledMiddlewareDefinitions,
+            disabledMiddlewares: $disabledMiddlewareDefinitions,
             hosts: $hosts,
             override: $override,
             defaults: $defaults,

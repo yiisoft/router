@@ -18,46 +18,28 @@ use function in_array;
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 final class Route implements Stringable
 {
-    private const POSSIBLE_METHODS = [
-        Method::GET,
-        Method::POST,
-        Method::PUT,
-        Method::DELETE,
-        Method::PATCH,
-        Method::HEAD,
-        Method::OPTIONS,
-    ];
-
     private bool $actionAdded = false;
     private array $builtMiddlewares = [];
 
     /**
-     * @param string[] $methods
+     * @param string[] $methods HTTP method names
      * @param string[] $hosts
      * @param array[]|callable[]|string[] $middlewares
-     * @param array<string,string> $defaults
+     * @param array $disabledMiddlewares Excludes middleware from being invoked when action is handled.
+     * It is useful to avoid invoking one of the parent group middleware for
+     * a certain route.
+     * @param bool $override Marks route as override. When added it will replace existing route with the same name.
+     * @param array<string,string> $defaults  Parameter default values indexed by parameter names.
+     * @psalm-param array<string,null|Stringable|scalar> $defaults
      */
     public function __construct(
         private array $methods,
         private string $pattern,
         private ?string $name = null,
         private array $middlewares = [],
-        /**
-         * Excludes middleware from being invoked when action is handled.
-         * It is useful to avoid invoking one of the parent group middleware for
-         * a certain route.
-         */
-        private array $disabledMiddlewareDefinitions = [],
+        private array $disabledMiddlewares = [],
         private array $hosts = [],
-        /**
-         * Marks route as override. When added it will replace existing route with the same name.
-         */
         private bool $override = false,
-        /**
-         * Parameter default values indexed by parameter names.
-         *
-         * @psalm-param array<string,null|Stringable|scalar> $defaults
-         */
         private array $defaults = [],
     ) {
         $this->methods = $this->processMethods($this->methods);
@@ -217,7 +199,7 @@ final class Route implements Stringable
     {
         $route = clone $this;
         array_push(
-            $route->disabledMiddlewareDefinitions,
+            $route->disabledMiddlewares,
             ...array_values($middlewareDefinition)
         );
         $route->builtMiddlewares = [];
@@ -293,16 +275,19 @@ final class Route implements Stringable
             'actionAdded' => $this->actionAdded,
             'middlewareDefinitions' => $this->middlewares,
             'builtMiddlewares' => $this->builtMiddlewares,
-            'disabledMiddlewareDefinitions' => $this->disabledMiddlewareDefinitions,
+            'disabledMiddlewareDefinitions' => $this->disabledMiddlewares,
         ];
     }
 
     public function getMiddlewares(): array
     {
+        if ($this->builtMiddlewares !== []) {
+            return $this->builtMiddlewares;
+        }
         $result = $this->middlewares;
         /** @var mixed $definition */
         foreach ($result as $index => $definition) {
-            if (in_array($definition, $this->disabledMiddlewareDefinitions, true)) {
+            if (in_array($definition, $this->disabledMiddlewares, true)) {
                 unset($result[$index]);
             }
         }
@@ -334,12 +319,12 @@ final class Route implements Stringable
         $result = [];
         foreach ($methods as $method) {
             $method = strtoupper($method);
-            if (!in_array($method, self::POSSIBLE_METHODS, true)) {
+            if (!in_array($method, Method::ALL, true)) {
                 throw new \InvalidArgumentException(
                     sprintf(
                         'Method "%s" is not supported. Possible methods: "%s".',
                         $method,
-                        implode('", "', self::POSSIBLE_METHODS),
+                        implode('", "', Method::ALL),
                     )
                 );
             }
