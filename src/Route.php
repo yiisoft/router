@@ -30,6 +30,7 @@ final class Route implements Stringable
      * a certain route.
      * @param bool $override Marks route as override. When added it will replace existing route with the same name.
      * @param array<string,string> $defaults  Parameter default values indexed by parameter names.
+     *
      * @psalm-param array<string,null|Stringable|scalar> $defaults
      */
     public function __construct(
