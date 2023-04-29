@@ -1,8 +1,8 @@
 # Yii Router Change Log
 
-## 3.0.1 under development
+## 3.1.0 under development
 
-- no changes in this release.
+- Enh #195: Add debug collector for yiisoft/yii-debug (@xepozz)
 
 ## 3.0.0 February 17, 2023
 
