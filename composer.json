@@ -40,7 +40,7 @@
         "yiisoft/di": "^1.0",
         "yiisoft/dummy-provider": "^1.0.0",
         "yiisoft/test-support": "^3.0",
-        "yiisoft/yii-debug": "dev-split-debug"
+        "yiisoft/yii-debug": "dev-master"
     },
     "autoload": {
         "psr-4": {
