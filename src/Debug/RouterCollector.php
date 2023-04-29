@@ -12,7 +12,7 @@ use Yiisoft\Router\RouteCollectionInterface;
 use Yiisoft\Yii\Debug\Collector\CollectorTrait;
 use Yiisoft\Yii\Debug\Collector\SummaryCollectorInterface;
 
-class RouterCollector implements SummaryCollectorInterface
+final class RouterCollector implements SummaryCollectorInterface
 {
     use CollectorTrait;
 
@@ -32,6 +32,9 @@ class RouterCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
+        /**
+         * @var RouteCollectionInterface|null $routeCollection
+         */
         $routeCollection = $this->container->has(RouteCollectionInterface::class)
             ? $this->container->get(RouteCollectionInterface::class)
             : null;
@@ -90,6 +93,9 @@ class RouterCollector implements SummaryCollectorInterface
         ];
     }
 
+    /**
+     * @psalm-suppress MixedReturnStatement, MixedInferredReturnType
+     */
     private function getCurrentRoute(): ?CurrentRoute
     {
         return $this->container->has(CurrentRoute::class) ? $this->container->get(CurrentRoute::class) : null;
@@ -105,7 +111,11 @@ class RouterCollector implements SummaryCollectorInterface
         $reflectionProperty = $reflection->getProperty('route');
         $reflectionProperty->setAccessible(true);
 
-        return $reflectionProperty->getValue($currentRoute);
+        /**
+         * @var Route $value
+         */
+        $value = $reflectionProperty->getValue($currentRoute);
+        return $value;
     }
 
     private function getMiddlewaresAndAction(?Route $route): array
@@ -114,8 +124,12 @@ class RouterCollector implements SummaryCollectorInterface
             return [[], null];
         }
         $reflection = new ReflectionObject($route);
+
         $reflectionProperty = $reflection->getProperty('middlewareDefinitions');
         $reflectionProperty->setAccessible(true);
+        /**
+         * @var array[]|callable[]|string[] $middlewareDefinitions
+         */
         $middlewareDefinitions = $reflectionProperty->getValue($route);
         $action = array_pop($middlewareDefinitions);
         return [$middlewareDefinitions, $action];
