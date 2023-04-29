@@ -114,8 +114,7 @@ final class RouterCollector implements SummaryCollectorInterface
         /**
          * @var Route $value
          */
-        $value = $reflectionProperty->getValue($currentRoute);
-        return $value;
+        return $reflectionProperty->getValue($currentRoute);
     }
 
     private function getMiddlewaresAndAction(?Route $route): array
