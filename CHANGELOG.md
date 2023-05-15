@@ -1,8 +1,8 @@
 # Yii Router Change Log
 
-## 3.0.1 under development
+## 3.1.0 under development
 
-- no changes in this release.
+- New #230: Added `Route` attribute for Yii Hydrator (@vjik)
 
 ## 3.0.0 February 17, 2023
 
