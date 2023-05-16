@@ -11,12 +11,12 @@ use Yiisoft\Hydrator\Context;
 use Yiisoft\Hydrator\Hydrator;
 use Yiisoft\Hydrator\UnexpectedAttributeException;
 use Yiisoft\Router\CurrentRoute;
-use Yiisoft\Router\HydratorAttribute\Route;
-use Yiisoft\Router\HydratorAttribute\RouteResolver;
+use Yiisoft\Router\HydratorAttribute\RouteArgument;
+use Yiisoft\Router\HydratorAttribute\RouteArgumentResolver;
 use Yiisoft\Router\Route as RouterRoute;
 use Yiisoft\Test\Support\Container\SimpleContainer;
 
-final class RouteTest extends TestCase
+final class RouteArgumentTest extends TestCase
 {
     public function testBase(): void
     {
@@ -26,11 +26,11 @@ final class RouteTest extends TestCase
         ]);
 
         $input = new class () {
-            #[Route('a')]
+            #[RouteArgument('a')]
             public string $a = '';
-            #[Route('b')]
+            #[RouteArgument('b')]
             public string $b = '';
-            #[Route]
+            #[RouteArgument]
             public array $all = [];
         };
 
@@ -46,11 +46,11 @@ final class RouteTest extends TestCase
         $hydrator = $this->createHydrator([]);
 
         $input = new class () {
-            #[Route('a')]
+            #[RouteArgument('a')]
             public string $a = '';
-            #[Route('b')]
+            #[RouteArgument('b')]
             public string $b = '';
-            #[Route]
+            #[RouteArgument]
             public array $all = [];
         };
 
@@ -63,13 +63,13 @@ final class RouteTest extends TestCase
 
     public function testUnexpectedAttributeException(): void
     {
-        $resolver = new RouteResolver(new CurrentRoute());
+        $resolver = new RouteArgumentResolver(new CurrentRoute());
 
         $attribute = new ToString();
         $context = $this->createContext();
 
         $this->expectException(UnexpectedAttributeException::class);
-        $this->expectExceptionMessage('Expected "' . Route::class . '", but "' . ToString::class . '" given.');
+        $this->expectExceptionMessage('Expected "' . RouteArgument::class . '", but "' . ToString::class . '" given.');
         $resolver->getParameterValue($attribute, $context);
     }
 
@@ -80,7 +80,7 @@ final class RouteTest extends TestCase
 
         return new Hydrator(
             new SimpleContainer([
-                RouteResolver::class => new RouteResolver($currentRoute),
+                RouteArgumentResolver::class => new RouteArgumentResolver($currentRoute),
             ]),
         );
     }

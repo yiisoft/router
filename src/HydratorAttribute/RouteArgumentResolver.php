@@ -11,7 +11,7 @@ use Yiisoft\Hydrator\ParameterAttributeResolverInterface;
 use Yiisoft\Hydrator\UnexpectedAttributeException;
 use Yiisoft\Router\CurrentRoute;
 
-final class RouteResolver implements ParameterAttributeResolverInterface
+final class RouteArgumentResolver implements ParameterAttributeResolverInterface
 {
     public function __construct(
         private CurrentRoute $currentRoute,
@@ -20,8 +20,8 @@ final class RouteResolver implements ParameterAttributeResolverInterface
 
     public function getParameterValue(ParameterAttributeInterface $attribute, Context $context): mixed
     {
-        if (!$attribute instanceof Route) {
-            throw new UnexpectedAttributeException(Route::class, $attribute);
+        if (!$attribute instanceof RouteArgument) {
+            throw new UnexpectedAttributeException(RouteArgument::class, $attribute);
         }
 
         $arguments = $this->currentRoute->getArguments();

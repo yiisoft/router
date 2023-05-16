@@ -8,7 +8,7 @@ use Attribute;
 use Yiisoft\Hydrator\ParameterAttributeInterface;
 
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_PARAMETER | Attribute::IS_REPEATABLE)]
-final class Route implements ParameterAttributeInterface
+final class RouteArgument implements ParameterAttributeInterface
 {
     public function __construct(
         private ?string $name = null
@@ -22,6 +22,6 @@ final class Route implements ParameterAttributeInterface
 
     public function getResolver(): string
     {
-        return RouteResolver::class;
+        return RouteArgumentResolver::class;
     }
 }

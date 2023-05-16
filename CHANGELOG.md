@@ -2,7 +2,7 @@
 
 ## 3.1.0 under development
 
-- New #203: Added `Route` attribute for Yii Hydrator (@vjik)
+- New #203: Added `RouteArgument` attribute for Yii Hydrator (@vjik)
 
 ## 3.0.0 February 17, 2023
 
