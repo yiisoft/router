@@ -54,7 +54,7 @@
     },
     "suggest": {
         "yiisoft/router-fastroute": "Router implementation based on nikic/FastRoute",
-        "yiisoft/hydrator": "Need to use `Route` attribute"
+        "yiisoft/hydrator": "Needed to use `Route` attribute"
     },
     "extra": {
         "config-plugin-options": {
