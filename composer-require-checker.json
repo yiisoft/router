@@ -1,9 +1,9 @@
 {
     "symbol-whitelist": [
         "Yiisoft\\Hydrator\\Context",
-        "Yiisoft\\Hydrator\\NotResolvedException",
         "Yiisoft\\Hydrator\\ParameterAttributeInterface",
         "Yiisoft\\Hydrator\\ParameterAttributeResolverInterface",
+        "Yiisoft\\Hydrator\\Result",
         "Yiisoft\\Hydrator\\UnexpectedAttributeException"
     ]
 }
