@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Yiisoft\Router\HydratorAttribute;
 
 use Yiisoft\Hydrator\Context;
-use Yiisoft\Hydrator\NotResolvedException;
 use Yiisoft\Hydrator\ParameterAttributeInterface;
 use Yiisoft\Hydrator\ParameterAttributeResolverInterface;
+use Yiisoft\Hydrator\Result;
 use Yiisoft\Hydrator\UnexpectedAttributeException;
 use Yiisoft\Router\CurrentRoute;
 
@@ -18,7 +18,7 @@ final class RouteArgumentResolver implements ParameterAttributeResolverInterface
     ) {
     }
 
-    public function getParameterValue(ParameterAttributeInterface $attribute, Context $context): mixed
+    public function getParameterValue(ParameterAttributeInterface $attribute, Context $context): Result
     {
         if (!$attribute instanceof RouteArgument) {
             throw new UnexpectedAttributeException(RouteArgument::class, $attribute);
@@ -26,11 +26,12 @@ final class RouteArgumentResolver implements ParameterAttributeResolverInterface
 
         $arguments = $this->currentRoute->getArguments();
 
-        $name = $attribute->getName();
-        if ($name === null) {
-            return $arguments;
+        $name = $attribute->getName() ?? $context->getParameter()->getName();
+
+        if (array_key_exists($name, $arguments)) {
+            return Result::success($arguments[$name]);
         }
 
-        return $arguments[$name] ?? throw new NotResolvedException();
+        return Result::fail();
     }
 }
