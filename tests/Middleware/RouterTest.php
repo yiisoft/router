@@ -22,6 +22,7 @@ use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectionInterface;
 use Yiisoft\Router\RouteCollector;
+use Yiisoft\Router\Tests\Support\CustomResponseMiddleware;
 use Yiisoft\Router\UrlMatcherInterface;
 use Yiisoft\Test\Support\Container\SimpleContainer;
 
@@ -134,6 +135,47 @@ final class RouterTest extends TestCase
         $this->assertSame(['parameter' => 'value'], $currentRoute->getArguments());
     }
 
+    public function dataRouteMiddleware(): array
+    {
+        return [
+            'callable' => [
+                201,
+                static fn () => new Response(201),
+            ],
+            'array' => [
+                202,
+                [
+                    'class' => CustomResponseMiddleware::class,
+                    '__construct()' => [202],
+                ],
+            ],
+            'class' => [
+                404,
+                CustomResponseMiddleware::class,
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider dataRouteMiddleware
+     */
+    public function testRouteMiddleware(int $expectedCode, mixed $middleware): void
+    {
+        $response = $this->processWithRouter(
+            request: new ServerRequest('GET', '/'),
+            routes: new RouteCollection(
+                (new RouteCollector())->addRoute(
+                    Route::get('/')
+                        ->middleware($middleware)
+                        ->action(static fn () => new Response(200))
+                )
+            ),
+            containerDefinitions: [CustomResponseMiddleware::class => new CustomResponseMiddleware(404)],
+        );
+
+        $this->assertSame($expectedCode, $response->getStatusCode());
+    }
+
     private function getMatcher(?RouteCollectionInterface $routeCollection = null): UrlMatcherInterface
     {
         $middleware = $this->createRouteMiddleware();
@@ -191,9 +233,15 @@ final class RouterTest extends TestCase
 
     private function createRouterMiddleware(
         ?RouteCollectionInterface $routeCollection = null,
-        ?CurrentRoute $currentRoute = null
+        ?CurrentRoute $currentRoute = null,
+        array $containerDefinitions = [],
     ): Router {
-        $container = new SimpleContainer([ResponseFactoryInterface::class => $this->createResponseFactory()]);
+        $container = new SimpleContainer(
+            array_merge(
+                [ResponseFactoryInterface::class => $this->createResponseFactory()],
+                $containerDefinitions,
+            )
+        );
 
         return new Router(
             $this->getMatcher($routeCollection),
@@ -206,10 +254,11 @@ final class RouterTest extends TestCase
     private function processWithRouter(
         ServerRequestInterface $request,
         ?RouteCollectionInterface $routes = null,
-        ?CurrentRoute $currentRoute = null
+        ?CurrentRoute $currentRoute = null,
+        array $containerDefinitions = [],
     ): ResponseInterface {
         return $this
-            ->createRouterMiddleware($routes, $currentRoute)
+            ->createRouterMiddleware($routes, $currentRoute, $containerDefinitions)
             ->process($request, $this->createRequestHandler());
     }
 
