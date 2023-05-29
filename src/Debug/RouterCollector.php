@@ -32,6 +32,9 @@ final class RouterCollector implements SummaryCollectorInterface
 
     public function getCollected(): array
     {
+        if (!$this->isActive()) {
+            return [];
+        }
         /**
          * @var RouteCollectionInterface|null $routeCollection
          */
@@ -68,6 +71,9 @@ final class RouterCollector implements SummaryCollectorInterface
 
     public function getSummary(): array
     {
+        if (!$this->isActive()) {
+            return [];
+        }
         $currentRoute = $this->getCurrentRoute();
         $route = $this->getRouteByCurrentRoute($currentRoute);
 
@@ -101,6 +107,9 @@ final class RouterCollector implements SummaryCollectorInterface
         return $this->container->has(CurrentRoute::class) ? $this->container->get(CurrentRoute::class) : null;
     }
 
+    /**
+     * @psalm-suppress MixedReturnStatement, MixedInferredReturnType
+     */
     private function getRouteByCurrentRoute(?CurrentRoute $currentRoute): ?Route
     {
         if ($currentRoute === null) {
