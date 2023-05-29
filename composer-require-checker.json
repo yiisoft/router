@@ -1,5 +1,6 @@
 {
     "symbol-whitelist" : [
+        "Psr\\Container\\ContainerInterface",
         "Yiisoft\\Yii\\Debug\\Collector\\CollectorTrait",
         "Yiisoft\\Yii\\Debug\\Collector\\SummaryCollectorInterface"
     ]
