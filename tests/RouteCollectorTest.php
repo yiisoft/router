@@ -19,7 +19,7 @@ final class RouteCollectorTest extends TestCase
         $topRoute = Route::get('/top');
 
         $collector = new RouteCollector();
-        $collector->addItem($listRoute, $viewRoute, top: $topRoute);
+        $collector->addRoute($listRoute, $viewRoute, top: $topRoute);
 
         $this->assertCount(3, $collector->getItems());
         $this->assertSame($listRoute, $collector->getItems()[0]);
@@ -53,7 +53,7 @@ final class RouteCollectorTest extends TestCase
             );
 
         $collector = new RouteCollector();
-        $collector->addItem($rootGroup, $postGroup, test: $testGroup);
+        $collector->addRoute($rootGroup, $postGroup, test: $testGroup);
 
         $this->assertCount(3, $collector->getItems());
         $this->assertContainsOnlyInstancesOf(Group::class, $collector->getItems());

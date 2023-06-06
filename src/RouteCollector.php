@@ -16,7 +16,7 @@ final class RouteCollector implements RouteCollectorInterface
      */
     private array $middlewareDefinitions = [];
 
-    public function addItem(Route|Group ...$item): RouteCollectorInterface
+    public function addRoute(Route|Group ...$item): RouteCollectorInterface
     {
         array_push(
             $this->items,

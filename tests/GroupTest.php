@@ -107,7 +107,7 @@ final class GroupTest extends TestCase
             );
 
         $collector = new RouteCollector();
-        $collector->addItem($group);
+        $collector->addRoute($group);
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
@@ -142,7 +142,7 @@ final class GroupTest extends TestCase
             );
 
         $collector = new RouteCollector();
-        $collector->addItem($group);
+        $collector->addRoute($group);
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
@@ -171,7 +171,7 @@ final class GroupTest extends TestCase
             );
 
         $collector = new RouteCollector();
-        $collector->addItem($group);
+        $collector->addRoute($group);
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
@@ -319,7 +319,7 @@ final class GroupTest extends TestCase
             );
 
         $collector = new RouteCollector();
-        $collector->addItem($group);
+        $collector->addRoute($group);
         $routeCollection = new RouteCollection($collector);
 
         $this->assertCount(3, $routeCollection->getRoutes());
@@ -344,7 +344,7 @@ final class GroupTest extends TestCase
             );
 
         $collector = new RouteCollector();
-        $collector->addItem($group);
+        $collector->addRoute($group);
         $routeCollection = new RouteCollection($collector);
 
         $this->assertCount(5, $routeCollection->getRoutes());
@@ -369,7 +369,7 @@ final class GroupTest extends TestCase
         );
 
         $collector = new RouteCollector();
-        $collector->addItem($group);
+        $collector->addRoute($group);
 
         $routeCollection = new RouteCollection($collector);
         $this->assertCount(7, $routeCollection->getRoutes());
@@ -393,7 +393,7 @@ final class GroupTest extends TestCase
             static fn () => new Response(204)
         );
         $collector = new RouteCollector();
-        $collector->addItem($group);
+        $collector->addRoute($group);
 
         $routeCollection = new RouteCollection($collector);
         $this->assertCount(8, $routeCollection->getRoutes());

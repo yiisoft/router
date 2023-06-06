@@ -81,7 +81,7 @@ final class RouterTest extends TestCase
             );
 
         $collector = new RouteCollector();
-        $collector->addItem($group);
+        $collector->addRoute($group);
         $routeCollection = new RouteCollection($collector);
 
         $request = new ServerRequest('OPTIONS', '/post');
@@ -164,7 +164,7 @@ final class RouterTest extends TestCase
         $response = $this->processWithRouter(
             request: new ServerRequest('GET', '/'),
             routes: new RouteCollection(
-                (new RouteCollector())->addItem(
+                (new RouteCollector())->addRoute(
                     Route::get('/')
                         ->middleware($middleware)
                         ->action(static fn () => new Response(200))

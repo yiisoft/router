@@ -2,7 +2,7 @@
 
 ## 4.0.0 under development
 
-- Chg #207: Replace two `RouteCollectorInterface` methods `addRoute()` and `addGroup()` to single `addItem()` (@vjik)
+- Chg #207: Replace two `RouteCollectorInterface` methods `addRoute()` and `addGroup()` to single `addRoute()` (@vjik)
 
 ## 3.0.0 February 17, 2023
 
