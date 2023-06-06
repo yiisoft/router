@@ -9,7 +9,7 @@ interface RouteCollectorInterface
     /**
      * Add a route or a group of routes.
      */
-    public function addRoute(Route|Group ...$item): self;
+    public function addRoute(Route|Group ...$routes): self;
 
     /**
      * Appends a handler middleware definition that should be invoked for a matched route.
