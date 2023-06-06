@@ -36,7 +36,7 @@ final class RouteCollectionTest extends TestCase
         $group = Group::create()->routes($listRoute, $viewRoute);
 
         $collector = new RouteCollector();
-        $collector->addGroup($group);
+        $collector->addItem($group);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("A route with name 'my-route' already exists.");
@@ -52,8 +52,7 @@ final class RouteCollectionTest extends TestCase
         $group = Group::create()->routes($listRoute);
 
         $collector = new RouteCollector();
-        $collector->addGroup($group);
-        $collector->addRoute($viewRoute);
+        $collector->addItem($group, $viewRoute);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("A route with name 'my-route' already exists.");
@@ -68,7 +67,7 @@ final class RouteCollectionTest extends TestCase
         $group = Group::create()->routes($listRoute);
 
         $collector = new RouteCollector();
-        $collector->addGroup($group);
+        $collector->addItem($group);
 
         $this->expectException(RouteNotFoundException::class);
         $this->expectExceptionMessage('Cannot generate URI for route "wrong-name"; route not found');
@@ -86,7 +85,7 @@ final class RouteCollectionTest extends TestCase
         $group = Group::create()->routes($listRoute, $viewRoute);
 
         $collector = new RouteCollector();
-        $collector->addGroup($group);
+        $collector->addItem($group);
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('my-route');
@@ -105,7 +104,7 @@ final class RouteCollectionTest extends TestCase
             );
 
         $collector = new RouteCollector();
-        $collector->addGroup($group);
+        $collector->addItem($group);
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('image');
@@ -142,8 +141,7 @@ final class RouteCollectionTest extends TestCase
             ->namePrefix('/api');
 
         $collector = new RouteCollector();
-        $collector->addGroup($group1);
-        $collector->addGroup($group2);
+        $collector->addItem($group1, $group2);
 
         $routeCollection = new RouteCollection($collector);
         $routeTree = $routeCollection->getRouteTree();
@@ -177,7 +175,7 @@ final class RouteCollectionTest extends TestCase
             );
 
         $collector = new RouteCollector();
-        $collector->addGroup($group);
+        $collector->addItem($group);
 
         $routeCollection = new RouteCollection($collector);
         $routes = $routeCollection->getRoutes();
@@ -203,7 +201,7 @@ final class RouteCollectionTest extends TestCase
             ->host('https://yiiframework.com/');
 
         $collector = new RouteCollector();
-        $collector->addGroup($group);
+        $collector->addItem($group);
 
         $routeCollection = new RouteCollection($collector);
         $route1 = $routeCollection->getRoute('image');
@@ -234,7 +232,7 @@ final class RouteCollectionTest extends TestCase
             )->namePrefix('api');
 
         $collector = new RouteCollector();
-        $collector->addGroup($group);
+        $collector->addItem($group);
 
         $routeCollection = new RouteCollection($collector);
         $route1 = $routeCollection->getRoute('api/post/view');
@@ -272,8 +270,7 @@ final class RouteCollectionTest extends TestCase
 
         $collector = new RouteCollector();
         $collector->middleware($middleware);
-        $collector->addGroup($group);
-        $collector->addRoute($viewRoute);
+        $collector->addItem($group, $viewRoute);
 
         $routeCollection = new RouteCollection($collector);
         $route1 = $routeCollection->getRoute('list');
@@ -325,13 +322,9 @@ final class RouteCollectionTest extends TestCase
             ->action([TestController::class, 'index'])
             ->name('main');
 
-        if ($groupWrapped) {
-            $collector->addGroup(
-                Group::create()->routes($rawRoute)
-            );
-        } else {
-            $collector->addRoute($rawRoute);
-        }
+        $collector->addItem(
+            $groupWrapped ? Group::create()->routes($rawRoute) : $rawRoute
+        );
 
         $route = (new RouteCollection($collector))->getRoute('main');
         $route->injectDispatcher($injectDispatcher);
@@ -356,7 +349,7 @@ final class RouteCollectionTest extends TestCase
         $collector = new RouteCollector();
         $collector->middleware(TestMiddleware1::class);
 
-        $collector->addRoute(
+        $collector->addItem(
             Route::get('i/{image}')->name('image')
         );
 

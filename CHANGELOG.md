@@ -1,8 +1,8 @@
 # Yii Router Change Log
 
-## 3.0.1 under development
+## 4.0.0 under development
 
-- no changes in this release.
+- Chg #207: Replace two `RouteCollectorInterface` methods `addRoute()` and `addGroup()` to single `addItem()` (@vjik)
 
 ## 3.0.0 February 17, 2023
 
