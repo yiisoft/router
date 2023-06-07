@@ -94,7 +94,7 @@ final class GroupTest extends TestCase
             return $handler->handle($request);
         };
 
-        $group = Group::create('/outergroup', $this->getDispatcher())
+        $group = Group::create('/outergroup')
             ->middleware($middleware1)
             ->routes(
                 Group::create('/innergroup')
@@ -111,8 +111,8 @@ final class GroupTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
-        $response = $route
-            ->getData('dispatcherWithMiddlewares')
+        $response = $this->getDispatcher()
+            ->withMiddlewares($route->getData('middlewareDefinitions'))
             ->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('middleware2', $response->getReasonPhrase());
@@ -132,7 +132,7 @@ final class GroupTest extends TestCase
             return $handler->handle($request);
         };
 
-        $group = Group::create('/group', $this->getDispatcher())
+        $group = Group::create('/group')
             ->middleware($middleware1)
             ->middleware($middleware2)
             ->routes(
@@ -146,8 +146,8 @@ final class GroupTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
-        $response = $route
-            ->getData('dispatcherWithMiddlewares')
+        $response = $this->getDispatcher()
+            ->withMiddlewares($route->getData('middlewareDefinitions'))
             ->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('middleware2', $response->getReasonPhrase());
@@ -161,7 +161,7 @@ final class GroupTest extends TestCase
         $middleware1 = fn () => new Response(403);
         $middleware2 = fn () => new Response(405);
 
-        $group = Group::create('/group', $this->getDispatcher())
+        $group = Group::create('/group')
             ->middleware($middleware1)
             ->middleware($middleware2)
             ->routes(
@@ -175,8 +175,8 @@ final class GroupTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
-        $response = $route
-            ->getData('dispatcherWithMiddlewares')
+        $response = $this->getDispatcher()
+            ->withMiddlewares($route->getData('middlewareDefinitions'))
             ->dispatch($request, $this->getRequestHandler());
         $this->assertSame(403, $response->getStatusCode());
     }
@@ -257,54 +257,6 @@ final class GroupTest extends TestCase
         $this->expectExceptionMessage('Unknown data key: wrong');
 
         $group->getData('wrong');
-    }
-
-    public function testDispatcherInjected(): void
-    {
-        $dispatcher = $this->getDispatcher();
-
-        $apiGroup = Group::create('/api', $dispatcher)
-            ->routes(
-                Route::get('/info')->name('api-info'),
-                Group::create('/v1')
-                    ->routes(
-                        Route::get('/user')->name('api-v1-user/index'),
-                        Route::get('/user/{id}')->name('api-v1-user/view'),
-                        Group::create('/news')
-                            ->routes(
-                                Route::get('/post')->name('api-v1-news-post/index'),
-                                Route::get('/post/{id}')->name('api-v1-news-post/view'),
-                            ),
-                        Group::create('/blog')
-                            ->routes(
-                                Route::get('/post')->name('api-v1-blog-post/index'),
-                                Route::get('/post/{id}')->name('api-v1-blog-post/view'),
-                            ),
-                        Route::get('/note')->name('api-v1-note/index'),
-                        Route::get('/note/{id}')->name('api-v1-note/view'),
-                    ),
-                Group::create('/v2')
-                    ->routes(
-                        Route::get('/user')->name('api-v2-user/index'),
-                        Route::get('/user/{id}')->name('api-v2-user/view'),
-                        Group::create('/news')
-                            ->routes(
-                                Route::get('/post')->name('api-v2-news-post/index'),
-                                Route::get('/post/{id}')->name('api-v2-news-post/view'),
-                                Group::create('/blog')
-                                    ->routes(
-                                        Route::get('/post')->name('api-v2-blog-post/index'),
-                                        Route::get('/post/{id}')->name('api-v2-blog-post/view'),
-                                        Route::get('/note')->name('api-v2-note/index'),
-                                        Route::get('/note/{id}')->name('api-v2-note/view')
-                                    )
-                            )
-                    )
-            );
-
-        $items = $apiGroup->getData('items');
-
-        $this->assertAllRoutesAndGroupsHaveDispatcher($items);
     }
 
     public function testWithCors(): void
@@ -440,15 +392,8 @@ final class GroupTest extends TestCase
 
     public function testImmutability(): void
     {
-        $container = new SimpleContainer();
-        $middlewareDispatcher = new MiddlewareDispatcher(
-            new MiddlewareFactory($container),
-        );
-
         $group = Group::create();
-
         $this->assertNotSame($group, $group->routes());
-        $this->assertNotSame($group, $group->withDispatcher($middlewareDispatcher));
         $this->assertNotSame($group, $group->withCors(null));
         $this->assertNotSame($group, $group->middleware());
         $this->assertNotSame($group, $group->prependMiddleware());
@@ -474,17 +419,5 @@ final class GroupTest extends TestCase
             new MiddlewareFactory($container),
             $this->createMock(EventDispatcherInterface::class)
         );
-    }
-
-    private function assertAllRoutesAndGroupsHaveDispatcher(array $items): void
-    {
-        $func = function ($item) use (&$func) {
-            $this->assertTrue($item->getData('hasDispatcher'));
-            if ($item instanceof Group) {
-                $items = $item->getData('items');
-                array_walk($items, $func);
-            }
-        };
-        array_walk($items, $func);
     }
 }

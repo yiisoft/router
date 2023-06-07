@@ -6,7 +6,6 @@ namespace Yiisoft\Router;
 
 use InvalidArgumentException;
 use RuntimeException;
-use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 
 use function in_array;
 
@@ -36,7 +35,7 @@ final class Group
      */
     private $corsMiddleware = null;
 
-    private function __construct(private ?string $prefix = null, private ?MiddlewareDispatcher $dispatcher = null)
+    private function __construct(private ?string $prefix = null)
     {
     }
 
@@ -44,13 +43,9 @@ final class Group
      * Create a new group instance.
      *
      * @param string|null $prefix URL prefix to prepend to all routes of the group.
-     * @param MiddlewareDispatcher|null $dispatcher Middleware dispatcher to use for the group.
      */
-    public static function create(
-        ?string $prefix = null,
-        MiddlewareDispatcher $dispatcher = null
-    ): self {
-        return new self($prefix, $dispatcher);
+    public static function create(        ?string $prefix = null): self {
+        return new self($prefix);
     }
 
     public function routes(self|Route ...$routes): self
@@ -60,29 +55,12 @@ final class Group
         }
         $new = clone $this;
         foreach ($routes as $route) {
-            if ($new->dispatcher !== null && !$route->getData('hasDispatcher')) {
-                $route = $route->withDispatcher($new->dispatcher);
-            }
             $new->items[] = $route;
         }
 
         $new->routesAdded = true;
 
         return $new;
-    }
-
-    public function withDispatcher(MiddlewareDispatcher $dispatcher): self
-    {
-        $group = clone $this;
-        $group->dispatcher = $dispatcher;
-        foreach ($group->items as $index => $item) {
-            if (!$item->getData('hasDispatcher')) {
-                $item = $item->withDispatcher($dispatcher);
-                $group->items[$index] = $item;
-            }
-        }
-
-        return $group;
     }
 
     /**
@@ -180,7 +158,7 @@ final class Group
      *   T is ('prefix'|'namePrefix'|'host') ? string|null :
      *   (T is 'items' ? Group[]|Route[] :
      *     (T is 'hosts' ? array<array-key, string> :
-     *       (T is ('hasCorsMiddleware'|'hasDispatcher') ? bool :
+     *       (T is ('hasCorsMiddleware') ? bool :
      *         (T is 'middlewareDefinitions' ? list<array|callable|string> :
      *           (T is 'corsMiddleware' ? array|callable|string|null : mixed)
      *         )
@@ -199,7 +177,6 @@ final class Group
             'corsMiddleware' => $this->corsMiddleware,
             'items' => $this->items,
             'hasCorsMiddleware' => $this->corsMiddleware !== null,
-            'hasDispatcher' => $this->dispatcher !== null,
             'middlewareDefinitions' => $this->getMiddlewareDefinitions(),
             default => throw new InvalidArgumentException('Unknown data key: ' . $key),
         };
