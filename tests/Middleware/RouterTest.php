@@ -81,7 +81,7 @@ final class RouterTest extends TestCase
             );
 
         $collector = new RouteCollector();
-        $collector->addGroup($group);
+        $collector->addRoute($group);
         $routeCollection = new RouteCollection($collector);
 
         $request = new ServerRequest('OPTIONS', '/post');
@@ -115,7 +115,7 @@ final class RouterTest extends TestCase
             );
 
         $collector = new RouteCollector();
-        $collector->addGroup($group);
+        $collector->addRoute($group);
         $routeCollection = new RouteCollection($collector);
 
         $request = new ServerRequest('OPTIONS', '/post');

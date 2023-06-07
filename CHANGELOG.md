@@ -3,6 +3,9 @@
 ## 3.1.0 under development
 
 - Enh #195: Add debug collector for yiisoft/yii-debug (@xepozz)
+## 4.0.0 under development
+
+- Chg #207: Replace two `RouteCollectorInterface` methods `addRoute()` and `addGroup()` to single `addRoute()` (@vjik)
 - Enh #202: Add support for `psr/http-message` version `^2.0` (@vjik)
 
 ## 3.0.0 February 17, 2023
