@@ -83,7 +83,7 @@ $routes = [
 
 // Add routes defined to route collector
 $collector = $container->get(RouteCollectorInterface::class);
-$collector->addGroup(Group::create(null)->routes($routes));
+$collector->addRoute(Group::create(null)->routes($routes));
 
 // Initialize URL matcher
 /** @var UrlMatcherInterface $urlMatcher */
@@ -213,7 +213,7 @@ use \Yiisoft\Router\RouteCollectorInterface;
 // for obtaining router see adapter package of choice readme
 $collector = $container->get(RouteCollectorInterface::class);
     
-$collector->addGroup(
+$collector->addRoute(
     Group::create('/api')
         ->middleware(ApiAuthentication::class)
         ->host('https://example.com')
