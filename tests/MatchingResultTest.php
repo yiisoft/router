@@ -5,20 +5,14 @@ declare(strict_types=1);
 namespace Yiisoft\Router\Tests;
 
 use Nyholm\Psr7\Response;
-use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
-use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use RuntimeException;
 use Yiisoft\Http\Method;
-use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
-use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\MatchingResult;
 use Yiisoft\Router\Route;
-use Yiisoft\Test\Support\Container\SimpleContainer;
 
 final class MatchingResultTest extends TestCase
 {
