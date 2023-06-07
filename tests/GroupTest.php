@@ -341,7 +341,7 @@ final class GroupTest extends TestCase
             );
 
         $collector = new RouteCollector();
-        $collector->addGroup($group);
+        $collector->addRoute($group);
         $routeCollection = new RouteCollection($collector);
 
         $this->assertCount(4, $routeCollection->getRoutes());
