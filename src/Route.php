@@ -226,7 +226,7 @@ final class Route implements Stringable
      */
     public function getData(string $key): mixed
     {
-        $middlewareDefinitions = $this->getMiddlewareDefinitions();
+        $middlewareDefinitions = $this->getEnabledMiddlewareDefinitions();
         return match ($key) {
             'name' => $this->name ??
                 (implode(', ', $this->methods) . ' ' . implode('|', $this->hosts) . $this->pattern),
@@ -280,7 +280,7 @@ final class Route implements Stringable
         ];
     }
 
-    private function getMiddlewareDefinitions(): array
+    private function getEnabledMiddlewareDefinitions(): array
     {
         foreach ($this->middlewareDefinitions as $index => $definition) {
             if (in_array($definition, $this->disabledMiddlewareDefinitions, true)) {
