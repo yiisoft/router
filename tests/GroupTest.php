@@ -325,6 +325,28 @@ final class GroupTest extends TestCase
         $this->assertCount(3, $routeCollection->getRoutes());
     }
 
+    public function testWithCorsWithHostRoutes(): void
+    {
+        $group = Group::create()
+            ->routes(
+                Route::get('/info')
+                    ->action(static fn () => 'info')
+                    ->host('yii.dev'),
+                Route::get('/info')
+                    ->action(static fn () => 'info')
+                    ->host('yii.test'),
+            )
+            ->withCors(
+                static fn () => new Response(204)
+            );
+
+        $collector = new RouteCollector();
+        $collector->addGroup($group);
+        $routeCollection = new RouteCollection($collector);
+
+        $this->assertCount(4, $routeCollection->getRoutes());
+    }
+
     public function testWithCorsDoesntDuplicateRoutes(): void
     {
         $group = Group::create()
