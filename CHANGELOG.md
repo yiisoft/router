@@ -1,8 +1,9 @@
 # Yii Router Change Log
 
-## 3.0.1 under development
+## 4.0.0 under development
 
-- no changes in this release.
+- Chg #207: Replace two `RouteCollectorInterface` methods `addRoute()` and `addGroup()` to single `addRoute()` (@vjik)
+- Enh #202: Add support for `psr/http-message` version `^2.0` (@vjik)
 
 ## 3.0.0 February 17, 2023
 
