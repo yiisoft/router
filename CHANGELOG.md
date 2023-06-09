@@ -2,7 +2,7 @@
 
 ## 4.0.0 under development
 
-- Chg #210: Remove usage middleware dispatcher in `Route`, `Group` and `MatchingResult` (@vjik)
+- Chg #210: Remove usage of middleware dispatcher from `Route`, `Group` and `MatchingResult` (@vjik)
 - Chg #207: Replace two `RouteCollectorInterface` methods `addRoute()` and `addGroup()` to single `addRoute()` (@vjik)
 - Enh #202: Add support for `psr/http-message` version `^2.0` (@vjik)
 
