@@ -9,7 +9,8 @@ namespace Yiisoft\Router;
  */
 final class RouteAttributesRegistrar implements RouteAttributesRegistrarInterface
 {
-    public function __construct(private RouteCollectorInterface $collector) {
+    public function __construct(private RouteCollectorInterface $collector)
+    {
     }
 
     /**
