@@ -9,7 +9,7 @@ namespace Yiisoft\Router;
  */
 final class RouteAttributesRegistrar implements RouteAttributesRegistrarInterface
 {
-    public function __construct(private RouteCollectorInterface $collector)
+    public function __construct(private RouteCollectorInterface $routeCollector)
     {
     }
 
@@ -25,21 +25,21 @@ final class RouteAttributesRegistrar implements RouteAttributesRegistrarInterfac
             if (!$reflectionClass->isUserDefined()) {
                 continue;
             }
-            $routes = $this->getRoutes($reflectionClass);
+            $routes = $this->lookupRoutes($reflectionClass);
             $groupAttributes = $reflectionClass->getAttributes(Group::class, \ReflectionAttribute::IS_INSTANCEOF);
 
             if (!empty($groupAttributes)) {
                 [$groupAttribute] = $groupAttributes;
                 /** @var Group $group */
                 $group = $groupAttribute->newInstance();
-                $this->collector->addRoute($group->routes(...$routes));
+                $this->routeCollector->addRoute($group->routes(...$routes));
             } else {
-                $this->collector->addRoute(...$routes);
+                $this->routeCollector->addRoute(...$routes);
             }
         }
     }
 
-    private function getRoutes(\ReflectionClass $reflectionClass): iterable
+    private function lookupRoutes(\ReflectionClass $reflectionClass): iterable
     {
         foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $reflectionMethod) {
             foreach (
