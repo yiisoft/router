@@ -15,7 +15,7 @@ use function in_array;
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
  */
-#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
+#[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 class Route implements Stringable
 {
     private bool $actionAdded = false;
@@ -23,195 +23,92 @@ class Route implements Stringable
      * @var array[]|callable[]|string[]
      */
     private array $builtMiddlewares = [];
+    /**
+     * @var array[]|callable[]|string[]
+     */
+    private array $middlewares = [];
+    /**
+     * @var string[]
+     */
+    private array $methods;
+    /**
+     * @var string[]
+     */
+    private array $hosts = [];
+    /**
+     * @var array<string,null|Stringable|scalar>
+     */
+    private array $defaults = [];
 
     /**
-     * @param array $defaults Parameter default values indexed by parameter names.
+     * @param array<string,null|Stringable|scalar> $defaults Parameter default values indexed by parameter names.
      * @param bool $override Marks route as override. When added it will replace existing route with the same name.
      * @param array $disabledMiddlewares Excludes middleware from being invoked when action is handled.
      * It is useful to avoid invoking one of the parent group middleware for
      * a certain route.
      */
     public function __construct(
-        private array $methods,
+        array $methods,
         private string $pattern,
         private ?string $name = null,
-        private array $middlewares = [],
-        private array $defaults = [],
-        private array $hosts = [],
+        array $middlewares = [],
+        array $defaults = [],
+        array $hosts = [],
         private bool $override = false,
         private array $disabledMiddlewares = [],
     ) {
+        $this->assertListOfStrings($methods, 'methods');
+        $this->assertMiddlewares($middlewares);
+        $this->assertListOfStrings($hosts, 'hosts');
+        $this->methods = $methods;
+        $this->middlewares = $middlewares;
+        $this->hosts = $hosts;
+        $this->defaults = array_map('\strval', $defaults);
     }
 
-    public static function get(
-        string $pattern,
-        ?string $name = null,
-        array $middlewares = [],
-        array $defaults = [],
-        array $hosts = [],
-        bool $override = false,
-        array $disabledMiddlewares = []
-    ): self {
-        return self::methods(
-            [Method::GET],
-            $pattern,
-            $name,
-            $middlewares,
-            $defaults,
-            $hosts,
-            $override,
-            $disabledMiddlewares
-        );
+    public static function get(string $pattern): self
+    {
+        return self::methods([Method::GET], $pattern);
     }
 
-    public static function post(
-        string $pattern,
-        ?string $name = null,
-        array $middlewares = [],
-        array $defaults = [],
-        array $hosts = [],
-        bool $override = false,
-        array $disabledMiddlewares = []
-    ): self {
-        return self::methods(
-            [Method::POST],
-            $pattern,
-            $name,
-            $middlewares,
-            $defaults,
-            $hosts,
-            $override,
-            $disabledMiddlewares
-        );
+    public static function post(string $pattern): self
+    {
+        return self::methods([Method::POST], $pattern);
     }
 
-    public static function put(
-        string $pattern,
-        ?string $name = null,
-        array $middlewares = [],
-        array $defaults = [],
-        array $hosts = [],
-        bool $override = false,
-        array $disabledMiddlewares = []
-    ): self {
-        return self::methods(
-            [Method::PUT],
-            $pattern,
-            $name,
-            $middlewares,
-            $defaults,
-            $hosts,
-            $override,
-            $disabledMiddlewares
-        );
+    public static function put(string $pattern): self
+    {
+        return self::methods([Method::PUT], $pattern);
     }
 
-    public static function delete(
-        string $pattern,
-        ?string $name = null,
-        array $middlewares = [],
-        array $defaults = [],
-        array $hosts = [],
-        bool $override = false,
-        array $disabledMiddlewares = []
-    ): self {
-        return self::methods(
-            [Method::DELETE],
-            $pattern,
-            $name,
-            $middlewares,
-            $defaults,
-            $hosts,
-            $override,
-            $disabledMiddlewares
-        );
+    public static function delete(string $pattern): self
+    {
+        return self::methods([Method::DELETE], $pattern);
     }
 
-    public static function patch(
-        string $pattern,
-        ?string $name = null,
-        array $middlewares = [],
-        array $defaults = [],
-        array $hosts = [],
-        bool $override = false,
-        array $disabledMiddlewares = []
-    ): self {
-        return self::methods(
-            [Method::PATCH],
-            $pattern,
-            $name,
-            $middlewares,
-            $defaults,
-            $hosts,
-            $override,
-            $disabledMiddlewares
-        );
+    public static function patch(string $pattern): self
+    {
+        return self::methods([Method::PATCH], $pattern);
     }
 
-    public static function head(
-        string $pattern,
-        ?string $name = null,
-        array $middlewares = [],
-        array $defaults = [],
-        array $hosts = [],
-        bool $override = false,
-        array $disabledMiddlewares = []
-    ): self {
-        return self::methods(
-            [Method::HEAD],
-            $pattern,
-            $name,
-            $middlewares,
-            $defaults,
-            $hosts,
-            $override,
-            $disabledMiddlewares
-        );
+    public static function head(string $pattern): self
+    {
+        return self::methods([Method::HEAD], $pattern);
     }
 
-    public static function options(
-        string $pattern,
-        ?string $name = null,
-        array $middlewares = [],
-        array $defaults = [],
-        array $hosts = [],
-        bool $override = false,
-        array $disabledMiddlewares = []
-    ): self {
-        return self::methods(
-            [Method::OPTIONS],
-            $pattern,
-            $name,
-            $middlewares,
-            $defaults,
-            $hosts,
-            $override,
-            $disabledMiddlewares
-        );
+    public static function options(string $pattern): self
+    {
+        return self::methods([Method::OPTIONS], $pattern);
     }
 
     /**
      * @param string[] $methods
      */
-    public static function methods(
-        array $methods,
-        string $pattern,
-        ?string $name = null,
-        array $middlewares = [],
-        array $defaults = [],
-        array $hosts = [],
-        bool $override = false,
-        array $disabledMiddlewares = []
-    ): self {
+    public static function methods(array $methods, string $pattern): self
+    {
         return new self(
             methods: $methods,
-            pattern: $pattern,
-            name: $name,
-            middlewares: $middlewares,
-            defaults: $defaults,
-            hosts: $hosts,
-            override: $override,
-            disabledMiddlewares: $disabledMiddlewares
+            pattern: $pattern
         );
     }
 
@@ -365,7 +262,7 @@ class Route implements Stringable
             'methods' => $this->methods,
             'defaults' => $this->defaults,
             'override' => $this->override,
-            'hasMiddlewares' => $this->middlewares !== [],
+            'hasMiddlewares' => !empty($this->middlewares),
             default => throw new InvalidArgumentException('Unknown data key: ' . $key),
         };
     }
@@ -416,7 +313,7 @@ class Route implements Stringable
     {
         // Don't build middlewares if we did it earlier.
         // This improves performance in event-loop applications.
-        if ($this->builtMiddlewares !== []) {
+        if (!empty($this->builtMiddlewares)) {
             return $this->builtMiddlewares;
         }
 
@@ -429,5 +326,38 @@ class Route implements Stringable
         }
 
         return $this->builtMiddlewares = $builtMiddlewares;
+    }
+
+    /**
+     * @psalm-assert array<string> $items
+     */
+    private function assertListOfStrings(array $items, string $argument): void
+    {
+        foreach ($items as $item) {
+            if (!is_string($item)) {
+                throw new \InvalidArgumentException('Invalid ' . $argument . ' provided, list of string expected.');
+            }
+        }
+    }
+
+    /**
+     * @psalm-assert array<array|callable|string> $middlewares
+     */
+    private function assertMiddlewares(array $middlewares): void
+    {
+        /** @var mixed $middleware */
+        foreach ($middlewares as $middleware) {
+            if (is_string($middleware)) {
+                continue;
+            }
+
+            if (is_callable($middleware) || is_array($middleware)) {
+                continue;
+            }
+
+            throw new \InvalidArgumentException(
+                'Invalid middlewares provided, list of string or array or callable expected.'
+            );
+        }
     }
 }

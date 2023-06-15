@@ -32,14 +32,17 @@ final class RouteAttributesRegistrar implements RouteAttributesRegistrarInterfac
                 [$groupAttribute] = $groupAttributes;
                 /** @var Group $group */
                 $group = $groupAttribute->newInstance();
-                $this->routeCollector->addRoute($group->routes(...$routes));
+                $this->routeCollector->addRoute($group->routes(...iterator_to_array($routes)));
             } else {
-                $this->routeCollector->addRoute(...$routes);
+                $this->routeCollector->addRoute(...iterator_to_array($routes));
             }
         }
     }
 
-    private function lookupRoutes(\ReflectionClass $reflectionClass): iterable
+    /**
+     * @return \Generator<Route>
+     */
+    private function lookupRoutes(\ReflectionClass $reflectionClass): \Generator
     {
         foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $reflectionMethod) {
             foreach (

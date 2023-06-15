@@ -24,6 +24,14 @@ final class Group
      * @var array|callable|string|null Middleware definition for CORS requests.
      */
     private $corsMiddleware;
+    /**
+     * @var string[]
+     */
+    private array $hosts = [];
+    /**
+     * @var array[]|callable[]|string[]
+     */
+    private array $middlewares = [];
 
     /**
      * @param array $disabledMiddlewares Excludes middleware from being invoked when action is handled.
@@ -32,12 +40,16 @@ final class Group
      */
     public function __construct(
         private ?string $prefix = null,
-        private array $middlewares = [],
-        private array $hosts = [],
+        array $middlewares = [],
+        array $hosts = [],
         private ?string $namePrefix = null,
         private array $disabledMiddlewares = [],
         array|callable|string|null $corsMiddleware = null
     ) {
+        $this->assertMiddlewares($middlewares);
+        $this->assertHosts($hosts);
+        $this->middlewares = $middlewares;
+        $this->hosts = $hosts;
         $this->corsMiddleware = $corsMiddleware;
     }
 
@@ -202,7 +214,7 @@ final class Group
 
     private function getBuiltMiddlewares(): array
     {
-        if ($this->builtMiddlewares !== []) {
+        if (!empty($this->builtMiddlewares)) {
             return $this->builtMiddlewares;
         }
 
@@ -216,5 +228,38 @@ final class Group
         }
 
         return $this->builtMiddlewares = array_values($builtMiddlewares);
+    }
+
+    /**
+     * @psalm-assert array<string> $hosts
+     */
+    private function assertHosts(array $hosts): void
+    {
+        foreach ($hosts as $host) {
+            if (!is_string($host)) {
+                throw new \InvalidArgumentException('Invalid hosts provided, list of string expected.');
+            }
+        }
+    }
+
+    /**
+     * @psalm-assert array<array|callable|string> $middlewares
+     */
+    private function assertMiddlewares(array $middlewares): void
+    {
+        /** @var mixed $middleware */
+        foreach ($middlewares as $middleware) {
+            if (is_string($middleware)) {
+                continue;
+            }
+
+            if (is_callable($middleware) || is_array($middleware)) {
+                continue;
+            }
+
+            throw new \InvalidArgumentException(
+                'Invalid middlewares provided, list of string or array or callable expected.'
+            );
+        }
     }
 }

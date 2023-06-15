@@ -8,7 +8,9 @@ use Nyholm\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Router\Attribute\Get;
+use Yiisoft\Router\Group;
 
+#[Group('/test')]
 final class TestController
 {
     public function index(ServerRequestInterface $request): ResponseInterface

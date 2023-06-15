@@ -11,6 +11,11 @@ use Yiisoft\Router\Tests\Support\TestController;
 
 class RouteAttributesRegistrarTest extends TestCase
 {
+    public function setUp(): void
+    {
+        parent::setUp();
+        class_exists(TestController::class);
+    }
     public function testRegister(): void
     {
         $routeCollector = new RouteCollector();
@@ -19,7 +24,8 @@ class RouteAttributesRegistrarTest extends TestCase
         $registrar->register();
 
         $this->assertCount(1, $items = $routeCollector->getItems());
-        $this->assertCount(1, $items[0]->getBuiltMiddlewares());
-        $this->assertSame([TestController::class, 'attributeAction'], $items[0]->getBuiltMiddlewares()[0]);
+        $this->assertCount(1, $items[0]->getData('routes'));
+        $this->assertCount(1, $items[0]->getData('routes')[0]->getBuiltMiddlewares());
+        $this->assertSame([TestController::class, 'attributeAction'], $items[0]->getData('routes')[0]->getBuiltMiddlewares()[0]);
     }
 }
