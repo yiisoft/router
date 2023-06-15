@@ -19,9 +19,9 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\Tests\Support\AssertTrait;
 use Yiisoft\Router\Tests\Support\Container;
+use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
-use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware3;
 
 final class RouteTest extends TestCase
@@ -132,12 +132,12 @@ final class RouteTest extends TestCase
     public function testHosts(): void
     {
         $route = Route::get('/')
-            ->hosts(
-                'https://yiiframework.com/',
-                'yf.com',
-                'yii.com',
-                'yf.ru'
-            );
+                      ->hosts(
+                          'https://yiiframework.com/',
+                          'yf.com',
+                          'yii.com',
+                          'yf.ru'
+                      );
 
         $this->assertSame(
             [
@@ -153,12 +153,12 @@ final class RouteTest extends TestCase
     public function testMultipleHosts(): void
     {
         $route = Route::get('/')
-            ->host('https://yiiframework.com/');
+                      ->host('https://yiiframework.com/');
         $multipleRoute = Route::get('/')
-            ->hosts(
-                'https://yiiframework.com/',
-                'https://yiiframework.ru/'
-            );
+                              ->hosts(
+                                  'https://yiiframework.com/',
+                                  'https://yiiframework.ru/'
+                              );
 
         $this->assertCount(1, $route->getData('hosts'));
         $this->assertCount(2, $multipleRoute->getData('hosts'));
@@ -198,17 +198,17 @@ final class RouteTest extends TestCase
     public function testToString(string $expected, string $pattern): void
     {
         $route = Route::methods([Method::GET, Method::POST], $pattern)
-            ->name('test.route')
-            ->host('yiiframework.com');
+                      ->name('test.route')
+                      ->host('yiiframework.com');
 
-        $this->assertSame('[test.route] GET,POST ' . $expected, (string)$route);
+        $this->assertSame('[test.route] GET,POST ' . $expected, (string) $route);
     }
 
     public function testToStringSimple(): void
     {
         $route = Route::get('/');
 
-        $this->assertSame('GET /', (string)$route);
+        $this->assertSame('GET /', (string) $route);
     }
 
     public function testMiddlewareAfterAction(): void
@@ -229,6 +229,14 @@ final class RouteTest extends TestCase
         $route->prependMiddleware(static fn () => new Response());
     }
 
+    public function testInvalidMiddlewares(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid $middlewares provided, list of string or array or callable expected.');
+
+        $route = new Route([Method::GET], '/', middlewares: [static fn () => new Response(), (object) ['test' => 1]]);
+    }
+
     public function testDisabledMiddlewareDefinitions(): void
     {
         $request = new ServerRequest('GET', '/');
@@ -243,9 +251,9 @@ final class RouteTest extends TestCase
         );
 
         $route = Route::get('/')
-            ->middleware(TestMiddleware1::class, TestMiddleware2::class, TestMiddleware3::class)
-            ->action([TestController::class, 'index'])
-            ->disableMiddleware(TestMiddleware1::class, TestMiddleware3::class);
+                      ->middleware(TestMiddleware1::class, TestMiddleware2::class, TestMiddleware3::class)
+                      ->action([TestController::class, 'index'])
+                      ->disableMiddleware(TestMiddleware1::class, TestMiddleware3::class);
 
         $dispatcher = $injectDispatcher->withMiddlewares($route->getBuiltMiddlewares());
 
@@ -268,9 +276,9 @@ final class RouteTest extends TestCase
         );
 
         $route = Route::get('/')
-            ->middleware(TestMiddleware3::class)
-            ->action([TestController::class, 'index'])
-            ->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class);
+                      ->middleware(TestMiddleware3::class)
+                      ->action([TestController::class, 'index'])
+                      ->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class);
 
         $dispatcher = $injectDispatcher->withMiddlewares($route->getBuiltMiddlewares());
 
@@ -282,14 +290,14 @@ final class RouteTest extends TestCase
     public function testDebugInfo(): void
     {
         $route = Route::get('/')
-            ->name('test')
-            ->host('example.com')
-            ->defaults(['age' => 42])
-            ->override()
-            ->middleware(middleware: TestMiddleware1::class)
-            ->disableMiddleware(middleware: TestMiddleware2::class)
-            ->action('go')
-            ->prependMiddleware(middleware: TestMiddleware3::class);
+                      ->name('test')
+                      ->host('example.com')
+                      ->defaults(['age' => 42])
+                      ->override()
+                      ->middleware(middleware: TestMiddleware1::class)
+                      ->disableMiddleware(middleware: TestMiddleware2::class)
+                      ->action('go')
+                      ->prependMiddleware(middleware: TestMiddleware3::class);
 
         $expected = <<<EOL
 Yiisoft\Router\Route Object
@@ -342,6 +350,14 @@ EOL;
         $this->assertSame(['a.com', 'b.com'], $route->getData('hosts'));
     }
 
+    public function testInvalidHosts(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid $hosts provided, list of string expected.');
+
+        $route = new Route([Method::GET], '/', hosts: ['b.com', 123]);
+    }
+
     public function testImmutability(): void
     {
         $route = Route::get('/');
@@ -362,8 +378,8 @@ EOL;
     public function testBuiltMiddlewares(): void
     {
         $route = Route::get('')
-            ->middleware(TestMiddleware1::class)
-            ->action(static fn () => new Response(200));
+                      ->middleware(TestMiddleware1::class)
+                      ->action(static fn () => new Response(200));
 
         $builtMiddlewares = $route->getBuiltMiddlewares();
 

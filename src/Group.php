@@ -58,22 +58,9 @@ final class Group
      *
      * @param string|null $prefix URL prefix to prepend to all routes of the group.
      */
-    public static function create(
-        ?string $prefix = null,
-        array $middlewares = [],
-        array $hosts = [],
-        ?string $namePrefix = null,
-        array $disabledMiddlewares = [],
-        array|callable|string|null $corsMiddleware = null
-    ): self {
-        return new self(
-            prefix: $prefix,
-            middlewares: $middlewares,
-            hosts: $hosts,
-            namePrefix: $namePrefix,
-            disabledMiddlewares: $disabledMiddlewares,
-            corsMiddleware: $corsMiddleware
-        );
+    public static function create(?string $prefix = null): self
+    {
+        return new self($prefix);
     }
 
     public function routes(self|Route ...$routes): self
@@ -237,7 +224,7 @@ final class Group
     {
         foreach ($hosts as $host) {
             if (!is_string($host)) {
-                throw new \InvalidArgumentException('Invalid hosts provided, list of string expected.');
+                throw new \InvalidArgumentException('Invalid $hosts provided, list of string expected.');
             }
         }
     }
@@ -249,16 +236,12 @@ final class Group
     {
         /** @var mixed $middleware */
         foreach ($middlewares as $middleware) {
-            if (is_string($middleware)) {
-                continue;
-            }
-
-            if (is_callable($middleware) || is_array($middleware)) {
+            if (is_string($middleware) || is_callable($middleware) || is_array($middleware)) {
                 continue;
             }
 
             throw new \InvalidArgumentException(
-                'Invalid middlewares provided, list of string or array or callable expected.'
+                'Invalid $middlewares provided, list of string or array or callable expected.'
             );
         }
     }
