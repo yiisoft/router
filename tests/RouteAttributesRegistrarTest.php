@@ -16,6 +16,7 @@ class RouteAttributesRegistrarTest extends TestCase
         parent::setUp();
         class_exists(TestController::class);
     }
+
     public function testRegister(): void
     {
         $routeCollector = new RouteCollector();
