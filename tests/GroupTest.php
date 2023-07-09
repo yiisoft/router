@@ -107,7 +107,7 @@ final class GroupTest extends TestCase
             );
 
         $collector = new RouteCollector();
-        $collector->addGroup($group);
+        $collector->addRoute($group);
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
@@ -142,7 +142,7 @@ final class GroupTest extends TestCase
             );
 
         $collector = new RouteCollector();
-        $collector->addGroup($group);
+        $collector->addRoute($group);
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
@@ -171,7 +171,7 @@ final class GroupTest extends TestCase
             );
 
         $collector = new RouteCollector();
-        $collector->addGroup($group);
+        $collector->addRoute($group);
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
@@ -319,10 +319,32 @@ final class GroupTest extends TestCase
             );
 
         $collector = new RouteCollector();
-        $collector->addGroup($group);
+        $collector->addRoute($group);
         $routeCollection = new RouteCollection($collector);
 
         $this->assertCount(3, $routeCollection->getRoutes());
+    }
+
+    public function testWithCorsWithHostRoutes(): void
+    {
+        $group = Group::create()
+            ->routes(
+                Route::get('/info')
+                    ->action(static fn () => 'info')
+                    ->host('yii.dev'),
+                Route::get('/info')
+                    ->action(static fn () => 'info')
+                    ->host('yii.test'),
+            )
+            ->withCors(
+                static fn () => new Response(204)
+            );
+
+        $collector = new RouteCollector();
+        $collector->addRoute($group);
+        $routeCollection = new RouteCollection($collector);
+
+        $this->assertCount(4, $routeCollection->getRoutes());
     }
 
     public function testWithCorsDoesntDuplicateRoutes(): void
@@ -344,7 +366,7 @@ final class GroupTest extends TestCase
             );
 
         $collector = new RouteCollector();
-        $collector->addGroup($group);
+        $collector->addRoute($group);
         $routeCollection = new RouteCollection($collector);
 
         $this->assertCount(5, $routeCollection->getRoutes());
@@ -369,7 +391,7 @@ final class GroupTest extends TestCase
         );
 
         $collector = new RouteCollector();
-        $collector->addGroup($group);
+        $collector->addRoute($group);
 
         $routeCollection = new RouteCollection($collector);
         $this->assertCount(7, $routeCollection->getRoutes());
@@ -393,7 +415,7 @@ final class GroupTest extends TestCase
             static fn () => new Response(204)
         );
         $collector = new RouteCollector();
-        $collector->addGroup($group);
+        $collector->addRoute($group);
 
         $routeCollection = new RouteCollection($collector);
         $this->assertCount(8, $routeCollection->getRoutes());

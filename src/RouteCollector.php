@@ -16,20 +16,11 @@ final class RouteCollector implements RouteCollectorInterface
      */
     private array $middlewareDefinitions = [];
 
-    public function addRoute(Route ...$route): RouteCollectorInterface
+    public function addRoute(Route|Group ...$routes): RouteCollectorInterface
     {
         array_push(
             $this->items,
-            ...array_values($route)
-        );
-        return $this;
-    }
-
-    public function addGroup(Group ...$group): RouteCollectorInterface
-    {
-        array_push(
-            $this->items,
-            ...array_values($group),
+            ...array_values($routes)
         );
         return $this;
     }

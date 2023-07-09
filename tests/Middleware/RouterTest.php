@@ -81,7 +81,7 @@ final class RouterTest extends TestCase
             );
 
         $collector = new RouteCollector();
-        $collector->addGroup($group);
+        $collector->addRoute($group);
         $routeCollection = new RouteCollection($collector);
 
         $request = new ServerRequest('OPTIONS', '/post');
@@ -93,6 +93,36 @@ final class RouterTest extends TestCase
         $this->assertSame(204, $response->getStatusCode());
         $this->assertSame('test from options handler', $response->getHeaderLine('Test'));
         $request = new ServerRequest('PUT', '/post');
+        $response = $this->processWithRouter($request, $routeCollection);
+        $this->assertSame(204, $response->getStatusCode());
+        $this->assertSame('test from options handler', $response->getHeaderLine('Test'));
+    }
+
+    public function testNestedGroupWithCorsHandlers(): void
+    {
+        $group = Group::create()
+            ->routes(
+                Group::create()
+                    ->routes(
+                        Route::post('/post')->action(static fn () => new Response(204)),
+                    )
+                    ->withCors(
+                        static function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
+                            $response = $handler->handle($request);
+                            return $response->withHeader('Test', 'test from options handler');
+                        }
+                    )
+            );
+
+        $collector = new RouteCollector();
+        $collector->addRoute($group);
+        $routeCollection = new RouteCollection($collector);
+
+        $request = new ServerRequest('OPTIONS', '/post');
+        $response = $this->processWithRouter($request, $routeCollection);
+        $this->assertSame(204, $response->getStatusCode());
+        $this->assertSame('test from options handler', $response->getHeaderLine('Test'));
+        $request = new ServerRequest('POST', '/post');
         $response = $this->processWithRouter($request, $routeCollection);
         $this->assertSame(204, $response->getStatusCode());
         $this->assertSame('test from options handler', $response->getHeaderLine('Test'));
