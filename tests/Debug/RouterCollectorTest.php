@@ -40,7 +40,7 @@ final class RouterCollectorTest extends AbstractCollectorTestCase
     {
         $this->routeCollector = $this->createMock(RouteCollectorInterface::class);
         $routeCollector = new RouteCollector();
-        $routeCollector->addGroup(Group::create()->routes(...$this->createRoutes()));
+        $routeCollector->addRoute(...$this->createRoutes());
 
         $config = ContainerConfig::create()
             ->withDefinitions([
