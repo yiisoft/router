@@ -17,4 +17,11 @@ class HeadTest extends TestCase
         $this->assertSame('/post', $route->getData('pattern'));
         $this->assertEquals([Method::HEAD], $route->getData('methods'));
     }
+
+    public function testOverride(): void
+    {
+        $route = new Head('/', override: true);
+
+        $this->assertTrue($route->getData('override'));
+    }
 }

@@ -17,4 +17,11 @@ class PutTest extends TestCase
         $this->assertSame('/post', $route->getData('pattern'));
         $this->assertEquals([Method::PUT], $route->getData('methods'));
     }
+
+    public function testOverride(): void
+    {
+        $route = new Put('/', override: true);
+
+        $this->assertTrue($route->getData('override'));
+    }
 }

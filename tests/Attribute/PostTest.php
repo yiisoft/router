@@ -17,4 +17,11 @@ class PostTest extends TestCase
         $this->assertSame('/post', $route->getData('pattern'));
         $this->assertEquals([Method::POST], $route->getData('methods'));
     }
+
+    public function testOverride(): void
+    {
+        $route = new Post('/', override: true);
+
+        $this->assertTrue($route->getData('override'));
+    }
 }

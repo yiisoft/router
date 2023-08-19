@@ -17,4 +17,11 @@ class DeleteTest extends TestCase
         $this->assertSame('/post', $route->getData('pattern'));
         $this->assertEquals([Method::DELETE], $route->getData('methods'));
     }
+
+    public function testOverride(): void
+    {
+        $route = new Delete('/', override: true);
+
+        $this->assertTrue($route->getData('override'));
+    }
 }

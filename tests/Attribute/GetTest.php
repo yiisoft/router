@@ -17,4 +17,11 @@ class GetTest extends TestCase
         $this->assertSame('/post', $route->getData('pattern'));
         $this->assertEquals([Method::GET], $route->getData('methods'));
     }
+
+    public function testOverride(): void
+    {
+        $route = new Get('/', override: true);
+
+        $this->assertTrue($route->getData('override'));
+    }
 }

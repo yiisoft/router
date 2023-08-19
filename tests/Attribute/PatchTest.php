@@ -17,4 +17,11 @@ class PatchTest extends TestCase
         $this->assertSame('/post', $route->getData('pattern'));
         $this->assertEquals([Method::PATCH], $route->getData('methods'));
     }
+
+    public function testOverride(): void
+    {
+        $route = new Patch('/', override: true);
+
+        $this->assertTrue($route->getData('override'));
+    }
 }

@@ -17,4 +17,11 @@ class OptionsTest extends TestCase
         $this->assertSame('/post', $route->getData('pattern'));
         $this->assertEquals([Method::OPTIONS], $route->getData('methods'));
     }
+
+    public function testOverride(): void
+    {
+        $route = new Options('/', override: true);
+
+        $this->assertTrue($route->getData('override'));
+    }
 }

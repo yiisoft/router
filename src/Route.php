@@ -41,6 +41,8 @@ class Route implements Stringable
     private array $defaults = [];
 
     /**
+     * @param array|callable|string|null $action Action handler. It is a primary middleware definition that
+     * should be invoked last for a matched route.
      * @param array<string,scalar|Stringable|null> $defaults Parameter default values indexed by parameter names.
      * @param bool $override Marks route as override. When added it will replace existing route with the same name.
      * @param array $disabledMiddlewares Excludes middleware from being invoked when action is handled.

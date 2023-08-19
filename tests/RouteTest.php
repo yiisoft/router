@@ -34,10 +34,13 @@ final class RouteTest extends TestCase
             methods: [Method::GET],
             pattern: '/',
             action: [TestController::class, 'index'],
+            middlewares: [TestMiddleware1::class],
+            override: true,
         );
 
         $this->assertInstanceOf(Route::class, $route);
-        $this->assertNotEmpty($route->getData('builtMiddlewares'));
+        $this->assertCount(2, $route->getData('builtMiddlewares'));
+        $this->assertTrue($route->getData('override'));
     }
 
     public function testName(): void
