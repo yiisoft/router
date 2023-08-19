@@ -39,7 +39,8 @@
         "vimeo/psalm": "^4.30|^5.6",
         "yiisoft/di": "^1.0",
         "yiisoft/dummy-provider": "^1.0.0",
-        "yiisoft/test-support": "^3.0"
+        "yiisoft/test-support": "^3.0",
+        "yiisoft/yii-debug": "dev-master"
     },
     "autoload": {
         "psr-4": {
@@ -59,14 +60,16 @@
             "source-directory": "config"
         },
         "config-plugin": {
-            "di": "di.php"
+            "di": "di.php",
+            "params": "params.php"
         }
     },
     "config": {
         "sort-packages": true,
         "allow-plugins": {
             "infection/extension-installer": true,
-            "composer/package-versions-deprecated": true
+            "composer/package-versions-deprecated": true,
+            "yiisoft/config": false
         }
     },
     "scripts": {
