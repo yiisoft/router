@@ -51,6 +51,7 @@ class Route implements Stringable
         array $methods,
         private string $pattern,
         private ?string $name = null,
+        array|callable|string $action = null,
         array $middlewares = [],
         array $defaults = [],
         array $hosts = [],
@@ -64,6 +65,10 @@ class Route implements Stringable
         $this->middlewares = $middlewares;
         $this->hosts = $hosts;
         $this->defaults = array_map('\strval', $defaults);
+        if (!empty($action)) {
+            $this->middlewares[] = $action;
+            $this->actionAdded = true;
+        }
     }
 
     public static function get(string $pattern): self
@@ -244,7 +249,9 @@ class Route implements Stringable
      *           (T is 'hosts' ? array<array-key, string> :
      *               (T is 'methods' ? array<array-key,string> :
      *                   (T is 'defaults' ? array<string,string> :
-     *                       (T is ('override'|'hasMiddlewares') ? bool : mixed)
+     *                       (T is ('override'|'hasMiddlewares') ? bool :
+     *                           (T is 'builtMiddlewares' ? array<array-key,array|callable|string> : mixed)
+     *                       )
      *                   )
      *               )
      *           )
@@ -263,6 +270,7 @@ class Route implements Stringable
             'defaults' => $this->defaults,
             'override' => $this->override,
             'hasMiddlewares' => !empty($this->middlewares),
+            'builtMiddlewares' => $this->getBuiltMiddlewares(),
             default => throw new InvalidArgumentException('Unknown data key: ' . $key),
         };
     }

@@ -255,7 +255,7 @@ final class RouteTest extends TestCase
                       ->action([TestController::class, 'index'])
                       ->disableMiddleware(TestMiddleware1::class, TestMiddleware3::class);
 
-        $dispatcher = $injectDispatcher->withMiddlewares($route->getBuiltMiddlewares());
+        $dispatcher = $injectDispatcher->withMiddlewares($route->getData('builtMiddlewares'));
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
@@ -280,7 +280,7 @@ final class RouteTest extends TestCase
                       ->action([TestController::class, 'index'])
                       ->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class);
 
-        $dispatcher = $injectDispatcher->withMiddlewares($route->getBuiltMiddlewares());
+        $dispatcher = $injectDispatcher->withMiddlewares($route->getData('builtMiddlewares'));
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
@@ -381,9 +381,9 @@ EOL;
                       ->middleware(TestMiddleware1::class)
                       ->action(static fn () => new Response(200));
 
-        $builtMiddlewares = $route->getBuiltMiddlewares();
+        $builtMiddlewares = $route->getData('builtMiddlewares');
 
-        $this->assertSame($builtMiddlewares, $route->getBuiltMiddlewares());
+        $this->assertSame($builtMiddlewares, $route->getData('builtMiddlewares'));
     }
 
     private function getRequestHandler(): RequestHandlerInterface

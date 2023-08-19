@@ -26,7 +26,7 @@ class RouteAttributesRegistrarTest extends TestCase
 
         $this->assertCount(1, $items = $routeCollector->getItems());
         $this->assertCount(1, $items[0]->getData('routes'));
-        $this->assertCount(1, $items[0]->getData('routes')[0]->getBuiltMiddlewares());
-        $this->assertSame([TestController::class, 'attributeAction'], $items[0]->getData('routes')[0]->getBuiltMiddlewares()[0]);
+        $this->assertCount(1, $items[0]->getData('routes')[0]->getData('builtMiddlewares'));
+        $this->assertSame([TestController::class, 'attributeAction'], $items[0]->getData('routes')[0]->getData('builtMiddlewares')[0]);
     }
 }
