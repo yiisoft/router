@@ -28,6 +28,18 @@ final class RouteTest extends TestCase
 {
     use AssertTrait;
 
+    public function testSimpleInstance(): void
+    {
+        $route = new Route(
+            methods: [Method::GET],
+            pattern: '/',
+            action: [TestController::class, 'index'],
+        );
+
+        $this->assertInstanceOf(Route::class, $route);
+        $this->assertNotEmpty($route->getData('builtMiddlewares'));
+    }
+
     public function testName(): void
     {
         $route = Route::get('/')->name('test.route');

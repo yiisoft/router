@@ -317,7 +317,7 @@ class Route implements Stringable
     /**
      * @return array[]|callable[]|string[]
      */
-    public function getBuiltMiddlewares(): array
+    private function getBuiltMiddlewares(): array
     {
         // Don't build middlewares if we did it earlier.
         // This improves performance in event-loop applications.
