@@ -1,0 +1,15 @@
+{
+    "symbol-whitelist" : [
+        "Psr\\Container\\ContainerInterface",
+        "Yiisoft\\VarDumper\\VarDumper",
+        "Yiisoft\\Yii\\Debug\\Debugger",
+        "Yiisoft\\Yii\\Debug\\Collector\\CollectorTrait",
+        "Yiisoft\\Yii\\Debug\\Collector\\SummaryCollectorInterface",
+        "Symfony\\Component\\Console\\Command\\Command",
+        "Symfony\\Component\\Console\\Helper\\Table",
+        "Symfony\\Component\\Console\\Input\\InputArgument",
+        "Symfony\\Component\\Console\\Input\\InputInterface",
+        "Symfony\\Component\\Console\\Output\\OutputInterface",
+        "Symfony\\Component\\Console\\Style\\SymfonyStyle"
+    ]
+}
