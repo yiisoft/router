@@ -7,26 +7,9 @@ namespace Yiisoft\Router;
 interface RouteCollectorInterface
 {
     /**
-     * Add a route.
+     * Add a route or a group of routes.
      */
-    public function addRoute(Route ...$route): self;
-
-    /**
-     * Add a group of routes.
-     *
-     * ```php
-     * $group = Group::create('/api')
-     * ->middleware($myMiddleware)
-     * ->routes(
-     *     Route::get('/users', function () {}),
-     *     Route::get('/contacts', function () {}),
-     * );
-     * $routeCollector->addGroup($group);
-     * ```
-     *
-     * @param Group ...$group A group to add.
-     */
-    public function addGroup(Group ...$group): self;
+    public function addRoute(Route|Group ...$routes): self;
 
     /**
      * Appends a handler middleware definition that should be invoked for a matched route.
