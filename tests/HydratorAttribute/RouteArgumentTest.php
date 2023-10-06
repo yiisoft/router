@@ -6,11 +6,13 @@ namespace Yiisoft\Router\Tests\HydratorAttribute;
 
 use PHPUnit\Framework\TestCase;
 use ReflectionFunction;
+use Yiisoft\Hydrator\ArrayData;
 use Yiisoft\Hydrator\Attribute\Parameter\ToString;
-use Yiisoft\Hydrator\Context;
+use Yiisoft\Hydrator\AttributeHandling\Exception\UnexpectedAttributeException;
+use Yiisoft\Hydrator\AttributeHandling\ParameterAttributeResolveContext;
+use Yiisoft\Hydrator\AttributeHandling\ResolverFactory\ContainerAttributeResolverFactory;
 use Yiisoft\Hydrator\Hydrator;
 use Yiisoft\Hydrator\Result;
-use Yiisoft\Hydrator\UnexpectedAttributeException;
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\HydratorAttribute\RouteArgument;
 use Yiisoft\Router\HydratorAttribute\RouteArgumentResolver;
@@ -68,7 +70,7 @@ final class RouteArgumentTest extends TestCase
         $resolver = new RouteArgumentResolver(new CurrentRoute());
 
         $attribute = new ToString();
-        $context = $this->createContext();
+        $context = $this->createParameterAttributeResolveContext();
 
         $this->expectException(UnexpectedAttributeException::class);
         $this->expectExceptionMessage('Expected "' . RouteArgument::class . '", but "' . ToString::class . '" given.');
@@ -81,16 +83,18 @@ final class RouteArgumentTest extends TestCase
         $currentRoute->setRouteWithArguments(RouterRoute::get('/'), $arguments);
 
         return new Hydrator(
-            new SimpleContainer([
-                RouteArgumentResolver::class => new RouteArgumentResolver($currentRoute),
-            ]),
+            attributeResolverFactory: new ContainerAttributeResolverFactory(
+                new SimpleContainer([
+                    RouteArgumentResolver::class => new RouteArgumentResolver($currentRoute),
+                ])
+            ),
         );
     }
 
-    private function createContext(): Context
+    private function createParameterAttributeResolveContext(): ParameterAttributeResolveContext
     {
         $reflection = new ReflectionFunction(static fn (int $a) => null);
 
-        return new Context($reflection->getParameters()[0], Result::fail(), [], []);
+        return new ParameterAttributeResolveContext($reflection->getParameters()[0], Result::fail(), new ArrayData());
     }
 }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Router\HydratorAttribute;
 
 use Attribute;
-use Yiisoft\Hydrator\ParameterAttributeInterface;
+use Yiisoft\Hydrator\Attribute\Parameter\ParameterAttributeInterface;
 
 #[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_PARAMETER | Attribute::IS_REPEATABLE)]
 final class RouteArgument implements ParameterAttributeInterface
