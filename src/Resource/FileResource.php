@@ -30,9 +30,7 @@ final class FileResource implements ResourceInterface
                     $this->file,
                     \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::FOLLOW_SYMLINKS
                 ),
-                function (\SplFileInfo $fileInfo) {
-                    return $fileInfo->isFile() && $fileInfo->getExtension() === 'php';
-                }
+                fn(\SplFileInfo $fileInfo) => $fileInfo->isFile() && $fileInfo->getExtension() === 'php'
             );
             /** @var \SplFileInfo[] $files */
             foreach ($files as $file) {
