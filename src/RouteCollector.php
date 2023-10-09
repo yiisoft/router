@@ -4,12 +4,19 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
+use Yiisoft\Router\Resource\ResourceInterface;
+
 final class RouteCollector implements RouteCollectorInterface
 {
     /**
      * @var Group[]|Route[]
      */
     private array $items = [];
+
+    /**
+     * @var ResourceInterface[]
+     */
+    private array $resources = [];
 
     /**
      * @var array[]|callable[]|string[]
@@ -22,6 +29,12 @@ final class RouteCollector implements RouteCollectorInterface
             $this->items,
             ...array_values($routes)
         );
+        return $this;
+    }
+
+    public function addResource(ResourceInterface $resource): RouteCollectorInterface
+    {
+        $this->resources[] = $resource;
         return $this;
     }
 
@@ -45,6 +58,12 @@ final class RouteCollector implements RouteCollectorInterface
 
     public function getItems(): array
     {
+        foreach ($this->resources as $resource) {
+            array_push(
+                $this->items,
+                ...$resource->getRoutes()
+            );
+        }
         return $this->items;
     }
 

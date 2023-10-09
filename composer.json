@@ -31,6 +31,7 @@
     "require-dev": {
         "maglnet/composer-require-checker": "^4.4",
         "nyholm/psr7": "^1.5",
+        "olvlvl/composer-attribute-collector": "^2.0",
         "phpunit/phpunit": "^9.5",
         "psr/container": "^1.1|^2.0",
         "rector/rector": "^0.17.0",
@@ -53,7 +54,8 @@
         }
     },
     "suggest": {
-        "yiisoft/router-fastroute": "Router implementation based on nikic/FastRoute"
+        "yiisoft/router-fastroute": "Router implementation based on nikic/FastRoute",
+        "olvlvl/composer-attribute-collector": "Required to register routes using PHP attributes"
     },
     "extra": {
         "config-plugin-options": {
@@ -69,7 +71,8 @@
         "allow-plugins": {
             "infection/extension-installer": true,
             "composer/package-versions-deprecated": true,
-            "yiisoft/config": false
+            "yiisoft/config": false,
+            "olvlvl/composer-attribute-collector": true
         }
     },
     "scripts": {
