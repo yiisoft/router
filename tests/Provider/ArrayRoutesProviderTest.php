@@ -9,7 +9,7 @@ use Yiisoft\Router\Group;
 use Yiisoft\Router\Provider\ArrayRoutesProvider;
 use Yiisoft\Router\Route;
 
-class ArrayResourceTest extends TestCase
+class ArrayRoutesProviderTest extends TestCase
 {
     public function testGetRoutes(): void
     {

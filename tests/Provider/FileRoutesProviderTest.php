@@ -9,7 +9,7 @@ use Yiisoft\Router\Provider\FileRoutesProvider;
 
 use const _PHPStan_4dd92cd93\__;
 
-class FileResourceTest extends TestCase
+class FileRoutesProviderTest extends TestCase
 {
     private array $routes = [];
     private string $file = __DIR__ . '/../Support/resources/routes.php';
@@ -27,9 +27,16 @@ class FileResourceTest extends TestCase
         $this->assertEquals($this->routes, $provider->getRoutes());
     }
 
+    public function testGetRoutesInDirectory(): void
+    {
+        $provider = new FileRoutesProvider(dirname($this->file));
+
+        $this->assertEquals($this->routes, $provider->getRoutes());
+    }
+
     public function testGetRoutesWithNotExistFile(): void
     {
-        $file = __DIR__ . '/foo.php';
+        $file = __DIR__ . '/wrong.php';
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Failed to provide routes from "' . $file . '". File or directory not found.');
 
@@ -37,10 +44,12 @@ class FileResourceTest extends TestCase
         $provider->getRoutes();
     }
 
-    public function testGetRoutesInDirectory(): void
+    public function testGetRoutesWithEmptyRoutes(): void
     {
-        $provider = new FileRoutesProvider(dirname($this->file));
+        $file = dirname(__DIR__) . '/Support/resources/foo.php';
 
-        $this->assertEquals($this->routes, $provider->getRoutes());
+        $provider = new FileRoutesProvider($file);
+
+        $this->assertEmpty($provider->getRoutes());
     }
 }
