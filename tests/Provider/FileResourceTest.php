@@ -7,8 +7,6 @@ namespace Yiisoft\Router\Tests\Provider;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Router\Provider\FileRoutesProvider;
 
-use const _PHPStan_4dd92cd93\__;
-
 class FileResourceTest extends TestCase
 {
     private array $routes = [];
