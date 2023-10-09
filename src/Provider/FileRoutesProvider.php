@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Router\Resource;
+namespace Yiisoft\Router\Provider;
 
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 
 /**
- * A file resource represents routes from a file or directory of files.
+ * A file provider provides routes from a file or directory of files.
  */
-final class FileResource implements ResourceInterface
+final class FileRoutesProvider implements RoutesProviderInterface
 {
     public function __construct(private string $file, private array $scope = [])
     {
@@ -26,7 +26,9 @@ final class FileResource implements ResourceInterface
             return require $file;
         };
         if (!file_exists($this->file)) {
-            throw new \RuntimeException();
+            throw new \RuntimeException(
+                'Failed to provide routes from "' . $this->file . '". File or directory not found.'
+            );
         }
         if (is_dir($this->file) && !is_file($this->file)) {
             $directoryRoutes = [];

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Router\Resource;
+namespace Yiisoft\Router\Provider;
 
 use Yiisoft\Router\Route;
 use Yiisoft\Router\Group;
 
-final class ArrayResource implements ResourceInterface
+final class ArrayRoutesProvider implements RoutesProviderInterface
 {
     /**
      * @param Group[]|Route[] $routes

@@ -2,17 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Router\Resource;
+namespace Yiisoft\Router\Provider;
 
 use olvlvl\ComposerAttributeCollector\Attributes;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 
 /**
- * An attribute resource represents routes that declared via PHP Attributes.
+ * An attribute provider provides routes that declared via PHP Attributes.
+ * Currently, uses `olvlvl/composer-attribute-collector`. {@link https://github.com/olvlvl/composer-attribute-collector}.
  * @codeCoverageIgnore
  */
-final class AttributeResource implements ResourceInterface
+final class AttributeRoutesProvider implements RoutesProviderInterface
 {
     /**
      * @var array<class-string, \ReflectionMethod>

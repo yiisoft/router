@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\Router\Resource;
+namespace Yiisoft\Router\Provider;
 
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 
 /**
- * `ResourceInterface` is a resource of routes.
+ * `RoutesProviderInterface` provides routes.
  */
-interface ResourceInterface
+interface RoutesProviderInterface
 {
     /**
      * @return Group[]|Route[]
