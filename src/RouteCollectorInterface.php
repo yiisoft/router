@@ -16,7 +16,7 @@ interface RouteCollectorInterface
     /**
      * Add a provider of routes
      */
-    public function addProvider(RoutesProviderInterface $provider): self;
+    public function addProvider(RoutesProviderInterface ...$provider): self;
 
     /**
      * Appends a handler middleware definition that should be invoked for a matched route.

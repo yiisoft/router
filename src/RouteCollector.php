@@ -32,9 +32,12 @@ final class RouteCollector implements RouteCollectorInterface
         return $this;
     }
 
-    public function addProvider(RoutesProviderInterface $provider): RouteCollectorInterface
+    public function addProvider(RoutesProviderInterface ...$provider): RouteCollectorInterface
     {
-        $this->providers[] = $provider;
+        array_push(
+            $this->providers,
+            ...array_values($provider)
+        );
         return $this;
     }
 
