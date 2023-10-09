@@ -23,8 +23,8 @@ final class AttributeResource implements ResourceInterface
     {
         $routes = [];
         $groupRoutes = [];
-        $predicate = Attributes::predicateForAttributeInstanceOf(Route::class);
-        $targetMethods = Attributes::filterTargetMethods($predicate);
+        $routePredicate = Attributes::predicateForAttributeInstanceOf(Route::class);
+        $targetMethods = Attributes::filterTargetMethods($routePredicate);
         foreach ($targetMethods as $targetMethod) {
             /** @var Route $route */
             $route = $targetMethod->attribute;
@@ -43,9 +43,9 @@ final class AttributeResource implements ResourceInterface
                 $routes[] = $route->action([$targetMethod->class, $targetMethod->name]);
             }
         }
-        $predicate = static fn (string $attribute): bool => is_a($attribute, Route::class, true)
+        $groupPredicate = static fn (string $attribute): bool => is_a($attribute, Route::class, true)
             || is_a($attribute, Group::class, true);
-        $targetClasses = Attributes::filterTargetClasses($predicate);
+        $targetClasses = Attributes::filterTargetClasses($groupPredicate);
         foreach ($targetClasses as $targetClass) {
             if (isset($groupRoutes[$targetClass->name])) {
                 /** @var Group $group */
