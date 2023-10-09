@@ -10,7 +10,7 @@ use Yiisoft\Router\Group;
 final class ArrayResource implements ResourceInterface
 {
     /**
-     * @param Route[]|Group[] $routes
+     * @param Group[]|Route[] $routes
      */
     public function __construct(private array $routes)
     {
