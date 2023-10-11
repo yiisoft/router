@@ -11,6 +11,7 @@ use Yiisoft\Router\Route;
 /**
  * An attribute provider provides routes that declared via PHP Attributes.
  * Currently, uses `olvlvl/composer-attribute-collector`. {@link https://github.com/olvlvl/composer-attribute-collector}.
+ *
  * @codeCoverageIgnore
  */
 final class AttributeRoutesProvider implements RoutesProviderInterface
@@ -29,9 +30,8 @@ final class AttributeRoutesProvider implements RoutesProviderInterface
         foreach ($targetMethods as $targetMethod) {
             /** @var Route $route */
             $route = $targetMethod->attribute;
-            $targetMethodReflection = self::$reflectionsCache[$targetMethod->class] ??= new \ReflectionMethod(
-                $targetMethod->class,
-                $targetMethod->name
+            $targetMethodReflection = self::$reflectionsCache[$targetMethod->class] ??= new \ReflectionClass(
+                $targetMethod->class
             );
             /** @var Group[] $groupAttributes */
             $groupAttributes = $targetMethodReflection->getAttributes(
@@ -48,12 +48,10 @@ final class AttributeRoutesProvider implements RoutesProviderInterface
             || is_a($attribute, Group::class, true);
         $targetClasses = Attributes::filterTargetClasses($groupPredicate);
         foreach ($targetClasses as $targetClass) {
-            if (isset($groupRoutes[$targetClass->name])) {
-                /** @var Group $group */
-                $group = $targetClass->attribute;
+            $group = $targetClass->attribute;
+            if ($group instanceof Group && isset($groupRoutes[$targetClass->name])) {
                 $routes[] = $group->routes(...$groupRoutes[$targetClass->name]);
-            } else {
-                /** @var Route $group */
+            } elseif ($group instanceof Route) {
                 $routes[] = $group->action($targetClass->name);
             }
         }
