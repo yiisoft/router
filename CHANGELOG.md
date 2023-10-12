@@ -3,6 +3,7 @@
 ## 3.1.0 under development
 
 - New #203: Added `RouteArgument` attribute for Yii Hydrator (@vjik)
+
 ## 4.0.0 under development
 
 - New #195: Add debug collector for `yiisoft/yii-debug` (@xepozz)
