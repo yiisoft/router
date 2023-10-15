@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
-use Attribute;
 use InvalidArgumentException;
 use RuntimeException;
 use Stringable;
