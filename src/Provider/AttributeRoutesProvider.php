@@ -17,7 +17,7 @@ use Yiisoft\Router\Route;
 final class AttributeRoutesProvider implements RoutesProviderInterface
 {
     /**
-     * @var array<class-string, \ReflectionMethod>
+     * @var array<class-string, \ReflectionClass>
      */
     private static array $reflectionsCache = [];
 
