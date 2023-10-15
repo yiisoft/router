@@ -12,15 +12,19 @@ class PutTest extends TestCase
 {
     public function testRoute(): void
     {
-        $route = new Put('/post');
+        $attribute = new Put('/post');
+
+        $route = $attribute->getRoute();
 
         $this->assertSame('/post', $route->getData('pattern'));
-        $this->assertEquals([Method::PUT], $route->getData('methods'));
+        $this->assertSame([Method::PUT], $route->getData('methods'));
     }
 
     public function testOverride(): void
     {
-        $route = new Put('/', override: true);
+        $attribute = new Put('/', override: true);
+
+        $route = $attribute->getRoute();
 
         $this->assertTrue($route->getData('override'));
     }

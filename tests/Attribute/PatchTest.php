@@ -12,15 +12,19 @@ class PatchTest extends TestCase
 {
     public function testRoute(): void
     {
-        $route = new Patch('/post');
+        $attribute = new Patch('/post');
+
+        $route = $attribute->getRoute();
 
         $this->assertSame('/post', $route->getData('pattern'));
-        $this->assertEquals([Method::PATCH], $route->getData('methods'));
+        $this->assertSame([Method::PATCH], $route->getData('methods'));
     }
 
     public function testOverride(): void
     {
-        $route = new Patch('/', override: true);
+        $attribute = new Patch('/', override: true);
+
+        $route = $attribute->getRoute();
 
         $this->assertTrue($route->getData('override'));
     }

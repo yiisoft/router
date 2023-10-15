@@ -12,15 +12,19 @@ class OptionsTest extends TestCase
 {
     public function testRoute(): void
     {
-        $route = new Options('/post');
+        $attribute = new Options('/post');
+
+        $route = $attribute->getRoute();
 
         $this->assertSame('/post', $route->getData('pattern'));
-        $this->assertEquals([Method::OPTIONS], $route->getData('methods'));
+        $this->assertSame([Method::OPTIONS], $route->getData('methods'));
     }
 
     public function testOverride(): void
     {
-        $route = new Options('/', override: true);
+        $attribute = new Options('/', override: true);
+
+        $route = $attribute->getRoute();
 
         $this->assertTrue($route->getData('override'));
     }

@@ -12,15 +12,19 @@ class DeleteTest extends TestCase
 {
     public function testRoute(): void
     {
-        $route = new Delete('/post');
+        $attribute = new Delete('/post');
+
+        $route = $attribute->getRoute();
 
         $this->assertSame('/post', $route->getData('pattern'));
-        $this->assertEquals([Method::DELETE], $route->getData('methods'));
+        $this->assertSame([Method::DELETE], $route->getData('methods'));
     }
 
     public function testOverride(): void
     {
-        $route = new Delete('/', override: true);
+        $attribute = new Delete('/', override: true);
+
+        $route = $attribute->getRoute();
 
         $this->assertTrue($route->getData('override'));
     }
