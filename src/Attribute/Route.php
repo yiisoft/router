@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Router\Attribute;
 
 use Attribute;
+use Stringable;
 use Yiisoft\Router\Route as RouteObject;
 
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
