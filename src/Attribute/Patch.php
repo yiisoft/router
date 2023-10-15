@@ -8,7 +8,7 @@ use Attribute;
 use Yiisoft\Http\Method;
 use Yiisoft\Router\Route;
 
-#[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
+#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 final class Patch extends Route
 {
     /**
