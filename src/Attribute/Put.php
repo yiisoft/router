@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace Yiisoft\Router\Attribute;
 
 use Attribute;
+use Stringable;
 use Yiisoft\Http\Method;
 use Yiisoft\Router\Route;
 
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
-final class Put extends Route
+final class Put implements RouteAttributeInterface
 {
+    private Route $route;
+
     /**
-     * @param array<string,scalar|\Stringable|null> $defaults Parameter default values indexed by parameter names.
+     * @param array<string,scalar|Stringable|null> $defaults Parameter default values indexed by parameter names.
      * @param bool $override Marks route as override. When added it will replace existing route with the same name.
      * @param array $disabledMiddlewares Excludes middleware from being invoked when action is handled.
      * It is useful to avoid invoking one of the parent group middleware for
@@ -27,7 +30,7 @@ final class Put extends Route
         bool $override = false,
         array $disabledMiddlewares = []
     ) {
-        parent::__construct(
+        $this->route = new Route(
             methods: [Method::PUT],
             pattern: $pattern,
             name: $name,
@@ -37,5 +40,10 @@ final class Put extends Route
             override: $override,
             disabledMiddlewares: $disabledMiddlewares
         );
+    }
+
+    public function getRoute(): Route
+    {
+        return $this->route;
     }
 }

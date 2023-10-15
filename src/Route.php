@@ -15,8 +15,7 @@ use function in_array;
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
  */
-#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
-class Route implements Stringable
+final class Route implements Stringable
 {
     private bool $actionAdded = false;
     /**

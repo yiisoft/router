@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace Yiisoft\Router\Attribute;
 
 use Attribute;
-use Stringable;
-use Yiisoft\Http\Method;
-use Yiisoft\Router\Route;
+use Yiisoft\Router\Route as RouteObject;
 
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
-final class Options implements RouteAttributeInterface
+final class Route implements RouteAttributeInterface
 {
-    private Route $route;
+    private RouteObject $route;
 
     /**
      * @param array<string,scalar|Stringable|null> $defaults Parameter default values indexed by parameter names.
@@ -22,6 +20,7 @@ final class Options implements RouteAttributeInterface
      * a certain route.
      */
     public function __construct(
+        array $methods,
         string $pattern,
         ?string $name = null,
         array $middlewares = [],
@@ -30,8 +29,8 @@ final class Options implements RouteAttributeInterface
         bool $override = false,
         array $disabledMiddlewares = []
     ) {
-        $this->route = new Route(
-            methods: [Method::OPTIONS],
+        $this->route = new RouteObject(
+            methods: $methods,
             pattern: $pattern,
             name: $name,
             middlewares: $middlewares,
@@ -42,7 +41,7 @@ final class Options implements RouteAttributeInterface
         );
     }
 
-    public function getRoute(): Route
+    public function getRoute(): RouteObject
     {
         return $this->route;
     }

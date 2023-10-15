@@ -12,15 +12,19 @@ class GetTest extends TestCase
 {
     public function testRoute(): void
     {
-        $route = new Get('/post');
+        $attribute = new Get('/post');
+
+        $route = $attribute->getRoute();
 
         $this->assertSame('/post', $route->getData('pattern'));
-        $this->assertEquals([Method::GET], $route->getData('methods'));
+        $this->assertSame([Method::GET], $route->getData('methods'));
     }
 
     public function testOverride(): void
     {
-        $route = new Get('/', override: true);
+        $attribute = new Get('/', override: true);
+
+        $route = $attribute->getRoute();
 
         $this->assertTrue($route->getData('override'));
     }
