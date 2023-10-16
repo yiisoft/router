@@ -18,13 +18,13 @@ final class FileRoutesProvider implements RoutesProviderInterface
 
     public function getRoutes(): array
     {
-        $scopeRequire = static function (string $file, array $scope): mixed {
+        $scopeRequire = \Closure::bind(static function (string $file, array $scope): mixed {
             extract($scope, EXTR_SKIP);
             /**
              * @psalm-suppress UnresolvableInclude
              */
             return require $file;
-        };
+        }, null, null);
         if (!file_exists($this->file)) {
             throw new \RuntimeException(
                 'Failed to provide routes from "' . $this->file . '". File or directory not found.'

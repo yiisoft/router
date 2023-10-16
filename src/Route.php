@@ -58,6 +58,9 @@ final class Route implements Stringable
         private bool $override = false,
         private array $disabledMiddlewareDefinitions = [],
     ) {
+        if (empty($methods)) {
+            throw new InvalidArgumentException('$methods cannot be empty.');
+        }
         $this->assertListOfStrings($methods, 'methods');
         $this->assertMiddlewares($middlewareDefinitions);
         $this->assertListOfStrings($hosts, 'hosts');
