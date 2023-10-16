@@ -14,6 +14,6 @@ namespace PHPSTORM_META {
         'override',
         'defaults',
         'hasMiddlewares',
-        'builtMiddlewares'
+        'builtMiddlewareDefinitions'
     );
 }

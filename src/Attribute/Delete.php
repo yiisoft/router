@@ -34,11 +34,11 @@ final class Delete implements RouteAttributeInterface
             methods: [Method::DELETE],
             pattern: $pattern,
             name: $name,
-            middlewares: $middlewares,
+            middlewareDefinitions: $middlewares,
             defaults: $defaults,
             hosts: $hosts,
             override: $override,
-            disabledMiddlewares: $disabledMiddlewares
+            disabledMiddlewareDefinitions: $disabledMiddlewares
         );
     }
 

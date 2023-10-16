@@ -34,12 +34,12 @@ final class RouteTest extends TestCase
             methods: [Method::GET],
             pattern: '/',
             action: [TestController::class, 'index'],
-            middlewares: [TestMiddleware1::class],
+            middlewareDefinitions: [TestMiddleware1::class],
             override: true,
         );
 
         $this->assertInstanceOf(Route::class, $route);
-        $this->assertCount(2, $route->getData('builtMiddlewares'));
+        $this->assertCount(2, $route->getData('builtMiddlewareDefinitions'));
         $this->assertTrue($route->getData('override'));
     }
 
@@ -247,9 +247,9 @@ final class RouteTest extends TestCase
     public function testInvalidMiddlewares(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid $middlewares provided, list of string or array or callable expected.');
+        $this->expectExceptionMessage('Invalid $middlewareDefinitions provided, list of string or array or callable expected.');
 
-        $route = new Route([Method::GET], '/', middlewares: [static fn () => new Response(), (object) ['test' => 1]]);
+        $route = new Route([Method::GET], '/', middlewareDefinitions: [static fn () => new Response(), (object) ['test' => 1]]);
     }
 
     public function testDisabledMiddlewareDefinitions(): void
@@ -270,7 +270,7 @@ final class RouteTest extends TestCase
                       ->action([TestController::class, 'index'])
                       ->disableMiddleware(TestMiddleware1::class, TestMiddleware3::class);
 
-        $dispatcher = $injectDispatcher->withMiddlewares($route->getData('builtMiddlewares'));
+        $dispatcher = $injectDispatcher->withMiddlewares($route->getData('builtMiddlewareDefinitions'));
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
@@ -295,7 +295,7 @@ final class RouteTest extends TestCase
                       ->action([TestController::class, 'index'])
                       ->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class);
 
-        $dispatcher = $injectDispatcher->withMiddlewares($route->getData('builtMiddlewares'));
+        $dispatcher = $injectDispatcher->withMiddlewares($route->getData('builtMiddlewareDefinitions'));
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
@@ -336,18 +336,18 @@ Yiisoft\Router\Route Object
 
     [override] => 1
     [actionAdded] => 1
-    [middlewares] => Array
+    [middlewareDefinitions] => Array
         (
             [0] => Yiisoft\Router\Tests\Support\TestMiddleware3
             [1] => Yiisoft\Router\Tests\Support\TestMiddleware1
             [2] => go
         )
 
-    [builtMiddlewares] => Array
+    [builtMiddlewareDefinitions] => Array
         (
         )
 
-    [disabledMiddlewares] => Array
+    [disabledMiddlewareDefinitions] => Array
         (
             [0] => Yiisoft\Router\Tests\Support\TestMiddleware2
         )
@@ -396,9 +396,9 @@ EOL;
                       ->middleware(TestMiddleware1::class)
                       ->action(static fn () => new Response(200));
 
-        $builtMiddlewares = $route->getData('builtMiddlewares');
+        $builtMiddlewareDefinitions = $route->getData('builtMiddlewareDefinitions');
 
-        $this->assertSame($builtMiddlewares, $route->getData('builtMiddlewares'));
+        $this->assertSame($builtMiddlewareDefinitions, $route->getData('builtMiddlewareDefinitions'));
     }
 
     private function getRequestHandler(): RequestHandlerInterface

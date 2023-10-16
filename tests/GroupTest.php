@@ -36,15 +36,15 @@ final class GroupTest extends TestCase
         $group = $group
             ->middleware($middleware1)
             ->middleware($middleware2);
-        $this->assertCount(2, $group->getData('middlewares'));
-        $this->assertSame($middleware1, $group->getData('middlewares')[0]);
-        $this->assertSame($middleware2, $group->getData('middlewares')[1]);
+        $this->assertCount(2, $group->getData('middlewareDefinitions'));
+        $this->assertSame($middleware1, $group->getData('middlewareDefinitions')[0]);
+        $this->assertSame($middleware2, $group->getData('middlewareDefinitions')[1]);
     }
 
     public function testInvalidMiddlewares(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid $middlewares provided, list of string or array or callable expected.');
+        $this->expectExceptionMessage('Invalid $middlewareDefinitions provided, list of string or array or callable expected.');
 
         $middleware = static fn () => new Response();
         $group = new Group('/api', [$middleware, new \stdClass()]);
@@ -57,8 +57,8 @@ final class GroupTest extends TestCase
             ->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class)
             ->disableMiddleware(TestMiddleware1::class, TestMiddleware3::class);
 
-        $this->assertCount(1, $group->getData('middlewares'));
-        $this->assertSame(TestMiddleware2::class, $group->getData('middlewares')[0]);
+        $this->assertCount(1, $group->getData('middlewareDefinitions'));
+        $this->assertSame(TestMiddleware2::class, $group->getData('middlewareDefinitions')[0]);
     }
 
     public function testNamedArgumentsInMiddlewareMethods(): void
@@ -68,8 +68,8 @@ final class GroupTest extends TestCase
             ->prependMiddleware(middleware1: TestMiddleware1::class, middleware2: TestMiddleware2::class)
             ->disableMiddleware(middleware1: TestMiddleware1::class, middleware2: TestMiddleware3::class);
 
-        $this->assertCount(1, $group->getData('middlewares'));
-        $this->assertSame(TestMiddleware2::class, $group->getData('middlewares')[0]);
+        $this->assertCount(1, $group->getData('middlewareDefinitions'));
+        $this->assertSame(TestMiddleware2::class, $group->getData('middlewareDefinitions')[0]);
     }
 
     public function testRoutesAfterMiddleware(): void
@@ -120,7 +120,7 @@ final class GroupTest extends TestCase
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
         $response = $this->getDispatcher()
-            ->withMiddlewares($route->getData('builtMiddlewares'))
+            ->withMiddlewares($route->getData('builtMiddlewareDefinitions'))
             ->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('middleware2', $response->getReasonPhrase());
@@ -155,7 +155,7 @@ final class GroupTest extends TestCase
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
         $response = $this->getDispatcher()
-            ->withMiddlewares($route->getData('builtMiddlewares'))
+            ->withMiddlewares($route->getData('builtMiddlewareDefinitions'))
             ->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('middleware2', $response->getReasonPhrase());
@@ -184,7 +184,7 @@ final class GroupTest extends TestCase
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
         $response = $this->getDispatcher()
-                         ->withMiddlewares($route->getData('builtMiddlewares'))
+                         ->withMiddlewares($route->getData('builtMiddlewareDefinitions'))
                          ->dispatch($request, $this->getRequestHandler());
         $this->assertSame(403, $response->getStatusCode());
     }
@@ -225,15 +225,15 @@ final class GroupTest extends TestCase
         /** @var Group $postGroup */
         $postGroup = $api->getData('routes')[1];
         $this->assertInstanceOf(Group::class, $postGroup);
-        $this->assertCount(2, $api->getData('middlewares'));
-        $this->assertSame($middleware1, $api->getData('middlewares')[0]);
-        $this->assertSame($middleware2, $api->getData('middlewares')[1]);
+        $this->assertCount(2, $api->getData('middlewareDefinitions'));
+        $this->assertSame($middleware1, $api->getData('middlewareDefinitions')[0]);
+        $this->assertSame($middleware2, $api->getData('middlewareDefinitions')[1]);
 
         $this->assertSame('/post', $postGroup->getData('prefix'));
         $this->assertCount(2, $postGroup->getData('routes'));
         $this->assertSame($listRoute, $postGroup->getData('routes')[0]);
         $this->assertSame($viewRoute, $postGroup->getData('routes')[1]);
-        $this->assertEmpty($postGroup->getData('middlewares'));
+        $this->assertEmpty($postGroup->getData('middlewareDefinitions'));
     }
 
     public function testHost(): void
@@ -425,9 +425,9 @@ final class GroupTest extends TestCase
             ->middleware(static fn () => new Response(200))
             ->prependMiddleware(TestMiddleware1::class);
 
-        $builtMiddlewares = $group->getData('middlewares');
+        $builtMiddlewareDefinitions = $group->getData('middlewareDefinitions');
 
-        $this->assertSame($builtMiddlewares, $group->getData('middlewares'));
+        $this->assertSame($builtMiddlewareDefinitions, $group->getData('middlewareDefinitions'));
     }
 
     private function getRequestHandler(): RequestHandlerInterface

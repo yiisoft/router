@@ -34,11 +34,11 @@ final class Get implements RouteAttributeInterface
             methods: [Method::GET],
             pattern: $pattern,
             name: $name,
-            middlewares: $middlewares,
+            middlewareDefinitions: $middlewares,
             defaults: $defaults,
             hosts: $hosts,
             override: $override,
-            disabledMiddlewares: $disabledMiddlewares
+            disabledMiddlewareDefinitions: $disabledMiddlewares
         );
     }
 

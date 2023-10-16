@@ -19,7 +19,7 @@ final class Group
     private array $routes = [];
     private bool $routesAdded = false;
     private bool $middlewareAdded = false;
-    private array $builtMiddlewares = [];
+    private array $builtMiddlewareDefinitions = [];
     /**
      * @var array|callable|string|null Middleware definition for CORS requests.
      */
@@ -31,24 +31,24 @@ final class Group
     /**
      * @var array[]|callable[]|string[]
      */
-    private array $middlewares = [];
+    private array $middlewareDefinitions = [];
 
     /**
-     * @param array $disabledMiddlewares Excludes middleware from being invoked when action is handled.
+     * @param array $disabledMiddlewareDefinitions Excludes middleware from being invoked when action is handled.
      * It is useful to avoid invoking one of the parent group middleware for
      * a certain route.
      */
     public function __construct(
         private ?string $prefix = null,
-        array $middlewares = [],
+        array $middlewareDefinitions = [],
         array $hosts = [],
         private ?string $namePrefix = null,
-        private array $disabledMiddlewares = [],
+        private array $disabledMiddlewareDefinitions = [],
         array|callable|string|null $corsMiddleware = null
     ) {
-        $this->assertMiddlewares($middlewares);
+        $this->assertMiddlewares($middlewareDefinitions);
         $this->assertHosts($hosts);
-        $this->middlewares = $middlewares;
+        $this->middlewareDefinitions = $middlewareDefinitions;
         $this->hosts = $hosts;
         $this->corsMiddleware = $corsMiddleware;
     }
@@ -100,10 +100,10 @@ final class Group
         }
         $new = clone $this;
         array_push(
-            $new->middlewares,
+            $new->middlewareDefinitions,
             ...array_values($middlewareDefinition)
         );
-        $new->builtMiddlewares = [];
+        $new->builtMiddlewareDefinitions = [];
         return $new;
     }
 
@@ -115,11 +115,11 @@ final class Group
     {
         $new = clone $this;
         array_unshift(
-            $new->middlewares,
+            $new->middlewareDefinitions,
             ...array_values($middlewareDefinition)
         );
         $new->middlewareAdded = true;
-        $new->builtMiddlewares = [];
+        $new->builtMiddlewareDefinitions = [];
         return $new;
     }
 
@@ -159,10 +159,10 @@ final class Group
     {
         $new = clone $this;
         array_push(
-            $new->disabledMiddlewares,
+            $new->disabledMiddlewareDefinitions,
             ...array_values($middlewareDefinition),
         );
-        $new->builtMiddlewares = [];
+        $new->builtMiddlewareDefinitions = [];
         return $new;
     }
 
@@ -176,7 +176,7 @@ final class Group
      *   (T is 'routes' ? Group[]|Route[] :
      *     (T is 'hosts' ? array<array-key, string> :
      *       (T is 'hasCorsMiddleware' ? bool :
-     *         (T is 'middlewares' ? list<array|callable|string> :
+     *         (T is 'middlewareDefinitions' ? list<array|callable|string> :
      *           (T is 'corsMiddleware' ? array|callable|string|null : mixed)
      *         )
      *       )
@@ -194,27 +194,27 @@ final class Group
             'corsMiddleware' => $this->corsMiddleware,
             'routes' => $this->routes,
             'hasCorsMiddleware' => $this->corsMiddleware !== null,
-            'middlewares' => $this->getBuiltMiddlewares(),
+            'middlewareDefinitions' => $this->getBuiltMiddlewares(),
             default => throw new InvalidArgumentException('Unknown data key: ' . $key),
         };
     }
 
     private function getBuiltMiddlewares(): array
     {
-        if (!empty($this->builtMiddlewares)) {
-            return $this->builtMiddlewares;
+        if (!empty($this->builtMiddlewareDefinitions)) {
+            return $this->builtMiddlewareDefinitions;
         }
 
-        $builtMiddlewares = $this->middlewares;
+        $builtMiddlewareDefinitions = $this->middlewareDefinitions;
 
         /** @var mixed $definition */
-        foreach ($builtMiddlewares as $index => $definition) {
-            if (in_array($definition, $this->disabledMiddlewares, true)) {
-                unset($builtMiddlewares[$index]);
+        foreach ($builtMiddlewareDefinitions as $index => $definition) {
+            if (in_array($definition, $this->disabledMiddlewareDefinitions, true)) {
+                unset($builtMiddlewareDefinitions[$index]);
             }
         }
 
-        return $this->builtMiddlewares = array_values($builtMiddlewares);
+        return $this->builtMiddlewareDefinitions = array_values($builtMiddlewareDefinitions);
     }
 
     /**
@@ -230,18 +230,18 @@ final class Group
     }
 
     /**
-     * @psalm-assert array<array|callable|string> $middlewares
+     * @psalm-assert array<array|callable|string> $middlewareDefinitions
      */
-    private function assertMiddlewares(array $middlewares): void
+    private function assertMiddlewares(array $middlewareDefinitions): void
     {
-        /** @var mixed $middleware */
-        foreach ($middlewares as $middleware) {
-            if (is_string($middleware) || is_callable($middleware) || is_array($middleware)) {
+        /** @var mixed $middlewareDefinition */
+        foreach ($middlewareDefinitions as $middlewareDefinition) {
+            if (is_string($middlewareDefinition) || is_callable($middlewareDefinition) || is_array($middlewareDefinition)) {
                 continue;
             }
 
             throw new \InvalidArgumentException(
-                'Invalid $middlewares provided, list of string or array or callable expected.'
+                'Invalid $middlewareDefinitions provided, list of string or array or callable expected.'
             );
         }
     }

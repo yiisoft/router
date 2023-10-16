@@ -12,7 +12,7 @@ namespace PHPSTORM_META {
         'hosts',
         'corsMiddleware',
         'routes',
-        'middlewares',
+        'middlewareDefinitions',
         'hasCorsMiddleware'
     );
 }
