@@ -43,6 +43,14 @@ final class RouteTest extends TestCase
         $this->assertTrue($route->getData('override'));
     }
 
+    public function testEmptyMethods(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('$methods cannot be empty.');
+
+        new Route([], '');
+    }
+
     public function testName(): void
     {
         $route = Route::get('/')->name('test.route');
