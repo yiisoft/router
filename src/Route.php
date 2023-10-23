@@ -288,7 +288,7 @@ final class Route implements Stringable
             $result .= implode(',', $this->methods) . ' ';
         }
 
-        if ($this->hosts) {
+        if (!empty($this->hosts)) {
             $quoted = array_map(static fn ($host) => preg_quote($host, '/'), $this->hosts);
 
             if (!preg_match('/' . implode('|', $quoted) . '/', $this->pattern)) {
