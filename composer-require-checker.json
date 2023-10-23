@@ -1,6 +1,5 @@
 {
     "symbol-whitelist" : [
-        "olvlvl\\ComposerAttributeCollector\\Attributes",
         "Psr\\Container\\ContainerInterface",
         "Yiisoft\\VarDumper\\VarDumper",
         "Yiisoft\\Yii\\Debug\\Debugger",

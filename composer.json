@@ -53,8 +53,7 @@
         }
     },
     "suggest": {
-        "yiisoft/router-fastroute": "Router implementation based on nikic/FastRoute",
-        "olvlvl/composer-attribute-collector": "Required to register routes using PHP attributes"
+        "yiisoft/router-fastroute": "Router implementation based on nikic/FastRoute"
     },
     "extra": {
         "config-plugin-options": {
@@ -70,8 +69,7 @@
         "allow-plugins": {
             "infection/extension-installer": true,
             "composer/package-versions-deprecated": true,
-            "yiisoft/config": false,
-            "olvlvl/composer-attribute-collector": true
+            "yiisoft/config": false
         }
     },
     "scripts": {
