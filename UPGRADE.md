@@ -5,7 +5,7 @@ These notes highlight changes that could break your application when you upgrade
 
 ## 4.0.0
 
-In this release classes `Route`, `Group` and `MatchingResult` are made dispatcher independent. Now you don't can inject
+In this release classes `Route`, `Group` and `MatchingResult` are made dispatcher-independent. Now you don't can inject
 own middleware dispatcher to group or to route.
 
 The following backward incompatible changes have been made.
