@@ -45,7 +45,8 @@ final class Group
      *
      * @param string|null $prefix URL prefix to prepend to all routes of the group.
      */
-    public static function create(?string $prefix = null): self {
+    public static function create(?string $prefix = null): self
+    {
         return new self($prefix);
     }
 
