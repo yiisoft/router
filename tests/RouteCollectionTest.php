@@ -276,11 +276,11 @@ final class RouteCollectionTest extends TestCase
         $route1 = $routeCollection->getRoute('list');
         $route2 = $routeCollection->getRoute('view');
         $request = new ServerRequest('GET', '/');
-        $response1 = $route1
-            ->getData('dispatcherWithMiddlewares')
+        $response1 = $this->getDispatcher()
+            ->withMiddlewares($route1->getData('enabledMiddlewares'))
             ->dispatch($request, $this->getRequestHandler());
-        $response2 = $route2
-            ->getData('dispatcherWithMiddlewares')
+        $response2 = $this->getDispatcher()
+            ->withMiddlewares($route2->getData('enabledMiddlewares'))
             ->dispatch($request, $this->getRequestHandler());
 
         $this->assertEquals('middleware1', $response1->getReasonPhrase());
@@ -302,15 +302,6 @@ final class RouteCollectionTest extends TestCase
     {
         $request = new ServerRequest('GET', '/');
 
-        $injectDispatcher = $this->getDispatcher(
-            new SimpleContainer([
-                TestMiddleware1::class => new TestMiddleware1(),
-                TestMiddleware2::class => new TestMiddleware2(),
-                TestMiddleware3::class => new TestMiddleware3(),
-                TestController::class => new TestController(),
-            ])
-        );
-
         $collector = new RouteCollector();
 
         $collector
@@ -327,9 +318,17 @@ final class RouteCollectionTest extends TestCase
         );
 
         $route = (new RouteCollection($collector))->getRoute('main');
-        $route->injectDispatcher($injectDispatcher);
 
-        $dispatcher = $route->getData('dispatcherWithMiddlewares');
+        $dispatcher = $this
+            ->getDispatcher(
+                new SimpleContainer([
+                    TestMiddleware1::class => new TestMiddleware1(),
+                    TestMiddleware2::class => new TestMiddleware2(),
+                    TestMiddleware3::class => new TestMiddleware3(),
+                    TestController::class => new TestController(),
+                ])
+            )
+            ->withMiddlewares($route->getData('enabledMiddlewares'));
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
@@ -340,12 +339,6 @@ final class RouteCollectionTest extends TestCase
     {
         $request = new ServerRequest('GET', '/');
 
-        $injectDispatcher = $this->getDispatcher(
-            new SimpleContainer([
-                TestMiddleware1::class => new TestMiddleware1(),
-            ])
-        );
-
         $collector = new RouteCollector();
         $collector->middleware(TestMiddleware1::class);
 
@@ -354,9 +347,14 @@ final class RouteCollectionTest extends TestCase
         );
 
         $route = (new RouteCollection($collector))->getRoute('image');
-        $route->injectDispatcher($injectDispatcher);
 
-        $dispatcher = $route->getData('dispatcherWithMiddlewares');
+        $dispatcher = $this
+            ->getDispatcher(
+                new SimpleContainer([
+                    TestMiddleware1::class => new TestMiddleware1(),
+                ])
+            )
+            ->withMiddlewares($route->getData('enabledMiddlewares'));
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Stack is empty.');
