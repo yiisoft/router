@@ -29,6 +29,7 @@ with an adapter package. Currently, the only adapter available is [FastRoute](ht
 - Ready to use middleware for route matching.
 - Convenient `CurrentRoute` service that holds information about last matched route.
 - Out of the box CORS middleware support.
+- Declaring routes using PHP attributes.
 
 ## Requirements
 
