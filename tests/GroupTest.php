@@ -52,6 +52,19 @@ final class GroupTest extends TestCase
         $this->assertSame(TestMiddleware2::class, $group->getData('enabledMiddlewares')[0]);
     }
 
+    public function testMiddlewaresWithKeys(): void
+    {
+        $group = Group::create()
+            ->middleware(m3: TestMiddleware3::class)
+            ->prependMiddleware(m1: TestMiddleware1::class, m2: TestMiddleware2::class)
+            ->disableMiddleware(m1: TestMiddleware1::class);
+
+        $this->assertSame(
+            [TestMiddleware2::class, TestMiddleware3::class],
+            $group->getData('enabledMiddlewares')
+        );
+    }
+
     public function testNamedArgumentsInMiddlewareMethods(): void
     {
         $group = Group::create()

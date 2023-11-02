@@ -298,6 +298,20 @@ final class RouteTest extends TestCase
         $this->assertSame('123', (string) $response->getBody());
     }
 
+    public function testMiddlewaresWithKeys(): void
+    {
+        $group = Route::get('/')
+            ->middleware(m3: TestMiddleware3::class)
+            ->action([TestController::class, 'index'])
+            ->prependMiddleware(m1: TestMiddleware1::class, m2: TestMiddleware2::class)
+            ->disableMiddleware(m1: TestMiddleware1::class);
+
+        $this->assertSame(
+            [TestMiddleware2::class, TestMiddleware3::class, [TestController::class, 'index']],
+            $group->getData('enabledMiddlewares')
+        );
+    }
+
     public function testDebugInfo(): void
     {
         $route = Route::get('/')
