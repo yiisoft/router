@@ -97,7 +97,7 @@ final class RouteCollectionTest extends TestCase
         $group = Group::create()
             ->middleware(fn () => 1)
             ->routes(
-                Route::get('/test', $this->getDispatcher())
+                Route::get('/test')
                     ->action(fn () => 2)
                     ->name('test'),
                 Route::get('/images/{sile}')->name('image')
@@ -115,19 +115,19 @@ final class RouteCollectionTest extends TestCase
     {
         $group1 = Group::create('/api')
             ->routes(
-                Route::get('/test', $this->getDispatcher())
+                Route::get('/test')
                     ->action(fn () => 2)
                     ->name('/test'),
                 Route::get('/images/{sile}')->name('/image'),
                 Group::create('/v1')
                     ->routes(
-                        Route::get('/posts', $this->getDispatcher())->name('/posts'),
+                        Route::get('/posts')->name('/posts'),
                         Route::get('/post/{sile}')->name('/post/view')
                     )
                     ->namePrefix('/v1'),
                 Group::create('/v1')
                     ->routes(
-                        Route::get('/tags', $this->getDispatcher())->name('/tags'),
+                        Route::get('/tags')->name('/tags'),
                         Route::get('/tag/{slug}')->name('/tag/view'),
                     )
                     ->namePrefix('/v1'),
@@ -135,7 +135,7 @@ final class RouteCollectionTest extends TestCase
 
         $group2 = Group::create('/api')
             ->routes(
-                Route::get('/posts', $this->getDispatcher())->name('/posts'),
+                Route::get('/posts')->name('/posts'),
                 Route::get('/post/{sile}')->name('/post/view'),
             )
             ->namePrefix('/api');
@@ -168,7 +168,7 @@ final class RouteCollectionTest extends TestCase
         $group = Group::create()
             ->middleware(fn () => 1)
             ->routes(
-                Route::get('/test', $this->getDispatcher())
+                Route::get('/test')
                     ->action(fn () => 2)
                     ->name('test'),
                 Route::get('/images/{sile}')->name('image')
@@ -252,16 +252,16 @@ final class RouteCollectionTest extends TestCase
             [],
             null,
             '1.1',
-            implode($request->getAttributes())
+            implode('', $request->getAttributes())
         );
         $listRoute = Route::get('/')
             ->action($action)
             ->name('list');
-        $viewRoute = Route::get('/{id}', $this->getDispatcher())
+        $viewRoute = Route::get('/{id}')
             ->action($action)
             ->name('view');
 
-        $group = Group::create(null, $this->getDispatcher())->routes($listRoute);
+        $group = Group::create(null)->routes($listRoute);
 
         $middleware = function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             $request = $request->withAttribute('middleware', 'middleware1');

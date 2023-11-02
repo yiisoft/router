@@ -81,7 +81,7 @@ final class GroupTest extends TestCase
     {
         $request = new ServerRequest('GET', '/outergroup/innergroup/test1');
 
-        $action = static fn (ServerRequestInterface $request) => new Response(200, [], null, '1.1', implode($request->getAttributes()));
+        $action = static fn (ServerRequestInterface $request) => new Response(200, [], null, '1.1', implode('', $request->getAttributes()));
 
         $middleware1 = static function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             $request = $request->withAttribute('middleware', 'middleware1');
@@ -93,7 +93,7 @@ final class GroupTest extends TestCase
             return $handler->handle($request);
         };
 
-        $group = Group::create('/outergroup', $this->getDispatcher())
+        $group = Group::create('/outergroup')
             ->middleware($middleware1)
             ->routes(
                 Group::create('/innergroup')
@@ -121,7 +121,7 @@ final class GroupTest extends TestCase
     {
         $request = new ServerRequest('GET', '/group/test1');
 
-        $action = static fn (ServerRequestInterface $request) => new Response(200, [], null, '1.1', implode($request->getAttributes()));
+        $action = static fn (ServerRequestInterface $request) => new Response(200, [], null, '1.1', implode('', $request->getAttributes()));
         $middleware1 = function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             $request = $request->withAttribute('middleware', 'middleware1');
             return $handler->handle($request);
