@@ -104,7 +104,7 @@ final class RouteCollection implements RouteCollectionInterface
     {
         $prefix .= (string) $group->getData('prefix');
         $namePrefix .= (string) $group->getData('namePrefix');
-        $items = $group->getData('items');
+        $items = $group->getData('routes');
         $pattern = null;
         $hosts = [];
         foreach ($items as $item) {

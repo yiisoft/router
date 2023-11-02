@@ -7,6 +7,7 @@ namespace Yiisoft\Router\Tests;
 use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Router\Group;
+use Yiisoft\Router\Provider\ArrayRoutesProvider;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollector;
 
@@ -54,6 +55,38 @@ final class RouteCollectorTest extends TestCase
 
         $collector = new RouteCollector();
         $collector->addRoute($rootGroup, $postGroup, test: $testGroup);
+
+        $this->assertCount(3, $collector->getItems());
+        $this->assertContainsOnlyInstancesOf(Group::class, $collector->getItems());
+    }
+
+    public function testAddProvider(): void
+    {
+        $logoutRoute = Route::post('/logout');
+        $listRoute = Route::get('/');
+        $viewRoute = Route::get('/{id}');
+        $postGroup = Group::create('/post')
+            ->routes(
+                $listRoute,
+                $viewRoute
+            );
+
+        $rootGroup = Group::create()
+            ->routes(
+                Group::create('/api')
+                    ->routes(
+                        $logoutRoute,
+                        $postGroup
+                    ),
+            );
+
+        $testGroup = Group::create()
+            ->routes(
+                Route::get('test/')
+            );
+
+        $collector = new RouteCollector();
+        $collector->addProvider(new ArrayRoutesProvider([$rootGroup, $postGroup, $testGroup]));
 
         $this->assertCount(3, $collector->getItems());
         $this->assertContainsOnlyInstancesOf(Group::class, $collector->getItems());
