@@ -8,6 +8,9 @@ use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Router\MatchingResult;
 use Yiisoft\Router\UrlMatcherInterface;
 
+/**
+ * @codeCoverageIgnore
+ */
 final class UrlMatcherInterfaceProxy implements UrlMatcherInterface
 {
     public function __construct(private UrlMatcherInterface $urlMatcher, private RouterCollector $routerCollector)
