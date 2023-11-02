@@ -252,7 +252,7 @@ final class RouteCollectionTest extends TestCase
             [],
             null,
             '1.1',
-            implode($request->getAttributes())
+            implode('', $request->getAttributes())
         );
         $listRoute = Route::get('/')
                           ->action($action)
