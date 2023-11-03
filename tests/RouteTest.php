@@ -345,6 +345,18 @@ final class RouteTest extends TestCase
         );
     }
 
+    public function testGetEnabledMiddlewaresTwice(): void
+    {
+        $route = Route::get('/')
+            ->middleware(TestMiddleware1::class, TestMiddleware2::class);
+
+        $result1 = $route->getData('enabledMiddlewares');
+        $result2 = $route->getData('enabledMiddlewares');
+
+        $this->assertSame([TestMiddleware1::class, TestMiddleware2::class], $result1);
+        $this->assertSame($result1, $result2);
+    }
+
     public function testMiddlewaresWithKeys(): void
     {
         $route = Route::get('/')
