@@ -97,7 +97,7 @@ final class RouteCollectionTest extends TestCase
         $group = Group::create()
             ->middleware(fn () => 1)
             ->routes(
-                Route::get('/test', $this->getDispatcher())
+                Route::get('/test')
                     ->action(fn () => 2)
                     ->name('test'),
                 Route::get('/images/{sile}')->name('image')
@@ -115,19 +115,19 @@ final class RouteCollectionTest extends TestCase
     {
         $group1 = Group::create('/api')
             ->routes(
-                Route::get('/test', $this->getDispatcher())
+                Route::get('/test')
                     ->action(fn () => 2)
                     ->name('/test'),
                 Route::get('/images/{sile}')->name('/image'),
                 Group::create('/v1')
                     ->routes(
-                        Route::get('/posts', $this->getDispatcher())->name('/posts'),
+                        Route::get('/posts')->name('/posts'),
                         Route::get('/post/{sile}')->name('/post/view')
                     )
                     ->namePrefix('/v1'),
                 Group::create('/v1')
                     ->routes(
-                        Route::get('/tags', $this->getDispatcher())->name('/tags'),
+                        Route::get('/tags')->name('/tags'),
                         Route::get('/tag/{slug}')->name('/tag/view'),
                     )
                     ->namePrefix('/v1'),
@@ -135,7 +135,7 @@ final class RouteCollectionTest extends TestCase
 
         $group2 = Group::create('/api')
             ->routes(
-                Route::get('/posts', $this->getDispatcher())->name('/posts'),
+                Route::get('/posts')->name('/posts'),
                 Route::get('/post/{sile}')->name('/post/view'),
             )
             ->namePrefix('/api');
@@ -168,7 +168,7 @@ final class RouteCollectionTest extends TestCase
         $group = Group::create()
             ->middleware(fn () => 1)
             ->routes(
-                Route::get('/test', $this->getDispatcher())
+                Route::get('/test')
                     ->action(fn () => 2)
                     ->name('test'),
                 Route::get('/images/{sile}')->name('image')
@@ -252,16 +252,16 @@ final class RouteCollectionTest extends TestCase
             [],
             null,
             '1.1',
-            implode($request->getAttributes())
+            implode('', $request->getAttributes())
         );
         $listRoute = Route::get('/')
             ->action($action)
             ->name('list');
-        $viewRoute = Route::get('/{id}', $this->getDispatcher())
+        $viewRoute = Route::get('/{id}')
             ->action($action)
             ->name('view');
 
-        $group = Group::create(null, $this->getDispatcher())->routes($listRoute);
+        $group = Group::create(null)->routes($listRoute);
 
         $middleware = function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             $request = $request->withAttribute('middleware', 'middleware1');
@@ -276,11 +276,11 @@ final class RouteCollectionTest extends TestCase
         $route1 = $routeCollection->getRoute('list');
         $route2 = $routeCollection->getRoute('view');
         $request = new ServerRequest('GET', '/');
-        $response1 = $route1
-            ->getData('dispatcherWithMiddlewares')
+        $response1 = $this->getDispatcher()
+            ->withMiddlewares($route1->getData('enabledMiddlewares'))
             ->dispatch($request, $this->getRequestHandler());
-        $response2 = $route2
-            ->getData('dispatcherWithMiddlewares')
+        $response2 = $this->getDispatcher()
+            ->withMiddlewares($route2->getData('enabledMiddlewares'))
             ->dispatch($request, $this->getRequestHandler());
 
         $this->assertEquals('middleware1', $response1->getReasonPhrase());
@@ -302,15 +302,6 @@ final class RouteCollectionTest extends TestCase
     {
         $request = new ServerRequest('GET', '/');
 
-        $injectDispatcher = $this->getDispatcher(
-            new SimpleContainer([
-                TestMiddleware1::class => new TestMiddleware1(),
-                TestMiddleware2::class => new TestMiddleware2(),
-                TestMiddleware3::class => new TestMiddleware3(),
-                TestController::class => new TestController(),
-            ])
-        );
-
         $collector = new RouteCollector();
 
         $collector
@@ -327,9 +318,17 @@ final class RouteCollectionTest extends TestCase
         );
 
         $route = (new RouteCollection($collector))->getRoute('main');
-        $route->injectDispatcher($injectDispatcher);
 
-        $dispatcher = $route->getData('dispatcherWithMiddlewares');
+        $dispatcher = $this
+            ->getDispatcher(
+                new SimpleContainer([
+                    TestMiddleware1::class => new TestMiddleware1(),
+                    TestMiddleware2::class => new TestMiddleware2(),
+                    TestMiddleware3::class => new TestMiddleware3(),
+                    TestController::class => new TestController(),
+                ])
+            )
+            ->withMiddlewares($route->getData('enabledMiddlewares'));
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
@@ -340,12 +339,6 @@ final class RouteCollectionTest extends TestCase
     {
         $request = new ServerRequest('GET', '/');
 
-        $injectDispatcher = $this->getDispatcher(
-            new SimpleContainer([
-                TestMiddleware1::class => new TestMiddleware1(),
-            ])
-        );
-
         $collector = new RouteCollector();
         $collector->middleware(TestMiddleware1::class);
 
@@ -354,9 +347,14 @@ final class RouteCollectionTest extends TestCase
         );
 
         $route = (new RouteCollection($collector))->getRoute('image');
-        $route->injectDispatcher($injectDispatcher);
 
-        $dispatcher = $route->getData('dispatcherWithMiddlewares');
+        $dispatcher = $this
+            ->getDispatcher(
+                new SimpleContainer([
+                    TestMiddleware1::class => new TestMiddleware1(),
+                ])
+            )
+            ->withMiddlewares($route->getData('enabledMiddlewares'));
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Stack is empty.');

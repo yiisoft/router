@@ -8,7 +8,7 @@ use InvalidArgumentException;
 use RuntimeException;
 use Stringable;
 use Yiisoft\Http\Method;
-use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
+use Yiisoft\Router\Internal\MiddlewareFilter;
 
 use function in_array;
 
@@ -28,10 +28,16 @@ final class Route implements Stringable
 
     /**
      * @var array[]|callable[]|string[]
+     * @psalm-var list<array|callable|string>
      */
-    private array $middlewareDefinitions = [];
+    private array $middlewares = [];
 
-    private array $disabledMiddlewareDefinitions = [];
+    private array $disabledMiddlewares = [];
+
+    /**
+     * @psalm-var list<array|callable|string>|null
+     */
+    private ?array $enabledMiddlewaresCache = null;
 
     /**
      * @var array<string,string>
@@ -44,69 +50,50 @@ final class Route implements Stringable
     private function __construct(
         private array $methods,
         private string $pattern,
-        private ?MiddlewareDispatcher $dispatcher = null
     ) {
     }
 
-    /**
-     * @psalm-assert MiddlewareDispatcher $this->dispatcher
-     */
-    public function injectDispatcher(MiddlewareDispatcher $dispatcher): void
+    public static function get(string $pattern): self
     {
-        $this->dispatcher = $dispatcher;
+        return self::methods([Method::GET], $pattern);
     }
 
-    public function withDispatcher(MiddlewareDispatcher $dispatcher): self
+    public static function post(string $pattern): self
     {
-        $route = clone $this;
-        $route->dispatcher = $dispatcher;
-        return $route;
+        return self::methods([Method::POST], $pattern);
     }
 
-    public static function get(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function put(string $pattern): self
     {
-        return self::methods([Method::GET], $pattern, $dispatcher);
+        return self::methods([Method::PUT], $pattern);
     }
 
-    public static function post(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function delete(string $pattern): self
     {
-        return self::methods([Method::POST], $pattern, $dispatcher);
+        return self::methods([Method::DELETE], $pattern);
     }
 
-    public static function put(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function patch(string $pattern): self
     {
-        return self::methods([Method::PUT], $pattern, $dispatcher);
+        return self::methods([Method::PATCH], $pattern);
     }
 
-    public static function delete(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function head(string $pattern): self
     {
-        return self::methods([Method::DELETE], $pattern, $dispatcher);
+        return self::methods([Method::HEAD], $pattern);
     }
 
-    public static function patch(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
+    public static function options(string $pattern): self
     {
-        return self::methods([Method::PATCH], $pattern, $dispatcher);
-    }
-
-    public static function head(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
-    {
-        return self::methods([Method::HEAD], $pattern, $dispatcher);
-    }
-
-    public static function options(string $pattern, ?MiddlewareDispatcher $dispatcher = null): self
-    {
-        return self::methods([Method::OPTIONS], $pattern, $dispatcher);
+        return self::methods([Method::OPTIONS], $pattern);
     }
 
     /**
      * @param string[] $methods
      */
-    public static function methods(
-        array $methods,
-        string $pattern,
-        ?MiddlewareDispatcher $dispatcher = null
-    ): self {
-        return new self($methods, $pattern, $dispatcher);
+    public static function methods(array $methods, string $pattern): self
+    {
+        return new self($methods, $pattern);
     }
 
     public function name(string $name): self
@@ -170,16 +157,20 @@ final class Route implements Stringable
      * Appends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed first.
      */
-    public function middleware(array|callable|string ...$middlewareDefinition): self
+    public function middleware(array|callable|string ...$definition): self
     {
         if ($this->actionAdded) {
             throw new RuntimeException('middleware() can not be used after action().');
         }
+
         $route = clone $this;
         array_push(
-            $route->middlewareDefinitions,
-            ...array_values($middlewareDefinition)
+            $route->middlewares,
+            ...array_values($definition)
         );
+
+        $route->enabledMiddlewaresCache = null;
+
         return $route;
     }
 
@@ -187,16 +178,20 @@ final class Route implements Stringable
      * Prepends a handler middleware definition that should be invoked for a matched route.
      * Last added handler will be executed first.
      */
-    public function prependMiddleware(array|callable|string ...$middlewareDefinition): self
+    public function prependMiddleware(array|callable|string ...$definition): self
     {
         if (!$this->actionAdded) {
             throw new RuntimeException('prependMiddleware() can not be used before action().');
         }
+
         $route = clone $this;
         array_unshift(
-            $route->middlewareDefinitions,
-            ...array_values($middlewareDefinition)
+            $route->middlewares,
+            ...array_values($definition)
         );
+
+        $route->enabledMiddlewaresCache = null;
+
         return $route;
     }
 
@@ -206,7 +201,7 @@ final class Route implements Stringable
     public function action(array|callable|string $middlewareDefinition): self
     {
         $route = clone $this;
-        $route->middlewareDefinitions[] = $middlewareDefinition;
+        $route->middlewares[] = $middlewareDefinition;
         $route->actionAdded = true;
         return $route;
     }
@@ -216,13 +211,16 @@ final class Route implements Stringable
      * It is useful to avoid invoking one of the parent group middleware for
      * a certain route.
      */
-    public function disableMiddleware(mixed ...$middlewareDefinition): self
+    public function disableMiddleware(mixed ...$definition): self
     {
         $route = clone $this;
         array_push(
-            $route->disabledMiddlewareDefinitions,
-            ...array_values($middlewareDefinition)
+            $route->disabledMiddlewares,
+            ...array_values($definition)
         );
+
+        $route->enabledMiddlewaresCache = null;
+
         return $route;
     }
 
@@ -237,8 +235,8 @@ final class Route implements Stringable
      *           (T is 'hosts' ? array<array-key, string> :
      *               (T is 'methods' ? array<array-key,string> :
      *                   (T is 'defaults' ? array<string,string> :
-     *                       (T is ('override'|'hasMiddlewares'|'hasDispatcher') ? bool :
-     *                           (T is 'dispatcherWithMiddlewares' ? MiddlewareDispatcher : mixed)
+     *                       (T is ('override'|'hasMiddlewares') ? bool :
+     *                           (T is 'enabledMiddlewares' ? array<array-key,array|callable|string> : mixed)
      *                       )
      *                   )
      *               )
@@ -257,9 +255,8 @@ final class Route implements Stringable
             'methods' => $this->methods,
             'defaults' => $this->defaults,
             'override' => $this->override,
-            'dispatcherWithMiddlewares' => $this->getDispatcherWithMiddlewares(),
-            'hasMiddlewares' => $this->middlewareDefinitions !== [],
-            'hasDispatcher' => $this->dispatcher !== null,
+            'hasMiddlewares' => $this->middlewares !== [],
+            'enabledMiddlewares' => $this->getEnabledMiddlewares(),
             default => throw new InvalidArgumentException('Unknown data key: ' . $key),
         };
     }
@@ -297,31 +294,24 @@ final class Route implements Stringable
             'defaults' => $this->defaults,
             'override' => $this->override,
             'actionAdded' => $this->actionAdded,
-            'middlewareDefinitions' => $this->middlewareDefinitions,
-            'disabledMiddlewareDefinitions' => $this->disabledMiddlewareDefinitions,
-            'middlewareDispatcher' => $this->dispatcher,
+            'middlewares' => $this->middlewares,
+            'disabledMiddlewares' => $this->disabledMiddlewares,
+            'enabledMiddlewares' => $this->getEnabledMiddlewares(),
         ];
     }
 
-    private function getDispatcherWithMiddlewares(): MiddlewareDispatcher
+    /**
+     * @return array[]|callable[]|string[]
+     * @psalm-return list<array|callable|string>
+     */
+    private function getEnabledMiddlewares(): array
     {
-        if ($this->dispatcher === null) {
-            throw new RuntimeException(sprintf('There is no dispatcher in the route %s.', $this->getData('name')));
+        if ($this->enabledMiddlewaresCache !== null) {
+            return $this->enabledMiddlewaresCache;
         }
 
-        // Don't add middlewares to dispatcher if we did it earlier.
-        // This improves performance in event-loop applications.
-        if ($this->dispatcher->hasMiddlewares()) {
-            return $this->dispatcher;
-        }
+        $this->enabledMiddlewaresCache = MiddlewareFilter::filter($this->middlewares, $this->disabledMiddlewares);
 
-        /** @var mixed $definition */
-        foreach ($this->middlewareDefinitions as $index => $definition) {
-            if (in_array($definition, $this->disabledMiddlewareDefinitions, true)) {
-                unset($this->middlewareDefinitions[$index]);
-            }
-        }
-
-        return $this->dispatcher = $this->dispatcher->withMiddlewares($this->middlewareDefinitions);
+        return $this->enabledMiddlewaresCache;
     }
 }

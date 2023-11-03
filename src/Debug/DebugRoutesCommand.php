@@ -14,6 +14,9 @@ use Yiisoft\Router\RouteCollectionInterface;
 use Yiisoft\VarDumper\VarDumper;
 use Yiisoft\Yii\Debug\Debugger;
 
+/**
+ * @codeCoverageIgnore
+ */
 final class DebugRoutesCommand extends Command
 {
     public const COMMAND_NAME = 'debug:routes';
