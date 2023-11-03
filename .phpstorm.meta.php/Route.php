@@ -7,14 +7,13 @@ namespace PHPSTORM_META {
     registerArgumentsSet(
         'routeDataKeys',
         'name',
+        'pattern',
         'host',
         'hosts',
-        'pattern',
         'methods',
-        'override',
         'defaults',
-        'dispatcherWithMiddlewares',
-        'hasDispatcher',
-        'hasMiddlewares'
+        'override',
+        'hasMiddlewares',
+        'enabledMiddlewares',
     );
 }
