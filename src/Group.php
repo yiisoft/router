@@ -31,6 +31,11 @@ final class Group
     private array $disabledMiddlewares = [];
 
     /**
+     * @psalm-var list<array|callable|string>|null
+     */
+    private ?array $enabledMiddlewaresCache = null;
+
+    /**
      * @var array|callable|string|null Middleware definition for CORS requests.
      */
     private $corsMiddleware = null;
@@ -93,6 +98,8 @@ final class Group
             ...array_values($definition)
         );
 
+        $new->enabledMiddlewaresCache = null;
+
         return $new;
     }
 
@@ -107,7 +114,10 @@ final class Group
             $new->middlewares,
             ...array_values($definition)
         );
+
         $new->middlewareAdded = true;
+        $new->enabledMiddlewaresCache = null;
+
         return $new;
     }
 
@@ -150,6 +160,9 @@ final class Group
             $new->disabledMiddlewares,
             ...array_values($definition),
         );
+
+        $new->enabledMiddlewaresCache = null;
+
         return $new;
     }
 
@@ -186,14 +199,23 @@ final class Group
         };
     }
 
+    /**
+     * @return array[]|callable[]|string[]
+     * @psalm-return list<array|callable|string>
+     */
     private function getEnabledMiddlewares(): array
     {
-        foreach ($this->middlewares as $index => $definition) {
-            if (in_array($definition, $this->disabledMiddlewares, true)) {
-                unset($this->middlewares[$index]);
-            }
+        if ($this->enabledMiddlewaresCache !== null) {
+            return $this->enabledMiddlewaresCache;
         }
 
-        return array_values($this->middlewares);
+        $this->enabledMiddlewaresCache = array_values(
+            array_filter(
+                $this->middlewares,
+                fn ($definition) => !in_array($definition, $this->disabledMiddlewares, true)
+            )
+        );
+
+        return $this->enabledMiddlewaresCache;
     }
 }

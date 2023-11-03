@@ -36,7 +36,7 @@ final class Route implements Stringable
     /**
      * @psalm-var list<array|callable|string>|null
      */
-    private ?array $enabledMiddlewares = null;
+    private ?array $enabledMiddlewaresCache = null;
 
     /**
      * @var array<string,string>
@@ -161,11 +161,15 @@ final class Route implements Stringable
         if ($this->actionAdded) {
             throw new RuntimeException('middleware() can not be used after action().');
         }
+
         $route = clone $this;
         array_push(
             $route->middlewares,
             ...array_values($definition)
         );
+
+        $route->enabledMiddlewaresCache = null;
+
         return $route;
     }
 
@@ -178,11 +182,15 @@ final class Route implements Stringable
         if (!$this->actionAdded) {
             throw new RuntimeException('prependMiddleware() can not be used before action().');
         }
+
         $route = clone $this;
         array_unshift(
             $route->middlewares,
             ...array_values($definition)
         );
+
+        $route->enabledMiddlewaresCache = null;
+
         return $route;
     }
 
@@ -209,6 +217,9 @@ final class Route implements Stringable
             $route->disabledMiddlewares,
             ...array_values($definition)
         );
+
+        $route->enabledMiddlewaresCache = null;
+
         return $route;
     }
 
@@ -294,17 +305,17 @@ final class Route implements Stringable
      */
     private function getEnabledMiddlewares(): array
     {
-        if ($this->enabledMiddlewares !== null) {
-            return $this->enabledMiddlewares;
+        if ($this->enabledMiddlewaresCache !== null) {
+            return $this->enabledMiddlewaresCache;
         }
 
-        $this->enabledMiddlewares = array_values(
+        $this->enabledMiddlewaresCache = array_values(
             array_filter(
                 $this->middlewares,
                 fn ($definition) => !in_array($definition, $this->disabledMiddlewares, true)
             )
         );
 
-        return $this->enabledMiddlewares;
+        return $this->enabledMiddlewaresCache;
     }
 }

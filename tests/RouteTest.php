@@ -298,9 +298,56 @@ final class RouteTest extends TestCase
         $this->assertSame('123', (string) $response->getBody());
     }
 
+    public function testPrependMiddlewaresAfterGetEnabledMiddlewares(): void
+    {
+        $route = Route::get('/')
+            ->middleware(TestMiddleware3::class)
+            ->disableMiddleware(TestMiddleware1::class)
+            ->action([TestController::class, 'index']);
+
+        $route->getData('enabledMiddlewares');
+
+        $route = $route->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class);
+
+        $this->assertSame(
+            [TestMiddleware2::class, TestMiddleware3::class, [TestController::class, 'index']],
+            $route->getData('enabledMiddlewares')
+        );
+    }
+
+    public function testAddMiddlewareAfterGetEnabledMiddlewares(): void
+    {
+        $route = Route::get('/')
+            ->middleware(TestMiddleware3::class);
+
+        $route->getData('enabledMiddlewares');
+
+        $route = $route->middleware(TestMiddleware1::class, TestMiddleware2::class);
+
+        $this->assertSame(
+            [TestMiddleware3::class, TestMiddleware1::class,  TestMiddleware2::class],
+            $route->getData('enabledMiddlewares')
+        );
+    }
+
+    public function testDisableMiddlewareAfterGetEnabledMiddlewares(): void
+    {
+        $route = Route::get('/')
+            ->middleware(TestMiddleware1::class, TestMiddleware2::class, TestMiddleware3::class);
+
+        $route->getData('enabledMiddlewares');
+
+        $route = $route->disableMiddleware(TestMiddleware1::class, TestMiddleware2::class);
+
+        $this->assertSame(
+            [TestMiddleware3::class],
+            $route->getData('enabledMiddlewares')
+        );
+    }
+
     public function testMiddlewaresWithKeys(): void
     {
-        $group = Route::get('/')
+        $route = Route::get('/')
             ->middleware(m3: TestMiddleware3::class)
             ->action([TestController::class, 'index'])
             ->prependMiddleware(m1: TestMiddleware1::class, m2: TestMiddleware2::class)
@@ -308,7 +355,7 @@ final class RouteTest extends TestCase
 
         $this->assertSame(
             [TestMiddleware2::class, TestMiddleware3::class, [TestController::class, 'index']],
-            $group->getData('enabledMiddlewares')
+            $route->getData('enabledMiddlewares')
         );
     }
 
