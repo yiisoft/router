@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use RuntimeException;
 use Stringable;
 use Yiisoft\Http\Method;
+use Yiisoft\Router\Internal\MiddlewareFilter;
 
 use function in_array;
 
@@ -309,12 +310,7 @@ final class Route implements Stringable
             return $this->enabledMiddlewaresCache;
         }
 
-        $this->enabledMiddlewaresCache = array_values(
-            array_filter(
-                $this->middlewares,
-                fn ($definition) => !in_array($definition, $this->disabledMiddlewares, true)
-            )
-        );
+        $this->enabledMiddlewaresCache = MiddlewareFilter::filter($this->middlewares, $this->disabledMiddlewares);
 
         return $this->enabledMiddlewaresCache;
     }

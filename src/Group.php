@@ -6,6 +6,7 @@ namespace Yiisoft\Router;
 
 use InvalidArgumentException;
 use RuntimeException;
+use Yiisoft\Router\Internal\MiddlewareFilter;
 
 use function in_array;
 
@@ -18,6 +19,7 @@ final class Group
 
     /**
      * @var array[]|callable[]|string[]
+     * @psalm-var list<array|callable|string>
      */
     private array $middlewares = [];
 
@@ -209,12 +211,7 @@ final class Group
             return $this->enabledMiddlewaresCache;
         }
 
-        $this->enabledMiddlewaresCache = array_values(
-            array_filter(
-                $this->middlewares,
-                fn ($definition) => !in_array($definition, $this->disabledMiddlewares, true)
-            )
-        );
+        $this->enabledMiddlewaresCache = MiddlewareFilter::filter($this->middlewares, $this->disabledMiddlewares);
 
         return $this->enabledMiddlewaresCache;
     }
