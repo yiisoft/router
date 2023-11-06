@@ -17,13 +17,15 @@ use function in_array;
  */
 final class Route implements Stringable
 {
-    private ?string $name = null;
+    /**
+     * @var string[]
+     */
+    private array $methods = [];
 
     /**
      * @var string[]
      */
     private array $hosts = [];
-    private bool $override = false;
     private bool $actionAdded = false;
 
     /**
@@ -32,25 +34,50 @@ final class Route implements Stringable
      */
     private array $middlewares = [];
 
-    private array $disabledMiddlewares = [];
-
     /**
      * @psalm-var list<array|callable|string>|null
      */
     private ?array $enabledMiddlewaresCache = null;
 
     /**
-     * @var array<string,string>
+     * @var array<string,scalar|Stringable|null>
      */
     private array $defaults = [];
 
     /**
-     * @param string[] $methods
+     * @param array|callable|string|null $action Action handler. It is a primary middleware definition that
+     * should be invoked last for a matched route.
+     * @param array<string,scalar|Stringable|null> $defaults Parameter default values indexed by parameter names.
+     * @param bool $override Marks route as override. When added it will replace existing route with the same name.
+     * @param array $disabledMiddlewares Excludes middleware from being invoked when action is handled.
+     * It is useful to avoid invoking one of the parent group middleware for
+     * a certain route.
      */
-    private function __construct(
-        private array $methods,
+    public function __construct(
+        array $methods,
         private string $pattern,
+        private ?string $name = null,
+        array|callable|string $action = null,
+        array $middlewares = [],
+        array $defaults = [],
+        array $hosts = [],
+        private bool $override = false,
+        private array $disabledMiddlewares = [],
     ) {
+        if (empty($methods)) {
+            throw new InvalidArgumentException('$methods cannot be empty.');
+        }
+        $this->assertListOfStrings($methods, 'methods');
+        $this->assertMiddlewares($middlewares);
+        $this->assertListOfStrings($hosts, 'hosts');
+        $this->methods = $methods;
+        $this->middlewares = $middlewares;
+        $this->hosts = $hosts;
+        $this->defaults = array_map('\strval', $defaults);
+        if (!empty($action)) {
+            $this->middlewares[] = $action;
+            $this->actionAdded = true;
+        }
     }
 
     public static function get(string $pattern): self
@@ -93,7 +120,7 @@ final class Route implements Stringable
      */
     public static function methods(array $methods, string $pattern): self
     {
-        return new self($methods, $pattern);
+        return new self(methods: $methods, pattern: $pattern);
     }
 
     public function name(string $name): self
@@ -271,7 +298,7 @@ final class Route implements Stringable
             $result .= implode(',', $this->methods) . ' ';
         }
 
-        if ($this->hosts) {
+        if (!empty($this->hosts)) {
             $quoted = array_map(static fn ($host) => preg_quote($host, '/'), $this->hosts);
 
             if (!preg_match('/' . implode('|', $quoted) . '/', $this->pattern)) {
@@ -313,5 +340,38 @@ final class Route implements Stringable
         $this->enabledMiddlewaresCache = MiddlewareFilter::filter($this->middlewares, $this->disabledMiddlewares);
 
         return $this->enabledMiddlewaresCache;
+    }
+
+    /**
+     * @psalm-assert array<string> $items
+     */
+    private function assertListOfStrings(array $items, string $argument): void
+    {
+        foreach ($items as $item) {
+            if (!is_string($item)) {
+                throw new \InvalidArgumentException('Invalid $' . $argument . ' provided, list of string expected.');
+            }
+        }
+    }
+
+    /**
+     * @psalm-assert list<array|callable|string> $middlewares
+     */
+    private function assertMiddlewares(array $middlewares): void
+    {
+        /** @var mixed $middleware */
+        foreach ($middlewares as $middleware) {
+            if (is_string($middleware)) {
+                continue;
+            }
+
+            if (is_callable($middleware) || is_array($middleware)) {
+                continue;
+            }
+
+            throw new \InvalidArgumentException(
+                'Invalid $middlewares provided, list of string or array or callable expected.'
+            );
+        }
     }
 }

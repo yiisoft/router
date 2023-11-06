@@ -243,6 +243,15 @@ final class GroupTest extends TestCase
         $this->assertSame(403, $response->getStatusCode());
     }
 
+    public function testInvalidMiddlewares(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid $middlewares provided, list of string or array or callable expected.');
+
+        $middleware = static fn () => new Response();
+        $group = new Group('/api', [$middleware, new \stdClass()]);
+    }
+
     public function testAddGroup(): void
     {
         $logoutRoute = Route::post('/logout');
@@ -302,6 +311,14 @@ final class GroupTest extends TestCase
         $group = Group::create()->hosts('https://yiiframework.com/', 'https://yiiframework.ru/');
 
         $this->assertSame(['https://yiiframework.com', 'https://yiiframework.ru'], $group->getData('hosts'));
+    }
+
+    public function testInvalidHosts(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid $hosts provided, list of string expected.');
+
+        $group = new Group(hosts: ['https://yiiframework.com/', 123]);
     }
 
     public function testName(): void

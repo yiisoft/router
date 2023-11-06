@@ -28,6 +28,29 @@ final class RouteTest extends TestCase
 {
     use AssertTrait;
 
+    public function testSimpleInstance(): void
+    {
+        $route = new Route(
+            methods: [Method::GET],
+            pattern: '/',
+            action: [TestController::class, 'index'],
+            middlewares: [TestMiddleware1::class],
+            override: true,
+        );
+
+        $this->assertInstanceOf(Route::class, $route);
+        $this->assertCount(2, $route->getData('enabledMiddlewares'));
+        $this->assertTrue($route->getData('override'));
+    }
+
+    public function testEmptyMethods(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('$methods cannot be empty.');
+
+        new Route([], '');
+    }
+
     public function testName(): void
     {
         $route = Route::get('/')->name('test.route');
@@ -371,6 +394,14 @@ final class RouteTest extends TestCase
         );
     }
 
+    public function testInvalidMiddlewares(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid $middlewares provided, list of string or array or callable expected.');
+
+        $route = new Route([Method::GET], '/', middlewares: [static fn () => new Response(), (object) ['test' => 1]]);
+    }
+
     public function testDebugInfo(): void
     {
         $route = Route::get('/')
@@ -436,6 +467,14 @@ EOL;
         $route = Route::get('/')->hosts('a.com', 'b.com', 'a.com');
 
         $this->assertSame(['a.com', 'b.com'], $route->getData('hosts'));
+    }
+
+    public function testInvalidHosts(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid $hosts provided, list of string expected.');
+
+        $route = new Route([Method::GET], '/', hosts: ['b.com', 123]);
     }
 
     public function testImmutability(): void
