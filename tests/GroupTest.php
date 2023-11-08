@@ -249,7 +249,7 @@ final class GroupTest extends TestCase
         $this->expectExceptionMessage('Invalid $middlewares provided, list of string or array or callable expected.');
 
         $middleware = static fn () => new Response();
-        $group = new Group('/api', [$middleware, new \stdClass()]);
+        $group = new Group('/api', middlewares: [$middleware, new \stdClass()]);
     }
 
     public function testAddGroup(): void

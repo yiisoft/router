@@ -47,17 +47,26 @@ final class Group
      */
     public function __construct(
         private ?string $prefix = null,
+        private ?string $namePrefix = null,
+        array $routes = [],
         array $middlewares = [],
         array $hosts = [],
-        private ?string $namePrefix = null,
         private array $disabledMiddlewares = [],
         array|callable|string|null $corsMiddleware = null
     ) {
+        $this->assertRoutes($routes);
         $this->assertMiddlewares($middlewares);
         $this->assertHosts($hosts);
+        $this->routes = $routes;
         $this->middlewares = $middlewares;
         $this->hosts = $hosts;
         $this->corsMiddleware = $corsMiddleware;
+        if (!empty($routes)) {
+            $this->routesAdded = true;
+        }
+        if (!empty($middlewares)) {
+            $this->middlewareAdded = true;
+        }
     }
 
     /**
@@ -254,6 +263,23 @@ final class Group
 
             throw new \InvalidArgumentException(
                 'Invalid $middlewares provided, list of string or array or callable expected.'
+            );
+        }
+    }
+
+    /**
+     * @psalm-assert array<Route|Group> $routes
+     */
+    private function assertRoutes(array $routes): void
+    {
+        /** @var mixed $route */
+        foreach ($routes as $route) {
+            if ($route instanceof Route || $route instanceof self) {
+                continue;
+            }
+
+            throw new \InvalidArgumentException(
+                'Invalid $routes provided, array of `Route` or `Group` expected.'
             );
         }
     }
