@@ -52,8 +52,8 @@ final class DebugRoutesCommand extends Command
                 $data = $route->__debugInfo();
                 $action = '';
                 $middlewares = [];
-                if (!empty($data['middlewareDefinitions'])) {
-                    $middlewareDefinitions = $data['middlewareDefinitions'];
+                if (!empty($data['enabledMiddlewares'])) {
+                    $middlewareDefinitions = $data['enabledMiddlewares'];
                     $action = array_pop($middlewareDefinitions);
                     $middlewares = $middlewareDefinitions;
                 }
@@ -91,8 +91,8 @@ final class DebugRoutesCommand extends Command
         foreach ($this->routeCollection->getRoutes() as $route) {
             $data = $route->__debugInfo();
             $action = '';
-            if (!empty($data['middlewareDefinitions'])) {
-                $middlewareDefinitions = $data['middlewareDefinitions'];
+            if (!empty($data['enabledMiddlewares'])) {
+                $middlewareDefinitions = $data['enabledMiddlewares'];
                 $action = array_pop($middlewareDefinitions);
             }
             $rows[] = [
