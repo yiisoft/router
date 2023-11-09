@@ -12,7 +12,6 @@ use Yiisoft\Router\Builder\GroupBuilder;
 use Yiisoft\Router\Builder\RouteBuilder;
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\Debug\RouterCollector;
-use Yiisoft\Router\Group;
 use Yiisoft\Router\MatchingResult;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
