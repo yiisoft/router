@@ -8,6 +8,8 @@ use InvalidArgumentException;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Yiisoft\Http\Method;
 
+use Yiisoft\Router\Builder\RouteBuilder;
+
 use function array_key_exists;
 use function in_array;
 use function is_array;
@@ -65,13 +67,16 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * Build routes array.
      *
-     * @param Group[]|Route[] $items
+     * @param Group[]|Route[]|RoutableInterface[] $items
      */
     private function injectItems(array $items): void
     {
         foreach ($items as $item) {
+            if ($item instanceof RoutableInterface) {
+                $item = $item->toRoute();
+            }
             if (!$this->isStaticRoute($item)) {
-                $item = $item->prependMiddleware(...$this->collector->getMiddlewareDefinitions());
+                $item->setMiddlewares(array_merge($this->collector->getMiddlewares(), $item->getMiddlewares()));
             }
             $this->injectItem($item);
         }
@@ -87,9 +92,9 @@ final class RouteCollection implements RouteCollectionInterface
             return;
         }
 
-        $routeName = $route->getData('name');
+        $routeName = $route->getName();
         $this->items[] = $routeName;
-        if (isset($this->routes[$routeName]) && !$route->getData('override')) {
+        if (isset($this->routes[$routeName]) && !$route->isOverride()) {
             throw new InvalidArgumentException("A route with name '$routeName' already exists.");
         }
         $this->routes[$routeName] = $route;
@@ -102,57 +107,61 @@ final class RouteCollection implements RouteCollectionInterface
      */
     private function injectGroup(Group $group, array &$tree, string $prefix = '', string $namePrefix = ''): void
     {
-        $prefix .= (string) $group->getData('prefix');
-        $namePrefix .= (string) $group->getData('namePrefix');
-        $items = $group->getData('routes');
+        $prefix .= (string) $group->getPrefix();
+        $namePrefix .= (string) $group->getNamePrefix();
+        $items = $group->getRoutes();
         $pattern = null;
         $hosts = [];
         foreach ($items as $item) {
+            if ($item instanceof RoutableInterface) {
+                $item = $item->toRoute();
+            }
             if (!$this->isStaticRoute($item)) {
-                $item = $item->prependMiddleware(...$group->getData('enabledMiddlewares'));
+                $item = $item->setMiddlewares(array_merge($group->getEnabledMiddlewares(), $item->getMiddlewares()));
             }
 
-            if (!empty($group->getData('hosts')) && empty($item->getData('hosts'))) {
-                $item = $item->hosts(...$group->getData('hosts'));
+            if (!empty($group->getHosts()) && empty($item->getHosts())) {
+                $item->setHosts($group->getHosts());
             }
 
             if ($item instanceof Group) {
-                if ($group->getData('hasCorsMiddleware')) {
-                    $item = $item->withCors($group->getData('corsMiddleware'));
+                if ($group->getCorsMiddleware() !== null) {
+                    $item->setCorsMiddleware($group->getCorsMiddleware());
                 }
-                if (empty($item->getData('prefix'))) {
+                if (empty($item->getPrefix())) {
                     $this->injectGroup($item, $tree, $prefix, $namePrefix);
                     continue;
                 }
                 /** @psalm-suppress PossiblyNullArrayOffset Checked group prefix on not empty above. */
-                if (!isset($tree[$item->getData('prefix')])) {
-                    $tree[$item->getData('prefix')] = [];
+                if (!isset($tree[$item->getPrefix()])) {
+                    $tree[$item->getPrefix()] = [];
                 }
                 /**
                  * @psalm-suppress MixedArgumentTypeCoercion
                  * @psalm-suppress MixedArgument,PossiblyNullArrayOffset
                  * Checked group prefix on not empty above.
                  */
-                $this->injectGroup($item, $tree[$item->getData('prefix')], $prefix, $namePrefix);
+                $this->injectGroup($item, $tree[$item->getPrefix()], $prefix, $namePrefix);
                 continue;
             }
 
-            $modifiedItem = $item->pattern($prefix . $item->getData('pattern'));
+            /** @var Route $item */
+            $item->setPattern($prefix . $item->getPattern());
 
-            if (!str_contains($modifiedItem->getData('name'), implode(', ', $modifiedItem->getData('methods')))) {
-                $modifiedItem = $modifiedItem->name($namePrefix . $modifiedItem->getData('name'));
+            if (!str_contains($item->getName(), implode(', ', $item->getMethods()))) {
+                $item->setName($namePrefix . $item->getName());
             }
 
-            if ($group->getData('hasCorsMiddleware')) {
-                $this->processCors($group, $hosts, $pattern, $modifiedItem, $tree);
+            if ($group->getCorsMiddleware() !== null) {
+                $this->processCors($group, $hosts, $pattern, $item, $tree);
             }
 
-            $routeName = $modifiedItem->getData('name');
+            $routeName = $item->getName();
             $tree[] = $routeName;
-            if (isset($this->routes[$routeName]) && !$modifiedItem->getData('override')) {
+            if (isset($this->routes[$routeName]) && !$item->isOverride()) {
                 throw new InvalidArgumentException("A route with name '$routeName' already exists.");
             }
-            $this->routes[$routeName] = $modifiedItem;
+            $this->routes[$routeName] = $item;
         }
     }
 
@@ -163,30 +172,31 @@ final class RouteCollection implements RouteCollectionInterface
         Group $group,
         array &$hosts,
         ?string &$pattern,
-        Route &$modifiedItem,
+        Route $modifiedItem,
         array &$tree
     ): void {
         /** @var array|callable|string $middleware */
-        $middleware = $group->getData('corsMiddleware');
-        $isNotDuplicate = !in_array(Method::OPTIONS, $modifiedItem->getData('methods'), true)
-            && ($pattern !== $modifiedItem->getData('pattern') || $hosts !== $modifiedItem->getData('hosts'));
+        $middleware = $group->getCorsMiddleware();
+        $isNotDuplicate = !in_array(Method::OPTIONS, $modifiedItem->getMethods(), true)
+            && ($pattern !== $modifiedItem->getPattern() || $hosts !== $modifiedItem->getHosts());
 
-        $pattern = $modifiedItem->getData('pattern');
-        $hosts = $modifiedItem->getData('hosts');
-        $optionsRoute = Route::options($pattern);
+        $pattern = $modifiedItem->getPattern();
+        $hosts = $modifiedItem->getHosts();
+        $optionsRoute = new Route([Method::OPTIONS], $pattern);
         if (!empty($hosts)) {
-            $optionsRoute = $optionsRoute->hosts(...$hosts);
+            $optionsRoute->setHosts($hosts);
         }
         if ($isNotDuplicate) {
-            $optionsRoute = $optionsRoute->middleware($middleware);
-
-            $routeName = $optionsRoute->getData('name');
-            $tree[] = $routeName;
-            $this->routes[$routeName] = $optionsRoute->action(
+            $optionsRoute->setMiddlewares([$middleware]);
+            $optionsRoute->setAction(
                 static fn (ResponseFactoryInterface $responseFactory) => $responseFactory->createResponse(204)
             );
+
+            $routeName = $optionsRoute->getName();
+            $tree[] = $routeName;
+            $this->routes[$routeName] = $optionsRoute;
         }
-        $modifiedItem = $modifiedItem->prependMiddleware($middleware);
+        $modifiedItem->setMiddlewares(array_merge([$middleware], $modifiedItem->getMiddlewares()));
     }
 
     /**
@@ -208,8 +218,8 @@ final class RouteCollection implements RouteCollectionInterface
         return $tree;
     }
 
-    private function isStaticRoute(Group|Route $item): bool
+    private function isStaticRoute(Group|Route|RoutableInterface $item): bool
     {
-        return $item instanceof Route && !$item->getData('hasMiddlewares');
+        return $item instanceof Route && empty($item->getMiddlewares()) && $item->getAction() === null;
     }
 }

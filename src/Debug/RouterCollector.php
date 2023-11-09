@@ -55,10 +55,10 @@ final class RouterCollector implements SummaryCollectorInterface
         if ($currentRoute !== null && $route !== null) {
             $result['currentRoute'] = [
                 'matchTime' => $this->matchTime,
-                'name' => $route->getData('name'),
-                'pattern' => $route->getData('pattern'),
+                'name' => $route->getName(),
+                'pattern' => $route->getPattern(),
                 'arguments' => $currentRoute->getArguments(),
-                'host' => $route->getData('host'),
+                'hosts' => implode(', ', $route->getHosts()),
                 'uri' => (string) $currentRoute->getUri(),
                 'action' => $action,
                 'middlewares' => $middlewares,
@@ -91,10 +91,10 @@ final class RouterCollector implements SummaryCollectorInterface
         return [
             'router' => [
                 'matchTime' => $this->matchTime,
-                'name' => $route->getData('name'),
-                'pattern' => $route->getData('pattern'),
+                'name' => $route->getName(),
+                'pattern' => $route->getPattern(),
                 'arguments' => $currentRoute->getArguments(),
-                'host' => $route->getData('host'),
+                'hosts' => implode(', ', $route->getHosts()),
                 'uri' => (string) $currentRoute->getUri(),
                 'action' => $action,
                 'middlewares' => $middlewares,
@@ -134,15 +134,7 @@ final class RouterCollector implements SummaryCollectorInterface
         if ($route === null) {
             return [[], null];
         }
-        $reflection = new ReflectionObject($route);
 
-        $reflectionProperty = $reflection->getProperty('middlewareDefinitions');
-        $reflectionProperty->setAccessible(true);
-        /**
-         * @var array[]|callable[]|string[] $middlewareDefinitions
-         */
-        $middlewareDefinitions = $reflectionProperty->getValue($route);
-        $action = array_pop($middlewareDefinitions);
-        return [$middlewareDefinitions, $action];
+        return [$route->getMiddlewares(), $route->getAction()];
     }
 }

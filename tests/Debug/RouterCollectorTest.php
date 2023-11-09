@@ -7,6 +7,9 @@ namespace Yiisoft\Router\Tests\Debug;
 use PHPUnit\Framework\MockObject\MockObject;
 use Yiisoft\Di\Container;
 use Yiisoft\Di\ContainerConfig;
+use Yiisoft\Http\Method;
+use Yiisoft\Router\Builder\GroupBuilder;
+use Yiisoft\Router\Builder\RouteBuilder;
 use Yiisoft\Router\Debug\RouterCollector;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
@@ -76,8 +79,8 @@ final class RouterCollectorTest extends AbstractCollectorTestCase
     private function createRoutes(): array
     {
         return [
-            Route::get('/'),
-            Group::create('/api')->routes(Route::get('/v1')),
+            new Route([Method::GET], '/'),
+            GroupBuilder::create('/api')->routes(RouteBuilder::get('/v1')),
         ];
     }
 }

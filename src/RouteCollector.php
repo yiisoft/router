@@ -7,16 +7,16 @@ namespace Yiisoft\Router;
 final class RouteCollector implements RouteCollectorInterface
 {
     /**
-     * @var Group[]|Route[]
+     * @var Group[]|Route[]|RoutableInterface[]
      */
     private array $items = [];
 
     /**
      * @var array[]|callable[]|string[]
      */
-    private array $middlewareDefinitions = [];
+    private array $middlewares = [];
 
-    public function addRoute(Route|Group ...$routes): RouteCollectorInterface
+    public function addRoute(Route|Group|RoutableInterface ...$routes): RouteCollectorInterface
     {
         array_push(
             $this->items,
@@ -25,20 +25,20 @@ final class RouteCollector implements RouteCollectorInterface
         return $this;
     }
 
-    public function middleware(array|callable|string ...$middlewareDefinition): RouteCollectorInterface
+    public function middleware(array|callable|string ...$definition): RouteCollectorInterface
     {
         array_push(
-            $this->middlewareDefinitions,
-            ...array_values($middlewareDefinition)
+            $this->middlewares,
+            ...array_values($definition)
         );
         return $this;
     }
 
-    public function prependMiddleware(array|callable|string ...$middlewareDefinition): RouteCollectorInterface
+    public function prependMiddleware(array|callable|string ...$definition): RouteCollectorInterface
     {
         array_unshift(
-            $this->middlewareDefinitions,
-            ...array_values($middlewareDefinition)
+            $this->middlewares,
+            ...array_values($definition)
         );
         return $this;
     }
@@ -48,8 +48,8 @@ final class RouteCollector implements RouteCollectorInterface
         return $this->items;
     }
 
-    public function getMiddlewareDefinitions(): array
+    public function getMiddlewares(): array
     {
-        return $this->middlewareDefinitions;
+        return $this->middlewares;
     }
 }
