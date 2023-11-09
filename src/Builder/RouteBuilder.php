@@ -10,8 +10,6 @@ use Yiisoft\Router\Group;
 use Yiisoft\Router\RoutableInterface;
 use Yiisoft\Router\Route;
 
-use function in_array;
-
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
  */
@@ -20,7 +18,7 @@ final class RouteBuilder implements RoutableInterface
     private ?string $name = null;
 
     /**
-     * @var array|string|callable|null
+     * @var array|callable|string|null
      */
     private $action = null;
 

@@ -24,7 +24,7 @@ interface RouteCollectorInterface
     public function prependMiddleware(array|callable|string ...$definition): self;
 
     /**
-     * @return Group[]|Route[]|RoutableInterface[]
+     * @return Group[]|RoutableInterface[]|Route[]
      */
     public function getItems(): array;
 

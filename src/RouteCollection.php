@@ -8,8 +8,6 @@ use InvalidArgumentException;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Yiisoft\Http\Method;
 
-use Yiisoft\Router\Builder\RouteBuilder;
-
 use function array_key_exists;
 use function in_array;
 use function is_array;
@@ -67,7 +65,7 @@ final class RouteCollection implements RouteCollectionInterface
     /**
      * Build routes array.
      *
-     * @param Group[]|Route[]|RoutableInterface[] $items
+     * @param Group[]|RoutableInterface[]|Route[] $items
      */
     private function injectItems(array $items): void
     {

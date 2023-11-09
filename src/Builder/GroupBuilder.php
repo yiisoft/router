@@ -12,7 +12,7 @@ use Yiisoft\Router\Route;
 final class GroupBuilder implements RoutableInterface
 {
     /**
-     * @var Group[]|Route[]|RoutableInterface[]
+     * @var Group[]|RoutableInterface[]|Route[]
      */
     private array $routes = [];
 
