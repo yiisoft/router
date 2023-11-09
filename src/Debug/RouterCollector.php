@@ -12,9 +12,6 @@ use Yiisoft\Router\RouteCollectionInterface;
 use Yiisoft\Yii\Debug\Collector\CollectorTrait;
 use Yiisoft\Yii\Debug\Collector\SummaryCollectorInterface;
 
-/**
- * @codeCoverageIgnore
- */
 final class RouterCollector implements SummaryCollectorInterface
 {
     use CollectorTrait;
