@@ -156,9 +156,7 @@ final class Group
             return $this->enabledMiddlewaresCache;
         }
 
-        $this->enabledMiddlewaresCache = MiddlewareFilter::filter($this->middlewares, $this->disabledMiddlewares);
-
-        return $this->enabledMiddlewaresCache;
+        return $this->enabledMiddlewaresCache = MiddlewareFilter::filter($this->middlewares, $this->disabledMiddlewares);
     }
 
     /**

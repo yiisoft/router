@@ -7,7 +7,9 @@ namespace Yiisoft\Router\Tests;
 use InvalidArgumentException;
 use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
+use Yiisoft\Http\Method;
 use Yiisoft\Router\Group;
+use Yiisoft\Router\Route;
 use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
 use Yiisoft\Router\Tests\Support\TestMiddleware3;
@@ -106,5 +108,20 @@ final class GroupTest extends TestCase
         $group = (new Group())->setCorsMiddleware($cors = static fn () => new Response());
 
         $this->assertSame($cors, $group->getCorsMiddleware());
+    }
+
+    public function testRoutes(): void
+    {
+        $group = (new Group())->setRoutes($routes = [new Route([Method::GET], '')]);
+
+        $this->assertSame($routes, $group->getRoutes());
+    }
+
+    public function testInvalidRoutes(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid $routes provided, array of `Route` or `Group` or `RoutableInterface` instance expected.');
+
+        $group = (new Group())->setRoutes([new Route([Method::GET], ''), new \stdClass()]);
     }
 }

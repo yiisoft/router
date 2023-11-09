@@ -65,9 +65,6 @@ final class Route implements Stringable
         private bool $override = false,
         private array $disabledMiddlewares = [],
     ) {
-        if (empty($methods)) {
-            throw new InvalidArgumentException('$methods cannot be empty.');
-        }
         $this->setMethods($methods);
         $this->action = $action;
         $this->setMiddlewares($middlewares);
@@ -146,6 +143,9 @@ final class Route implements Stringable
 
     public function setMethods(array $methods): self
     {
+        if (empty($methods)) {
+            throw new InvalidArgumentException('$methods cannot be empty.');
+        }
         $this->assertListOfStrings($methods, 'methods');
         $this->methods = $methods;
         return $this;
@@ -184,9 +184,9 @@ final class Route implements Stringable
     {
         /** @var mixed $value */
         foreach ($defaults as $key => $value) {
-            if (!is_scalar($value) && !($value instanceof Stringable)) {
+            if (!is_scalar($value) && !($value instanceof Stringable) && null !== $value) {
                 throw new \InvalidArgumentException(
-                    'Invalid $defaults provided, list of scalar or `Stringable` instance expected.'
+                    'Invalid $defaults provided, indexed array of scalar or `Stringable` or null expected.'
                 );
             }
             $this->defaults[$key] = (string) $value;

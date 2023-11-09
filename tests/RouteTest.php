@@ -48,6 +48,20 @@ final class RouteTest extends TestCase
         $this->assertSame(TestMiddleware2::class, $route->getDisabledMiddlewares()[0]);
     }
 
+    public function testEnabledMiddlewares(): void
+    {
+        $route = new Route(
+            methods: [Method::GET],
+            pattern: '/',
+            middlewares: [TestMiddleware1::class, TestMiddleware2::class],
+            override: true,
+        );
+        $route->setDisabledMiddlewares([TestMiddleware2::class]);
+
+        $this->assertCount(1, $route->getEnabledMiddlewares());
+        $this->assertSame(TestMiddleware1::class, $route->getEnabledMiddlewares()[0]);
+    }
+
     public function testEmptyMethods(): void
     {
         $this->expectException(\InvalidArgumentException::class);
@@ -165,6 +179,14 @@ final class RouteTest extends TestCase
         $this->expectExceptionMessage('Invalid $middlewares provided, list of string or array or callable expected.');
 
         $route = new Route([Method::GET], '/', middlewares: [static fn () => new Response(), (object) ['test' => 1]]);
+    }
+
+    public function testInvalidDefaults(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid $defaults provided, indexed array of scalar or `Stringable` or null expected.');
+
+        $route = new Route([Method::GET], '/', defaults: ['test' => 1, 'foo' => ['bar']]);
     }
 
     public function testDebugInfo(): void
