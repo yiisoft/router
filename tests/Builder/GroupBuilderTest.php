@@ -273,7 +273,6 @@ final class GroupBuilderTest extends TestCase
         $this->assertSame('api', $group->toRoute()->getNamePrefix());
     }
 
-
     public function testWithCors(): void
     {
         $group = Group::create()

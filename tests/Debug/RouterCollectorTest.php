@@ -11,7 +11,6 @@ use Yiisoft\Http\Method;
 use Yiisoft\Router\Builder\GroupBuilder;
 use Yiisoft\Router\Builder\RouteBuilder;
 use Yiisoft\Router\Debug\RouterCollector;
-use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectionInterface;

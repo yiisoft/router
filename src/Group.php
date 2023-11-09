@@ -9,7 +9,7 @@ use Yiisoft\Router\Internal\MiddlewareFilter;
 final class Group
 {
     /**
-     * @var Group[]|Route[]|RoutableInterface[]
+     * @var Group[]|RoutableInterface[]|Route[]
      */
     private array $routes = [];
 
@@ -193,7 +193,7 @@ final class Group
      */
     private function assertRoutes(array $routes): void
     {
-        /** @var Route|Group|RoutableInterface $route */
+        /** @var Group|RoutableInterface|Route $route */
         foreach ($routes as $route) {
             if ($route instanceof Route || $route instanceof self || $route instanceof RoutableInterface) {
                 continue;

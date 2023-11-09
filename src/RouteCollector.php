@@ -7,7 +7,7 @@ namespace Yiisoft\Router;
 final class RouteCollector implements RouteCollectorInterface
 {
     /**
-     * @var Group[]|Route[]|RoutableInterface[]
+     * @var Group[]|RoutableInterface[]|Route[]
      */
     private array $items = [];
 

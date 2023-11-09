@@ -52,7 +52,7 @@ final class GroupTest extends TestCase
 
     public function testDisableMiddlewareAfterGetEnabledMiddlewares(): void
     {
-        $group = (new Group)
+        $group = (new Group())
             ->setMiddlewares([TestMiddleware1::class, TestMiddleware2::class, TestMiddleware3::class]);
 
         $group->getEnabledMiddlewares();
