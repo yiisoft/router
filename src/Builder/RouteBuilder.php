@@ -11,7 +11,7 @@ use Yiisoft\Router\RoutableInterface;
 use Yiisoft\Router\Route;
 
 /**
- * Route defines a mapping from URL to callback / name and vice versa.
+ * RouteBuilder allows you to build routes using a flexible syntax.
  */
 final class RouteBuilder implements RoutableInterface
 {

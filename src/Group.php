@@ -109,8 +109,10 @@ final class Group
 
     public function setHosts(array $hosts): self
     {
-        $this->assertHosts($hosts);
         foreach ($hosts as $host) {
+            if (!is_string($host)) {
+                throw new \InvalidArgumentException('Invalid $hosts provided, list of string expected.');
+            }
             $host = rtrim($host, '/');
 
             if ($host !== '' && !in_array($host, $this->hosts, true)) {
@@ -157,18 +159,6 @@ final class Group
         }
 
         return $this->enabledMiddlewaresCache = MiddlewareFilter::filter($this->middlewares, $this->disabledMiddlewares);
-    }
-
-    /**
-     * @psalm-assert array<string> $hosts
-     */
-    private function assertHosts(array $hosts): void
-    {
-        foreach ($hosts as $host) {
-            if (!is_string($host)) {
-                throw new \InvalidArgumentException('Invalid $hosts provided, list of string expected.');
-            }
-        }
     }
 
     /**

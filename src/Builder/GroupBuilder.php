@@ -9,6 +9,9 @@ use Yiisoft\Router\Group;
 use Yiisoft\Router\RoutableInterface;
 use Yiisoft\Router\Route;
 
+/**
+ * GroupBuilder allows you to build group of routes using a flexible syntax.
+ */
 final class GroupBuilder implements RoutableInterface
 {
     /**

@@ -146,16 +146,22 @@ final class Route implements Stringable
         if (empty($methods)) {
             throw new InvalidArgumentException('$methods cannot be empty.');
         }
-        $this->assertListOfStrings($methods, 'methods');
-        $this->methods = $methods;
+        foreach ($methods as $method) {
+            if (!is_string($method)) {
+                throw new \InvalidArgumentException('Invalid $methods provided, list of string expected.');
+            }
+            $this->methods[] = $method;
+        }
         return $this;
     }
 
     public function setHosts(array $hosts): self
     {
-        $this->assertListOfStrings($hosts, 'hosts');
         $this->hosts = [];
         foreach ($hosts as $host) {
+            if (!is_string($host)) {
+                throw new \InvalidArgumentException('Invalid $hosts provided, list of string expected.');
+            }
             $host = rtrim($host, '/');
 
             if ($host !== '' && !in_array($host, $this->hosts, true)) {
@@ -256,18 +262,6 @@ final class Route implements Stringable
             'disabledMiddlewares' => $this->disabledMiddlewares,
             'enabledMiddlewares' => $this->getEnabledMiddlewares(),
         ];
-    }
-
-    /**
-     * @psalm-assert array<array-key,string> $items
-     */
-    private function assertListOfStrings(array $items, string $argument): void
-    {
-        foreach ($items as $item) {
-            if (!is_string($item)) {
-                throw new \InvalidArgumentException('Invalid $' . $argument . ' provided, list of string expected.');
-            }
-        }
     }
 
     /**

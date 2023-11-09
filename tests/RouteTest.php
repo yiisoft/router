@@ -264,4 +264,12 @@ EOL;
 
         $route = new Route([Method::GET], '/', hosts: ['b.com', 123]);
     }
+
+    public function testInvalidMethods(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid $methods provided, list of string expected.');
+
+        $route = new Route([1], '/');
+    }
 }
