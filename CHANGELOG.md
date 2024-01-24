@@ -6,6 +6,7 @@
 - Chg #207: Replace two `RouteCollectorInterface` methods `addRoute()` and `addGroup()` to single `addRoute()` (@vjik)
 - Enh #202: Add support for `psr/http-message` version `^2.0` (@vjik)
 - Chg #222: Make `Route`, `Group` and `MatchingResult` dispatcher-independent (@rustamwin, @vjik)
+- Enh #229: Add URL arguments' psalm type in `UrlGeneratorInterface` (@vjik) 
 
 ## 3.0.0 February 17, 2023
 

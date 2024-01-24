@@ -8,6 +8,9 @@ use Stringable;
 
 /**
  * `UrlGeneratorInterface` allows generating URL given route name, arguments, and query parameters.
+ *
+ * @psalm-type ArgumentType = scalar|Stringable|null
+ * @psalm-type ArgumentsType = array<string, ArgumentType>
  */
 interface UrlGeneratorInterface
 {
@@ -15,12 +18,14 @@ interface UrlGeneratorInterface
      * Generates URL from named route, arguments, and query parameters.
      *
      * @param string $name Name of the route.
-     * @param array<string,scalar|Stringable|null> $arguments Argument-value set.
+     * @param array $arguments Argument-value set.
      * @param array $queryParameters Parameter-value set.
      *
      * @throws RouteNotFoundException In case there is no route with the name specified.
      *
      * @return string URL generated.
+     *
+     * @psalm-param ArgumentsType $arguments
      */
     public function generate(string $name, array $arguments = [], array $queryParameters = []): string;
 
@@ -28,7 +33,7 @@ interface UrlGeneratorInterface
      * Generates absolute URL from named route, arguments, and query parameters.
      *
      * @param string $name Name of the route.
-     * @param array<string,scalar|Stringable|null> $arguments Argument-value set.
+     * @param array $arguments Argument-value set.
      * @param array $queryParameters Parameter-value set.
      * @param string|null $scheme Host scheme.
      * @param string|null $host Host for manual setup.
@@ -36,6 +41,8 @@ interface UrlGeneratorInterface
      * @throws RouteNotFoundException In case there is no route with the name specified.
      *
      * @return string URL generated.
+     *
+     * @psalm-param ArgumentsType $arguments
      */
     public function generateAbsolute(
         string $name,
@@ -48,11 +55,12 @@ interface UrlGeneratorInterface
     /**
      * Generate URL from the current route replacing some of its arguments with values specified.
      *
-     * @param array<string,scalar|Stringable|null> $replacedArguments New argument values indexed by replaced argument
-     * names.
+     * @param array $replacedArguments New argument values indexed by replaced argument names.
      * @param array $queryParameters Parameter-value set.
      * @param string|null $fallbackRouteName Name of a route that should be used if current route.
      * can not be determined.
+     *
+     * @psalm-param ArgumentsType $replacedArguments
      */
     public function generateFromCurrent(
         array $replacedArguments,
