@@ -9,8 +9,7 @@ use Stringable;
 /**
  * `UrlGeneratorInterface` allows generating URL given route name, arguments, and query parameters.
  *
- * @psalm-type ArgumentType = scalar|Stringable|null
- * @psalm-type ArgumentsType = array<string, ArgumentType>
+  * @psalm-type UrlArgumentsType = array<string,scalar|Stringable|null>
  */
 interface UrlGeneratorInterface
 {
@@ -25,7 +24,7 @@ interface UrlGeneratorInterface
      *
      * @return string URL generated.
      *
-     * @psalm-param ArgumentsType $arguments
+     * @psalm-param UrlArgumentsType $arguments
      */
     public function generate(string $name, array $arguments = [], array $queryParameters = []): string;
 
@@ -42,7 +41,7 @@ interface UrlGeneratorInterface
      *
      * @return string URL generated.
      *
-     * @psalm-param ArgumentsType $arguments
+     * @psalm-param UrlArgumentsType $arguments
      */
     public function generateAbsolute(
         string $name,
@@ -60,7 +59,7 @@ interface UrlGeneratorInterface
      * @param string|null $fallbackRouteName Name of a route that should be used if current route.
      * can not be determined.
      *
-     * @psalm-param ArgumentsType $replacedArguments
+     * @psalm-param UrlArgumentsType $replacedArguments
      */
     public function generateFromCurrent(
         array $replacedArguments,
