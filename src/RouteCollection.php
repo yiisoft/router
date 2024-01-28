@@ -104,12 +104,12 @@ final class RouteCollection implements RouteCollectionInterface
     {
         $prefix .= (string) $group->getData('prefix');
         $namePrefix .= (string) $group->getData('namePrefix');
-        $items = $group->getData('items');
+        $items = $group->getData('routes');
         $pattern = null;
         $hosts = [];
         foreach ($items as $item) {
             if (!$this->isStaticRoute($item)) {
-                $item = $item->prependMiddleware(...$group->getData('middlewareDefinitions'));
+                $item = $item->prependMiddleware(...$group->getData('enabledMiddlewares'));
             }
 
             if (!empty($group->getData('hosts')) && empty($item->getData('hosts'))) {

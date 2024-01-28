@@ -11,9 +11,8 @@ namespace PHPSTORM_META {
         'host',
         'hosts',
         'corsMiddleware',
-        'items',
-        'middlewareDefinitions',
-        'hasDispatcher',
-        'hasCorsMiddleware'
+        'routes',
+        'hasCorsMiddleware',
+        'enabledMiddlewares',
     );
 }

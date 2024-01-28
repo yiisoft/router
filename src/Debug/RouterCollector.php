@@ -131,15 +131,10 @@ final class RouterCollector implements SummaryCollectorInterface
         if ($route === null) {
             return [[], null];
         }
-        $reflection = new ReflectionObject($route);
 
-        $reflectionProperty = $reflection->getProperty('middlewareDefinitions');
-        $reflectionProperty->setAccessible(true);
-        /**
-         * @var array[]|callable[]|string[] $middlewareDefinitions
-         */
-        $middlewareDefinitions = $reflectionProperty->getValue($route);
-        $action = array_pop($middlewareDefinitions);
-        return [$middlewareDefinitions, $action];
+        $middlewares = $route->getData('enabledMiddlewares');
+        $action = array_pop($middlewares);
+
+        return [$middlewares, $action];
     }
 }
