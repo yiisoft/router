@@ -39,7 +39,7 @@
         "vimeo/psalm": "^4.30|^5.20",
         "yiisoft/di": "^1.0",
         "yiisoft/dummy-provider": "^1.0.0",
-        "yiisoft/hydrator": "dev-master",
+        "yiisoft/hydrator": "^1.0",
         "yiisoft/test-support": "^3.0",
         "yiisoft/yii-debug": "dev-master|dev-php80"
     },
