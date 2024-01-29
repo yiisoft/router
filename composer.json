@@ -39,6 +39,7 @@
         "vimeo/psalm": "^4.30|^5.22",
         "yiisoft/di": "^1.0",
         "yiisoft/dummy-provider": "^1.0.0",
+        "yiisoft/hydrator": "^1.0",
         "yiisoft/test-support": "^3.0"
     },
     "autoload": {
@@ -52,7 +53,8 @@
         }
     },
     "suggest": {
-        "yiisoft/router-fastroute": "Router implementation based on nikic/FastRoute"
+        "yiisoft/router-fastroute": "Router implementation based on nikic/FastRoute",
+        "yiisoft/hydrator": "Needed to use `RouteArgument` attribute"
     },
     "extra": {
         "config-plugin-options": {
