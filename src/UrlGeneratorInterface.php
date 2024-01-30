@@ -67,10 +67,6 @@ interface UrlGeneratorInterface
         ?string $fallbackRouteName = null
     ): string;
 
-    public function getUriPrefix(): string;
-
-    public function setUriPrefix(string $name): void;
-
     /**
      * Set default argument value.
      *
