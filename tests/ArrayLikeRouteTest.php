@@ -92,7 +92,6 @@ final class ArrayLikeRouteTest extends TestCase
     }
 
     /**
-     * @param array $routes
      * @return Route[]
      */
     private function fromArray(array $routes): array
