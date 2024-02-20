@@ -1,8 +1,28 @@
 on:
-  - pull_request
-  - push
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - 'CHANGELOG.md'
+      - '.gitignore'
+      - '.gitattributes'
+      - 'infection.json.dist'
+      - 'phpunit.xml.dist'
+      - 'psalm.xml'
+  push:
+    branches: ['master']
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - 'CHANGELOG.md'
+      - '.gitignore'
+      - '.gitattributes'
+      - 'infection.json.dist'
+      - 'phpunit.xml.dist'
+      - 'psalm.xml'
 
 name: backwards compatibility
+
 jobs:
   roave_bc_check:
     uses: yiisoft/actions/.github/workflows/bc.yml@master
