@@ -26,6 +26,7 @@ jobs:
   phpunit:
     uses: yiisoft/actions/.github/workflows/phpunit.yml@master
     with:
+      ini-values: pcov.directory=$GITHUB_WORKSPACE, pcov.exclude=#^(?!($GITHUB_WORKSPACE/config/|$GITHUB_WORKSPACE/src/)).*#
       os: >-
         ['ubuntu-latest', 'windows-latest']
       php: >-
