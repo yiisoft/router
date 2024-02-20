@@ -1,5 +1,9 @@
 # Yii Router Change Log
 
+## 3.1.1 under development
+
+- no changes in this release.
+
 ## 3.1.0 February 20, 2024
 
 - New #203, #237: Add `RouteArgument` attribute for Yii Hydrator (@vjik)
