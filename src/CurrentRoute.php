@@ -36,17 +36,17 @@ final class CurrentRoute
      */
     public function getName(): ?string
     {
-        return $this->route?->getData('name');
+        return $this->route?->getName();
     }
 
     /**
-     * Returns the current route host.
+     * Returns the current route hosts.
      *
-     * @return string|null The current route host.
+     * @return array|null The current route hosts.
      */
-    public function getHost(): ?string
+    public function getHosts(): ?array
     {
-        return $this->route?->getData('host');
+        return $this->route?->getHosts();
     }
 
     /**
@@ -56,7 +56,7 @@ final class CurrentRoute
      */
     public function getPattern(): ?string
     {
-        return $this->route?->getData('pattern');
+        return $this->route?->getPattern();
     }
 
     /**
@@ -66,7 +66,7 @@ final class CurrentRoute
      */
     public function getMethods(): ?array
     {
-        return $this->route?->getData('methods');
+        return $this->route?->getMethods();
     }
 
     /**

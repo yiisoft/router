@@ -52,10 +52,10 @@ final class RouterCollector implements SummaryCollectorInterface
         if ($currentRoute !== null && $route !== null) {
             $result['currentRoute'] = [
                 'matchTime' => $this->matchTime,
-                'name' => $route->getData('name'),
-                'pattern' => $route->getData('pattern'),
+                'name' => $route->getName(),
+                'pattern' => $route->getPattern(),
                 'arguments' => $currentRoute->getArguments(),
-                'host' => $route->getData('host'),
+                'hosts' => implode(', ', $route->getHosts()),
                 'uri' => (string) $currentRoute->getUri(),
                 'action' => $action,
                 'middlewares' => $middlewares,
@@ -88,10 +88,10 @@ final class RouterCollector implements SummaryCollectorInterface
         return [
             'router' => [
                 'matchTime' => $this->matchTime,
-                'name' => $route->getData('name'),
-                'pattern' => $route->getData('pattern'),
+                'name' => $route->getName(),
+                'pattern' => $route->getPattern(),
                 'arguments' => $currentRoute->getArguments(),
-                'host' => $route->getData('host'),
+                'hosts' => implode(', ', $route->getHosts()),
                 'uri' => (string) $currentRoute->getUri(),
                 'action' => $action,
                 'middlewares' => $middlewares,
@@ -132,9 +132,6 @@ final class RouterCollector implements SummaryCollectorInterface
             return [[], null];
         }
 
-        $middlewares = $route->getData('enabledMiddlewares');
-        $action = array_pop($middlewares);
-
-        return [$middlewares, $action];
+        return [$route->getMiddlewares(), $route->getAction()];
     }
 }

@@ -6,8 +6,8 @@ namespace Yiisoft\Router\Tests;
 
 use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
-use Yiisoft\Router\Group;
-use Yiisoft\Router\Route;
+use Yiisoft\Router\Builder\GroupBuilder as Group;
+use Yiisoft\Router\Builder\RouteBuilder as Route;
 use Yiisoft\Router\RouteCollector;
 
 final class RouteCollectorTest extends TestCase
@@ -73,12 +73,12 @@ final class RouteCollectorTest extends TestCase
             ->middleware($middleware3, $middleware4)
             ->middleware($middleware5)
             ->prependMiddleware($middleware1, $middleware2);
-        $this->assertCount(5, $collector->getMiddlewareDefinitions());
-        $this->assertSame($middleware1, $collector->getMiddlewareDefinitions()[0]);
-        $this->assertSame($middleware2, $collector->getMiddlewareDefinitions()[1]);
-        $this->assertSame($middleware3, $collector->getMiddlewareDefinitions()[2]);
-        $this->assertSame($middleware4, $collector->getMiddlewareDefinitions()[3]);
-        $this->assertSame($middleware5, $collector->getMiddlewareDefinitions()[4]);
+        $this->assertCount(5, $collector->getMiddlewares());
+        $this->assertSame($middleware1, $collector->getMiddlewares()[0]);
+        $this->assertSame($middleware2, $collector->getMiddlewares()[1]);
+        $this->assertSame($middleware3, $collector->getMiddlewares()[2]);
+        $this->assertSame($middleware4, $collector->getMiddlewares()[3]);
+        $this->assertSame($middleware5, $collector->getMiddlewares()[4]);
     }
 
     public function testNamedArgumentsInMiddlewareMethods(): void
@@ -91,7 +91,7 @@ final class RouteCollectorTest extends TestCase
         $collector
             ->middleware(a: $middleware2)
             ->prependMiddleware(b: $middleware1);
-        $this->assertSame($middleware1, $collector->getMiddlewareDefinitions()[0]);
-        $this->assertSame($middleware2, $collector->getMiddlewareDefinitions()[1]);
+        $this->assertSame($middleware1, $collector->getMiddlewares()[0]);
+        $this->assertSame($middleware2, $collector->getMiddlewares()[1]);
     }
 }
