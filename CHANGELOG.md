@@ -4,6 +4,13 @@
 
 - New #195: Add debug collector for `yiisoft/yii-debug` (@xepozz)
 - Chg #207: Replace two `RouteCollectorInterface` methods `addRoute()` and `addGroup()` to single `addRoute()` (@vjik)
+## 3.1.1 under development
+
+- no changes in this release.
+
+## 3.1.0 February 20, 2024
+
+- New #203, #237: Add `RouteArgument` attribute for Yii Hydrator (@vjik)
 - Enh #202: Add support for `psr/http-message` version `^2.0` (@vjik)
 - Chg #222: Make `Route`, `Group` and `MatchingResult` dispatcher-independent (@rustamwin, @vjik)
 - Enh #229: Add URL arguments' psalm type in `UrlGeneratorInterface` (@vjik) 
