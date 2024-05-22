@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://github.com/yiisoft" target="_blank">
-        <img src="https://yiisoft.github.io/docs/images/yii_logo.svg" height="100px">
+        <img src="https://yiisoft.github.io/docs/images/yii_logo.svg" height="100px" alt="Yii">
     </a>
     <h1 align="center">Yii Router</h1>
     <br>
@@ -23,7 +23,7 @@ with an adapter package. Currently, the only adapter available is [FastRoute](ht
 
 - URL matching and URL generation supporting HTTP methods, hosts, and defaults.
 - Good IDE support for defining routes.
-- Route groups with infinite nesting. 
+- Route groups with infinite nesting.
 - Middleware support for both individual routes and groups.
 - Ready to use middleware for route matching.
 - Convenient `CurrentRoute` service that holds information about last matched route.
@@ -105,7 +105,7 @@ $response = $result->process($request, $notFoundHandler);
 > features and, especially, pattern syntax may differ. To check usage and configuration details, please refer
 > to specific adapter documentation. All examples in this document are for
 > [FastRoute adapter](https://github.com/yiisoft/router-fastroute).
- 
+
 ### Middleware usage
 
 In order to simplify usage in PSR-middleware based application, there is a ready to use middleware provided:
@@ -187,7 +187,7 @@ Route::methods([Method::GET, Method::POST], '/page/add')
 It is typically used for a certain actions that could be reused for multiple routes such as authentication.
 
 If there is a need to either add middleware to be executed first or remove existing middleware from a route,
-`prependMiddleware()` and `disableMiddleware()` could be used. 
+`prependMiddleware()` and `disableMiddleware()` could be used.
 
 If you combine routes from multiple sources and want last route to have priority over existing ones, mark it as "override":
 
@@ -378,7 +378,7 @@ final class PostController
 
 In addition to commonly used `getArgument()` method, the following methods are available:
 
-- `getArguments()` - To obtain all arguments at once. 
+- `getArguments()` - To obtain all arguments at once.
 - `getName()` - To get route name.
 - `getHost()` - To get route host.
 - `getPattern()` - To get route pattern.
