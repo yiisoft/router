@@ -19,6 +19,8 @@ use Yiisoft\Router\UrlMatcherInterface;
 
 final class Router implements MiddlewareInterface
 {
+    private bool $handleMethodFailure = true;
+
     private MiddlewareDispatcher $dispatcher;
 
     public function __construct(
@@ -26,7 +28,9 @@ final class Router implements MiddlewareInterface
         private ResponseFactoryInterface $responseFactory,
         MiddlewareFactory $middlewareFactory,
         private CurrentRoute $currentRoute,
-        ?EventDispatcherInterface $eventDispatcher = null
+        ?EventDispatcherInterface $eventDispatcher = null,
+        private ?RequestHandlerInterface $optionsHandler = null,
+        private ?RequestHandlerInterface $notAllowedHandler = null
     ) {
         $this->dispatcher = new MiddlewareDispatcher($middlewareFactory, $eventDispatcher);
     }
@@ -37,15 +41,10 @@ final class Router implements MiddlewareInterface
 
         $this->currentRoute->setUri($request->getUri());
 
-        if ($result->isMethodFailure()) {
-            if ($request->getMethod() === Method::OPTIONS) {
-                return $this->responseFactory
-                    ->createResponse(Status::NO_CONTENT)
-                    ->withHeader('Allow', implode(', ', $result->methods()));
-            }
-            return $this->responseFactory
-                ->createResponse(Status::METHOD_NOT_ALLOWED)
-                ->withHeader('Allow', implode(', ', $result->methods()));
+        if ($this->handleMethodFailure && $result->isMethodFailure()) {
+            return $request->getMethod() === Method::OPTIONS
+                    ? $this->getOptionsResponse($request, $result)
+                    : $this->getMethodNotAllowedResponse($request, $result);
         }
 
         if (!$result->isSuccess()) {
@@ -57,5 +56,30 @@ final class Router implements MiddlewareInterface
         return $result
             ->withDispatcher($this->dispatcher)
             ->process($request, $handler);
+    }
+
+    public function withHandleMethodFailure(bool $handleMethodFailure): self
+    {
+        $new = clone $this;
+        $new->handleMethodFailure = $handleMethodFailure;
+        return $new;
+    }
+
+    private function getOptionsResponse(ServerRequestInterface $request, MatchingResult $result): ResponseInterface
+    {
+        return $this->optionsHandler !== null
+                ? $this->optionsHandler->handle($request, $result)
+                : $this->responseFactory
+                    ->createResponse(Status::NO_CONTENT)
+                    ->withHeader(Header::ALLOW, $result->methods());
+    }
+
+    private function getMethodNotAllowedResponse(ServerRequestInterface $request, MatchingResult $result): ResponseInterface
+    {
+        return $this->notAllowedHandler !== null
+                ? $this->notAllowedHandler->handle($request, $result)
+                : $this->responseFactory
+                    ->createResponse(Status::METHOD_NOT_ALLOWED)
+                    ->withHeader(Header::ALLOW, implode(', ', $result->methods()));
     }
 }
