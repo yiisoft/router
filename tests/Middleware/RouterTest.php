@@ -53,18 +53,10 @@ final class RouterTest extends TestCase
 
     public function testMethodMismatchFactoryRespondWith400(): void
     {
-        $notAllowedResponseFactory = new class () implements MethodsResponseFactoryInterface {
-            public function create(array $methods, ServerRequestInterface $request): ResponseInterface
-            {
-                return (new Response(400))
-                    ->withHeader('Test', 'test from options handler');
-            }
-        };
-
         $request = new ServerRequest('POST', '/');
         $response = $this
             ->createRouterMiddleware()
-            ->withNotAllowedResponseFactory($notAllowedResponseFactory)
+            ->withNotAllowedResponseFactory($this->createNotAllowedResponseFactory())
             ->process($request, $this->createRequestHandler());
         $this->assertSame(400, $response->getStatusCode());
         $this->assertSame('test from options handler', $response->getHeaderLine('Test'));
@@ -80,19 +72,10 @@ final class RouterTest extends TestCase
 
     public function testAutoResponseOptionsFactory(): void
     {
-        $optionsResponseFactory = new class () implements MethodsResponseFactoryInterface {
-            public function create(array $methods, ServerRequestInterface $request): ResponseInterface
-            {
-                return (new Response(200))
-                    ->withHeader('Allow', implode(', ', $methods))
-                    ->withHeader('Test', 'test from options handler');
-            }
-        };
-
         $request = new ServerRequest('OPTIONS', '/');
         $response = $this
             ->createRouterMiddleware()
-            ->withOptionsResponseFactory($optionsResponseFactory)
+            ->withOptionsResponseFactory($this->createOptionsResponseFactory())
             ->process($request, $this->createRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
@@ -257,6 +240,17 @@ final class RouterTest extends TestCase
         $this->assertSame($expectedCode, $response->getStatusCode());
     }
 
+    public function testImmutability(): void
+    {
+        $original = $this->createRouterMiddleware();
+
+        $this->assertNotSame($original, $original
+                ->ignoreMethodFailureHandle()
+                ->withNotAllowedResponseFactory($this->createNotAllowedResponseFactory())
+                ->withOptionsResponseFactory($this->createOptionsResponseFactory())
+        );
+    }
+
     private function getMatcher(?RouteCollectionInterface $routeCollection = null): UrlMatcherInterface
     {
         $middleware = $this->createRouteMiddleware();
@@ -356,5 +350,28 @@ final class RouterTest extends TestCase
     private function createRouteMiddleware(): callable
     {
         return static fn () => new Response(201);
+    }
+    
+    private function createNotAllowedResponseFactory(): MethodsResponseFactoryInterface
+    {
+        return new class () implements MethodsResponseFactoryInterface {
+            public function create(array $methods, ServerRequestInterface $request): ResponseInterface
+            {
+                return (new Response(400))
+                    ->withHeader('Test', 'test from options handler');
+            }
+        };
+    }
+
+    private function createOptionsResponseFactory(): MethodsResponseFactoryInterface
+    {
+        return new class () implements MethodsResponseFactoryInterface {
+            public function create(array $methods, ServerRequestInterface $request): ResponseInterface
+            {
+                return (new Response(200))
+                    ->withHeader('Allow', implode(', ', $methods))
+                    ->withHeader('Test', 'test from options handler');
+            }
+        };
     }
 }
