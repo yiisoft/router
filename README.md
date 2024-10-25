@@ -106,22 +106,6 @@ $response = $result->process($request, $notFoundHandler);
 > to specific adapter documentation. All examples in this document are for
 > [FastRoute adapter](https://github.com/yiisoft/router-fastroute).
 
-### Middleware usage
-
-In order to simplify usage in PSR-middleware based application, there is a ready to use middleware provided:
-
-```php
-$router = $container->get(Yiisoft\Router\UrlMatcherInterface::class);
-$responseFactory = $container->get(\Psr\Http\Message\ResponseFactoryInterface::class);
-
-$routerMiddleware = new Yiisoft\Router\Middleware\Router($router, $responseFactory, $container);
-
-// Add middleware to your middleware handler of choice.
-```
-
-In case of a route match router middleware executes handler middleware attached to the route. If there is no match, next
-application middleware processes the request.
-
 ### Routes
 
 Route could match for one or more HTTP methods: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`. There are
@@ -233,17 +217,127 @@ and `disableMiddleware()`. These middleware are executed prior to matched route'
 
 If host is specified, all routes in the group would match only if the host match.
 
-### Automatic OPTIONS response and CORS
+### Middleware usage
 
-By default, router responds automatically to OPTIONS requests based on the routes defined:
+In order to simplify usage in PSR-middleware based application, there is a ready to use `Yiisoft\Router\Middleware\Router` middleware provided:
+
+```php
+$router = $container->get(Yiisoft\Router\UrlMatcherInterface::class);
+$responseFactory = $container->get(\Psr\Http\Message\ResponseFactoryInterface::class);
+
+$routerMiddleware = new Yiisoft\Router\Middleware\Router($router, $responseFactory, $container);
+
+// Add middleware to your middleware handler of choice.
+```
+
+In case of a route match router middleware executes handler middleware attached to the route. If there is no match, next
+application middleware processes the request.
+
+### Automatic responses
+
+`Yiisoft\Router\Middleware\Router` middleware responds automatically to:
+- `OPTIONS` requests;
+- requests with methods that are not supported by the target resource.
+
+You can disable this behavior by calling the `Yiisoft\Router\Middleware\Router::ignoreMethodFailureHandle()` method
+
+```php
+use Yiisoft\Router\Middleware\Router;
+
+$routerMiddleware = new Router($router, $responseFactory, $middlewareFactory, $currentRoute);
+
+// Returns a new instance with the turned off method failure error handle.
+$routerMiddleware = $routerMiddleware->ignoreMethodFailureHandle();
+```
+
+or define the `Yiisoft\Router\Middleware\Router` configuration in the DI container
+
+`config/common/di/router.php`:
+
+```php
+use Yiisoft\Router\Middleware\Router;
+
+return [
+    Router::class => [
+        'ignoreMethodFailureHandle()' => [],
+    ],
+];
+```
+
+#### OPTIONS requests
+
+By default, `Yiisoft\Router\Middleware\Router` middleware responds to `OPTIONS` requests based on the routes defined:
 
 ```
 HTTP/1.1 204 No Content
 Allow: GET, HEAD
 ```
 
-Generally that is fine unless you need [CORS headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS). In this
-case, you can add a middleware for handling it such as [tuupola/cors-middleware](https://github.com/tuupola/cors-middleware):
+You can setup a custom response factory by calling the `Yiisoft\Router\Middleware\Router::withOptionsResponseFactory()` method
+
+```php
+use Yiisoft\Router\Middleware\Router;
+
+$routerMiddleware = new Router($router, $responseFactory, $middlewareFactory, $currentRoute);
+$optionsResponseFactory = new OptionsResponseFactory();
+
+// Returns a new instance with the response factory.
+$routerMiddleware = $routerMiddleware->withOptionsResponseFactory($optionsResponseFactory);
+```
+
+or define the `Yiisoft\Router\Middleware\Router` configuration in the DI container
+
+`config/common/di/router.php`:
+
+```php
+use Yiisoft\Router\Middleware\Router;
+
+return [
+    Router::class => [
+        'withOptionsResponseFactory()' => [Reference::to(OptionsResponseFactory::class)],
+    ],
+];
+```
+
+
+#### Method not allowed
+
+By default, `Yiisoft\Router\Middleware\Router` middleware responds to requests with methods that are not supported by the target resource based on the routes defined:
+
+```
+HTTP/1.1 405 Method Not Allowed
+Allow: GET, HEAD
+```
+
+You can setup a custom response factory by calling `Yiisoft\Router\Middleware\Router::withNotAllowedResponseFactory()` method
+
+```php
+use Yiisoft\Router\Middleware\Router;
+
+$routerMiddleware = new Router($router, $responseFactory, $middlewareFactory, $currentRoute);
+$notAllowedResponseFactory = new NotAllowedResponseFactory();
+
+// Returns a new instance with the response factory.
+$routerMiddleware = $routerMiddleware->withNotAllowedResponseFactory($notAllowedResponseFactory);
+```
+
+or define the `Yiisoft\Router\Middleware\Router` configuration in the DI container
+
+`config/common/di/router.php`:
+
+```php
+use Yiisoft\Router\Middleware\Router;
+
+return [
+    Router::class => [
+        'withNotAllowedResponseFactory()' => [Reference::to(NotAllowedResponseFactory::class)],
+    ],
+];
+```
+
+### CORS protocol
+
+If you need [CORS headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) you can add a middleware for handling it such as [tuupola/cors-middleware](https://github.com/tuupola/cors-middleware):
 
 ```php
 use Yiisoft\Router\Group;

@@ -10,27 +10,28 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Yiisoft\Http\Header;
 use Yiisoft\Http\Method;
 use Yiisoft\Http\Status;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\CurrentRoute;
+use Yiisoft\Router\MethodsResponseFactoryInterface;
 use Yiisoft\Router\UrlMatcherInterface;
 
 final class Router implements MiddlewareInterface
 {
-    private bool $handleMethodFailure = true;
-
     private MiddlewareDispatcher $dispatcher;
+    private bool $ignoreMethodFailureHandle = false;
+    private ?MethodsResponseFactoryInterface $optionsResponseFactory = null;
+    private ?MethodsResponseFactoryInterface $notAllowedResponseFactory = null;
 
     public function __construct(
         private UrlMatcherInterface $matcher,
         private ResponseFactoryInterface $responseFactory,
         MiddlewareFactory $middlewareFactory,
         private CurrentRoute $currentRoute,
-        ?EventDispatcherInterface $eventDispatcher = null,
-        private ?RequestHandlerInterface $optionsHandler = null,
-        private ?RequestHandlerInterface $notAllowedHandler = null
+        ?EventDispatcherInterface $eventDispatcher = null
     ) {
         $this->dispatcher = new MiddlewareDispatcher($middlewareFactory, $eventDispatcher);
     }
@@ -41,10 +42,10 @@ final class Router implements MiddlewareInterface
 
         $this->currentRoute->setUri($request->getUri());
 
-        if ($this->handleMethodFailure && $result->isMethodFailure()) {
+        if (!$this->ignoreMethodFailureHandle && $result->isMethodFailure()) {
             return $request->getMethod() === Method::OPTIONS
-                    ? $this->getOptionsResponse($request, $result)
-                    : $this->getMethodNotAllowedResponse($request, $result);
+                    ? $this->getOptionsResponse($request, $result->methods())
+                    : $this->getMethodNotAllowedResponse($request, $result->methods());
         }
 
         if (!$result->isSuccess()) {
@@ -58,28 +59,42 @@ final class Router implements MiddlewareInterface
             ->process($request, $handler);
     }
 
-    public function withHandleMethodFailure(bool $handleMethodFailure): self
+    public function ignoreMethodFailureHandle(): self
     {
         $new = clone $this;
-        $new->handleMethodFailure = $handleMethodFailure;
+        $new->ignoreMethodFailureHandle = true;
         return $new;
     }
 
-    private function getOptionsResponse(ServerRequestInterface $request, MatchingResult $result): ResponseInterface
+    public function withOptionsResponseFactory(MethodsResponseFactoryInterface $optionsResponseFactory): self
     {
-        return $this->optionsHandler !== null
-                ? $this->optionsHandler->handle($request, $result)
-                : $this->responseFactory
-                    ->createResponse(Status::NO_CONTENT)
-                    ->withHeader(Header::ALLOW, $result->methods());
+        $new = clone $this;
+        $new->optionsResponseFactory = $optionsResponseFactory;
+        return $new;
     }
 
-    private function getMethodNotAllowedResponse(ServerRequestInterface $request, MatchingResult $result): ResponseInterface
+    public function withNotAllowedResponseFactory(MethodsResponseFactoryInterface $notAllowedResponseFactory): self
     {
-        return $this->notAllowedHandler !== null
-                ? $this->notAllowedHandler->handle($request, $result)
+        $new = clone $this;
+        $new->notAllowedResponseFactory = $notAllowedResponseFactory;
+        return $new;
+    }
+
+    private function getOptionsResponse(ServerRequestInterface $request, array $methods): ResponseInterface
+    {
+        return $this->optionsResponseFactory !== null
+                ? $this->optionsResponseFactory->create($methods, $request)
+                : $this->responseFactory
+                    ->createResponse(Status::NO_CONTENT)
+                    ->withHeader(Header::ALLOW, implode(', ', $methods));
+    }
+
+    private function getMethodNotAllowedResponse(ServerRequestInterface $request, array $methods): ResponseInterface
+    {
+        return $this->notAllowedResponseFactory !== null
+                ? $this->notAllowedResponseFactory->create($methods, $request)
                 : $this->responseFactory
                     ->createResponse(Status::METHOD_NOT_ALLOWED)
-                    ->withHeader(Header::ALLOW, implode(', ', $result->methods()));
+                    ->withHeader(Header::ALLOW, implode(', ', $methods));
     }
 }

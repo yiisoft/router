@@ -17,6 +17,7 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\MatchingResult;
+use Yiisoft\Router\MethodsResponseFactoryInterface;
 use Yiisoft\Router\Middleware\Router;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
@@ -50,12 +51,62 @@ final class RouterTest extends TestCase
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
     }
 
+    public function testMethodMismatchFactoryRespondWith400(): void
+    {
+        $notAllowedResponseFactory =  new class () implements MethodsResponseFactoryInterface {
+            public function create(array $methods, ServerRequestInterface $request): ResponseInterface
+            {
+                return (new Response(400))
+                    ->withHeader('Test', 'test from options handler');
+            }
+        };
+
+        $request = new ServerRequest('POST', '/');
+        $response = $this
+            ->createRouterMiddleware()
+            ->withNotAllowedResponseFactory($notAllowedResponseFactory)
+            ->process($request, $this->createRequestHandler());
+        $this->assertSame(400, $response->getStatusCode());
+        $this->assertSame('test from options handler', $response->getHeaderLine('Test'));
+    }
+
     public function testAutoResponseOptions(): void
     {
         $request = new ServerRequest('OPTIONS', '/');
         $response = $this->processWithRouter($request);
         $this->assertSame(204, $response->getStatusCode());
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
+    }
+
+    public function testAutoResponseOptionsFactory(): void
+    {
+        $optionsResponseFactory =  new class () implements MethodsResponseFactoryInterface {
+            public function create(array $methods, ServerRequestInterface $request): ResponseInterface
+            {
+                return (new Response(200))
+                    ->withHeader('Allow', implode(', ', $methods))
+                    ->withHeader('Test', 'test from options handler');
+            }
+        };
+
+        $request = new ServerRequest('OPTIONS', '/');
+        $response = $this
+            ->createRouterMiddleware()
+            ->withOptionsResponseFactory($optionsResponseFactory)
+            ->process($request, $this->createRequestHandler());
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
+        $this->assertSame('test from options handler', $response->getHeaderLine('Test'));
+    }
+
+    public function testIgnoreMethodFailureHandleRespondWith404(): void
+    {
+        $request = new ServerRequest('POST', '/');
+        $response = $this
+            ->createRouterMiddleware()
+            ->ignoreMethodFailureHandle()
+            ->process($request, $this->createRequestHandler());
+        $this->assertSame(404, $response->getStatusCode());
     }
 
     public function testAutoResponseOptionsWithOrigin(): void
@@ -262,9 +313,9 @@ final class RouterTest extends TestCase
     }
 
     private function createRouterMiddleware(
-        ?RouteCollectionInterface $routeCollection = null,
-        ?CurrentRoute $currentRoute = null,
-        array $containerDefinitions = [],
+        RouteCollectionInterface $routeCollection = null,
+        CurrentRoute $currentRoute = null,
+        array $containerDefinitions = []
     ): Router {
         $container = new SimpleContainer(
             array_merge(
@@ -283,8 +334,8 @@ final class RouterTest extends TestCase
 
     private function processWithRouter(
         ServerRequestInterface $request,
-        ?RouteCollectionInterface $routes = null,
-        ?CurrentRoute $currentRoute = null,
+        RouteCollectionInterface $routes = null,
+        CurrentRoute $currentRoute = null,
         array $containerDefinitions = [],
     ): ResponseInterface {
         return $this
