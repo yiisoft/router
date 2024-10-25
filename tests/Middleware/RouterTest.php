@@ -53,7 +53,7 @@ final class RouterTest extends TestCase
 
     public function testMethodMismatchFactoryRespondWith400(): void
     {
-        $notAllowedResponseFactory =  new class () implements MethodsResponseFactoryInterface {
+        $notAllowedResponseFactory = new class () implements MethodsResponseFactoryInterface {
             public function create(array $methods, ServerRequestInterface $request): ResponseInterface
             {
                 return (new Response(400))
@@ -80,7 +80,7 @@ final class RouterTest extends TestCase
 
     public function testAutoResponseOptionsFactory(): void
     {
-        $optionsResponseFactory =  new class () implements MethodsResponseFactoryInterface {
+        $optionsResponseFactory = new class () implements MethodsResponseFactoryInterface {
             public function create(array $methods, ServerRequestInterface $request): ResponseInterface
             {
                 return (new Response(200))
