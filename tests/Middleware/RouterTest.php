@@ -244,13 +244,9 @@ final class RouterTest extends TestCase
     {
         $original = $this->createRouterMiddleware();
 
-        $this->assertNotSame(
-            $original,
-            $original
-                ->ignoreMethodFailureHandle()
-                ->withNotAllowedResponseFactory($this->createNotAllowedResponseFactory())
-                ->withOptionsResponseFactory($this->createOptionsResponseFactory())
-        );
+        $this->assertNotSame($original, $original->ignoreMethodFailureHandle());
+        $this->assertNotSame($original, $original->withNotAllowedResponseFactory($this->createNotAllowedResponseFactory()));
+        $this->assertNotSame($original, $original->withOptionsResponseFactory($this->createOptionsResponseFactory()));
     }
 
     private function getMatcher(?RouteCollectionInterface $routeCollection = null): UrlMatcherInterface
