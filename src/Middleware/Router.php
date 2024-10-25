@@ -80,6 +80,9 @@ final class Router implements MiddlewareInterface
         return $new;
     }
 
+    /**
+     * @param string[] $methods
+     */
     private function getOptionsResponse(ServerRequestInterface $request, array $methods): ResponseInterface
     {
         return $this->optionsResponseFactory !== null
@@ -89,6 +92,9 @@ final class Router implements MiddlewareInterface
                     ->withHeader(Header::ALLOW, implode(', ', $methods));
     }
 
+    /**
+     * @param string[] $methods
+     */
     private function getMethodNotAllowedResponse(ServerRequestInterface $request, array $methods): ResponseInterface
     {
         return $this->notAllowedResponseFactory !== null
