@@ -351,7 +351,7 @@ final class RouterTest extends TestCase
     {
         return static fn () => new Response(201);
     }
-    
+
     private function createNotAllowedResponseFactory(): MethodsResponseFactoryInterface
     {
         return new class () implements MethodsResponseFactoryInterface {
