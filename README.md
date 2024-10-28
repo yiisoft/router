@@ -219,7 +219,7 @@ If host is specified, all routes in the group would match only if the host match
 
 ### Middleware usage
 
-In order to simplify usage in PSR-middleware based application, there is a ready to use `Yiisoft\Router\Middleware\Router` middleware provided:
+To simplify usage in PSR-middleware based application, there is a ready to use `Yiisoft\Router\Middleware\Router` middleware provided:
 
 ```php
 $router = $container->get(Yiisoft\Router\UrlMatcherInterface::class);
@@ -230,7 +230,7 @@ $routerMiddleware = new Yiisoft\Router\Middleware\Router($router, $responseFacto
 // Add middleware to your middleware handler of choice.
 ```
 
-In case of a route match router middleware executes handler middleware attached to the route. If there is no match, next
+When a route matches router middleware executes handler middleware attached to the route. If there is no match, next
 application middleware processes the request.
 
 ### Automatic responses
@@ -239,27 +239,27 @@ application middleware processes the request.
 - `OPTIONS` requests;
 - requests with methods that are not supported by the target resource.
 
-You can disable this behavior by calling the `Yiisoft\Router\Middleware\Router::ignoreMethodFailureHandle()` method
+You can disable this behavior by calling the `Yiisoft\Router\Middleware\Router::ignoreMethodFailureHandler()` method:
 
 ```php
 use Yiisoft\Router\Middleware\Router;
 
 $routerMiddleware = new Router($router, $responseFactory, $middlewareFactory, $currentRoute);
 
-// Returns a new instance with the turned off method failure error handle.
-$routerMiddleware = $routerMiddleware->ignoreMethodFailureHandle();
+// Returns a new instance with the turned off method failure error handler.
+$routerMiddleware = $routerMiddleware->ignoreMethodFailureHandler();
 ```
 
-or define the `Yiisoft\Router\Middleware\Router` configuration in the DI container
+or define the `Yiisoft\Router\Middleware\Router` configuration in the DI container:
 
-`config/common/di/router.php`:
+`config/common/di/router.php`
 
 ```php
 use Yiisoft\Router\Middleware\Router;
 
 return [
     Router::class => [
-        'ignoreMethodFailureHandle()' => [],
+        'ignoreMethodFailureHandler()' => [],
     ],
 ];
 ```
@@ -273,7 +273,7 @@ HTTP/1.1 204 No Content
 Allow: GET, HEAD
 ```
 
-You can setup a custom response factory by calling the `Yiisoft\Router\Middleware\Router::withOptionsResponseFactory()` method
+You can setup a custom response factory by calling the `Yiisoft\Router\Middleware\Router::withOptionsResponseFactory()` method:
 
 ```php
 use Yiisoft\Router\Middleware\Router;
@@ -285,9 +285,9 @@ $optionsResponseFactory = new OptionsResponseFactory();
 $routerMiddleware = $routerMiddleware->withOptionsResponseFactory($optionsResponseFactory);
 ```
 
-or define the `Yiisoft\Router\Middleware\Router` configuration in the DI container
+or define the `Yiisoft\Router\Middleware\Router` configuration in the DI container:
 
-`config/common/di/router.php`:
+`config/common/di/router.php`
 
 ```php
 use Yiisoft\Router\Middleware\Router;
@@ -309,7 +309,7 @@ HTTP/1.1 405 Method Not Allowed
 Allow: GET, HEAD
 ```
 
-You can setup a custom response factory by calling `Yiisoft\Router\Middleware\Router::withNotAllowedResponseFactory()` method
+You can setup a custom response factory by calling `Yiisoft\Router\Middleware\Router::withNotAllowedResponseFactory()` method:
 
 ```php
 use Yiisoft\Router\Middleware\Router;
@@ -321,9 +321,9 @@ $notAllowedResponseFactory = new NotAllowedResponseFactory();
 $routerMiddleware = $routerMiddleware->withNotAllowedResponseFactory($notAllowedResponseFactory);
 ```
 
-or define the `Yiisoft\Router\Middleware\Router` configuration in the DI container
+or define the `Yiisoft\Router\Middleware\Router` configuration in the DI container:
 
-`config/common/di/router.php`:
+`config/common/di/router.php`
 
 ```php
 use Yiisoft\Router\Middleware\Router;

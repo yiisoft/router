@@ -2,8 +2,8 @@
 
 ## 3.1.1 under development
 
-- New #249 Add to the 'Router' middleware option to ignore method failure handle (@olegbaturin)
-- New #249 Add to the 'Router' middleware custom response factories for the method failure responses (@olegbaturin)
+- New #249 Add option to ignore method failure handler to the 'Router' middleware (@olegbaturin)
+- New #249 Add custom response factories for the method failure responses to the 'Router' middleware (@olegbaturin)
 
 ## 3.1.0 February 20, 2024
 

@@ -13,7 +13,7 @@ use Psr\Http\Message\ServerRequestInterface;
 interface MethodsResponseFactoryInterface
 {
     /**
-     * Handles allowed methods and produces a response.
+     * Produces a response listing resource's allowed methods.
      *
      * @param array $methods a list of the HTTP methods supported by the request's resource
      */
