@@ -244,7 +244,7 @@ final class RouterTest extends TestCase
     {
         $original = $this->createRouterMiddleware();
 
-        $this->assertNotSame($original, $original->ignoreMethodFailureHandle());
+        $this->assertNotSame($original, $original->ignoreMethodFailureHandler());
         $this->assertNotSame($original, $original->withNotAllowedResponseFactory($this->createNotAllowedResponseFactory()));
         $this->assertNotSame($original, $original->withOptionsResponseFactory($this->createOptionsResponseFactory()));
     }
