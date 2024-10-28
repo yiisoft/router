@@ -82,12 +82,12 @@ final class RouterTest extends TestCase
         $this->assertSame('test from options handler', $response->getHeaderLine('Test'));
     }
 
-    public function testIgnoreMethodFailureHandleRespondWith404(): void
+    public function testIgnoreMethodFailureHandlerRespondWith404(): void
     {
         $request = new ServerRequest('POST', '/');
         $response = $this
             ->createRouterMiddleware()
-            ->ignoreMethodFailureHandle()
+            ->ignoreMethodFailureHandler()
             ->process($request, $this->createRequestHandler());
         $this->assertSame(404, $response->getStatusCode());
     }

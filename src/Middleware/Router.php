@@ -22,7 +22,7 @@ use Yiisoft\Router\UrlMatcherInterface;
 final class Router implements MiddlewareInterface
 {
     private MiddlewareDispatcher $dispatcher;
-    private bool $ignoreMethodFailureHandle = false;
+    private bool $ignoreMethodFailureHandler = false;
     private ?MethodsResponseFactoryInterface $optionsResponseFactory = null;
     private ?MethodsResponseFactoryInterface $notAllowedResponseFactory = null;
 
@@ -42,7 +42,7 @@ final class Router implements MiddlewareInterface
 
         $this->currentRoute->setUri($request->getUri());
 
-        if (!$this->ignoreMethodFailureHandle && $result->isMethodFailure()) {
+        if (!$this->ignoreMethodFailureHandler && $result->isMethodFailure()) {
             return $request->getMethod() === Method::OPTIONS
                     ? $this->getOptionsResponse($request, $result->methods())
                     : $this->getMethodNotAllowedResponse($request, $result->methods());
@@ -59,10 +59,10 @@ final class Router implements MiddlewareInterface
             ->process($request, $handler);
     }
 
-    public function ignoreMethodFailureHandle(): self
+    public function ignoreMethodFailureHandler(): self
     {
         $new = clone $this;
-        $new->ignoreMethodFailureHandle = true;
+        $new->ignoreMethodFailureHandler = true;
         return $new;
     }
 
