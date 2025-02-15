@@ -15,6 +15,9 @@ use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Yii\Debug\Debugger;
 use Yiisoft\Yii\Debug\Storage\MemoryStorage;
 
+/**
+ * @requires PHP >= 8.1
+ */
 final class DebugRoutesCommandTest extends TestCase
 {
     public function testBase(): void
