@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://github.com/yiisoft" target="_blank">
-        <img src="https://yiisoft.github.io/docs/images/yii_logo.svg" height="100px">
+        <img src="https://yiisoft.github.io/docs/images/yii_logo.svg" height="100px" alt="Yii">
     </a>
     <h1 align="center">Yii Router</h1>
     <br>
@@ -23,7 +23,7 @@ with an adapter package. Currently, the only adapter available is [FastRoute](ht
 
 - URL matching and URL generation supporting HTTP methods, hosts, and defaults.
 - Good IDE support for defining routes.
-- Route groups with infinite nesting. 
+- Route groups with infinite nesting.
 - Middleware support for both individual routes and groups.
 - Ready to use middleware for route matching.
 - Convenient `CurrentRoute` service that holds information about last matched route.
@@ -35,7 +35,7 @@ with an adapter package. Currently, the only adapter available is [FastRoute](ht
 
 ## Installation
 
-The package could be installed with composer:
+The package could be installed with [Composer](https://getcomposer.org):
 
 ```shell
 composer require yiisoft/router
@@ -105,7 +105,7 @@ $response = $result->process($request, $notFoundHandler);
 > features and, especially, pattern syntax may differ. To check usage and configuration details, please refer
 > to specific adapter documentation. All examples in this document are for
 > [FastRoute adapter](https://github.com/yiisoft/router-fastroute).
- 
+
 ### Middleware usage
 
 In order to simplify usage in PSR-middleware based application, there is a ready to use middleware provided:
@@ -187,7 +187,7 @@ Route::methods([Method::GET, Method::POST], '/page/add')
 It is typically used for a certain actions that could be reused for multiple routes such as authentication.
 
 If there is a need to either add middleware to be executed first or remove existing middleware from a route,
-`prependMiddleware()` and `disableMiddleware()` could be used. 
+`prependMiddleware()` and `disableMiddleware()` could be used.
 
 If you combine routes from multiple sources and want last route to have priority over existing ones, mark it as "override":
 
@@ -378,42 +378,23 @@ final class PostController
 
 In addition to commonly used `getArgument()` method, the following methods are available:
 
-- `getArguments()` - To obtain all arguments at once. 
+- `getArguments()` - To obtain all arguments at once.
 - `getName()` - To get route name.
 - `getHost()` - To get route host.
 - `getPattern()` - To get route pattern.
 - `getMethods()` - To get route methods.
 - `getUri()` - To get current URI.
 
-## Testing
+## Documentation
 
-### Unit testing
+- [Internals](docs/internals.md)
 
-The package is tested with [PHPUnit](https://phpunit.de/). To run tests:
-
-```shell
-./vendor/bin/phpunit
-```
-
-### Mutation testing
-
-The package tests are checked with [Infection](https://infection.github.io/) mutation framework. To run it:
-
-```shell
-./vendor/bin/infection
-```
-
-### Static analysis
-
-The code is statically analyzed with [Psalm](https://psalm.dev/). To run static analysis:
-
-```shell
-./vendor/bin/psalm
-```
+If you need help or have a question, the [Yii Forum](https://forum.yiiframework.com/c/yii-3-0/63) is a good place for that.
+You may also check out other [Yii Community Resources](https://www.yiiframework.com/community).
 
 ## License
 
-The Yii Dependency Injection is free software. It is released under the terms of the BSD License.
+The Yii Router is free software. It is released under the terms of the BSD License.
 Please see [`LICENSE`](./LICENSE.md) for more information.
 
 Maintained by [Yii Software](https://www.yiiframework.com/).
