@@ -10,7 +10,7 @@ use Yiisoft\Di\Container;
 use Yiisoft\Di\ContainerConfig;
 use Yiisoft\Di\StateResetter;
 use Yiisoft\Router\CurrentRoute;
-use Yiisoft\Router\Route;
+use Yiisoft\Router\Builder\RouteBuilder as Route;
 use Yiisoft\Router\RouteCollector;
 use Yiisoft\Router\RouteCollectorInterface;
 
@@ -29,7 +29,7 @@ final class ConfigTest extends TestCase
         $container = $this->createContainer();
 
         $currentRoute = $container->get(CurrentRoute::class);
-        $currentRoute->setRouteWithArguments(Route::get('/main'), ['name' => 'hello']);
+        $currentRoute->setRouteWithArguments(Route::get('/main')->toRoute(), ['name' => 'hello']);
         $currentRoute->setUri(new Uri('http://example.com/'));
 
         $container

@@ -6,8 +6,8 @@ namespace Yiisoft\Router\Tests\Debug;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
+use Yiisoft\Router\Builder\RouteBuilder;
 use Yiisoft\Router\Debug\DebugRoutesCommand;
-use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollector;
 use Yiisoft\Router\Tests\Support\TestController;
@@ -25,12 +25,12 @@ final class DebugRoutesCommandTest extends TestCase
         $command = new DebugRoutesCommand(
             new RouteCollection(
                 (new RouteCollector())->addRoute(
-                    Route::get('/')
+                    RouteBuilder::get('/')
                         ->host('example.com')
                         ->defaults(['SpecialArg' => 1])
                         ->action(fn () => 'Hello, XXXXXX!')
                         ->name('site/index'),
-                    Route::get('/about')
+                    RouteBuilder::get('/about')
                         ->action([TestController::class, 'index'])
                         ->name('site/about'),
                 ),
@@ -58,13 +58,13 @@ final class DebugRoutesCommandTest extends TestCase
         $command = new DebugRoutesCommand(
             new RouteCollection(
                 (new RouteCollector())->addRoute(
-                    Route::get('/')
+                    RouteBuilder::get('/')
                         ->host('example.com')
                         ->defaults(['SpecialArg' => 1])
                         ->name('site/index')
                         ->middleware(TestMiddleware1::class)
                         ->action(fn () => 'Hello world!'),
-                    Route::get('/about')->name('site/about'),
+                    RouteBuilder::get('/about')->name('site/about'),
                 ),
             ),
             new Debugger(

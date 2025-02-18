@@ -15,10 +15,10 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\CurrentRoute;
-use Yiisoft\Router\Group;
+use Yiisoft\Router\Builder\GroupBuilder as Group;
 use Yiisoft\Router\MatchingResult;
 use Yiisoft\Router\Middleware\Router;
-use Yiisoft\Router\Route;
+use Yiisoft\Router\Builder\RouteBuilder as Route;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectionInterface;
 use Yiisoft\Router\RouteCollector;
@@ -232,7 +232,7 @@ final class RouterTest extends TestCase
                         ->getUri()
                         ->getPath() === '/options') {
                     $route = Route::options('/options')->middleware($this->middleware);
-                    return MatchingResult::fromSuccess($route, ['method' => 'options']);
+                    return MatchingResult::fromSuccess($route->toRoute(), ['method' => 'options']);
                 }
 
                 if ($request
@@ -243,7 +243,7 @@ final class RouterTest extends TestCase
 
                 if ($request->getMethod() === Method::GET) {
                     $route = Route::get('/')->middleware($this->middleware);
-                    return MatchingResult::fromSuccess($route, ['parameter' => 'value']);
+                    return MatchingResult::fromSuccess($route->toRoute(), ['parameter' => 'value']);
                 }
 
                 return MatchingResult::fromFailure([Method::GET, Method::HEAD]);
