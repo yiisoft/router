@@ -16,5 +16,6 @@
     <issueHandlers>
         <MixedAssignment errorLevel="suppress" />
         <RiskyTruthyFalsyComparison errorLevel="suppress" />
+        <MissingOverrideAttribute errorLevel="suppress" />
     </issueHandlers>
 </psalm>
