@@ -7,6 +7,7 @@ namespace Yiisoft\Router\Tests;
 use InvalidArgumentException;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -287,17 +288,8 @@ final class RouteCollectionTest extends TestCase
         $this->assertEquals('middleware1', $response2->getReasonPhrase());
     }
 
-    public function dataMiddlewaresOrder(): array
-    {
-        return [
-            [true],
-            [false],
-        ];
-    }
-
-    /**
-     * @dataProvider dataMiddlewaresOrder
-     */
+    #[TestWith([true])]
+    #[TestWith([false])]
     public function testMiddlewaresOrder(bool $groupWrapped): void
     {
         $request = new ServerRequest('GET', '/');

@@ -7,6 +7,7 @@ namespace Yiisoft\Router\Tests\Middleware;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -165,7 +166,7 @@ final class RouterTest extends TestCase
         $this->assertSame(['parameter' => 'value'], $currentRoute->getArguments());
     }
 
-    public function dataRouteMiddleware(): array
+    public static function dataRouteMiddleware(): array
     {
         return [
             'callable' => [
@@ -186,9 +187,7 @@ final class RouterTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider dataRouteMiddleware
-     */
+    #[DataProvider('dataRouteMiddleware')]
     public function testRouteMiddleware(int $expectedCode, mixed $middleware): void
     {
         $response = $this->processWithRouter(

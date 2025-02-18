@@ -41,7 +41,7 @@
     "require-dev": {
         "maglnet/composer-require-checker": "^4.7.1",
         "nyholm/psr7": "^1.8.2",
-        "phpunit/phpunit": "^9.6.22",
+        "phpunit/phpunit": "^10.5.45",
         "psr/container": "^1.1 || ^2.0.2",
         "rector/rector": "^2.0.9",
         "roave/infection-static-analysis-plugin": "^1.35",
