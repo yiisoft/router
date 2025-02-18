@@ -18,6 +18,10 @@ use function is_array;
 final class RouteCollection implements RouteCollectionInterface
 {
     /**
+     * @var Route[]
+     */
+    private array $aliases = [];
+    /**
      * @psalm-var Items
      */
     private array $items = [];
@@ -73,26 +77,48 @@ final class RouteCollection implements RouteCollectionInterface
             if (!$this->isStaticRoute($item)) {
                 $item = $item->prependMiddleware(...$this->collector->getMiddlewareDefinitions());
             }
+            if ($item instanceof Group) {
+                $this->injectGroup($item, $this->items);
+                continue;
+            }
             $this->injectItem($item);
+        }
+        foreach ($this->aliases as $alias) {
+            $referencedRouteName = $alias->getData('alias');
+            if (!isset($this->routes[$referencedRouteName])) {
+                throw new \Exception('Referenced route for alias ' . $referencedRouteName . ' is not found.');
+            }
+            $referencedRoute = $this->routes[$referencedRouteName];
+            $referencedRoute = $referencedRoute->pattern($alias->getData('pattern'));
+            if ($hosts = $alias->getData('hosts')) {
+                $referencedRoute = $referencedRoute->hosts($hosts);
+            }
+            if ($name = $alias->getData('name')) {
+                $referencedRoute = $referencedRoute->name($name);
+            }
+            if ($defaults = $alias->getData('defaults')) {
+                $referencedRoute = $referencedRoute->defaults($defaults);
+            }
+            if ($alias->getData('override')) {
+                $referencedRoute = $referencedRoute->override();
+            }
+            $routeName = $alias->getData('name');
+            $this->routes[$routeName] = $referencedRoute;
         }
     }
 
     /**
      * Add an item into routes array.
      */
-    private function injectItem(Group|Route $route): void
+    private function injectItem(Route $route): void
     {
-        if ($route instanceof Group) {
-            $this->injectGroup($route, $this->items);
+        if ($this->isAliasRoute($route)) {
+            $this->aliases[] = $route;
             return;
         }
-
         $routeName = $route->getData('name');
         $this->items[] = $routeName;
-        if (isset($this->routes[$routeName]) && !$route->getData('override')) {
-            throw new InvalidArgumentException("A route with name '$routeName' already exists.");
-        }
-        $this->routes[$routeName] = $route;
+        $this->injectRoute($routeName, $route);
     }
 
     /**
@@ -149,10 +175,11 @@ final class RouteCollection implements RouteCollectionInterface
 
             $routeName = $modifiedItem->getData('name');
             $tree[] = $routeName;
-            if (isset($this->routes[$routeName]) && !$modifiedItem->getData('override')) {
-                throw new InvalidArgumentException("A route with name '$routeName' already exists.");
+            if ($this->isAliasRoute($modifiedItem)) {
+                $this->aliases[] = $modifiedItem;
+                return;
             }
-            $this->routes[$routeName] = $modifiedItem;
+            $this->injectRoute($routeName, $modifiedItem);
         }
     }
 
@@ -211,5 +238,18 @@ final class RouteCollection implements RouteCollectionInterface
     private function isStaticRoute(Group|Route $item): bool
     {
         return $item instanceof Route && !$item->getData('hasMiddlewares');
+    }
+
+    protected function injectRoute(string $routeName, Route $route): void
+    {
+        if (isset($this->routes[$routeName]) && !$route->getData('override')) {
+            throw new InvalidArgumentException("A route with name '$routeName' already exists.");
+        }
+        $this->routes[$routeName] = $route;
+    }
+
+    private function isAliasRoute(Route $route): bool
+    {
+        return $route->getData('alias') !== null;
     }
 }

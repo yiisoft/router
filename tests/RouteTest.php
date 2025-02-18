@@ -19,9 +19,9 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\Tests\Support\AssertTrait;
 use Yiisoft\Router\Tests\Support\Container;
+use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
-use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware3;
 
 final class RouteTest extends TestCase
@@ -106,6 +106,15 @@ final class RouteTest extends TestCase
         $route = Route::head('/');
 
         $this->assertSame([Method::HEAD], $route->getData('methods'));
+    }
+
+    public function testAlias(): void
+    {
+        $route1 = Route::head('/')->name('home');
+        $route2 = Route::head('/main')->alias('new-home')->name('new-home');
+
+        $this->assertSame(null, $route1->getData('alias'));
+        $this->assertSame('new-home', $route2->getData('alias'));
     }
 
     public function testOptionsMethod(): void
