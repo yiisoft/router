@@ -11,12 +11,22 @@
     "license": "BSD-3-Clause",
     "support": {
         "issues": "https://github.com/yiisoft/router/issues?state=open",
+        "source": "https://github.com/yiisoft/router",
         "forum": "https://www.yiiframework.com/forum/",
         "wiki": "https://www.yiiframework.com/wiki/",
-        "irc": "irc://irc.freenode.net/yii",
-        "chat": "https://t.me/yii3en",
-        "source": "https://github.com/yiisoft/router"
+        "irc": "ircs://irc.libera.chat:6697/yii",
+        "chat": "https://t.me/yii3en"
     },
+    "funding": [
+        {
+            "type": "opencollective",
+            "url": "https://opencollective.com/yiisoft"
+        },
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/yiisoft"
+        }
+    ],
     "require": {
         "php": "^8.0",
         "psr/event-dispatcher": "^1.0",
@@ -33,7 +43,7 @@
         "nyholm/psr7": "^1.5",
         "phpunit/phpunit": "^9.5",
         "psr/container": "^1.1|^2.0",
-        "rector/rector": "^1.0",
+        "rector/rector": "^2.0",
         "roave/infection-static-analysis-plugin": "^1.18",
         "spatie/phpunit-watcher": "^1.23",
         "vimeo/psalm": "^4.30|^5.22",
