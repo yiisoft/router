@@ -211,8 +211,10 @@ final class RouterTest extends TestCase
         $middleware = $this->createRouteMiddleware();
 
         return new class ($middleware, $routeCollection) implements UrlMatcherInterface {
-            public function __construct(private $middleware, private ?RouteCollectionInterface $routeCollection = null)
-            {
+            public function __construct(
+                private $middleware,
+                private readonly ?RouteCollectionInterface $routeCollection = null,
+            ) {
             }
 
             /**

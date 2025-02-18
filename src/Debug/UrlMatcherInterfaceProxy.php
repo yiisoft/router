@@ -11,8 +11,8 @@ use Yiisoft\Router\UrlMatcherInterface;
 final class UrlMatcherInterfaceProxy implements UrlMatcherInterface
 {
     public function __construct(
-        private UrlMatcherInterface $urlMatcher,
-        private RouterCollector $routerCollector
+        private readonly UrlMatcherInterface $urlMatcher,
+        private readonly RouterCollector $routerCollector
     ) {
     }
 

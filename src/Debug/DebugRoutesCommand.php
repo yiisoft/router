@@ -24,8 +24,8 @@ final class DebugRoutesCommand extends Command
     public const COMMAND_NAME = 'debug:routes';
 
     public function __construct(
-        private RouteCollectionInterface $routeCollection,
-        private Debugger $debugger,
+        private readonly RouteCollectionInterface $routeCollection,
+        private readonly Debugger $debugger,
     ) {
         parent::__construct();
     }

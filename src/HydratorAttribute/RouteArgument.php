@@ -11,7 +11,7 @@ use Yiisoft\Hydrator\Attribute\Parameter\ParameterAttributeInterface;
 final class RouteArgument implements ParameterAttributeInterface
 {
     public function __construct(
-        private ?string $name = null
+        private readonly ?string $name = null
     ) {
     }
 

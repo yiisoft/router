@@ -86,6 +86,7 @@
         }
     },
     "scripts": {
+        "rector": "rector",
         "test": "phpunit --testdox --no-interaction",
         "test-watch": "phpunit-watcher watch"
     }
