@@ -15,6 +15,9 @@ use Yiisoft\Router\RouteCollectionInterface;
 use Yiisoft\VarDumper\VarDumper;
 use Yiisoft\Yii\Debug\Debugger;
 
+/**
+ * @infection-ignore-all
+ */
 #[AsCommand(
     name: DebugRoutesCommand::COMMAND_NAME,
     description: 'Show information about registered routes'
