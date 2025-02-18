@@ -86,6 +86,7 @@
         }
     },
     "scripts": {
+        "composer-require-checker": "composer-require-checker",
         "rector": "rector",
         "test": "phpunit --testdox --no-interaction",
         "test-watch": "phpunit-watcher watch"
