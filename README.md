@@ -6,12 +6,12 @@
     <br>
 </p>
 
-[![Latest Stable Version](https://poser.pugx.org/yiisoft/router/v/stable.png)](https://packagist.org/packages/yiisoft/router)
-[![Total Downloads](https://poser.pugx.org/yiisoft/router/downloads.png)](https://packagist.org/packages/yiisoft/router)
-[![Build status](https://github.com/yiisoft/router/workflows/build/badge.svg)](https://github.com/yiisoft/router/actions)
+[![Latest Stable Version](https://poser.pugx.org/yiisoft/router/v)](https://packagist.org/packages/yiisoft/router)
+[![Total Downloads](https://poser.pugx.org/yiisoft/router/downloads)](https://packagist.org/packages/yiisoft/router)
+[![Build status](https://github.com/yiisoft/router/actions/workflows/build.yml/badge.svg)](https://github.com/yiisoft/router/actions/workflows/build.yml)
 [![Code coverage](https://codecov.io/gh/yiisoft/router/graph/badge.svg?token=FxndVgUmF0)](https://codecov.io/gh/yiisoft/router)
 [![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fyiisoft%2Frouter%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/yiisoft/router/master)
-[![static analysis](https://github.com/yiisoft/router/workflows/static%20analysis/badge.svg)](https://github.com/yiisoft/router/actions?query=workflow%3A%22static+analysis%22)
+[![Static analysis](https://github.com/yiisoft/router/actions/workflows/static.yml/badge.svg?branch=master)](https://github.com/yiisoft/router/actions/workflows/static.yml?query=branch%3Amaster)
 [![type-coverage](https://shepherd.dev/github/yiisoft/router/coverage.svg)](https://shepherd.dev/github/yiisoft/router)
 
 The package provides [PSR-7](https://www.php-fig.org/psr/psr-7/) compatible request routing and
