@@ -175,8 +175,17 @@ final class Route implements Stringable
     }
 
     /**
-     * Prepends a handler middleware definition that should be invoked for a matched route.
-     * Last added handler will be executed first.
+     * Prepends a handler middleware definition that should be invoked for a matched route. Last added handlers will be
+     * executed first.
+     *
+     * Passed definitions will be added to beginning. For example:
+     *
+     * ```php
+     * // Resulting middleware stack order: Middleware1, Middleware2, Middleware3
+     * Route::get('/')
+     *   ->middleware(Middleware3::class)
+     *   ->prependMiddleware(Middleware1::class, Middleware2::class)
+     * ```
      */
     public function prependMiddleware(array|callable|string ...$definition): self
     {
