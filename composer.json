@@ -88,6 +88,7 @@
     "scripts": {
         "composer-require-checker": "composer-require-checker",
         "rector": "rector",
+        "infection": "roave-infection-static-analysis-plugin",
         "test": "phpunit --testdox --no-interaction",
         "test-watch": "phpunit-watcher watch"
     }

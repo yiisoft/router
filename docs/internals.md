@@ -14,7 +14,7 @@ The package tests are checked with [Infection](https://infection.github.io/) mut
 [Infection Static Analysis Plugin](https://github.com/Roave/infection-static-analysis-plugin). To run it:
 
 ```shell
-./vendor/bin/roave-infection-static-analysis-plugin
+composer infection
 ```
 
 ## Static analysis
