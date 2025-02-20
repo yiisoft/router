@@ -363,7 +363,7 @@ final class RouteCollectionTest extends TestCase
         };
     }
 
-    private function getDispatcher(ContainerInterface $container = null): MiddlewareDispatcher
+    private function getDispatcher(?ContainerInterface $container = null): MiddlewareDispatcher
     {
         $container ??= $this->createMock(ContainerInterface::class);
         return new MiddlewareDispatcher(

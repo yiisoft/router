@@ -464,7 +464,7 @@ EOL;
         };
     }
 
-    private function getDispatcher(ContainerInterface $container = null): MiddlewareDispatcher
+    private function getDispatcher(?ContainerInterface $container = null): MiddlewareDispatcher
     {
         if ($container === null) {
             return new MiddlewareDispatcher(

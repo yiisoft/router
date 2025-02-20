@@ -8,6 +8,8 @@
 - Enh #229: Add URL arguments' psalm type in `UrlGeneratorInterface` (@vjik)
 - Chg #256: Bump minimum PHP version to 8.1 (@vjik)
 - Enh #256: Mark readonly properties (@vjik)
+- Chg #257: Change PHP constraint in `composer.json` to `~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0` (@vjik)
+- Bug #257: Explicitly mark nullable parameters (@vjik)
 
 ## 3.1.0 February 20, 2024
 
