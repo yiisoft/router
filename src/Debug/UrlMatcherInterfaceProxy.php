@@ -8,11 +8,14 @@ use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Router\MatchingResult;
 use Yiisoft\Router\UrlMatcherInterface;
 
+/**
+ * @infection-ignore-all
+ */
 final class UrlMatcherInterfaceProxy implements UrlMatcherInterface
 {
     public function __construct(
-        private UrlMatcherInterface $urlMatcher,
-        private RouterCollector $routerCollector
+        private readonly UrlMatcherInterface $urlMatcher,
+        private readonly RouterCollector $routerCollector
     ) {
     }
 
