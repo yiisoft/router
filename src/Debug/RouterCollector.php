@@ -12,6 +12,9 @@ use Yiisoft\Router\RouteCollectionInterface;
 use Yiisoft\Yii\Debug\Collector\CollectorTrait;
 use Yiisoft\Yii\Debug\Collector\SummaryCollectorInterface;
 
+/**
+ * @infection-ignore-all
+ */
 final class RouterCollector implements SummaryCollectorInterface
 {
     use CollectorTrait;

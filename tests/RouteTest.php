@@ -6,6 +6,7 @@ namespace Yiisoft\Router\Tests;
 
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -184,7 +185,7 @@ final class RouteTest extends TestCase
         $this->assertTrue($route->getData('override'));
     }
 
-    public function dataToString(): array
+    public static function dataToString(): array
     {
         return [
             ['yiiframework.com/', '/'],
@@ -192,9 +193,7 @@ final class RouteTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider dataToString
-     */
+    #[DataProvider('dataToString')]
     public function testToString(string $expected, string $pattern): void
     {
         $route = Route::methods([Method::GET, Method::POST], $pattern)

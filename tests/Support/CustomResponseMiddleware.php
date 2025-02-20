@@ -13,7 +13,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 final class CustomResponseMiddleware implements MiddlewareInterface
 {
     public function __construct(
-        private int $code,
+        private readonly int $code,
     ) {
     }
 

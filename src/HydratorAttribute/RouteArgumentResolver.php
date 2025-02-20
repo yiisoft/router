@@ -16,7 +16,7 @@ use function array_key_exists;
 final class RouteArgumentResolver implements ParameterAttributeResolverInterface
 {
     public function __construct(
-        private CurrentRoute $currentRoute,
+        private readonly CurrentRoute $currentRoute,
     ) {
     }
 

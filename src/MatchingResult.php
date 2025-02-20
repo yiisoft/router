@@ -20,7 +20,7 @@ final class MatchingResult
      */
     private array $methods = [];
 
-    private function __construct(private ?Route $route)
+    private function __construct(private readonly ?Route $route)
     {
     }
 

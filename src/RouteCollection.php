@@ -29,7 +29,7 @@ final class RouteCollection implements RouteCollectionInterface
      */
     private array $routes = [];
 
-    public function __construct(private RouteCollectorInterface $collector)
+    public function __construct(private readonly RouteCollectorInterface $collector)
     {
     }
 
