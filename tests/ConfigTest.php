@@ -14,6 +14,8 @@ use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollector;
 use Yiisoft\Router\RouteCollectorInterface;
 
+use function dirname;
+
 final class ConfigTest extends TestCase
 {
     public function testRouteCollector(): void
@@ -52,7 +54,7 @@ final class ConfigTest extends TestCase
 
     private function getContainerDefinitions(): array
     {
-        $params = [];
+        $params = require dirname(__DIR__) . '/config/params.php';
         return require dirname(__DIR__) . '/config/di.php';
     }
 }
