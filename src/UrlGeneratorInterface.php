@@ -20,6 +20,7 @@ interface UrlGeneratorInterface
      * @param array $arguments Argument-value set. Unused arguments will be moved to query parameters, if query
      * parameter with such name doesn't exist.
      * @param array $queryParameters Parameter-value set.
+     * @param string|null $hash Hash part (fragment identifier) of the URL.
      *
      * @throws RouteNotFoundException In case there is no route with the name specified.
      *
@@ -27,7 +28,12 @@ interface UrlGeneratorInterface
      *
      * @psalm-param UrlArgumentsType $arguments
      */
-    public function generate(string $name, array $arguments = [], array $queryParameters = []): string;
+    public function generate(
+        string $name,
+        array $arguments = [],
+        array $queryParameters = [],
+        ?string $hash = null,
+    ): string;
 
     /**
      * Generates absolute URL from named route, arguments, and query parameters.
@@ -36,6 +42,7 @@ interface UrlGeneratorInterface
      * @param array $arguments Argument-value set. Unused arguments will be moved to query parameters, if query
      * parameter with such name doesn't exist.
      * @param array $queryParameters Parameter-value set.
+     * @param string|null $hash Hash part (fragment identifier) of the URL.
      * @param string|null $scheme Host scheme.
      * @param string|null $host Host for manual setup.
      *
@@ -49,6 +56,7 @@ interface UrlGeneratorInterface
         string $name,
         array $arguments = [],
         array $queryParameters = [],
+        ?string $hash = null,
         string $scheme = null,
         string $host = null
     ): string;
@@ -59,6 +67,7 @@ interface UrlGeneratorInterface
      * @param array $replacedArguments New argument values indexed by replaced argument names. Unused arguments will be
      * moved to query parameters, if query parameter with such name doesn't exist.
      * @param array $queryParameters Parameter-value set.
+     * @param string|null $hash Hash part (fragment identifier) of the URL.
      * @param string|null $fallbackRouteName Name of a route that should be used if current route.
      * can not be determined.
      *
@@ -67,6 +76,7 @@ interface UrlGeneratorInterface
     public function generateFromCurrent(
         array $replacedArguments,
         array $queryParameters = [],
+        ?string $hash = null,
         ?string $fallbackRouteName = null
     ): string;
 
