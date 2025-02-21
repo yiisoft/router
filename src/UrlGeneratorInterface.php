@@ -17,7 +17,8 @@ interface UrlGeneratorInterface
      * Generates URL from named route, arguments, and query parameters.
      *
      * @param string $name Name of the route.
-     * @param array $arguments Argument-value set.
+     * @param array $arguments Argument-value set. Unused arguments will be moved to query parameters, if query
+     * parameter with such name doesn't exist.
      * @param array $queryParameters Parameter-value set.
      *
      * @throws RouteNotFoundException In case there is no route with the name specified.
@@ -32,7 +33,8 @@ interface UrlGeneratorInterface
      * Generates absolute URL from named route, arguments, and query parameters.
      *
      * @param string $name Name of the route.
-     * @param array $arguments Argument-value set.
+     * @param array $arguments Argument-value set. Unused arguments will be moved to query parameters, if query
+     * parameter with such name doesn't exist.
      * @param array $queryParameters Parameter-value set.
      * @param string|null $scheme Host scheme.
      * @param string|null $host Host for manual setup.
@@ -54,7 +56,8 @@ interface UrlGeneratorInterface
     /**
      * Generate URL from the current route replacing some of its arguments with values specified.
      *
-     * @param array $replacedArguments New argument values indexed by replaced argument names.
+     * @param array $replacedArguments New argument values indexed by replaced argument names. Unused arguments will be
+     * moved to query parameters, if query parameter with such name doesn't exist.
      * @param array $queryParameters Parameter-value set.
      * @param string|null $fallbackRouteName Name of a route that should be used if current route.
      * can not be determined.
