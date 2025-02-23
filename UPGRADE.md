@@ -37,5 +37,10 @@ The following backward incompatible changes have been made.
 
 ### `UrlGeneratorInterface` changes
 
-Contract is changed: on URL generation all unused arguments must be moved to query parameters, if query parameter with 
-such name doesn't exist. You should change your interface implementations accordingly.
+Contract is changed:
+
+- on URL generation all unused arguments must be moved to query parameters, if query parameter with 
+such name doesn't exist;
+- added `$hash` parameter to `generate()`, `generateAbsolute()` and `generateFromCurrent()` methods.
+
+You should change your interface implementations accordingly.
