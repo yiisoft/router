@@ -9,7 +9,7 @@
 - Chg #256: Bump minimum PHP version to 8.1 (@vjik)
 - Enh #256: Mark readonly properties (@vjik)
 - Chg #257: Change PHP constraint in `composer.json` to `~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0` (@vjik)
-- Bug #257: Explicitly mark nullable parameters (@vjik)
+- Bug #257, #263: Explicitly mark nullable parameters (@vjik)
 - Сhg #247: Change `UrlGeneratorInterface` contract: on URL generation all unused arguments must be moved to query
   parameters, if query parameter with such name doesn't exist (@vjik)
 - New #262: Add `$hash` parameter to `UrlGeneratorInterface` methods: `generate()`, `generateAbsolute()` and
