@@ -57,8 +57,8 @@ interface UrlGeneratorInterface
         array $arguments = [],
         array $queryParameters = [],
         ?string $hash = null,
-        string $scheme = null,
-        string $host = null
+        ?string $scheme = null,
+        ?string $host = null
     ): string;
 
     /**
