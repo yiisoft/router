@@ -4,6 +4,10 @@
 
 - Enh #195: Add debug collector for yiisoft/yii-debug (@xepozz)
 ## 4.0.0 under development
+## 4.0.1 under development
+
+- no changes in this release.
+
 ## 4.0.0 February 25, 2025
 
 - Сhg #247: Change `UrlGeneratorInterface` contract: on URL generation all unused arguments must be moved to query
