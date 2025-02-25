@@ -1,5 +1,9 @@
 # Yii Router Change Log
 
+## 4.0.1 under development
+
+- no changes in this release.
+
 ## 4.0.0 February 25, 2025
 
 - Сhg #247: Change `UrlGeneratorInterface` contract: on URL generation all unused arguments must be moved to query
