@@ -16,6 +16,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use RuntimeException;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
+use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
@@ -246,6 +247,33 @@ final class RouteCollectionTest extends TestCase
         $this->assertInstanceOf(Route::class, $route4);
     }
 
+    public function testGroupAlias(): void
+    {
+        $group = Group::create()
+            ->routes(
+                Route::get('/user/{username}')
+                    ->name('user/profile')
+                    ->override()
+                    ->hosts('google.com', 'yandex.com')
+                    ->defaults(['username' => 'xepozz']),
+                Route::get('/profile/{username}')
+                    ->alias('user/profile')
+                    ->name('profile'),
+            );
+
+        $collector = new RouteCollector();
+        $collector->addRoute($group);
+
+        $routeCollection = new RouteCollection($collector);
+        $route1 = $routeCollection->getRoute('user/profile');
+        $route2 = $routeCollection->getRoute('profile');
+        $this->assertEquals($route1->getData('override'), $route2->getData('override'));
+        $this->assertEquals($route1->getData('defaults'), $route2->getData('defaults'));
+        $this->assertEquals($route1->getData('hosts'), $route2->getData('hosts'));
+        $this->assertEquals($route1->getData('methods'), $route2->getData('methods'));
+        $this->assertEquals($route1->getData('hasMiddlewares'), $route2->getData('hasMiddlewares'));
+    }
+
     public function testCollectorMiddlewareFullstackCalled(): void
     {
         $action = fn (ServerRequestInterface $request) => new Response(
@@ -351,6 +379,52 @@ final class RouteCollectionTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Stack is empty.');
         $dispatcher->dispatch($request, $this->getRequestHandler());
+    }
+
+    public function testAliasRouteDispatch(): void
+    {
+        $action = fn (ServerRequestInterface $request, CurrentRoute $route) => new Response(
+            200,
+            [],
+            implode('', [$route->getPattern(), $route->getName(), $route->getHost(), implode($route->getMethods())]),
+            '1.1',
+            implode('', $request->getAttributes())
+        );
+
+        $collector = new RouteCollector();
+
+        $collector->addRoute(
+            Route::get('i/{image}')->name('image')->middleware(TestMiddleware1::class)->action($action),
+            Route::get('f/{image}')->name('another-image')->alias('image'),
+            Route::get('test')->name('test'),
+        );
+
+        $routeCollection = new RouteCollection($collector);
+        $route1 = $routeCollection->getRoute('image');
+        $route2 = $routeCollection->getRoute('another-image');
+        $route3 = $routeCollection->getRoute('test');
+
+        $currentRoute = new CurrentRoute();
+        $currentRoute->setRouteWithArguments($route1, []);
+        $ref = $currentRoute;
+        $container = new SimpleContainer([
+            TestMiddleware1::class => new TestMiddleware1(),
+            CurrentRoute::class => &$ref,
+        ]);
+        $dispatcher = $this->getDispatcher($container)
+            ->withMiddlewares($route1->getData('enabledMiddlewares'));
+
+        $response1 = $dispatcher->dispatch(new ServerRequest('GET', '/i/test'), $this->getRequestHandler());
+
+        $currentRoute = new CurrentRoute();
+        $currentRoute->setRouteWithArguments($route2, []);
+        $ref = $currentRoute;
+
+        $response2 = $dispatcher->dispatch(new ServerRequest('GET', '/f/test'), $this->getRequestHandler());
+
+        $this->assertNotEquals((string) $response1->getBody(), (string) $response2->getBody());
+        $this->assertEquals('i/{image}imageGET', (string) $response1->getBody());
+        $this->assertEquals('f/{image}another-imageGET', (string) $response2->getBody());
     }
 
     private function getRequestHandler(): RequestHandlerInterface

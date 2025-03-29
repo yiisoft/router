@@ -18,6 +18,7 @@ use function in_array;
 final class Route implements Stringable
 {
     private ?string $name = null;
+    private ?string $alias = null;
 
     /**
      * @var string[]
@@ -103,6 +104,13 @@ final class Route implements Stringable
         return $route;
     }
 
+    public function alias(string $alias): self
+    {
+        $route = clone $this;
+        $route->alias = $alias;
+        return $route;
+    }
+
     public function pattern(string $pattern): self
     {
         $new = clone $this;
@@ -134,10 +142,10 @@ final class Route implements Stringable
     /**
      * Marks route as override. When added it will replace existing route with the same name.
      */
-    public function override(): self
+    public function override(bool $override = true): self
     {
         $route = clone $this;
-        $route->override = true;
+        $route->override = $override;
         return $route;
     }
 
@@ -256,6 +264,7 @@ final class Route implements Stringable
     public function getData(string $key): mixed
     {
         return match ($key) {
+            'alias' => $this->alias,
             'name' => $this->name ??
                 (implode(', ', $this->methods) . ' ' . implode('|', $this->hosts) . $this->pattern),
             'pattern' => $this->pattern,
