@@ -81,24 +81,20 @@ final class RouterCollector implements SummaryCollectorInterface
         $route = $this->getRouteByCurrentRoute($currentRoute);
 
         if ($currentRoute === null || $route === null) {
-            return [
-                'router' => null,
-            ];
+            return [];
         }
 
         [$middlewares, $action] = $this->getMiddlewaresAndAction($route);
 
         return [
-            'router' => [
-                'matchTime' => $this->matchTime,
-                'name' => $route->getData('name'),
-                'pattern' => $route->getData('pattern'),
-                'arguments' => $currentRoute->getArguments(),
-                'host' => $route->getData('host'),
-                'uri' => (string) $currentRoute->getUri(),
-                'action' => $action,
-                'middlewares' => $middlewares,
-            ],
+            'matchTime' => $this->matchTime,
+            'name' => $route->getData('name'),
+            'pattern' => $route->getData('pattern'),
+            'arguments' => $currentRoute->getArguments(),
+            'host' => $route->getData('host'),
+            'uri' => (string) $currentRoute->getUri(),
+            'action' => $action,
+            'middlewares' => $middlewares,
         ];
     }
 
