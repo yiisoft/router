@@ -2,7 +2,7 @@
 
 ## 4.0.1 under development
 
-- no changes in this release.
+- Enh #265: Adapt summary data in debug collector (@rustamwin)
 
 ## 4.0.0 February 25, 2025
 
