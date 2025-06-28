@@ -39,7 +39,7 @@ final class RouterCollectorTest extends AbstractCollectorTestCase
 
         $summary = $collector->getSummary();
 
-        $this->assertNull($summary['router']);
+        $this->assertEmpty($summary);
     }
 
     public function testWithoutRouteCollection(): void

@@ -42,6 +42,6 @@ final class UrlMatcherInterfaceProxyTest extends TestCase
         $summary = $collector->getSummary();
 
         $this->assertSame($result, $proxyResult);
-        $this->assertGreaterThan(0, $summary['router']['matchTime']);
+        $this->assertGreaterThan(0, $summary['matchTime']);
     }
 }
