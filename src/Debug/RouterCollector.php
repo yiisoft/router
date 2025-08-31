@@ -117,7 +117,6 @@ final class RouterCollector implements SummaryCollectorInterface
         $reflection = new ReflectionObject($currentRoute);
 
         $reflectionProperty = $reflection->getProperty('route');
-        $reflectionProperty->setAccessible(true);
 
         /**
          * @var Route $value
