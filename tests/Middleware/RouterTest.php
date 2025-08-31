@@ -18,6 +18,7 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\MatchingResult;
+use Yiisoft\Router\MethodFailureHandlerInterface;
 use Yiisoft\Router\Middleware\Router;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
@@ -51,12 +52,44 @@ final class RouterTest extends TestCase
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
     }
 
+    public function testMethodMismatchHandlerRespondWith400(): void
+    {
+        $request = new ServerRequest('POST', '/');
+        $response = $this
+            ->createRouterMiddleware(methodNotAllowedHandler: $this->creatMethodFailureHandler(400))
+            ->process($request, $this->createRequestHandler());
+        $this->assertSame(400, $response->getStatusCode());
+        $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
+        $this->assertSame('JGURDA', $response->getHeaderLine('X-JGURDA'));
+    }
+
     public function testAutoResponseOptions(): void
     {
         $request = new ServerRequest('OPTIONS', '/');
         $response = $this->processWithRouter($request);
         $this->assertSame(204, $response->getStatusCode());
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
+    }
+
+    public function testAutoResponseOptionsHandler(): void
+    {
+        $request = new ServerRequest('OPTIONS', '/');
+        $response = $this
+            ->createRouterMiddleware(allowedMethodsHandler: $this->creatMethodFailureHandler(200))
+            ->process($request, $this->createRequestHandler());
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
+        $this->assertSame('JGURDA', $response->getHeaderLine('X-JGURDA'));
+    }
+
+    public function testIgnoreMethodFailureHandlerRespondWith404(): void
+    {
+        $request = new ServerRequest('POST', '/');
+        $response = $this
+            ->createRouterMiddleware()
+            ->ignoreMethodFailureHandler()
+            ->process($request, $this->createRequestHandler());
+        $this->assertSame(404, $response->getStatusCode());
     }
 
     public function testAutoResponseOptionsWithOrigin(): void
@@ -205,6 +238,13 @@ final class RouterTest extends TestCase
         $this->assertSame($expectedCode, $response->getStatusCode());
     }
 
+    public function testImmutability(): void
+    {
+        $original = $this->createRouterMiddleware();
+
+        $this->assertNotSame($original, $original->ignoreMethodFailureHandler());
+    }
+
     private function getMatcher(?RouteCollectionInterface $routeCollection = null): UrlMatcherInterface
     {
         $middleware = $this->createRouteMiddleware();
@@ -265,6 +305,8 @@ final class RouterTest extends TestCase
     private function createRouterMiddleware(
         ?RouteCollectionInterface $routeCollection = null,
         ?CurrentRoute $currentRoute = null,
+        ?MethodFailureHandlerInterface $allowedMethodsHandler = null,
+        ?MethodFailureHandlerInterface $methodNotAllowedHandler = null,
         array $containerDefinitions = [],
     ): Router {
         $container = new SimpleContainer(
@@ -278,7 +320,10 @@ final class RouterTest extends TestCase
             $this->getMatcher($routeCollection),
             new Psr17Factory(),
             new MiddlewareFactory($container),
-            $currentRoute ?? new CurrentRoute()
+            $currentRoute ?? new CurrentRoute(),
+            null,
+            $allowedMethodsHandler,
+            $methodNotAllowedHandler,
         );
     }
 
@@ -289,7 +334,7 @@ final class RouterTest extends TestCase
         array $containerDefinitions = [],
     ): ResponseInterface {
         return $this
-            ->createRouterMiddleware($routes, $currentRoute, $containerDefinitions)
+            ->createRouterMiddleware($routes, $currentRoute, containerDefinitions: $containerDefinitions)
             ->process($request, $this->createRequestHandler());
     }
 
@@ -306,5 +351,29 @@ final class RouterTest extends TestCase
     private function createRouteMiddleware(): callable
     {
         return static fn () => new Response(201);
+    }
+
+    private function creatMethodFailureHandler(int $code): MethodFailureHandlerInterface
+    {
+        return new class ($code) implements MethodFailureHandlerInterface {
+            private array $methods;
+            
+            public function __construct(private int $code)
+            {}
+
+            public function handle(ServerRequestInterface $request): ResponseInterface
+            {
+                return (new Response($this->code))
+                    ->withHeader('Allow', implode(', ', $this->methods))
+                    ->withHeader('X-JGURDA', 'JGURDA');
+            }
+
+            public function withAllowedMethods(array $methods): self
+            {
+                $new = clone $this;
+                $new->methods = $methods;
+                return $new;
+            }
+        };
     }
 }
