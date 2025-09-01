@@ -10,30 +10,34 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Yiisoft\Http\Header;
 use Yiisoft\Http\Method;
-use Yiisoft\Http\Status;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\CurrentRoute;
+use Yiisoft\Router\AllowedMethodsHandler;
 use Yiisoft\Router\MethodFailureHandlerInterface;
+use Yiisoft\Router\MethodNotAllowedHandler;
 use Yiisoft\Router\UrlMatcherInterface;
 
 final class Router implements MiddlewareInterface
 {
     private readonly MiddlewareDispatcher $dispatcher;
+    private readonly ?MethodFailureHandlerInterface $allowedMethodsHandler;
+    private readonly ?MethodFailureHandlerInterface $methodNotAllowedHandler;
     private bool $ignoreMethodFailureHandler = false;
 
     public function __construct(
         private readonly UrlMatcherInterface $matcher,
-        private readonly ResponseFactoryInterface $responseFactory,
+        ResponseFactoryInterface $responseFactory,
         MiddlewareFactory $middlewareFactory,
         private readonly CurrentRoute $currentRoute,
         ?EventDispatcherInterface $eventDispatcher = null,
-        private readonly ?MethodFailureHandlerInterface $allowedMethodsHandler = null,
-        private readonly ?MethodFailureHandlerInterface $methodNotAllowedHandler = null
+        ?MethodFailureHandlerInterface $allowedMethodsHandler = null,
+        ?MethodFailureHandlerInterface $methodNotAllowedHandler = null
     ) {
         $this->dispatcher = new MiddlewareDispatcher($middlewareFactory, $eventDispatcher);
+        $this->allowedMethodsHandler = $allowedMethodsHandler ?? new AllowedMethodsHandler($responseFactory);
+        $this->methodNotAllowedHandler = $methodNotAllowedHandler ?? new MethodNotAllowedHandler($responseFactory);
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -44,8 +48,12 @@ final class Router implements MiddlewareInterface
 
         if (!$this->ignoreMethodFailureHandler && $result->isMethodFailure()) {
             return $request->getMethod() === Method::OPTIONS
-                    ? $this->getAllowedMethodsResponse($request, $result->methods())
-                    : $this->getMethodNotAllowedResponse($request, $result->methods());
+                    ? $this->allowedMethodsHandler
+                        ->withAllowedMethods($result->methods())
+                        ->handle($request)
+                    : $this->methodNotAllowedHandler
+                        ->withAllowedMethods($result->methods())
+                        ->handle($request);
         }
 
         if (!$result->isSuccess()) {
@@ -64,33 +72,5 @@ final class Router implements MiddlewareInterface
         $new = clone $this;
         $new->ignoreMethodFailureHandler = true;
         return $new;
-    }
-
-    /**
-     * @param string[] $methods
-     */
-    private function getAllowedMethodsResponse(ServerRequestInterface $request, array $methods): ResponseInterface
-    {
-        return $this->allowedMethodsHandler !== null
-                ? $this->allowedMethodsHandler
-                    ->withAllowedMethods($methods)
-                    ->handle($request)
-                : $this->responseFactory
-                    ->createResponse(Status::NO_CONTENT)
-                    ->withHeader(Header::ALLOW, implode(', ', $methods));
-    }
-
-    /**
-     * @param string[] $methods
-     */
-    private function getMethodNotAllowedResponse(ServerRequestInterface $request, array $methods): ResponseInterface
-    {
-        return $this->methodNotAllowedHandler !== null
-                ? $this->methodNotAllowedHandler
-                    ->withAllowedMethods($methods)
-                    ->handle($request)
-                : $this->responseFactory
-                    ->createResponse(Status::METHOD_NOT_ALLOWED)
-                    ->withHeader(Header::ALLOW, implode(', ', $methods));
     }
 }
