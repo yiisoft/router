@@ -236,8 +236,8 @@ application middleware processes the request.
 ### Automatic responses
 
 `Yiisoft\Router\Middleware\Router` middleware responds automatically to:
-- `OPTIONS` requests, see [OPTIONS requests](#options-requests) section below.
-- Requests with methods that are not supported by the target resource, see [Method not allowed response](#method-not-allowed-response) section below.
+- `OPTIONS` requests, see [OPTIONS requests](#options-requests) section.
+- Requests with methods that are not supported by the target resource, see [Method not allowed response](#method-not-allowed-response) section.
 
 You can disable this behavior by calling the `Yiisoft\Router\Middleware\Router::ignoreMethodFailureHandler()` method:
 
