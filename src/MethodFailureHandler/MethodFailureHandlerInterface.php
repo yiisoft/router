@@ -11,8 +11,6 @@ interface MethodFailureHandlerInterface
 {
     /**
      * @param string[] $allowedMethods
-     *
-     * @psalm-param non-empty-array<string> $allowedMethods
      */
     public function handle(ServerRequestInterface $request, array $allowedMethods): ResponseInterface;
 }

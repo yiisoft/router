@@ -13,13 +13,14 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\CurrentRoute;
-use Yiisoft\Router\MethodFailureHandler\MethodFailureHandler;
+use Yiisoft\Router\MethodFailureHandler\StandardMethodFailureHandler;
+use Yiisoft\Router\MethodFailureHandler\MethodFailureHandlerInterface;
 use Yiisoft\Router\UrlMatcherInterface;
 
 final class Router implements MiddlewareInterface
 {
     private readonly MiddlewareDispatcher $dispatcher;
-    private readonly MethodFailureHandler|null $methodFailureHandler;
+    private readonly MethodFailureHandlerInterface|null $methodFailureHandler;
 
     public function __construct(
         private readonly UrlMatcherInterface $matcher,
@@ -27,12 +28,12 @@ final class Router implements MiddlewareInterface
         MiddlewareFactory $middlewareFactory,
         private readonly CurrentRoute $currentRoute,
         ?EventDispatcherInterface $eventDispatcher = null,
-        MethodFailureHandler|false|null $methodFailureHandler = null,
+        MethodFailureHandlerInterface|false|null $methodFailureHandler = null,
     ) {
         $this->dispatcher = new MiddlewareDispatcher($middlewareFactory, $eventDispatcher);
         $this->methodFailureHandler = $methodFailureHandler === false
             ? null
-            : $methodFailureHandler ?? new MethodFailureHandler($responseFactory);
+            : $methodFailureHandler ?? new StandardMethodFailureHandler($responseFactory);
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
