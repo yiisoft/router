@@ -10,8 +10,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Yiisoft\Http\Method;
-use Yiisoft\Http\Status;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\CurrentRoute;
@@ -32,10 +30,9 @@ final class Router implements MiddlewareInterface
         MethodFailureHandler|false|null $methodFailureHandler = null,
     ) {
         $this->dispatcher = new MiddlewareDispatcher($middlewareFactory, $eventDispatcher);
-            $this->methodFailureHandler = $methodFailureHandler === false
-                ? null
-                : $methodFailureHandler ?? new MethodFailureHandler($responseFactory);
-
+        $this->methodFailureHandler = $methodFailureHandler === false
+            ? null
+            : $methodFailureHandler ?? new MethodFailureHandler($responseFactory);
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
