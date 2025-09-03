@@ -22,7 +22,7 @@ use Yiisoft\Yii\Debug\Collector\CollectorInterface;
 use Yiisoft\Yii\Debug\Tests\Shared\AbstractCollectorTestCase;
 
 /**
- * @requires PHP >= 8.1
+ * @group yii-debug
  */
 final class RouterCollectorTest extends AbstractCollectorTestCase
 {
