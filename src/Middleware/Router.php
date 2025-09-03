@@ -15,20 +15,27 @@ use Yiisoft\Http\Status;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\CurrentRoute;
+use Yiisoft\Router\MethodFailureHandler\MethodFailureHandler;
 use Yiisoft\Router\UrlMatcherInterface;
 
 final class Router implements MiddlewareInterface
 {
     private readonly MiddlewareDispatcher $dispatcher;
+    private readonly MethodFailureHandler|null $methodFailureHandler;
 
     public function __construct(
         private readonly UrlMatcherInterface $matcher,
-        private readonly ResponseFactoryInterface $responseFactory,
+        ResponseFactoryInterface $responseFactory,
         MiddlewareFactory $middlewareFactory,
         private readonly CurrentRoute $currentRoute,
-        ?EventDispatcherInterface $eventDispatcher = null
+        ?EventDispatcherInterface $eventDispatcher = null,
+        MethodFailureHandler|false|null $methodFailureHandler = null,
     ) {
         $this->dispatcher = new MiddlewareDispatcher($middlewareFactory, $eventDispatcher);
+            $this->methodFailureHandler = $methodFailureHandler === false
+                ? null
+                : $methodFailureHandler ?? new MethodFailureHandler($responseFactory);
+
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -37,15 +44,8 @@ final class Router implements MiddlewareInterface
 
         $this->currentRoute->setUri($request->getUri());
 
-        if ($result->isMethodFailure()) {
-            if ($request->getMethod() === Method::OPTIONS) {
-                return $this->responseFactory
-                    ->createResponse(Status::NO_CONTENT)
-                    ->withHeader('Allow', implode(', ', $result->methods()));
-            }
-            return $this->responseFactory
-                ->createResponse(Status::METHOD_NOT_ALLOWED)
-                ->withHeader('Allow', implode(', ', $result->methods()));
+        if ($result->isMethodFailure() && $this->methodFailureHandler !== null) {
+            return $this->methodFailureHandler->handle($request, $result->methods());
         }
 
         if (!$result->isSuccess()) {
