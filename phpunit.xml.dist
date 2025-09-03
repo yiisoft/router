@@ -17,6 +17,12 @@
         <ini name="error_reporting" value="-1"/>
     </php>
 
+    <groups>
+        <exclude>
+            <group>yii-debug</group>
+        </exclude>
+    </groups>
+
     <testsuites>
         <testsuite name="Yii Router tests">
             <directory>./tests</directory>
