@@ -16,9 +16,4 @@ return [
             UrlMatcherInterface::class => [UrlMatcherInterfaceProxy::class, RouterCollector::class],
         ],
     ],
-    'yiisoft/yii-console' => [
-        'commands' => [
-            DebugRoutesCommand::COMMAND_NAME => DebugRoutesCommand::class,
-        ],
-    ],
 ];
