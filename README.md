@@ -82,7 +82,7 @@ $routes = [
 
 // Add routes defined to route collector
 $collector = $container->get(RouteCollectorInterface::class);
-$collector->addRoute(Group::create(null)->routes($routes));
+$collector->addRoute(...$routes);
 
 // Initialize URL matcher
 /** @var UrlMatcherInterface $urlMatcher */
@@ -200,12 +200,12 @@ $collector->addRoute(
     Group::create('/api')
         ->middleware(ApiAuthentication::class)
         ->host('https://example.com')
-        ->routes([
+        ->routes(
             Route::get('/comments'),
-            Group::create('/posts')->routes([
+            Group::create('/posts')->routes(
                 Route::get('/list'),
-            ]),
-        ])
+            ),
+        )
 );
 ```
 
@@ -390,10 +390,9 @@ use \Tuupola\Middleware\CorsMiddleware;
 return [
     Group::create('/api')
         ->withCors(CorsMiddleware::class)
-        ->routes([
+        ->routes(
           // ...
-        ]
-    );
+        );
 ];
 ```
 

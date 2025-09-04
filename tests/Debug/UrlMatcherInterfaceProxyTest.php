@@ -15,7 +15,7 @@ use Yiisoft\Router\Tests\Support\UrlMatcherStub;
 use Yiisoft\Test\Support\Container\SimpleContainer;
 
 /**
- * @requires PHP >= 8.1
+ * @group yii-debug
  */
 final class UrlMatcherInterfaceProxyTest extends TestCase
 {

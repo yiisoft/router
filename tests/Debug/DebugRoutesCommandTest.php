@@ -16,7 +16,7 @@ use Yiisoft\Yii\Debug\Debugger;
 use Yiisoft\Yii\Debug\Storage\MemoryStorage;
 
 /**
- * @requires PHP >= 8.1
+ * @group yii-debug
  */
 final class DebugRoutesCommandTest extends TestCase
 {
