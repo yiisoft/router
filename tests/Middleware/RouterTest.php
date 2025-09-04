@@ -361,7 +361,7 @@ final class RouterTest extends TestCase
             public function __construct(private int $code)
             {}
 
-            public function handle(ServerRequestInterface $request): ResponseInterface
+            public function handle(ServerRequestInterface $request, array $allowedMethods): ResponseInterface
             {
                 return (new Response($this->code))
                     ->withHeader('Allow', implode(', ', $this->methods))
