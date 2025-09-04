@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
-use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * `MethodFailureHandlerInterface` produces a response with a list of the target resource's supported methods.
  */
-interface MethodFailureHandlerInterface extends RequestHandlerInterface
+interface MethodFailureHandlerInterface
 {
     /**
-     * Creates new instance of handler with supported methods set.
+     * Produces a response listing resource's allowed methods.
      *
-     * @param string[] $methods a list of the HTTP methods supported by the request's resource
+     * @param string[] $allowedMethods a list of the HTTP methods supported by the request's resource
      */
-    public function withAllowedMethods(array $methods): self;
+    public function handle(ServerRequestInterface $request, array $allowedMethods): ResponseInterface;
 }

@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use Yiisoft\Router\CurrentRoute;
+use Yiisoft\Router\MethodFailureHandlerInterface;
+use Yiisoft\Router\MethodFailureHandler;
 use Yiisoft\Router\RouteCollector;
 use Yiisoft\Router\RouteCollectorInterface;
-use Yiisoft\Router\CurrentRoute;
 
 return [
     RouteCollectorInterface::class => RouteCollector::class,
@@ -15,4 +17,5 @@ return [
             $this->arguments = [];
         },
     ],
+    MethodFailureHandlerInterface::class => MethodFailureHandler::class,
 ];

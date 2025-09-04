@@ -10,21 +10,15 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\CurrentRoute;
-use Yiisoft\Router\AllowedMethodsHandler;
 use Yiisoft\Router\MethodFailureHandlerInterface;
-use Yiisoft\Router\MethodNotAllowedHandler;
 use Yiisoft\Router\UrlMatcherInterface;
 
 final class Router implements MiddlewareInterface
 {
     private readonly MiddlewareDispatcher $dispatcher;
-    private readonly ?MethodFailureHandlerInterface $allowedMethodsHandler;
-    private readonly ?MethodFailureHandlerInterface $methodNotAllowedHandler;
-    private bool $ignoreMethodFailureHandler = false;
 
     public function __construct(
         private readonly UrlMatcherInterface $matcher,
@@ -32,12 +26,9 @@ final class Router implements MiddlewareInterface
         MiddlewareFactory $middlewareFactory,
         private readonly CurrentRoute $currentRoute,
         ?EventDispatcherInterface $eventDispatcher = null,
-        ?MethodFailureHandlerInterface $allowedMethodsHandler = null,
-        ?MethodFailureHandlerInterface $methodNotAllowedHandler = null
+        private readonly ?MethodFailureHandlerInterface $methodFailureHandler = null
     ) {
         $this->dispatcher = new MiddlewareDispatcher($middlewareFactory, $eventDispatcher);
-        $this->allowedMethodsHandler = $allowedMethodsHandler ?? new AllowedMethodsHandler($responseFactory);
-        $this->methodNotAllowedHandler = $methodNotAllowedHandler ?? new MethodNotAllowedHandler($responseFactory);
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -46,14 +37,8 @@ final class Router implements MiddlewareInterface
 
         $this->currentRoute->setUri($request->getUri());
 
-        if (!$this->ignoreMethodFailureHandler && $result->isMethodFailure()) {
-            return $request->getMethod() === Method::OPTIONS
-                    ? $this->allowedMethodsHandler
-                        ->withAllowedMethods($result->methods())
-                        ->handle($request)
-                    : $this->methodNotAllowedHandler
-                        ->withAllowedMethods($result->methods())
-                        ->handle($request);
+        if ($result->isMethodFailure() && $this->methodFailureHandler !== null) {
+            return $this->methodFailureHandler->handle($request, $result->methods());
         }
 
         if (!$result->isSuccess()) {
@@ -65,12 +50,5 @@ final class Router implements MiddlewareInterface
         return $this->dispatcher
             ->withMiddlewares($result->route()->getData('enabledMiddlewares'))
             ->dispatch($request, $handler);
-    }
-
-    public function ignoreMethodFailureHandler(): self
-    {
-        $new = clone $this;
-        $new->ignoreMethodFailureHandler = true;
-        return $new;
     }
 }
