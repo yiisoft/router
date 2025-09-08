@@ -17,5 +17,4 @@ return [
             $this->arguments = [];
         },
     ],
-    MethodFailureHandlerInterface::class => MethodFailureHandler::class,
 ];

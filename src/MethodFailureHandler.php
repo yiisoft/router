@@ -12,9 +12,13 @@ use Yiisoft\Http\Header;
 use Yiisoft\Http\Method;
 use Yiisoft\Http\Status;
 
-class MethodFailureHandler implements MethodFailureHandlerInterface
+/**
+ * Default handler that is produces a response with a list of the target resource's supported methods.
+ */
+final class MethodFailureHandler implements MethodFailureHandlerInterface
 {
-    public function __construct(private readonly ResponseFactoryInterface $responseFactory) {
+    public function __construct(private readonly ResponseFactoryInterface $responseFactory)
+    {
     }
 
     public function handle(ServerRequestInterface $request, array $allowedMethods): ResponseInterface
@@ -23,12 +27,10 @@ class MethodFailureHandler implements MethodFailureHandlerInterface
             throw new InvalidArgumentException("Allowed methods can't be empty array.");
         }
 
-        return $request->getMethod() === Method::OPTIONS
-            ? $this->responseFactory
-                ->createResponse(Status::NO_CONTENT)
-                ->withHeader(Header::ALLOW, implode(', ', $allowedMethods))
-            : $this->responseFactory
-                ->createResponse(Status::METHOD_NOT_ALLOWED)
+        $status = $request->getMethod() === Method::OPTIONS ? Status::NO_CONTENT : Status::METHOD_NOT_ALLOWED;
+
+        return $this->responseFactory
+                ->createResponse($status)
                 ->withHeader(Header::ALLOW, implode(', ', $allowedMethods));
     }
 }
