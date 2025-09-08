@@ -357,7 +357,8 @@ final class RouterTest extends TestCase
     {
         return new class ($code) implements MethodFailureHandlerInterface {
             public function __construct(private readonly int $code)
-            {}
+            {
+            }
 
             public function handle(ServerRequestInterface $request, array $allowedMethods): ResponseInterface
             {
