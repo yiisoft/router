@@ -18,6 +18,8 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\MatchingResult;
+use Yiisoft\Router\MethodFailureAction;
+use Yiisoft\Router\MethodFailureActionInterface;
 use Yiisoft\Router\Middleware\Router;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
@@ -43,28 +45,63 @@ final class RouterTest extends TestCase
         $this->assertSame(404, $response->getStatusCode());
     }
 
-    public function testMethodMismatchRespondWith405(): void
+    public function testWithoutMethodFailureHandlerRespondWith404(): void
     {
         $request = new ServerRequest('POST', '/');
         $response = $this->processWithRouter($request);
+        $this->assertSame(404, $response->getStatusCode());
+    }
+
+    public function testDefaultFailureHandlerResponseOptions(): void
+    {
+        $request = new ServerRequest('OPTIONS', '/');
+        $response = $this
+            ->createRouterMiddleware(methodFailureAction: $this->creatDefaultMethodFailureAction())
+            ->process($request, $this->createRequestHandler());
+        $this->assertSame(204, $response->getStatusCode());
+        $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
+    }
+
+    public function testDefaultFailureHandlerResponseOptionsWithOrigin(): void
+    {
+        $request = new ServerRequest('OPTIONS', 'http://test.local/', ['Origin' => 'http://test.com']);
+        $response = $this
+            ->createRouterMiddleware(methodFailureAction: $this->creatDefaultMethodFailureAction())
+            ->process($request, $this->createRequestHandler());
+        $this->assertSame(204, $response->getStatusCode());
+        $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
+    }
+
+    public function testCustomFailureHandlerResponseOptions(): void
+    {
+        $request = new ServerRequest('OPTIONS', '/');
+        $response = $this
+            ->createRouterMiddleware(methodFailureAction: $this->creatMethodFailureAction(200))
+            ->process($request, $this->createRequestHandler());
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
+        $this->assertSame('JGURDA', $response->getHeaderLine('X-JGURDA'));
+    }
+
+    public function testDefaultFailureHandlerRespondWith405(): void
+    {
+        $request = new ServerRequest('POST', '/');
+        $response = $this
+            ->createRouterMiddleware(methodFailureAction: $this->creatDefaultMethodFailureAction())
+            ->process($request, $this->createRequestHandler());
         $this->assertSame(405, $response->getStatusCode());
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
     }
 
-    public function testAutoResponseOptions(): void
+    public function testCustomFailureHandlerRespondWith400(): void
     {
-        $request = new ServerRequest('OPTIONS', '/');
-        $response = $this->processWithRouter($request);
-        $this->assertSame(204, $response->getStatusCode());
+        $request = new ServerRequest('POST', '/');
+        $response = $this
+            ->createRouterMiddleware(methodFailureAction: $this->creatMethodFailureAction(400))
+            ->process($request, $this->createRequestHandler());
+        $this->assertSame(400, $response->getStatusCode());
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
-    }
-
-    public function testAutoResponseOptionsWithOrigin(): void
-    {
-        $request = new ServerRequest('OPTIONS', 'http://test.local/', ['Origin' => 'http://test.com']);
-        $response = $this->processWithRouter($request);
-        $this->assertSame(204, $response->getStatusCode());
-        $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
+        $this->assertSame('JGURDA', $response->getHeaderLine('X-JGURDA'));
     }
 
     public function testWithCorsHandlers(): void
@@ -265,6 +302,7 @@ final class RouterTest extends TestCase
     private function createRouterMiddleware(
         ?RouteCollectionInterface $routeCollection = null,
         ?CurrentRoute $currentRoute = null,
+        ?MethodFailureActionInterface $methodFailureAction = null,
         array $containerDefinitions = [],
     ): Router {
         $container = new SimpleContainer(
@@ -278,7 +316,9 @@ final class RouterTest extends TestCase
             $this->getMatcher($routeCollection),
             new Psr17Factory(),
             new MiddlewareFactory($container),
-            $currentRoute ?? new CurrentRoute()
+            $currentRoute ?? new CurrentRoute(),
+            $methodFailureAction,
+            null
         );
     }
 
@@ -289,7 +329,7 @@ final class RouterTest extends TestCase
         array $containerDefinitions = [],
     ): ResponseInterface {
         return $this
-            ->createRouterMiddleware($routes, $currentRoute, $containerDefinitions)
+            ->createRouterMiddleware($routes, $currentRoute, containerDefinitions: $containerDefinitions)
             ->process($request, $this->createRequestHandler());
     }
 
@@ -306,5 +346,26 @@ final class RouterTest extends TestCase
     private function createRouteMiddleware(): callable
     {
         return static fn () => new Response(201);
+    }
+
+    private function creatDefaultMethodFailureAction(): MethodFailureAction
+    {
+        return new MethodFailureAction(new Psr17Factory());
+    }
+
+    private function creatMethodFailureAction(int $code): MethodFailureActionInterface
+    {
+        return new class ($code) implements MethodFailureActionInterface {
+            public function __construct(private readonly int $code)
+            {
+            }
+
+            public function handle(ServerRequestInterface $request, array $allowedMethods): ResponseInterface
+            {
+                return (new Response($this->code))
+                    ->withHeader('Allow', implode(', ', $allowedMethods))
+                    ->withHeader('X-JGURDA', 'JGURDA');
+            }
+        };
     }
 }
