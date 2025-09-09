@@ -18,8 +18,8 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\MatchingResult;
-use Yiisoft\Router\MethodFailureHandler;
-use Yiisoft\Router\MethodFailureHandlerInterface;
+use Yiisoft\Router\MethodFailureAction;
+use Yiisoft\Router\MethodFailureActionInterface;
 use Yiisoft\Router\Middleware\Router;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
@@ -45,7 +45,7 @@ final class RouterTest extends TestCase
         $this->assertSame(404, $response->getStatusCode());
     }
 
-    public function testDefaultMethodFailureRespondWith404(): void
+    public function testWithoutMethodFailureHandlerRespondWith404(): void
     {
         $request = new ServerRequest('POST', '/');
         $response = $this->processWithRouter($request);
@@ -56,7 +56,7 @@ final class RouterTest extends TestCase
     {
         $request = new ServerRequest('OPTIONS', '/');
         $response = $this
-            ->createRouterMiddleware(methodFailureHandler: $this->creatDefaultMethodFailureHandler())
+            ->createRouterMiddleware(methodFailureAction: $this->creatDefaultMethodFailureAction())
             ->process($request, $this->createRequestHandler());
         $this->assertSame(204, $response->getStatusCode());
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
@@ -66,7 +66,7 @@ final class RouterTest extends TestCase
     {
         $request = new ServerRequest('OPTIONS', 'http://test.local/', ['Origin' => 'http://test.com']);
         $response = $this
-            ->createRouterMiddleware(methodFailureHandler: $this->creatDefaultMethodFailureHandler())
+            ->createRouterMiddleware(methodFailureAction: $this->creatDefaultMethodFailureAction())
             ->process($request, $this->createRequestHandler());
         $this->assertSame(204, $response->getStatusCode());
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
@@ -76,7 +76,7 @@ final class RouterTest extends TestCase
     {
         $request = new ServerRequest('OPTIONS', '/');
         $response = $this
-            ->createRouterMiddleware(methodFailureHandler: $this->creatMethodFailureHandler(200))
+            ->createRouterMiddleware(methodFailureAction: $this->creatMethodFailureAction(200))
             ->process($request, $this->createRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
@@ -87,7 +87,7 @@ final class RouterTest extends TestCase
     {
         $request = new ServerRequest('POST', '/');
         $response = $this
-            ->createRouterMiddleware(methodFailureHandler: $this->creatDefaultMethodFailureHandler())
+            ->createRouterMiddleware(methodFailureAction: $this->creatDefaultMethodFailureAction())
             ->process($request, $this->createRequestHandler());
         $this->assertSame(405, $response->getStatusCode());
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
@@ -97,7 +97,7 @@ final class RouterTest extends TestCase
     {
         $request = new ServerRequest('POST', '/');
         $response = $this
-            ->createRouterMiddleware(methodFailureHandler: $this->creatMethodFailureHandler(400))
+            ->createRouterMiddleware(methodFailureAction: $this->creatMethodFailureAction(400))
             ->process($request, $this->createRequestHandler());
         $this->assertSame(400, $response->getStatusCode());
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
@@ -302,7 +302,7 @@ final class RouterTest extends TestCase
     private function createRouterMiddleware(
         ?RouteCollectionInterface $routeCollection = null,
         ?CurrentRoute $currentRoute = null,
-        ?MethodFailureHandlerInterface $methodFailureHandler = null,
+        ?MethodFailureActionInterface $methodFailureAction = null,
         array $containerDefinitions = [],
     ): Router {
         $container = new SimpleContainer(
@@ -317,8 +317,8 @@ final class RouterTest extends TestCase
             new Psr17Factory(),
             new MiddlewareFactory($container),
             $currentRoute ?? new CurrentRoute(),
-            null,
-            $methodFailureHandler
+            $methodFailureAction,
+            null
         );
     }
 
@@ -348,14 +348,14 @@ final class RouterTest extends TestCase
         return static fn () => new Response(201);
     }
 
-    private function creatDefaultMethodFailureHandler(): MethodFailureHandler
+    private function creatDefaultMethodFailureAction(): MethodFailureAction
     {
-        return new MethodFailureHandler(new Psr17Factory());
+        return new MethodFailureAction(new Psr17Factory());
     }
 
-    private function creatMethodFailureHandler(int $code): MethodFailureHandlerInterface
+    private function creatMethodFailureAction(int $code): MethodFailureActionInterface
     {
-        return new class ($code) implements MethodFailureHandlerInterface {
+        return new class ($code) implements MethodFailureActionInterface {
             public function __construct(private readonly int $code)
             {
             }

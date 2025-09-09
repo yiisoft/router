@@ -15,7 +15,7 @@ use Yiisoft\Http\Status;
 /**
  * Default handler that is produces a response with a list of the target resource's supported methods.
  */
-final class MethodFailureHandler implements MethodFailureHandlerInterface
+final class MethodFailureAction implements MethodFailureActionInterface
 {
     public function __construct(private readonly ResponseFactoryInterface $responseFactory)
     {

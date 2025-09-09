@@ -13,7 +13,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\CurrentRoute;
-use Yiisoft\Router\MethodFailureHandlerInterface;
+use Yiisoft\Router\MethodFailureActionInterface;
 use Yiisoft\Router\UrlMatcherInterface;
 
 final class Router implements MiddlewareInterface
@@ -25,8 +25,8 @@ final class Router implements MiddlewareInterface
         ResponseFactoryInterface $responseFactory,
         MiddlewareFactory $middlewareFactory,
         private readonly CurrentRoute $currentRoute,
+        private readonly MethodFailureActionInterface|null $methodFailureAction,
         ?EventDispatcherInterface $eventDispatcher = null,
-        private readonly ?MethodFailureHandlerInterface $methodFailureHandler = null
     ) {
         $this->dispatcher = new MiddlewareDispatcher($middlewareFactory, $eventDispatcher);
     }
@@ -37,8 +37,8 @@ final class Router implements MiddlewareInterface
 
         $this->currentRoute->setUri($request->getUri());
 
-        if ($result->isMethodFailure() && $this->methodFailureHandler !== null) {
-            return $this->methodFailureHandler->handle($request, $result->methods());
+        if ($result->isMethodFailure() && $this->methodFailureAction !== null) {
+            return $this->methodFailureAction->handle($request, $result->methods());
         }
 
         if (!$result->isSuccess()) {
