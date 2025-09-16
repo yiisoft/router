@@ -10,9 +10,9 @@ use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Http\Method;
-use Yiisoft\Router\MethodFailureAction;
+use Yiisoft\Router\MethodFailureHandler;
 
-final class MethodFailureActionTest extends TestCase
+final class MethodFailureHandlerTest extends TestCase
 {
     public function testShouldReturnCode204(): void
     {
@@ -44,9 +44,9 @@ final class MethodFailureActionTest extends TestCase
             ->handle($this->createRequest(), []);
     }
 
-    private function createHandler(): MethodFailureAction
+    private function createHandler(): MethodFailureHandler
     {
-        return new MethodFailureAction(new Psr17Factory());
+        return new MethodFailureHandler(new Psr17Factory());
     }
 
     private function createRequest(string $method = Method::GET, string $uri = '/'): ServerRequestInterface

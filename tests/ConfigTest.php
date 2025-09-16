@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace Yiisoft\Router\Tests;
 
 use Nyholm\Psr7\Uri;
+use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Yiisoft\Di\Container;
 use Yiisoft\Di\ContainerConfig;
 use Yiisoft\Di\StateResetter;
 use Yiisoft\Router\CurrentRoute;
+use Yiisoft\Router\MethodFailureHandler;
+use Yiisoft\Router\MethodFailureHandlerInterface;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollector;
 use Yiisoft\Router\RouteCollectorInterface;
@@ -24,6 +28,14 @@ final class ConfigTest extends TestCase
 
         $routerCollector = $container->get(RouteCollectorInterface::class);
         $this->assertInstanceOf(RouteCollector::class, $routerCollector);
+    }
+
+    public function testMethodFailureHandler(): void
+    {
+        $container = $this->createContainer();
+
+        $methodFailureHandler = $container->get(MethodFailureHandlerInterface::class);
+        $this->assertInstanceOf(MethodFailureHandler::class, $methodFailureHandler);
     }
 
     public function testCurrentRoute(): void
@@ -46,9 +58,10 @@ final class ConfigTest extends TestCase
     private function createContainer(): Container
     {
         return new Container(
-            ContainerConfig::create()->withDefinitions(
-                $this->getContainerDefinitions()
-            )
+            ContainerConfig::create()->withDefinitions([
+                ResponseFactoryInterface::class => Psr17Factory::class,
+                ...$this->getContainerDefinitions(),
+            ])
         );
     }
 

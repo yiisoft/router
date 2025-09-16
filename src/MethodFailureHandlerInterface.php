@@ -8,9 +8,9 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
- * `MethodFailureActionInterface` produces a response with a list of the target resource's supported methods.
+ * `MethodFailureHandlerInterface` produces a response with a list of the target resource's supported methods.
  */
-interface MethodFailureActionInterface
+interface MethodFailureHandlerInterface
 {
     /**
      * Produces a response listing resource's allowed methods.
