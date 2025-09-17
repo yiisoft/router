@@ -32,7 +32,7 @@ final class ConfigTest extends TestCase
 
     public function testMethodFailureHandler(): void
     {
-        $container = $this->createContainer();
+        $container = $this->createContainer('web');
 
         $methodFailureHandler = $container->get(MethodFailureHandlerInterface::class);
         $this->assertInstanceOf(MethodFailureHandler::class, $methodFailureHandler);
@@ -40,7 +40,7 @@ final class ConfigTest extends TestCase
 
     public function testCurrentRoute(): void
     {
-        $container = $this->createContainer();
+        $container = $this->createContainer('web');
 
         $currentRoute = $container->get(CurrentRoute::class);
         $currentRoute->setRouteWithArguments(Route::get('/main'), ['name' => 'hello']);
@@ -55,19 +55,19 @@ final class ConfigTest extends TestCase
         $this->assertSame([], $currentRoute->getArguments());
     }
 
-    private function createContainer(): Container
+    private function createContainer(?string $postfix = null): Container
     {
         return new Container(
             ContainerConfig::create()->withDefinitions([
                 ResponseFactoryInterface::class => Psr17Factory::class,
-                ...$this->getContainerDefinitions(),
+                ...$this->getDiConfig($postfix),
             ])
         );
     }
 
-    private function getContainerDefinitions(): array
+    private function getDiConfig(?string $postfix = null): array
     {
         $params = require dirname(__DIR__) . '/config/params.php';
-        return require dirname(__DIR__) . '/config/di.php';
+        return require dirname(__DIR__) . '/config/di' . ($postfix !== null ? '-' . $postfix : '') . '.php';
     }
 }
