@@ -5,6 +5,7 @@
 - Enh #195: Add debug collector for yiisoft/yii-debug (@xepozz)
 ## 4.0.0 under development
 ## 4.0.1 under development
+## 4.0.1 September 23, 2025
 
 - Enh #265: Adapt summary data in debug collector (@rustamwin)
 - Bug #268: Remove debug console command from package configuration (@vjik)
