@@ -1,6 +1,6 @@
 # Yii Router Change Log
 
-## 4.0.1 under development
+## 4.0.1 September 23, 2025
 
 - Enh #265: Adapt summary data in debug collector (@rustamwin)
 - Bug #268: Remove debug console command from package configuration (@vjik)
