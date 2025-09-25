@@ -1,10 +1,13 @@
 # Yii Router Change Log
 
-## 4.0.1 under development
+## 4.0.2 under development
 
-- Enh #265: Adapt summary data in debug collector (@rustamwin)
 - New #249: Add option to ignore method failure handler to the 'Router' middleware (@olegbaturin)
 - New #249: Add custom response handlers for the method failure responses to the 'Router' middleware (@olegbaturin)
+
+## 4.0.1 September 23, 2025
+
+- Enh #265: Adapt summary data in debug collector (@rustamwin)
 - Bug #268: Remove debug console command from package configuration (@vjik)
 
 ## 4.0.0 February 25, 2025
