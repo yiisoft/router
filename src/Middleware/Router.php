@@ -23,7 +23,7 @@ final class Router implements MiddlewareInterface
         private readonly UrlMatcherInterface $matcher,
         MiddlewareFactory $middlewareFactory,
         private readonly CurrentRoute $currentRoute,
-        private readonly MethodFailureHandlerInterface|null $MethodFailureHandler,
+        private readonly MethodFailureHandlerInterface|null $methodFailureHandler,
         ?EventDispatcherInterface $eventDispatcher = null,
     ) {
         $this->dispatcher = new MiddlewareDispatcher($middlewareFactory, $eventDispatcher);
@@ -35,8 +35,8 @@ final class Router implements MiddlewareInterface
 
         $this->currentRoute->setUri($request->getUri());
 
-        if ($result->isMethodFailure() && $this->MethodFailureHandler !== null) {
-            return $this->MethodFailureHandler->handle($request, $result->methods());
+        if ($result->isMethodFailure() && $this->methodFailureHandler !== null) {
+            return $this->methodFailureHandler->handle($request, $result->methods());
         }
 
         if (!$result->isSuccess()) {
