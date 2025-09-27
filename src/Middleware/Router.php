@@ -23,7 +23,7 @@ final class Router implements MiddlewareInterface
         private readonly UrlMatcherInterface $matcher,
         MiddlewareFactory $middlewareFactory,
         private readonly CurrentRoute $currentRoute,
-        private readonly MethodFailureHandlerInterface|null $methodFailureHandler,
+        private readonly ?MethodFailureHandlerInterface $methodFailureHandler,
         ?EventDispatcherInterface $eventDispatcher = null,
     ) {
         $this->dispatcher = new MiddlewareDispatcher($middlewareFactory, $eventDispatcher);

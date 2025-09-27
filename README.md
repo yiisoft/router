@@ -222,10 +222,18 @@ If host is specified, all routes in the group would match only if the host match
 To simplify usage in PSR-middleware based application, there is a ready to use `Yiisoft\Router\Middleware\Router` middleware provided:
 
 ```php
-$router = $container->get(Yiisoft\Router\UrlMatcherInterface::class);
-$responseFactory = $container->get(\Psr\Http\Message\ResponseFactoryInterface::class);
+use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
+use Yiisoft\Router\CurrentRoute;
+use Yiisoft\Router\MethodFailureHandlerInterface;
+use Yiisoft\Router\Middleware\Router;
+use Yiisoft\Router\UrlMatcherInterface;
 
-$routerMiddleware = new Yiisoft\Router\Middleware\Router($router, $responseFactory, $container);
+$matcher = $container->get(UrlMatcherInterface::class);
+$middlewareFactory = $container->get(MiddlewareFactory::class);
+$currentRoute = $container->get(CurrentRoute::class);
+$methodFailureHandler = $container->get(MethodFailureHandlerInterface::class);
+
+$routerMiddleware = new Router($matcher, $middlewareFactory, $currentRoute, $methodFailureHandler);
 
 // Add middleware to your middleware handler of choice.
 ```
@@ -233,150 +241,68 @@ $routerMiddleware = new Yiisoft\Router\Middleware\Router($router, $responseFacto
 When a route matches router middleware executes handler middleware attached to the route. If there is no match, next
 application middleware processes the request.
 
-### Automatic responses
+### Handling method failure error
 
-`Yiisoft\Router\Middleware\Router` middleware responds automatically to:
-- `OPTIONS` requests, see [OPTIONS requests](#options-requests) section.
-- Requests with methods that are not supported by the target resource, see [Method not allowed response](#method-not-allowed-response) section.
+To handle method failure error, pass an instance of `Yiisoft\Router\MethodFailureHandlerInterface` to the `Yiisoft\Router\Middleware\Router` middleware's constructor.
+The [Yii Router](yiisoft/router) package provides a default method failure handler, `Yiisoft\Router\MethodFailureHandler`.
 
-You can disable this behavior by calling the `Yiisoft\Router\Middleware\Router::ignoreMethodFailureHandler()` method:
+`Yiisoft\Router\MethodFailureHandler` responds based on the HTTP methods supported by the request's resource:
 
-```php
-use Yiisoft\Router\Middleware\Router;
-
-$routerMiddleware = new Router($router, $responseFactory, $middlewareFactory, $currentRoute);
-
-// Returns a new instance with the turned off method failure error handler.
-$routerMiddleware = $routerMiddleware->ignoreMethodFailureHandler();
-```
-
-or define the `Yiisoft\Router\Middleware\Router` configuration in the DI container:
-
-`config/common/di/router.php`
-
-```php
-use Yiisoft\Router\Middleware\Router;
-
-return [
-    Router::class => [
-        'ignoreMethodFailureHandler()' => [],
-    ],
-];
-```
-
-#### OPTIONS requests
-
-By default, `Yiisoft\Router\Middleware\Router` middleware responds to `OPTIONS` requests based on the routes defined:
-
+- For `OPTIONS` requests:
 ```
 HTTP/1.1 204 No Content
 Allow: GET, HEAD
 ```
 
-You can change this behavior by implementing your own request handler:
-
-```php
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\Http\Header;
-use Yiisoft\Http\Status;
-use Yiisoft\Router\MethodFailureHandlerInterface;
-use Yiisoft\Router\Middleware\Router;
-
-$allowedMethodsHandler = new class implements MethodFailureHandlerInterface {
-        private array $methods;
-
-        public function handle(ServerRequestInterface $request): ResponseInterface
-        {
-            return (new Response(Status::OK))
-                ->withHeader(Header::ALLOW, implode(', ', $this->methods));
-        }
-
-        public function withAllowedMethods(array $methods): self
-        {
-            $new = clone $this;
-            $new->methods = $methods;
-            return $new;
-        }
-    };
-
-$routerMiddleware = new Router(
-    $router,
-    $responseFactory,
-    $middlewareFactory,
-    $currentRoute,
-    allowedMethodsHandler: $allowedMethodsHandler
-);
-```
-
-or define the `Yiisoft\Router\Middleware\Router` configuration in the DI container:
-
-`config/common/di/router.php`
-
-```php
-use Yiisoft\Definitions\Reference;
-use Yiisoft\Router\Middleware\Router;
-use App\AllowedMethodsHandler;
-
-return [
-    Router::class => [
-        '__construct()' => [
-            'allowedMethodsHandler' => Reference::to(AllowedMethodsHandler::class),
-        ],
-    ],
-];
-```
-
-#### `Method not allowed` response
-
-By default, `Yiisoft\Router\Middleware\Router` middleware responds to requests with methods that are not supported by the target resource based on the routes defined:
-
+- For requests with methods that are not supported by the target resource:
 ```
 HTTP/1.1 405 Method Not Allowed
 Allow: GET, HEAD
 ```
 
-You can change this behavior by implementing your own request handler:
+To use `Yiisoft\Router\MethodFailureHandler`, pass it to the `Yiisoft\Router\Middleware\Router` middleware constructor.
 
 ```php
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\Http\Status;
-use Yiisoft\Router\MethodFailureHandlerInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Yiisoft\Router\MethodFailureHandler;
 use Yiisoft\Router\Middleware\Router;
 
-$methodNotAllowedHandler = new class implements MethodFailureHandlerInterface {
-        public function handle(ServerRequestInterface $request): ResponseInterface
-        {
-            return (new Response(Status::BAD_REQUEST));
-        }
-    };
+$responseFactory = $container->get(ResponseFactoryInterface::class);
+$methodFailureHandler = new MethodFailureHandler($responseFactory);
 
-$routerMiddleware = new Router(
-    $router,
-    $responseFactory,
+$middleware = new Router(
+    $matcher,
     $middlewareFactory,
     $currentRoute,
-    methodNotAllowedHandler: $methodNotAllowedHandler
+    $methodFailureHandler // pass the handler here
 );
 ```
 
-or define the `Yiisoft\Router\Middleware\Router` configuration in the DI container:
-
-`config/common/di/router.php`
+or define the `MethodFailureHandlerInterface` configuration in the [DI container](https://github.com/yiisoft/di):
 
 ```php
-use Yiisoft\Definitions\Reference;
-use Yiisoft\Router\Middleware\Router;
-use App\MethodNotAllowedHandler;
+// config/web/di/router.php
+
+use Yiisoft\Router\MethodFailureHandler;
+use Yiisoft\Router\MethodFailureHandlerInterface;
 
 return [
-    Router::class => [
-        '__construct()' => [
-            'methodNotAllowedHandler' => Reference::to(MethodNotAllowedHandler::class),
-        ],
-    ],
+    MethodFailureHandlerInterface::class => MethodFailureHandler::class,
 ];
+```
+
+> In case [Yii Router](yiisoft/router) package is used along with [Yii Config](https://github.com/yiisoft/config) plugin, the package is [configured](./config/di-web.php)
+automatically to use `Yiisoft\Router\MethodFailureHandler`.
+
+To disable method failure error handling pass `null` as the `methodFailureHandler` parameter of the `Yiisoft\Router\Middleware\Router` middleware constructor:
+
+```php
+$middleware = new Router(
+    $matcher,
+    $middlewareFactory,
+    $currentRoute,
+    null // disables method failure handling
+);
 ```
 
 ### CORS protocol
