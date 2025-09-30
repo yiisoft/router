@@ -76,7 +76,7 @@ final class RouterTest extends TestCase
     {
         $request = new ServerRequest('OPTIONS', '/');
         $response = $this
-            ->createRouterMiddleware(methodFailureHandler: $this->creatMethodFailureHandler(200))
+            ->createRouterMiddleware(methodFailureHandler: $this->createMethodFailureHandler(200))
             ->process($request, $this->createRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
@@ -97,7 +97,7 @@ final class RouterTest extends TestCase
     {
         $request = new ServerRequest('POST', '/');
         $response = $this
-            ->createRouterMiddleware(methodFailureHandler: $this->creatMethodFailureHandler(400))
+            ->createRouterMiddleware(methodFailureHandler: $this->createMethodFailureHandler(400))
             ->process($request, $this->createRequestHandler());
         $this->assertSame(400, $response->getStatusCode());
         $this->assertSame('GET, HEAD', $response->getHeaderLine('Allow'));
@@ -352,7 +352,7 @@ final class RouterTest extends TestCase
         return new MethodFailureHandler(new Psr17Factory());
     }
 
-    private function creatMethodFailureHandler(int $code): MethodFailureHandlerInterface
+    private function createMethodFailureHandler(int $code): MethodFailureHandlerInterface
     {
         return new class ($code) implements MethodFailureHandlerInterface {
             public function __construct(private readonly int $code)

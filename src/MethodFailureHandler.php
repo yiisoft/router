@@ -13,7 +13,7 @@ use Yiisoft\Http\Method;
 use Yiisoft\Http\Status;
 
 /**
- * Default handler that is produces a response with a list of the target resource's supported methods.
+ * Default handler that produces a response with a list of the target resource's supported methods.
  */
 final class MethodFailureHandler implements MethodFailureHandlerInterface
 {
