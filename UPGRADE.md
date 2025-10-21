@@ -5,12 +5,14 @@ These notes highlight changes that could break your application when you upgrade
 
 ## 4.0.0
 
+### `Route`, `Group` and `MatchingResult` changes
+
 In this release classes `Route`, `Group` and `MatchingResult` are made dispatcher-independent. Now you don't can inject
 own middleware dispatcher to group or to route.
 
 The following backward incompatible changes have been made.
 
-### `Route`
+#### `Route`
 
 - Removed parameter `$dispatcher` from `Route` creating methods: `get()`, `post()`, `put()`, `delete()`, `patch()`,
   `head()`, `options()`, `methods()`.
@@ -19,7 +21,7 @@ The following backward incompatible changes have been made.
   - removed elements `dispatcherWithMiddlewares` and `hasDispatcher`;
   - added element `enabledMiddlewares`.
  
-### `Group`
+#### `Group`
 
 - Removed parameter `$dispatcher` from `Group::create()` method.
 - Removed method `Group::withDispatcher()`.
@@ -28,7 +30,17 @@ The following backward incompatible changes have been made.
   - key `items` renamed to `routes`;
   - key `middlewareDefinitions` renamed to `enabledMiddlewares`.
 
-### `MatchingResult`
+#### `MatchingResult`
 
 - Removed `MatchingResult` implementation from `MiddlewareInterface`, so it is no longer middleware.
 - Removed method `MatchingResult::process()`.
+
+### `UrlGeneratorInterface` changes
+
+Contract is changed:
+
+- on URL generation all unused arguments must be moved to query parameters, if query parameter with 
+such name doesn't exist;
+- added `$hash` parameter to `generate()`, `generateAbsolute()` and `generateFromCurrent()` methods.
+
+You should change your interface implementations accordingly.

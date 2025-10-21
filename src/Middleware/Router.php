@@ -19,13 +19,13 @@ use Yiisoft\Router\UrlMatcherInterface;
 
 final class Router implements MiddlewareInterface
 {
-    private MiddlewareDispatcher $dispatcher;
+    private readonly MiddlewareDispatcher $dispatcher;
 
     public function __construct(
-        private UrlMatcherInterface $matcher,
-        private ResponseFactoryInterface $responseFactory,
+        private readonly UrlMatcherInterface $matcher,
+        private readonly ResponseFactoryInterface $responseFactory,
         MiddlewareFactory $middlewareFactory,
-        private CurrentRoute $currentRoute,
+        private readonly CurrentRoute $currentRoute,
         ?EventDispatcherInterface $eventDispatcher = null
     ) {
         $this->dispatcher = new MiddlewareDispatcher($middlewareFactory, $eventDispatcher);

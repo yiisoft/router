@@ -13,15 +13,15 @@ use Yiisoft\Router\RouteCollector;
 use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Yii\Debug\Debugger;
-use Yiisoft\Yii\Debug\DebuggerIdGenerator;
 use Yiisoft\Yii\Debug\Storage\MemoryStorage;
 
+/**
+ * @group yii-debug
+ */
 final class DebugRoutesCommandTest extends TestCase
 {
     public function testBase(): void
     {
-        $debuggerIdGenerator = new DebuggerIdGenerator();
-
         $command = new DebugRoutesCommand(
             new RouteCollection(
                 (new RouteCollector())->addRoute(
@@ -36,8 +36,7 @@ final class DebugRoutesCommandTest extends TestCase
                 ),
             ),
             new Debugger(
-                $debuggerIdGenerator,
-                new MemoryStorage($debuggerIdGenerator),
+                new MemoryStorage(),
                 [],
             ),
         );
@@ -56,8 +55,6 @@ final class DebugRoutesCommandTest extends TestCase
 
     public function testSpecificRoute(): void
     {
-        $debuggerIdGenerator = new DebuggerIdGenerator();
-
         $command = new DebugRoutesCommand(
             new RouteCollection(
                 (new RouteCollector())->addRoute(
@@ -71,8 +68,7 @@ final class DebugRoutesCommandTest extends TestCase
                 ),
             ),
             new Debugger(
-                $debuggerIdGenerator,
-                new MemoryStorage($debuggerIdGenerator),
+                new MemoryStorage(),
                 [],
             ),
         );

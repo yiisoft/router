@@ -15,6 +15,9 @@ use Yiisoft\Router\Route;
 use Yiisoft\Router\Tests\Support\UrlMatcherStub;
 use Yiisoft\Test\Support\Container\SimpleContainer;
 
+/**
+ * @group yii-debug
+ */
 final class UrlMatcherInterfaceProxyTest extends TestCase
 {
     public function testBase(): void
@@ -40,6 +43,6 @@ final class UrlMatcherInterfaceProxyTest extends TestCase
         $summary = $collector->getSummary();
 
         $this->assertSame($result, $proxyResult);
-        $this->assertGreaterThan(0, $summary['router']['matchTime']);
+        $this->assertGreaterThan(0, $summary['matchTime']);
     }
 }

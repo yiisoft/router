@@ -1,21 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<phpunit
-    bootstrap="vendor/autoload.php"
-    colors="true"
-    verbose="true"
-    failOnRisky="true"
-    failOnWarning="true"
-    convertErrorsToExceptions="true"
-    convertNoticesToExceptions="true"
-    convertWarningsToExceptions="true"
-    stopOnFailure="false"
-    executionOrder="random"
-    resolveDependencies="true"
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         cacheDirectory=".phpunit.cache"
+         requireCoverageMetadata="false"
+         beStrictAboutCoverageMetadata="true"
+         beStrictAboutOutputDuringTests="true"
+         executionOrder="random"
+         failOnRisky="true"
+         failOnWarning="true"
+         stopOnFailure="false"
+         colors="true"
+         displayDetailsOnPhpunitDeprecations="true"
 >
     <php>
         <ini name="error_reporting" value="-1"/>
     </php>
+
+    <groups>
+        <exclude>
+            <group>yii-debug</group>
+        </exclude>
+    </groups>
 
     <testsuites>
         <testsuite name="Yii Router tests">
@@ -23,10 +29,10 @@
         </testsuite>
     </testsuites>
 
-    <coverage>
+    <source>
         <include>
-            <directory>./src</directory>
-            <directory>./config</directory>
+            <directory suffix=".php">./src</directory>
+            <directory suffix=".php">./config</directory>
         </include>
-    </coverage>
+    </source>
 </phpunit>

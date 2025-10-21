@@ -23,6 +23,9 @@ use Yiisoft\Test\Support\Container\SimpleContainer;
 use Yiisoft\Yii\Debug\Collector\CollectorInterface;
 use Yiisoft\Yii\Debug\Tests\Shared\AbstractCollectorTestCase;
 
+/**
+ * @group yii-debug
+ */
 final class RouterCollectorTest extends AbstractCollectorTestCase
 {
     private MockObject|RouteCollectorInterface|null $routeCollector = null;
@@ -38,7 +41,7 @@ final class RouterCollectorTest extends AbstractCollectorTestCase
 
         $summary = $collector->getSummary();
 
-        $this->assertNull($summary['router']);
+        $this->assertEmpty($summary);
     }
 
     public function testWithoutRouteCollection(): void

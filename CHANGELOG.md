@@ -1,11 +1,33 @@
 # Yii Router Change Log
 
-## 4.0.0 under development
+## 4.0.2 under development
 
+- no changes in this release.
+
+## 4.0.1 September 23, 2025
+
+- Enh #265: Adapt summary data in debug collector (@rustamwin)
+- Bug #268: Remove debug console command from package configuration (@vjik)
+
+## 4.0.0 February 25, 2025
+
+- Сhg #247: Change `UrlGeneratorInterface` contract: on URL generation all unused arguments must be moved to query
+  parameters, if query parameter with such name doesn't exist (@vjik)
 - New #195: Add debug collector for `yiisoft/yii-debug` (@xepozz)
+- New #262: Add `$hash` parameter to `UrlGeneratorInterface` methods: `generate()`, `generateAbsolute()` and
+  `generateFromCurrent()` (@vjik)
 - Chg #207: Replace two `RouteCollectorInterface` methods `addRoute()` and `addGroup()` to single `addRoute()` (@vjik)
-- Enh #202: Add support for `psr/http-message` version `^2.0` (@vjik)
 - Chg #222: Make `Route`, `Group` and `MatchingResult` dispatcher-independent (@rustamwin, @vjik)
+- Chg #256: Bump minimum PHP version to 8.1 (@vjik)
+- Chg #257: Change PHP constraint in `composer.json` to `~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0` (@vjik)
+- Enh #229: Add URL arguments' psalm type in `UrlGeneratorInterface` (@vjik)
+- Enh #256: Mark readonly properties (@vjik)
+- Bug #257, #263: Explicitly mark nullable parameters (@vjik)
+
+## 3.1.0 February 20, 2024
+
+- New #203, #237: Add `RouteArgument` attribute for Yii Hydrator (@vjik)
+- Enh #202: Add support for `psr/http-message` version `^2.0` (@vjik)
 
 ## 3.0.0 February 17, 2023
 

@@ -146,7 +146,7 @@ final class RouteTest extends TestCase
         $this->assertTrue($route->isOverride());
     }
 
-    public function dataToString(): array
+    public static function dataToString(): array
     {
         return [
             ['yiiframework.com/', '/'],
@@ -154,9 +154,7 @@ final class RouteTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider dataToString
-     */
+    #[DataProvider('dataToString')]
     public function testToString(string $expected, string $pattern): void
     {
         $route = (new Route([Method::GET, Method::POST], $pattern))

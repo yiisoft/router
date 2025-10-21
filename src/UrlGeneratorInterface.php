@@ -8,6 +8,8 @@ use Stringable;
 
 /**
  * `UrlGeneratorInterface` allows generating URL given route name, arguments, and query parameters.
+ *
+  * @psalm-type UrlArgumentsType = array<string,scalar|Stringable|null>
  */
 interface UrlGeneratorInterface
 {
@@ -15,48 +17,66 @@ interface UrlGeneratorInterface
      * Generates URL from named route, arguments, and query parameters.
      *
      * @param string $name Name of the route.
-     * @param array<string,scalar|Stringable|null> $arguments Argument-value set.
+     * @param array $arguments Argument-value set. Unused arguments will be moved to query parameters, if query
+     * parameter with such name doesn't exist.
      * @param array $queryParameters Parameter-value set.
+     * @param string|null $hash Hash part (fragment identifier) of the URL.
      *
      * @throws RouteNotFoundException In case there is no route with the name specified.
      *
      * @return string URL generated.
+     *
+     * @psalm-param UrlArgumentsType $arguments
      */
-    public function generate(string $name, array $arguments = [], array $queryParameters = []): string;
+    public function generate(
+        string $name,
+        array $arguments = [],
+        array $queryParameters = [],
+        ?string $hash = null,
+    ): string;
 
     /**
      * Generates absolute URL from named route, arguments, and query parameters.
      *
      * @param string $name Name of the route.
-     * @param array<string,scalar|Stringable|null> $arguments Argument-value set.
+     * @param array $arguments Argument-value set. Unused arguments will be moved to query parameters, if query
+     * parameter with such name doesn't exist.
      * @param array $queryParameters Parameter-value set.
+     * @param string|null $hash Hash part (fragment identifier) of the URL.
      * @param string|null $scheme Host scheme.
      * @param string|null $host Host for manual setup.
      *
      * @throws RouteNotFoundException In case there is no route with the name specified.
      *
      * @return string URL generated.
+     *
+     * @psalm-param UrlArgumentsType $arguments
      */
     public function generateAbsolute(
         string $name,
         array $arguments = [],
         array $queryParameters = [],
-        string $scheme = null,
-        string $host = null
+        ?string $hash = null,
+        ?string $scheme = null,
+        ?string $host = null
     ): string;
 
     /**
      * Generate URL from the current route replacing some of its arguments with values specified.
      *
-     * @param array<string,scalar|Stringable|null> $replacedArguments New argument values indexed by replaced argument
-     * names.
+     * @param array $replacedArguments New argument values indexed by replaced argument names. Unused arguments will be
+     * moved to query parameters, if query parameter with such name doesn't exist.
      * @param array $queryParameters Parameter-value set.
+     * @param string|null $hash Hash part (fragment identifier) of the URL.
      * @param string|null $fallbackRouteName Name of a route that should be used if current route.
      * can not be determined.
+     *
+     * @psalm-param UrlArgumentsType $replacedArguments
      */
     public function generateFromCurrent(
         array $replacedArguments,
         array $queryParameters = [],
+        ?string $hash = null,
         ?string $fallbackRouteName = null
     ): string;
 

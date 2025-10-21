@@ -12,6 +12,9 @@ use Yiisoft\Router\RouteCollectionInterface;
 use Yiisoft\Yii\Debug\Collector\CollectorTrait;
 use Yiisoft\Yii\Debug\Collector\SummaryCollectorInterface;
 
+/**
+ * @infection-ignore-all
+ */
 final class RouterCollector implements SummaryCollectorInterface
 {
     use CollectorTrait;
@@ -78,24 +81,20 @@ final class RouterCollector implements SummaryCollectorInterface
         $route = $this->getRouteByCurrentRoute($currentRoute);
 
         if ($currentRoute === null || $route === null) {
-            return [
-                'router' => null,
-            ];
+            return [];
         }
 
         [$middlewares, $action] = $this->getMiddlewaresAndAction($route);
 
         return [
-            'router' => [
-                'matchTime' => $this->matchTime,
-                'name' => $route->getName(),
-                'pattern' => $route->getPattern(),
-                'arguments' => $currentRoute->getArguments(),
-                'hosts' => implode(', ', $route->getHosts()),
-                'uri' => (string) $currentRoute->getUri(),
-                'action' => $action,
-                'middlewares' => $middlewares,
-            ],
+            'matchTime' => $this->matchTime,
+            'name' => $route->getName(),
+            'pattern' => $route->getPattern(),
+            'arguments' => $currentRoute->getArguments(),
+            'hosts' => implode(', ', $route->getHosts()),
+            'uri' => (string) $currentRoute->getUri(),
+            'action' => $action,
+            'middlewares' => $middlewares,
         ];
     }
 
@@ -118,7 +117,6 @@ final class RouterCollector implements SummaryCollectorInterface
         $reflection = new ReflectionObject($currentRoute);
 
         $reflectionProperty = $reflection->getProperty('route');
-        $reflectionProperty->setAccessible(true);
 
         /**
          * @var Route $value
