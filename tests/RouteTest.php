@@ -6,6 +6,7 @@ namespace Yiisoft\Router\Tests;
 
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -207,7 +208,7 @@ final class RouteTest extends TestCase
         $this->assertTrue($route->getData('override'));
     }
 
-    public function dataToString(): array
+    public static function dataToString(): array
     {
         return [
             ['yiiframework.com/', '/'],
@@ -215,9 +216,7 @@ final class RouteTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider dataToString
-     */
+    #[DataProvider('dataToString')]
     public function testToString(string $expected, string $pattern): void
     {
         $route = Route::methods([Method::GET, Method::POST], $pattern)
@@ -232,6 +231,25 @@ final class RouteTest extends TestCase
         $route = Route::get('/');
 
         $this->assertSame('GET /', (string) $route);
+    }
+
+    public function testDispatcherInjecting(): void
+    {
+        $request = new ServerRequest('GET', '/');
+        $container = $this->getContainer(
+            [
+                TestController::class => new TestController(),
+            ]
+        );
+
+        $route = Route::get('/')->action([TestController::class, 'index']);
+
+        $response = $this
+            ->getDispatcher($container)
+            ->withMiddlewares($route->getData('enabledMiddlewares'))
+            ->dispatch($request, $this->getRequestHandler());
+
+        $this->assertSame(200, $response->getStatusCode());
     }
 
     public function testMiddlewareAfterAction(): void
@@ -264,21 +282,21 @@ final class RouteTest extends TestCase
     {
         $request = new ServerRequest('GET', '/');
 
-        $injectDispatcher = $this->getDispatcher(
-            $this->getContainer([
-                TestMiddleware1::class => new TestMiddleware1(),
-                TestMiddleware2::class => new TestMiddleware2(),
-                TestMiddleware3::class => new TestMiddleware3(),
-                TestController::class => new TestController(),
-            ])
-        );
-
         $route = Route::get('/')
-                      ->middleware(TestMiddleware1::class, TestMiddleware2::class, TestMiddleware3::class)
-                      ->action([TestController::class, 'index'])
-                      ->disableMiddleware(TestMiddleware1::class, TestMiddleware3::class);
+            ->middleware(TestMiddleware1::class, TestMiddleware2::class, TestMiddleware3::class)
+            ->action([TestController::class, 'index'])
+            ->disableMiddleware(TestMiddleware1::class, TestMiddleware3::class);
 
-        $dispatcher = $injectDispatcher->withMiddlewares($route->getData('builtMiddlewareDefinitions'));
+        $dispatcher = $this
+            ->getDispatcher(
+                $this->getContainer([
+                    TestMiddleware1::class => new TestMiddleware1(),
+                    TestMiddleware2::class => new TestMiddleware2(),
+                    TestMiddleware3::class => new TestMiddleware3(),
+                    TestController::class => new TestController(),
+                ])
+            )
+            ->withMiddlewares($route->getData('enabledMiddlewares'));
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
@@ -289,25 +307,98 @@ final class RouteTest extends TestCase
     {
         $request = new ServerRequest('GET', '/');
 
-        $injectDispatcher = $this->getDispatcher(
-            $this->getContainer([
-                TestMiddleware1::class => new TestMiddleware1(),
-                TestMiddleware2::class => new TestMiddleware2(),
-                TestMiddleware3::class => new TestMiddleware3(),
-                TestController::class => new TestController(),
-            ])
-        );
-
         $route = Route::get('/')
-                      ->middleware(TestMiddleware3::class)
-                      ->action([TestController::class, 'index'])
-                      ->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class);
+            ->middleware(TestMiddleware3::class)
+            ->action([TestController::class, 'index'])
+            ->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class);
 
-        $dispatcher = $injectDispatcher->withMiddlewares($route->getData('builtMiddlewareDefinitions'));
+        $response = $this
+            ->getDispatcher(
+                $this->getContainer([
+                    TestMiddleware1::class => new TestMiddleware1(),
+                    TestMiddleware2::class => new TestMiddleware2(),
+                    TestMiddleware3::class => new TestMiddleware3(),
+                    TestController::class => new TestController(),
+                ])
+            )
+            ->withMiddlewares($route->getData('enabledMiddlewares'))
+            ->dispatch($request, $this->getRequestHandler());
 
-        $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('123', (string) $response->getBody());
+    }
+
+    public function testPrependMiddlewaresAfterGetEnabledMiddlewares(): void
+    {
+        $route = Route::get('/')
+            ->middleware(TestMiddleware3::class)
+            ->disableMiddleware(TestMiddleware1::class)
+            ->action([TestController::class, 'index']);
+
+        $route->getData('enabledMiddlewares');
+
+        $route = $route->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class);
+
+        $this->assertSame(
+            [TestMiddleware2::class, TestMiddleware3::class, [TestController::class, 'index']],
+            $route->getData('enabledMiddlewares')
+        );
+    }
+
+    public function testAddMiddlewareAfterGetEnabledMiddlewares(): void
+    {
+        $route = Route::get('/')
+            ->middleware(TestMiddleware3::class);
+
+        $route->getData('enabledMiddlewares');
+
+        $route = $route->middleware(TestMiddleware1::class, TestMiddleware2::class);
+
+        $this->assertSame(
+            [TestMiddleware3::class, TestMiddleware1::class,  TestMiddleware2::class],
+            $route->getData('enabledMiddlewares')
+        );
+    }
+
+    public function testDisableMiddlewareAfterGetEnabledMiddlewares(): void
+    {
+        $route = Route::get('/')
+            ->middleware(TestMiddleware1::class, TestMiddleware2::class, TestMiddleware3::class);
+
+        $route->getData('enabledMiddlewares');
+
+        $route = $route->disableMiddleware(TestMiddleware1::class, TestMiddleware2::class);
+
+        $this->assertSame(
+            [TestMiddleware3::class],
+            $route->getData('enabledMiddlewares')
+        );
+    }
+
+    public function testGetEnabledMiddlewaresTwice(): void
+    {
+        $route = Route::get('/')
+            ->middleware(TestMiddleware1::class, TestMiddleware2::class);
+
+        $result1 = $route->getData('enabledMiddlewares');
+        $result2 = $route->getData('enabledMiddlewares');
+
+        $this->assertSame([TestMiddleware1::class, TestMiddleware2::class], $result1);
+        $this->assertSame($result1, $result2);
+    }
+
+    public function testMiddlewaresWithKeys(): void
+    {
+        $route = Route::get('/')
+            ->middleware(m3: TestMiddleware3::class)
+            ->action([TestController::class, 'index'])
+            ->prependMiddleware(m1: TestMiddleware1::class, m2: TestMiddleware2::class)
+            ->disableMiddleware(m1: TestMiddleware1::class);
+
+        $this->assertSame(
+            [TestMiddleware2::class, TestMiddleware3::class, [TestController::class, 'index']],
+            $route->getData('enabledMiddlewares')
+        );
     }
 
     public function testDebugInfo(): void
@@ -317,10 +408,10 @@ final class RouteTest extends TestCase
                       ->host('example.com')
                       ->defaults(['age' => 42])
                       ->override()
-                      ->middleware(middleware: TestMiddleware1::class)
-                      ->disableMiddleware(middleware: TestMiddleware2::class)
+                      ->middleware(TestMiddleware1::class, TestMiddleware2::class)
+                      ->disableMiddleware(TestMiddleware2::class)
                       ->action('go')
-                      ->prependMiddleware(middleware: TestMiddleware3::class);
+                      ->prependMiddleware(TestMiddleware3::class);
 
         $expected = <<<EOL
 Yiisoft\Router\Route Object
@@ -344,20 +435,24 @@ Yiisoft\Router\Route Object
 
     [override] => 1
     [actionAdded] => 1
-    [middlewareDefinitions] => Array
+    [middlewares] => Array
+        (
+            [0] => Yiisoft\Router\Tests\Support\TestMiddleware3
+            [1] => Yiisoft\Router\Tests\Support\TestMiddleware1
+            [2] => Yiisoft\Router\Tests\Support\TestMiddleware2
+            [3] => go
+        )
+
+    [disabledMiddlewares] => Array
+        (
+            [0] => Yiisoft\Router\Tests\Support\TestMiddleware2
+        )
+
+    [enabledMiddlewares] => Array
         (
             [0] => Yiisoft\Router\Tests\Support\TestMiddleware3
             [1] => Yiisoft\Router\Tests\Support\TestMiddleware1
             [2] => go
-        )
-
-    [builtMiddlewareDefinitions] => Array
-        (
-        )
-
-    [disabledMiddlewareDefinitions] => Array
-        (
-            [0] => Yiisoft\Router\Tests\Support\TestMiddleware2
         )
 )
 
@@ -419,7 +514,7 @@ EOL;
         };
     }
 
-    private function getDispatcher(ContainerInterface $container = null): MiddlewareDispatcher
+    private function getDispatcher(?ContainerInterface $container = null): MiddlewareDispatcher
     {
         if ($container === null) {
             return new MiddlewareDispatcher(

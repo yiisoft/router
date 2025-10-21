@@ -7,6 +7,7 @@ namespace Yiisoft\Router;
 use Attribute;
 use InvalidArgumentException;
 use RuntimeException;
+use Yiisoft\Router\Internal\MiddlewareFilter;
 
 use function in_array;
 
@@ -17,40 +18,35 @@ final class Group
      * @var Group[]|Route[]
      */
     private array $routes = [];
-    private bool $routesAdded = false;
-    private bool $middlewareAdded = false;
-    private array $builtMiddlewareDefinitions = [];
+
     /**
-     * @var array|callable|string|null Middleware definition for CORS requests.
+     * @var array[]|callable[]|string[]
+     * @psalm-var list<array|callable|string>
      */
-    private $corsMiddleware;
+    private array $middlewares = [];
+
     /**
      * @var string[]
      */
     private array $hosts = [];
-    /**
-     * @var array[]|callable[]|string[]
-     */
-    private array $middlewareDefinitions = [];
+    private ?string $namePrefix = null;
+    private bool $routesAdded = false;
+    private bool $middlewareAdded = false;
+    private array $disabledMiddlewares = [];
 
     /**
-     * @param array $disabledMiddlewareDefinitions Excludes middleware from being invoked when action is handled.
-     * It is useful to avoid invoking one of the parent group middleware for
-     * a certain route.
+     * @psalm-var list<array|callable|string>|null
      */
-    public function __construct(
-        private ?string $prefix = null,
-        array $middlewareDefinitions = [],
-        array $hosts = [],
-        private ?string $namePrefix = null,
-        private array $disabledMiddlewareDefinitions = [],
-        array|callable|string|null $corsMiddleware = null
+    private ?array $enabledMiddlewaresCache = null;
+
+    /**
+     * @var array|callable|string|null Middleware definition for CORS requests.
+     */
+    private $corsMiddleware = null;
+
+    private function __construct(
+        private ?string $prefix = null
     ) {
-        $this->assertMiddlewares($middlewareDefinitions);
-        $this->assertHosts($hosts);
-        $this->middlewareDefinitions = $middlewareDefinitions;
-        $this->hosts = $hosts;
-        $this->corsMiddleware = $corsMiddleware;
     }
 
     /**
@@ -68,6 +64,7 @@ final class Group
         if ($this->middlewareAdded) {
             throw new RuntimeException('routes() can not be used after prependMiddleware().');
         }
+
         $new = clone $this;
         $new->routes = $routes;
         $new->routesAdded = true;
@@ -93,17 +90,20 @@ final class Group
      * Appends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed first.
      */
-    public function middleware(array|callable|string ...$middlewareDefinition): self
+    public function middleware(array|callable|string ...$definition): self
     {
         if ($this->routesAdded) {
             throw new RuntimeException('middleware() can not be used after routes().');
         }
+
         $new = clone $this;
         array_push(
-            $new->middlewareDefinitions,
-            ...array_values($middlewareDefinition)
+            $new->middlewares,
+            ...array_values($definition)
         );
-        $new->builtMiddlewareDefinitions = [];
+
+        $new->enabledMiddlewaresCache = null;
+
         return $new;
     }
 
@@ -111,15 +111,17 @@ final class Group
      * Prepends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed last.
      */
-    public function prependMiddleware(array|callable|string ...$middlewareDefinition): self
+    public function prependMiddleware(array|callable|string ...$definition): self
     {
         $new = clone $this;
         array_unshift(
-            $new->middlewareDefinitions,
-            ...array_values($middlewareDefinition)
+            $new->middlewares,
+            ...array_values($definition)
         );
+
         $new->middlewareAdded = true;
-        $new->builtMiddlewareDefinitions = [];
+        $new->enabledMiddlewaresCache = null;
+
         return $new;
     }
 
@@ -155,14 +157,16 @@ final class Group
      * It is useful to avoid invoking one of the parent group middleware for
      * a certain route.
      */
-    public function disableMiddleware(mixed ...$middlewareDefinition): self
+    public function disableMiddleware(mixed ...$definition): self
     {
         $new = clone $this;
         array_push(
-            $new->disabledMiddlewareDefinitions,
-            ...array_values($middlewareDefinition),
+            $new->disabledMiddlewares,
+            ...array_values($definition),
         );
-        $new->builtMiddlewareDefinitions = [];
+
+        $new->enabledMiddlewaresCache = null;
+
         return $new;
     }
 
@@ -175,8 +179,8 @@ final class Group
      *   T is ('prefix'|'namePrefix'|'host') ? string|null :
      *   (T is 'routes' ? Group[]|Route[] :
      *     (T is 'hosts' ? array<array-key, string> :
-     *       (T is 'hasCorsMiddleware' ? bool :
-     *         (T is 'middlewareDefinitions' ? list<array|callable|string> :
+     *       (T is ('hasCorsMiddleware') ? bool :
+     *         (T is 'enabledMiddlewares' ? list<array|callable|string> :
      *           (T is 'corsMiddleware' ? array|callable|string|null : mixed)
      *         )
      *       )
@@ -194,55 +198,23 @@ final class Group
             'corsMiddleware' => $this->corsMiddleware,
             'routes' => $this->routes,
             'hasCorsMiddleware' => $this->corsMiddleware !== null,
-            'middlewareDefinitions' => $this->getBuiltMiddlewares(),
+            'enabledMiddlewares' => $this->getEnabledMiddlewares(),
             default => throw new InvalidArgumentException('Unknown data key: ' . $key),
         };
     }
 
-    private function getBuiltMiddlewares(): array
-    {
-        if (!empty($this->builtMiddlewareDefinitions)) {
-            return $this->builtMiddlewareDefinitions;
-        }
-
-        $builtMiddlewareDefinitions = $this->middlewareDefinitions;
-
-        /** @var mixed $definition */
-        foreach ($builtMiddlewareDefinitions as $index => $definition) {
-            if (in_array($definition, $this->disabledMiddlewareDefinitions, true)) {
-                unset($builtMiddlewareDefinitions[$index]);
-            }
-        }
-
-        return $this->builtMiddlewareDefinitions = array_values($builtMiddlewareDefinitions);
-    }
-
     /**
-     * @psalm-assert array<string> $hosts
+     * @return array[]|callable[]|string[]
+     * @psalm-return list<array|callable|string>
      */
-    private function assertHosts(array $hosts): void
+    private function getEnabledMiddlewares(): array
     {
-        foreach ($hosts as $host) {
-            if (!is_string($host)) {
-                throw new \InvalidArgumentException('Invalid $hosts provided, list of string expected.');
-            }
+        if ($this->enabledMiddlewaresCache !== null) {
+            return $this->enabledMiddlewaresCache;
         }
-    }
 
-    /**
-     * @psalm-assert array<array|callable|string> $middlewareDefinitions
-     */
-    private function assertMiddlewares(array $middlewareDefinitions): void
-    {
-        /** @var mixed $middlewareDefinition */
-        foreach ($middlewareDefinitions as $middlewareDefinition) {
-            if (is_string($middlewareDefinition) || is_callable($middlewareDefinition) || is_array($middlewareDefinition)) {
-                continue;
-            }
+        $this->enabledMiddlewaresCache = MiddlewareFilter::filter($this->middlewares, $this->disabledMiddlewares);
 
-            throw new \InvalidArgumentException(
-                'Invalid $middlewareDefinitions provided, list of string or array or callable expected.'
-            );
-        }
+        return $this->enabledMiddlewaresCache;
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router\Debug;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
@@ -14,23 +15,27 @@ use Yiisoft\Router\RouteCollectionInterface;
 use Yiisoft\VarDumper\VarDumper;
 use Yiisoft\Yii\Debug\Debugger;
 
+/**
+ * @infection-ignore-all
+ */
+#[AsCommand(
+    name: DebugRoutesCommand::COMMAND_NAME,
+    description: 'Show information about registered routes'
+)]
 final class DebugRoutesCommand extends Command
 {
     public const COMMAND_NAME = 'debug:routes';
-    protected static $defaultName = self::COMMAND_NAME;
 
     public function __construct(
-        private RouteCollectionInterface $routeCollection,
-        private Debugger $debugger,
+        private readonly RouteCollectionInterface $routeCollection,
+        private readonly Debugger $debugger,
     ) {
         parent::__construct();
     }
 
     protected function configure(): void
     {
-        $this
-            ->setDescription('Show information about registered routes')
-            ->addArgument('route', InputArgument::IS_ARRAY, 'Route name');
+        $this->addArgument('route', InputArgument::IS_ARRAY, 'Route name');
     }
 
     /**
@@ -52,8 +57,8 @@ final class DebugRoutesCommand extends Command
                 $data = $route->__debugInfo();
                 $action = '';
                 $middlewares = [];
-                if (!empty($data['middlewareDefinitions'])) {
-                    $middlewareDefinitions = $data['middlewareDefinitions'];
+                if (!empty($data['enabledMiddlewares'])) {
+                    $middlewareDefinitions = $data['enabledMiddlewares'];
                     $action = array_pop($middlewareDefinitions);
                     $middlewares = $middlewareDefinitions;
                 }
@@ -91,8 +96,8 @@ final class DebugRoutesCommand extends Command
         foreach ($this->routeCollection->getRoutes() as $route) {
             $data = $route->__debugInfo();
             $action = '';
-            if (!empty($data['middlewareDefinitions'])) {
-                $middlewareDefinitions = $data['middlewareDefinitions'];
+            if (!empty($data['enabledMiddlewares'])) {
+                $middlewareDefinitions = $data['enabledMiddlewares'];
                 $action = array_pop($middlewareDefinitions);
             }
             $rows[] = [

@@ -10,7 +10,8 @@ use Yiisoft\Http\Method;
 final class MatchingResult
 {
     /**
-     * @var array<string,string>
+     * @var string[]
+     * @psalm-var array<string,string>
      */
     private array $arguments = [];
 
@@ -19,12 +20,12 @@ final class MatchingResult
      */
     private array $methods = [];
 
-    private function __construct(private ?Route $route)
+    private function __construct(private readonly ?Route $route)
     {
     }
-
     /**
-     * @param array<string,string> $arguments
+     * @param string[] $arguments
+     * @psalm-param array<string,string> $arguments
      */
     public static function fromSuccess(Route $route, array $arguments): self
     {
@@ -57,7 +58,8 @@ final class MatchingResult
     }
 
     /**
-     * @return array<string,string>
+     * @return string[]
+     * @psalm-return array<string,string>
      */
     public function arguments(): array
     {

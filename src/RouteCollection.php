@@ -29,7 +29,7 @@ final class RouteCollection implements RouteCollectionInterface
      */
     private array $routes = [];
 
-    public function __construct(private RouteCollectorInterface $collector)
+    public function __construct(private readonly RouteCollectorInterface $collector)
     {
     }
 
@@ -109,7 +109,7 @@ final class RouteCollection implements RouteCollectionInterface
         $hosts = [];
         foreach ($items as $item) {
             if (!$this->isStaticRoute($item)) {
-                $item = $item->prependMiddleware(...$group->getData('middlewareDefinitions'));
+                $item = $item->prependMiddleware(...$group->getData('enabledMiddlewares'));
             }
 
             if (!empty($group->getData('hosts')) && empty($item->getData('hosts'))) {

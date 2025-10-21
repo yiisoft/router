@@ -7,6 +7,7 @@ namespace Yiisoft\Router\Tests;
 use InvalidArgumentException;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -277,39 +278,21 @@ final class RouteCollectionTest extends TestCase
         $route2 = $routeCollection->getRoute('view');
         $request = new ServerRequest('GET', '/');
         $response1 = $this->getDispatcher()
-                          ->withMiddlewares($route1->getData('builtMiddlewareDefinitions'))
-                          ->dispatch($request, $this->getRequestHandler());
+            ->withMiddlewares($route1->getData('enabledMiddlewares'))
+            ->dispatch($request, $this->getRequestHandler());
         $response2 = $this->getDispatcher()
-                          ->withMiddlewares($route2->getData('builtMiddlewareDefinitions'))
-                          ->dispatch($request, $this->getRequestHandler());
+            ->withMiddlewares($route2->getData('enabledMiddlewares'))
+            ->dispatch($request, $this->getRequestHandler());
 
         $this->assertEquals('middleware1', $response1->getReasonPhrase());
         $this->assertEquals('middleware1', $response2->getReasonPhrase());
     }
 
-    public function dataMiddlewaresOrder(): array
-    {
-        return [
-            [true],
-            [false],
-        ];
-    }
-
-    /**
-     * @dataProvider dataMiddlewaresOrder
-     */
+    #[TestWith([true])]
+    #[TestWith([false])]
     public function testMiddlewaresOrder(bool $groupWrapped): void
     {
         $request = new ServerRequest('GET', '/');
-
-        $injectDispatcher = $this->getDispatcher(
-            new SimpleContainer([
-                TestMiddleware1::class => new TestMiddleware1(),
-                TestMiddleware2::class => new TestMiddleware2(),
-                TestMiddleware3::class => new TestMiddleware3(),
-                TestController::class => new TestController(),
-            ])
-        );
 
         $collector = new RouteCollector();
 
@@ -328,7 +311,16 @@ final class RouteCollectionTest extends TestCase
 
         $route = (new RouteCollection($collector))->getRoute('main');
 
-        $dispatcher = $injectDispatcher->withMiddlewares($route->getData('builtMiddlewareDefinitions'));
+        $dispatcher = $this
+            ->getDispatcher(
+                new SimpleContainer([
+                    TestMiddleware1::class => new TestMiddleware1(),
+                    TestMiddleware2::class => new TestMiddleware2(),
+                    TestMiddleware3::class => new TestMiddleware3(),
+                    TestController::class => new TestController(),
+                ])
+            )
+            ->withMiddlewares($route->getData('enabledMiddlewares'));
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
@@ -339,12 +331,6 @@ final class RouteCollectionTest extends TestCase
     {
         $request = new ServerRequest('GET', '/');
 
-        $injectDispatcher = $this->getDispatcher(
-            new SimpleContainer([
-                TestMiddleware1::class => new TestMiddleware1(),
-            ])
-        );
-
         $collector = new RouteCollector();
         $collector->middleware(TestMiddleware1::class);
 
@@ -354,7 +340,13 @@ final class RouteCollectionTest extends TestCase
 
         $route = (new RouteCollection($collector))->getRoute('image');
 
-        $dispatcher = $injectDispatcher->withMiddlewares($route->getData('builtMiddlewareDefinitions'));
+        $dispatcher = $this
+            ->getDispatcher(
+                new SimpleContainer([
+                    TestMiddleware1::class => new TestMiddleware1(),
+                ])
+            )
+            ->withMiddlewares($route->getData('enabledMiddlewares'));
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Stack is empty.');
@@ -371,7 +363,7 @@ final class RouteCollectionTest extends TestCase
         };
     }
 
-    private function getDispatcher(ContainerInterface $container = null): MiddlewareDispatcher
+    private function getDispatcher(?ContainerInterface $container = null): MiddlewareDispatcher
     {
         $container ??= $this->createMock(ContainerInterface::class);
         return new MiddlewareDispatcher(
