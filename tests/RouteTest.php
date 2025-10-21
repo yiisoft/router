@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Router\Tests;
 
 use Nyholm\Psr7\Response;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Http\Method;
 use Yiisoft\Router\Route;
