@@ -148,7 +148,7 @@ final class Route implements Stringable
         }
         foreach ($methods as $method) {
             if (!is_string($method)) {
-                throw new \InvalidArgumentException('Invalid $methods provided, list of string expected.');
+                throw new InvalidArgumentException('Invalid $methods provided, list of string expected.');
             }
             $this->methods[] = $method;
         }
@@ -160,7 +160,7 @@ final class Route implements Stringable
         $this->hosts = [];
         foreach ($hosts as $host) {
             if (!is_string($host)) {
-                throw new \InvalidArgumentException('Invalid $hosts provided, list of string expected.');
+                throw new InvalidArgumentException('Invalid $hosts provided, list of string expected.');
             }
             $host = rtrim($host, '/');
 
@@ -191,7 +191,7 @@ final class Route implements Stringable
         /** @var mixed $value */
         foreach ($defaults as $key => $value) {
             if (!is_scalar($value) && !($value instanceof Stringable) && null !== $value) {
-                throw new \InvalidArgumentException(
+                throw new InvalidArgumentException(
                     'Invalid $defaults provided, indexed array of scalar or `Stringable` or null expected.'
                 );
             }
@@ -279,7 +279,7 @@ final class Route implements Stringable
                 continue;
             }
 
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'Invalid $middlewares provided, list of string or array or callable expected.'
             );
         }
