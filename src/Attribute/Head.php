@@ -34,11 +34,11 @@ final class Head implements RouteAttributeInterface
             methods: [Method::HEAD],
             pattern: $pattern,
             name: $name,
-            middlewareDefinitions: $middlewares,
+            middlewares: $middlewares,
             defaults: $defaults,
             hosts: $hosts,
             override: $override,
-            disabledMiddlewareDefinitions: $disabledMiddlewares
+            disabledMiddlewares: $disabledMiddlewares
         );
     }
 

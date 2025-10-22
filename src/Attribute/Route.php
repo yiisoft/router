@@ -34,11 +34,11 @@ final class Route implements RouteAttributeInterface
             methods: $methods,
             pattern: $pattern,
             name: $name,
-            middlewareDefinitions: $middlewares,
+            middlewares: $middlewares,
             defaults: $defaults,
             hosts: $hosts,
             override: $override,
-            disabledMiddlewareDefinitions: $disabledMiddlewares
+            disabledMiddlewares: $disabledMiddlewares
         );
     }
 

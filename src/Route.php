@@ -20,21 +20,19 @@ final class Route implements Stringable
     private bool $actionAdded = false;
     /**
      * @var array[]|callable[]|string[]
-     */
-    private array $builtMiddlewareDefinitions = [];
-    /**
-     * @var array[]|callable[]|string[]
      * @psalm-var list<array|callable|string>
      */
     private array $middlewares = [];
-
-    private array $disabledMiddlewares = [];
 
     /**
      * @psalm-var list<array|callable|string>|null
      */
     private ?array $enabledMiddlewaresCache = null;
 
+    /**
+     * @var string[]
+     */
+    private array $methods;
     /**
      * @var string[]
      */
@@ -56,7 +54,28 @@ final class Route implements Stringable
     public function __construct(
         array $methods,
         private string $pattern,
+        private ?string $name = null,
+        array|callable|string|null $action = null,
+        array $middlewares = [],
+        array $defaults = [],
+        array $hosts = [],
+        private bool $override = false,
+        private array $disabledMiddlewares = [],
     ) {
+        if (empty($methods)) {
+            throw new InvalidArgumentException('$methods cannot be empty.');
+        }
+        $this->assertListOfStrings($methods, 'methods');
+        $this->assertMiddlewares($middlewares);
+        $this->assertListOfStrings($hosts, 'hosts');
+        $this->middlewares = $middlewares;
+        $this->methods = $methods;
+        $this->hosts = $hosts;
+        $this->defaults = array_map('\strval', $defaults);
+        if (!empty($action)) {
+            $this->middlewares[] = $action;
+            $this->actionAdded = true;
+        }
     }
 
     public static function get(string $pattern): self
@@ -218,7 +237,7 @@ final class Route implements Stringable
         $route = clone $this;
         $route->middlewares[] = $middlewareDefinition;
         $route->actionAdded = true;
-        $route->builtMiddlewareDefinitions = [];
+        $route->enabledMiddlewaresCache = null;
         return $route;
     }
 
@@ -314,6 +333,39 @@ final class Route implements Stringable
             'disabledMiddlewares' => $this->disabledMiddlewares,
             'enabledMiddlewares' => $this->getEnabledMiddlewares(),
         ];
+    }
+
+    /**
+     * @psalm-assert array<string> $items
+     */
+    private function assertListOfStrings(array $items, string $argument): void
+    {
+        foreach ($items as $item) {
+            if (!is_string($item)) {
+                throw new \InvalidArgumentException('Invalid $' . $argument . ' provided, list of string expected.');
+            }
+        }
+    }
+
+    /**
+     * @psalm-assert array<array|callable|string> $middlewareDefinitions
+     */
+    private function assertMiddlewares(array $middlewareDefinitions): void
+    {
+        /** @var mixed $middlewareDefinition */
+        foreach ($middlewareDefinitions as $middlewareDefinition) {
+            if (is_string($middlewareDefinition)) {
+                continue;
+            }
+
+            if (is_callable($middlewareDefinition) || is_array($middlewareDefinition)) {
+                continue;
+            }
+
+            throw new \InvalidArgumentException(
+                'Invalid $middlewareDefinitions provided, list of string or array or callable expected.'
+            );
+        }
     }
 
     /**

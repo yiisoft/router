@@ -34,11 +34,11 @@ final class Put implements RouteAttributeInterface
             methods: [Method::PUT],
             pattern: $pattern,
             name: $name,
-            middlewareDefinitions: $middlewares,
+            middlewares: $middlewares,
             defaults: $defaults,
             hosts: $hosts,
             override: $override,
-            disabledMiddlewareDefinitions: $disabledMiddlewares
+            disabledMiddlewares: $disabledMiddlewares
         );
     }
 

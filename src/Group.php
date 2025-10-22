@@ -29,10 +29,8 @@ final class Group
      * @var string[]
      */
     private array $hosts = [];
-    private ?string $namePrefix = null;
     private bool $routesAdded = false;
     private bool $middlewareAdded = false;
-    private array $disabledMiddlewares = [];
 
     /**
      * @psalm-var list<array|callable|string>|null
@@ -44,9 +42,24 @@ final class Group
      */
     private $corsMiddleware = null;
 
-    private function __construct(
-        private ?string $prefix = null
+    /**
+     * @param array $disabledMiddlewares Excludes middleware from being invoked when action is handled.
+     * It is useful to avoid invoking one of the parent group middleware for
+     * a certain route.
+     */
+    public function __construct(
+        private ?string $prefix = null,
+        array $middlewares = [],
+        array $hosts = [],
+        private ?string $namePrefix = null,
+        private array $disabledMiddlewares = [],
+        array|callable|string|null $corsMiddleware = null
     ) {
+        $this->assertMiddlewares($middlewares);
+        $this->assertHosts($hosts);
+        $this->middlewares = $middlewares;
+        $this->hosts = $hosts;
+        $this->corsMiddleware = $corsMiddleware;
     }
 
     /**
@@ -201,6 +214,32 @@ final class Group
             'enabledMiddlewares' => $this->getEnabledMiddlewares(),
             default => throw new InvalidArgumentException('Unknown data key: ' . $key),
         };
+    }
+
+    private function assertHosts(array $hosts): void
+    {
+        foreach ($hosts as $host) {
+            if (!is_string($host)) {
+                throw new \InvalidArgumentException('Invalid $hosts provided, list of string expected.');
+            }
+        }
+    }
+
+    /**
+     * @psalm-assert array<array|callable|string> $middlewareDefinitions
+     */
+    private function assertMiddlewares(array $middlewareDefinitions): void
+    {
+        /** @var mixed $middlewareDefinition */
+        foreach ($middlewareDefinitions as $middlewareDefinition) {
+            if (is_string($middlewareDefinition) || is_callable($middlewareDefinition) || is_array($middlewareDefinition)) {
+                continue;
+            }
+
+            throw new \InvalidArgumentException(
+                'Invalid $middlewareDefinitions provided, list of string or array or callable expected.'
+            );
+        }
     }
 
     /**

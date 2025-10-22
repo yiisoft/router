@@ -488,9 +488,9 @@ final class GroupTest extends TestCase
             ->middleware(static fn () => new Response(200))
             ->prependMiddleware(TestMiddleware1::class);
 
-        $builtMiddlewareDefinitions = $group->getData('middlewareDefinitions');
+        $builtMiddlewareDefinitions = $group->getData('enabledMiddlewares');
 
-        $this->assertSame($builtMiddlewareDefinitions, $group->getData('middlewareDefinitions'));
+        $this->assertSame($builtMiddlewareDefinitions, $group->getData('enabledMiddlewares'));
     }
 
     private function getRequestHandler(): RequestHandlerInterface

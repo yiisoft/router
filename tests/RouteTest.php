@@ -35,12 +35,12 @@ final class RouteTest extends TestCase
             methods: [Method::GET],
             pattern: '/',
             action: [TestController::class, 'index'],
-            middlewareDefinitions: [TestMiddleware1::class],
+            middlewares: [TestMiddleware1::class],
             override: true,
         );
 
         $this->assertInstanceOf(Route::class, $route);
-        $this->assertCount(2, $route->getData('builtMiddlewareDefinitions'));
+        $this->assertCount(2, $route->getData('enabledMiddlewares'));
         $this->assertTrue($route->getData('override'));
     }
 
@@ -275,7 +275,7 @@ final class RouteTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid $middlewareDefinitions provided, list of string or array or callable expected.');
 
-        $route = new Route([Method::GET], '/', middlewareDefinitions: [static fn () => new Response(), (object) ['test' => 1]]);
+        $route = new Route([Method::GET], '/', middlewares: [static fn () => new Response(), (object) ['test' => 1]]);
     }
 
     public function testDisabledMiddlewareDefinitions(): void
@@ -499,9 +499,9 @@ EOL;
                       ->middleware(TestMiddleware1::class)
                       ->action(static fn () => new Response(200));
 
-        $builtMiddlewareDefinitions = $route->getData('builtMiddlewareDefinitions');
+        $builtMiddlewareDefinitions = $route->getData('enabledMiddlewares');
 
-        $this->assertSame($builtMiddlewareDefinitions, $route->getData('builtMiddlewareDefinitions'));
+        $this->assertSame($builtMiddlewareDefinitions, $route->getData('enabledMiddlewares'));
     }
 
     private function getRequestHandler(): RequestHandlerInterface

@@ -34,11 +34,11 @@ final class Post implements RouteAttributeInterface
             methods: [Method::POST],
             pattern: $pattern,
             name: $name,
-            middlewareDefinitions: $middlewares,
+            middlewares: $middlewares,
             defaults: $defaults,
             hosts: $hosts,
             override: $override,
-            disabledMiddlewareDefinitions: $disabledMiddlewares
+            disabledMiddlewares: $disabledMiddlewares
         );
     }
 
