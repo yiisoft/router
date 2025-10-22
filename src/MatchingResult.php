@@ -23,6 +23,7 @@ final class MatchingResult
     private function __construct(private readonly ?Route $route)
     {
     }
+
     /**
      * @param string[] $arguments
      * @psalm-param array<string,string> $arguments

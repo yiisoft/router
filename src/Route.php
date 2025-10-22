@@ -342,7 +342,7 @@ final class Route implements Stringable
     {
         foreach ($items as $item) {
             if (!is_string($item)) {
-                throw new \InvalidArgumentException('Invalid $' . $argument . ' provided, list of string expected.');
+                throw new InvalidArgumentException('Invalid $' . $argument . ' provided, list of string expected.');
             }
         }
     }
@@ -362,7 +362,7 @@ final class Route implements Stringable
                 continue;
             }
 
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'Invalid $middlewareDefinitions provided, list of string or array or callable expected.'
             );
         }

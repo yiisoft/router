@@ -220,7 +220,7 @@ final class Group
     {
         foreach ($hosts as $host) {
             if (!is_string($host)) {
-                throw new \InvalidArgumentException('Invalid $hosts provided, list of string expected.');
+                throw new InvalidArgumentException('Invalid $hosts provided, list of string expected.');
             }
         }
     }
@@ -236,7 +236,7 @@ final class Group
                 continue;
             }
 
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'Invalid $middlewareDefinitions provided, list of string or array or callable expected.'
             );
         }
