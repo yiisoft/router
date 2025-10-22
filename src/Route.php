@@ -45,11 +45,14 @@ final class Route implements Stringable
     /**
      * @param array|callable|string|null $action Action handler. It is a primary middleware definition that
      * should be invoked last for a matched route.
+     * @param array[]|callable[]|string[] $middlewares Middleware definitions.
      * @param array<string,scalar|Stringable|null> $defaults Parameter default values indexed by parameter names.
      * @param bool $override Marks route as override. When added it will replace existing route with the same name.
-     * @param array $disabledMiddlewareDefinitions Excludes middleware from being invoked when action is handled.
+     * @param array $disabledMiddlewares Excludes middleware from being invoked when action is handled.
      * It is useful to avoid invoking one of the parent group middleware for
      * a certain route.
+     *
+     * @psalm-param list<array|callable|string> $middlewares
      */
     public function __construct(
         array $methods,

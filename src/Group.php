@@ -43,9 +43,14 @@ final class Group
     private $corsMiddleware = null;
 
     /**
+     * @param array[]|callable[]|string[] $middlewares Middleware definitions.
+     * @param string[] $hosts List of host names.
+     * @param string|null $namePrefix Prefix for route names.
      * @param array $disabledMiddlewares Excludes middleware from being invoked when action is handled.
      * It is useful to avoid invoking one of the parent group middleware for
      * a certain route.
+     *
+     * @psalm-param list<array|callable|string> $middlewares
      */
     public function __construct(
         private ?string $prefix = null,
