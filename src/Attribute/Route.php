@@ -11,7 +11,7 @@ use Yiisoft\Router\Route as RouteObject;
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 final class Route implements RouteAttributeInterface
 {
-    private RouteObject $route;
+    private readonly RouteObject $route;
 
     /**
      * @param array<string,scalar|Stringable|null> $defaults Parameter default values indexed by parameter names.

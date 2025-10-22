@@ -12,7 +12,7 @@ final class ArrayRoutesProvider implements RoutesProviderInterface
     /**
      * @param Group[]|Route[] $routes
      */
-    public function __construct(private array $routes)
+    public function __construct(private readonly array $routes)
     {
     }
 

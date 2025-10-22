@@ -13,7 +13,7 @@ use Yiisoft\Router\Route;
  */
 final class FileRoutesProvider implements RoutesProviderInterface
 {
-    public function __construct(private string $file, private array $scope = [])
+    public function __construct(private readonly string $file, private readonly array $scope = [])
     {
     }
 

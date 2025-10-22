@@ -12,7 +12,7 @@ use Yiisoft\Router\Route;
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 final class Head implements RouteAttributeInterface
 {
-    private Route $route;
+    private readonly Route $route;
 
     /**
      * @param array<string,scalar|Stringable|null> $defaults Parameter default values indexed by parameter names.
