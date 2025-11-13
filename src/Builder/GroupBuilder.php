@@ -40,7 +40,7 @@ final class GroupBuilder implements RoutableInterface
     private $corsMiddleware = null;
 
     private function __construct(
-        private ?string $prefix = null,
+        private readonly ?string $prefix = null,
         private ?string $namePrefix = null,
     ) {
     }

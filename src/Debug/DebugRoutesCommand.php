@@ -125,33 +125,12 @@ final class DebugRoutesCommand extends Command
         ) {
             return $value[0] . '::' . $value[1];
         }
-        if (is_array($value) && $this->isArrayList($value)) {
+        if (is_array($value) && array_is_list($value)) {
             return implode(', ', array_map(fn ($item) => $this->export($item), $value));
         }
         if (is_string($value)) {
             return $value;
         }
         return VarDumper::create($value)->asString();
-    }
-
-    /**
-     * Polyfill for is_array_list() function.
-     * It is available since PHP 8.1.
-     */
-    private function isArrayList(array $array): bool
-    {
-        if ([] === $array) {
-            return true;
-        }
-
-        $nextKey = -1;
-
-        foreach ($array as $k => $_) {
-            if ($k !== ++$nextKey) {
-                return false;
-            }
-        }
-
-        return true;
     }
 }

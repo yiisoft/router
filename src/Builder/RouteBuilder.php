@@ -15,7 +15,7 @@ use Yiisoft\Router\Route;
  */
 final class RouteBuilder implements RoutableInterface
 {
-    private ?string $name = null;
+    private null|string $name = null;
 
     /**
      * @var array|callable|string|null
@@ -46,7 +46,7 @@ final class RouteBuilder implements RoutableInterface
      * @param string[] $methods
      */
     private function __construct(
-        private array $methods,
+        private readonly array $methods,
         private string $pattern,
     ) {
     }
