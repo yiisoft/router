@@ -126,7 +126,7 @@ final class DebugRoutesCommand extends Command
             return $value[0] . '::' . $value[1];
         }
         if (is_array($value) && array_is_list($value)) {
-            return implode(', ', array_map(fn ($item) => $this->export($item), $value));
+            return implode(', ', array_map($this->export(...), $value));
         }
         if (is_string($value)) {
             return $value;
