@@ -39,12 +39,12 @@
         "yiisoft/router-implementation": "1.0.0"
     },
     "require-dev": {
-        "maglnet/composer-require-checker": "^4.17.0",
+        "maglnet/composer-require-checker": "^4.7.1",
         "nyholm/psr7": "^1.8.2",
         "phpunit/phpunit": "^10.5.58",
         "psr/container": "^1.1 || ^2.0.2",
         "rector/rector": "^2.2.7",
-        "roave/infection-static-analysis-plugin": "^1.39",
+        "roave/infection-static-analysis-plugin": "^1.35",
         "spatie/phpunit-watcher": "^1.24",
         "vimeo/psalm": "^5.26.1 || ^6.13.1",
         "yiisoft/di": "^1.4",
