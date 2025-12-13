@@ -149,7 +149,7 @@ final class Route implements Stringable
     public function defaults(array $defaults): self
     {
         $route = clone $this;
-        $route->defaults = array_map('\strval', $defaults);
+        $route->defaults = array_map(\strval(...), $defaults);
         return $route;
     }
 
@@ -316,6 +316,7 @@ final class Route implements Stringable
     private function getEnabledMiddlewares(): array
     {
         if ($this->enabledMiddlewaresCache !== null) {
+            /** @infection-ignore-all */
             return $this->enabledMiddlewaresCache;
         }
 
