@@ -6,6 +6,7 @@
 ## 4.0.0 under development
 ## 4.0.1 under development
 ## 4.0.2 under development
+## 4.0.2 December 13, 2025
 
 - Enh #275: Add PHP 8.5 support (@vjik)
 
