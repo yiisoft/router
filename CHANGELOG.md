@@ -1,5 +1,9 @@
 # Yii Router Change Log
 
+## 4.0.3 under development
+
+- no changes in this release.
+
 ## 4.0.2 December 13, 2025
 
 - Enh #275: Add PHP 8.5 support (@vjik)
