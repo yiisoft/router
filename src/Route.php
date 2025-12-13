@@ -149,7 +149,7 @@ final class Route implements Stringable
     public function defaults(array $defaults): self
     {
         $route = clone $this;
-        $route->defaults = array_map('\strval', $defaults);
+        $route->defaults = array_map(\strval(...), $defaults);
         return $route;
     }
 
