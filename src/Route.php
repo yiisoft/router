@@ -316,6 +316,7 @@ final class Route implements Stringable
     private function getEnabledMiddlewares(): array
     {
         if ($this->enabledMiddlewaresCache !== null) {
+            /** @infection-ignore-all */
             return $this->enabledMiddlewaresCache;
         }
 
