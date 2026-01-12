@@ -106,22 +106,6 @@ $response = $result->process($request, $notFoundHandler);
 > to specific adapter documentation. All examples in this document are for
 > [FastRoute adapter](https://github.com/yiisoft/router-fastroute).
 
-### Middleware usage
-
-In order to simplify usage in PSR-middleware based application, there is a ready to use middleware provided:
-
-```php
-$router = $container->get(Yiisoft\Router\UrlMatcherInterface::class);
-$responseFactory = $container->get(\Psr\Http\Message\ResponseFactoryInterface::class);
-
-$routerMiddleware = new Yiisoft\Router\Middleware\Router($router, $responseFactory, $container);
-
-// Add middleware to your middleware handler of choice.
-```
-
-In case of a route match router middleware executes handler middleware attached to the route. If there is no match, next
-application middleware processes the request.
-
 ### Routes
 
 Route could match for one or more HTTP methods: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`. There are
@@ -233,17 +217,97 @@ and `disableMiddleware()`. These middleware are executed prior to matched route'
 
 If host is specified, all routes in the group would match only if the host match.
 
-### Automatic OPTIONS response and CORS
+### Middleware usage
 
-By default, router responds automatically to OPTIONS requests based on the routes defined:
+To simplify usage in PSR-middleware based application, there is a ready to use `Yiisoft\Router\Middleware\Router` middleware provided:
 
+```php
+use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
+use Yiisoft\Router\CurrentRoute;
+use Yiisoft\Router\MethodFailureHandlerInterface;
+use Yiisoft\Router\Middleware\Router;
+use Yiisoft\Router\UrlMatcherInterface;
+
+$matcher = $container->get(UrlMatcherInterface::class);
+$middlewareFactory = $container->get(MiddlewareFactory::class);
+$currentRoute = $container->get(CurrentRoute::class);
+$methodFailureHandler = $container->get(MethodFailureHandlerInterface::class);
+
+$routerMiddleware = new Router($matcher, $middlewareFactory, $currentRoute, $methodFailureHandler);
+
+// Add middleware to your middleware handler of choice.
+```
+
+When a route matches router middleware executes handler middleware attached to the route. If there is no match, next
+application middleware processes the request.
+
+### Handling method failure error
+
+To handle method failure error, pass an instance of `Yiisoft\Router\MethodFailureHandlerInterface` to the `Yiisoft\Router\Middleware\Router` middleware's constructor.
+The [Yii Router](yiisoft/router) package provides a default method failure handler, `Yiisoft\Router\MethodFailureHandler`.
+
+`Yiisoft\Router\MethodFailureHandler` responds based on the HTTP methods supported by the request's resource:
+
+- For `OPTIONS` requests:
 ```
 HTTP/1.1 204 No Content
 Allow: GET, HEAD
 ```
 
-Generally that is fine unless you need [CORS headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS). In this
-case, you can add a middleware for handling it such as [tuupola/cors-middleware](https://github.com/tuupola/cors-middleware):
+- For requests with methods that are not supported by the target resource:
+```
+HTTP/1.1 405 Method Not Allowed
+Allow: GET, HEAD
+```
+
+To use `Yiisoft\Router\MethodFailureHandler`, pass it to the `Yiisoft\Router\Middleware\Router` middleware constructor.
+
+```php
+use Psr\Http\Message\ResponseFactoryInterface;
+use Yiisoft\Router\MethodFailureHandler;
+use Yiisoft\Router\Middleware\Router;
+
+$responseFactory = $container->get(ResponseFactoryInterface::class);
+$methodFailureHandler = new MethodFailureHandler($responseFactory);
+
+$middleware = new Router(
+    $matcher,
+    $middlewareFactory,
+    $currentRoute,
+    $methodFailureHandler // pass the handler here
+);
+```
+
+or define the `MethodFailureHandlerInterface` configuration in the [DI container](https://github.com/yiisoft/di):
+
+```php
+// config/web/di/router.php
+
+use Yiisoft\Router\MethodFailureHandler;
+use Yiisoft\Router\MethodFailureHandlerInterface;
+
+return [
+    MethodFailureHandlerInterface::class => MethodFailureHandler::class,
+];
+```
+
+> In case [Yii Router](yiisoft/router) package is used along with [Yii Config](https://github.com/yiisoft/config) plugin, the package is [configured](./config/di-web.php)
+automatically to use `Yiisoft\Router\MethodFailureHandler`.
+
+To disable method failure error handling pass `null` as the `methodFailureHandler` parameter of the `Yiisoft\Router\Middleware\Router` middleware constructor:
+
+```php
+$middleware = new Router(
+    $matcher,
+    $middlewareFactory,
+    $currentRoute,
+    null // disables method failure handling
+);
+```
+
+### CORS protocol
+
+If you need [CORS headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) you can add a middleware for handling it such as [tuupola/cors-middleware](https://github.com/tuupola/cors-middleware):
 
 ```php
 use Yiisoft\Router\Group;

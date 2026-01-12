@@ -2,7 +2,8 @@
 
 ## 4.0.3 under development
 
-- no changes in this release.
+- New #249: Add option to ignore method failure handler to the 'Router' middleware (@olegbaturin)
+- New #249: Add custom response handlers for the method failure responses to the 'Router' middleware (@olegbaturin)
 
 ## 4.0.2 December 13, 2025
 
