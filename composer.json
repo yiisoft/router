@@ -39,6 +39,7 @@
         "yiisoft/router-implementation": "1.0.0"
     },
     "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.89.1",
         "maglnet/composer-require-checker": "^4.7.1",
         "nyholm/psr7": "^1.8.2",
         "phpunit/phpunit": "^10.5.45",
@@ -55,12 +56,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Yiisoft\\Router\\": "src"
+            "Yiisoft\\Router\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Yiisoft\\Router\\Tests\\": "tests"
+            "Yiisoft\\Router\\Tests\\": "tests/"
         }
     },
     "suggest": {
@@ -86,6 +87,7 @@
     },
     "scripts": {
         "composer-require-checker": "composer-require-checker",
+        "lint": "php-cs-fixer fix",
         "rector": "rector",
         "test": "phpunit --testdox --no-interaction",
         "test-watch": "phpunit-watcher watch"
