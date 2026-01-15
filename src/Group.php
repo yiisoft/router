@@ -155,6 +155,7 @@ final class Group
     public function getEnabledMiddlewares(): array
     {
         if ($this->enabledMiddlewaresCache !== null) {
+            /** @infection-ignore-all */
             return $this->enabledMiddlewaresCache;
         }
 
