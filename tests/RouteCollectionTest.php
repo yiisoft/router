@@ -16,8 +16,8 @@ use Psr\Http\Server\RequestHandlerInterface;
 use RuntimeException;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
-use Yiisoft\Router\Group;
-use Yiisoft\Router\Route;
+use Yiisoft\Router\Builder\GroupBuilder as Group;
+use Yiisoft\Router\Builder\RouteBuilder as Route;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollector;
 use Yiisoft\Router\RouteNotFoundException;
@@ -90,7 +90,7 @@ final class RouteCollectionTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('my-route');
-        $this->assertSame('/{id}', $route->getData('pattern'));
+        $this->assertSame('/{id}', $route->getPattern());
     }
 
     public function testRouteWithoutAction(): void
@@ -109,7 +109,7 @@ final class RouteCollectionTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('image');
-        $this->assertFalse($route->getData('hasMiddlewares'));
+        $this->assertEmpty($route->getAction());
     }
 
     public function testGetRouterTree(): void
@@ -208,10 +208,10 @@ final class RouteCollectionTest extends TestCase
         $route1 = $routeCollection->getRoute('image');
         $route2 = $routeCollection->getRoute('project');
         $route3 = $routeCollection->getRoute('user');
-        $this->assertSame('https://yiiframework.com', $route1->getData('host'));
-        $this->assertCount(2, $route2->getData('hosts'));
-        $this->assertSame(['https://yiipowered.com', 'https://yiiframework.ru'], $route2->getData('hosts'));
-        $this->assertSame('https://yiiframework.com', $route3->getData('host'));
+        $this->assertSame('https://yiiframework.com', $route1->getHosts()[0]);
+        $this->assertCount(2, $route2->getHosts());
+        $this->assertSame(['https://yiipowered.com', 'https://yiiframework.ru'], $route2->getHosts());
+        $this->assertSame('https://yiiframework.com', $route3->getHosts()[0]);
     }
 
     public function testGroupName(): void
@@ -240,10 +240,10 @@ final class RouteCollectionTest extends TestCase
         $route2 = $routeCollection->getRoute('api/v1/package/downloads');
         $route3 = $routeCollection->getRoute('api/index');
         $route4 = $routeCollection->getRoute('GET api/user/{username}');
-        $this->assertInstanceOf(Route::class, $route1);
-        $this->assertInstanceOf(Route::class, $route2);
-        $this->assertInstanceOf(Route::class, $route3);
-        $this->assertInstanceOf(Route::class, $route4);
+        $this->assertInstanceOf(\Yiisoft\Router\Route::class, $route1);
+        $this->assertInstanceOf(\Yiisoft\Router\Route::class, $route2);
+        $this->assertInstanceOf(\Yiisoft\Router\Route::class, $route3);
+        $this->assertInstanceOf(\Yiisoft\Router\Route::class, $route4);
     }
 
     public function testCollectorMiddlewareFullstackCalled(): void
@@ -278,10 +278,10 @@ final class RouteCollectionTest extends TestCase
         $route2 = $routeCollection->getRoute('view');
         $request = new ServerRequest('GET', '/');
         $response1 = $this->getDispatcher()
-            ->withMiddlewares($route1->getData('enabledMiddlewares'))
+            ->withMiddlewares($route1->getEnabledMiddlewares())
             ->dispatch($request, $this->getRequestHandler());
         $response2 = $this->getDispatcher()
-            ->withMiddlewares($route2->getData('enabledMiddlewares'))
+            ->withMiddlewares($route2->getEnabledMiddlewares())
             ->dispatch($request, $this->getRequestHandler());
 
         $this->assertEquals('middleware1', $response1->getReasonPhrase());
@@ -320,7 +320,7 @@ final class RouteCollectionTest extends TestCase
                     TestController::class => new TestController(),
                 ])
             )
-            ->withMiddlewares($route->getData('enabledMiddlewares'));
+            ->withMiddlewares($route->getEnabledMiddlewares());
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
@@ -346,7 +346,7 @@ final class RouteCollectionTest extends TestCase
                     TestMiddleware1::class => new TestMiddleware1(),
                 ])
             )
-            ->withMiddlewares($route->getData('enabledMiddlewares'));
+            ->withMiddlewares($route->getEnabledMiddlewares());
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Stack is empty.');

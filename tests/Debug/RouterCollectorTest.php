@@ -7,9 +7,11 @@ namespace Yiisoft\Router\Tests\Debug;
 use PHPUnit\Framework\MockObject\MockObject;
 use Yiisoft\Di\Container;
 use Yiisoft\Di\ContainerConfig;
+use Yiisoft\Http\Method;
+use Yiisoft\Router\Builder\GroupBuilder;
+use Yiisoft\Router\Builder\RouteBuilder;
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\Debug\RouterCollector;
-use Yiisoft\Router\Group;
 use Yiisoft\Router\MatchingResult;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
@@ -44,7 +46,7 @@ final class RouterCollectorTest extends AbstractCollectorTestCase
 
     public function testWithoutRouteCollection(): void
     {
-        $route = Route::get('/');
+        $route = new Route([Method::GET], '/');
         $arguments = ['a' => 19];
         $result = MatchingResult::fromSuccess($route, $arguments);
 
@@ -61,7 +63,7 @@ final class RouterCollectorTest extends AbstractCollectorTestCase
 
         $this->assertSame(['currentRoute'], array_keys($collected));
         $this->assertSame(
-            ['matchTime', 'name', 'pattern', 'arguments', 'host', 'uri', 'action', 'middlewares'],
+            ['matchTime', 'name', 'pattern', 'arguments', 'hosts', 'uri', 'action', 'middlewares'],
             array_keys($collected['currentRoute'])
         );
     }
@@ -118,8 +120,8 @@ final class RouterCollectorTest extends AbstractCollectorTestCase
     private function createRoutes(): array
     {
         return [
-            Route::get('/'),
-            Group::create('/api')->routes(Route::get('/v1')),
+            new Route([Method::GET], '/'),
+            GroupBuilder::create('/api')->routes(RouteBuilder::get('/v1')),
         ];
     }
 }

@@ -5,140 +5,116 @@ declare(strict_types=1);
 namespace Yiisoft\Router\Tests;
 
 use Nyholm\Psr7\Response;
-use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
-use Psr\EventDispatcher\EventDispatcherInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
-use RuntimeException;
 use Yiisoft\Http\Method;
-use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
-use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\Tests\Support\AssertTrait;
-use Yiisoft\Router\Tests\Support\Container;
+use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
-use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware3;
 
 final class RouteTest extends TestCase
 {
     use AssertTrait;
 
+    public function testSimpleInstance(): void
+    {
+        $route = new Route(
+            methods: [Method::GET],
+            pattern: '/',
+            action: [TestController::class, 'index'],
+            middlewares: [TestMiddleware1::class],
+            override: true,
+        );
+
+        $this->assertInstanceOf(Route::class, $route);
+        $this->assertCount(2, $route->getEnabledMiddlewares());
+        $this->assertTrue($route->isOverride());
+    }
+
+    public function testDisabledMiddlewares(): void
+    {
+        $route = new Route(
+            methods: [Method::GET],
+            pattern: '/',
+            action: [TestController::class, 'index'],
+            middlewares: [TestMiddleware1::class],
+            override: true,
+        );
+        $route->setDisabledMiddlewares([TestMiddleware2::class]);
+
+        $this->assertCount(1, $route->getDisabledMiddlewares());
+        $this->assertSame(TestMiddleware2::class, $route->getDisabledMiddlewares()[0]);
+    }
+
+    public function testEnabledMiddlewares(): void
+    {
+        $route = new Route(
+            methods: [Method::GET],
+            pattern: '/',
+            middlewares: [TestMiddleware1::class, TestMiddleware2::class],
+            override: true,
+        );
+        $route->setDisabledMiddlewares([TestMiddleware2::class]);
+
+        $this->assertCount(1, $route->getEnabledMiddlewares());
+        $this->assertSame(TestMiddleware1::class, $route->getEnabledMiddlewares()[0]);
+    }
+
+    public function testEmptyMethods(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('$methods cannot be empty.');
+
+        new Route([], '');
+    }
+
     public function testName(): void
     {
-        $route = Route::get('/')->name('test.route');
+        $route = (new Route([Method::GET], '/'))->setName('test.route');
 
-        $this->assertSame('test.route', $route->getData('name'));
+        $this->assertSame('test.route', $route->getName());
     }
 
     public function testNameDefault(): void
     {
-        $route = Route::get('/');
+        $route = new Route([Method::GET], '/');
 
-        $this->assertSame('GET /', $route->getData('name'));
+        $this->assertSame('GET /', $route->getName());
     }
 
     public function testNameDefaultWithHosts(): void
     {
-        $route = Route::get('/')->hosts('a.com', 'b.com');
+        $route = (new Route([Method::GET], '/'))->setHosts(['a.com', 'b.com']);
 
-        $this->assertSame('GET a.com|b.com/', $route->getData('name'));
+        $this->assertSame('GET a.com|b.com/', $route->getName());
     }
 
     public function testMethods(): void
     {
-        $route = Route::methods([Method::POST, Method::HEAD], '/');
+        $route = new Route([Method::POST, Method::HEAD], '/');
 
-        $this->assertSame([Method::POST, Method::HEAD], $route->getData('methods'));
-    }
-
-    public function testGetDataWithWrongKey(): void
-    {
-        $route = Route::get('');
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Unknown data key: wrong');
-
-        $route->getData('wrong');
-    }
-
-    public function testGetMethod(): void
-    {
-        $route = Route::get('/');
-
-        $this->assertSame([Method::GET], $route->getData('methods'));
-    }
-
-    public function testPostMethod(): void
-    {
-        $route = Route::post('/');
-
-        $this->assertSame([Method::POST], $route->getData('methods'));
-    }
-
-    public function testPutMethod(): void
-    {
-        $route = Route::put('/');
-
-        $this->assertSame([Method::PUT], $route->getData('methods'));
-    }
-
-    public function testDeleteMethod(): void
-    {
-        $route = Route::delete('/');
-
-        $this->assertSame([Method::DELETE], $route->getData('methods'));
-    }
-
-    public function testPatchMethod(): void
-    {
-        $route = Route::patch('/');
-
-        $this->assertSame([Method::PATCH], $route->getData('methods'));
-    }
-
-    public function testHeadMethod(): void
-    {
-        $route = Route::head('/');
-
-        $this->assertSame([Method::HEAD], $route->getData('methods'));
-    }
-
-    public function testOptionsMethod(): void
-    {
-        $route = Route::options('/');
-
-        $this->assertSame([Method::OPTIONS], $route->getData('methods'));
+        $this->assertSame([Method::POST, Method::HEAD], $route->getMethods());
     }
 
     public function testPattern(): void
     {
-        $route = Route::get('/test')->pattern('/test2');
+        $route = (new Route([Method::GET], '/test'))->setPattern('/test2');
 
-        $this->assertSame('/test2', $route->getData('pattern'));
-    }
-
-    public function testHost(): void
-    {
-        $route = Route::get('/')->host('https://yiiframework.com/');
-
-        $this->assertSame('https://yiiframework.com', $route->getData('host'));
+        $this->assertSame('/test2', $route->getPattern());
     }
 
     public function testHosts(): void
     {
-        $route = Route::get('/')
-            ->hosts(
+        $route = (new Route([Method::GET], '/'))
+            ->setHosts([
                 'https://yiiframework.com/',
                 'yf.com',
                 'yii.com',
-                'yf.ru'
-            );
+                'yf.ru',
+            ]);
 
         $this->assertSame(
             [
@@ -147,27 +123,13 @@ final class RouteTest extends TestCase
                 'yii.com',
                 'yf.ru',
             ],
-            $route->getData('hosts')
+            $route->getHosts()
         );
-    }
-
-    public function testMultipleHosts(): void
-    {
-        $route = Route::get('/')
-            ->host('https://yiiframework.com/');
-        $multipleRoute = Route::get('/')
-            ->hosts(
-                'https://yiiframework.com/',
-                'https://yiiframework.ru/'
-            );
-
-        $this->assertCount(1, $route->getData('hosts'));
-        $this->assertCount(2, $multipleRoute->getData('hosts'));
     }
 
     public function testDefaults(): void
     {
-        $route = Route::get('/{language}')->defaults([
+        $route = (new Route([Method::GET], '/{language}'))->setDefaults([
             'language' => 'en',
             'age' => 42,
         ]);
@@ -175,14 +137,14 @@ final class RouteTest extends TestCase
         $this->assertSame([
             'language' => 'en',
             'age' => '42',
-        ], $route->getData('defaults'));
+        ], $route->getDefaults());
     }
 
     public function testOverride(): void
     {
-        $route = Route::get('/')->override();
+        $route = (new Route([Method::GET], '/'))->setOverride(true);
 
-        $this->assertTrue($route->getData('override'));
+        $this->assertTrue($route->isOverride());
     }
 
     public static function dataToString(): array
@@ -196,191 +158,49 @@ final class RouteTest extends TestCase
     #[DataProvider('dataToString')]
     public function testToString(string $expected, string $pattern): void
     {
-        $route = Route::methods([Method::GET, Method::POST], $pattern)
-            ->name('test.route')
-            ->host('yiiframework.com');
+        $route = (new Route([Method::GET, Method::POST], $pattern))
+            ->setName('test.route')
+            ->setHosts(['yiiframework.com']);
 
-        $this->assertSame('[test.route] GET,POST ' . $expected, (string)$route);
+        $this->assertSame('[test.route] GET,POST ' . $expected, (string) $route);
     }
 
     public function testToStringSimple(): void
     {
-        $route = Route::get('/');
+        $route = new Route([Method::GET], '/');
 
-        $this->assertSame('GET /', (string)$route);
+        $this->assertSame('GET /', (string) $route);
     }
 
-    public function testDispatcherInjecting(): void
+    public function testInvalidMiddlewares(): void
     {
-        $request = new ServerRequest('GET', '/');
-        $container = $this->getContainer(
-            [
-                TestController::class => new TestController(),
-            ]
-        );
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid $middlewares provided, list of string or array or callable expected.');
 
-        $route = Route::get('/')->action([TestController::class, 'index']);
-
-        $response = $this
-            ->getDispatcher($container)
-            ->withMiddlewares($route->getData('enabledMiddlewares'))
-            ->dispatch($request, $this->getRequestHandler());
-
-        $this->assertSame(200, $response->getStatusCode());
+        $route = new Route([Method::GET], '/', middlewares: [static fn () => new Response(), (object) ['test' => 1]]);
     }
 
-    public function testMiddlewareAfterAction(): void
+    public function testInvalidDefaults(): void
     {
-        $route = Route::get('/')->action([TestController::class, 'index']);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid $defaults provided, indexed array of scalar or `Stringable` or null expected.');
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('middleware() can not be used after action().');
-        $route->middleware(static fn () => new Response());
-    }
-
-    public function testPrependMiddlewareBeforeAction(): void
-    {
-        $route = Route::get('/');
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('prependMiddleware() can not be used before action().');
-        $route->prependMiddleware(static fn () => new Response());
-    }
-
-    public function testDisabledMiddlewareDefinitions(): void
-    {
-        $request = new ServerRequest('GET', '/');
-
-        $route = Route::get('/')
-            ->middleware(TestMiddleware1::class, TestMiddleware2::class, TestMiddleware3::class)
-            ->action([TestController::class, 'index'])
-            ->disableMiddleware(TestMiddleware1::class, TestMiddleware3::class);
-
-        $dispatcher = $this
-            ->getDispatcher(
-                $this->getContainer([
-                    TestMiddleware1::class => new TestMiddleware1(),
-                    TestMiddleware2::class => new TestMiddleware2(),
-                    TestMiddleware3::class => new TestMiddleware3(),
-                    TestController::class => new TestController(),
-                ])
-            )
-            ->withMiddlewares($route->getData('enabledMiddlewares'));
-
-        $response = $dispatcher->dispatch($request, $this->getRequestHandler());
-        $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame('2', (string) $response->getBody());
-    }
-
-    public function testPrependMiddlewareDefinitions(): void
-    {
-        $request = new ServerRequest('GET', '/');
-
-        $route = Route::get('/')
-            ->middleware(TestMiddleware3::class)
-            ->action([TestController::class, 'index'])
-            ->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class);
-
-        $response = $this
-            ->getDispatcher(
-                $this->getContainer([
-                    TestMiddleware1::class => new TestMiddleware1(),
-                    TestMiddleware2::class => new TestMiddleware2(),
-                    TestMiddleware3::class => new TestMiddleware3(),
-                    TestController::class => new TestController(),
-                ])
-            )
-            ->withMiddlewares($route->getData('enabledMiddlewares'))
-            ->dispatch($request, $this->getRequestHandler());
-
-        $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame('123', (string) $response->getBody());
-    }
-
-    public function testPrependMiddlewaresAfterGetEnabledMiddlewares(): void
-    {
-        $route = Route::get('/')
-            ->middleware(TestMiddleware3::class)
-            ->disableMiddleware(TestMiddleware1::class)
-            ->action([TestController::class, 'index']);
-
-        $route->getData('enabledMiddlewares');
-
-        $route = $route->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class);
-
-        $this->assertSame(
-            [TestMiddleware2::class, TestMiddleware3::class, [TestController::class, 'index']],
-            $route->getData('enabledMiddlewares')
-        );
-    }
-
-    public function testAddMiddlewareAfterGetEnabledMiddlewares(): void
-    {
-        $route = Route::get('/')
-            ->middleware(TestMiddleware3::class);
-
-        $route->getData('enabledMiddlewares');
-
-        $route = $route->middleware(TestMiddleware1::class, TestMiddleware2::class);
-
-        $this->assertSame(
-            [TestMiddleware3::class, TestMiddleware1::class,  TestMiddleware2::class],
-            $route->getData('enabledMiddlewares')
-        );
-    }
-
-    public function testDisableMiddlewareAfterGetEnabledMiddlewares(): void
-    {
-        $route = Route::get('/')
-            ->middleware(TestMiddleware1::class, TestMiddleware2::class, TestMiddleware3::class);
-
-        $route->getData('enabledMiddlewares');
-
-        $route = $route->disableMiddleware(TestMiddleware1::class, TestMiddleware2::class);
-
-        $this->assertSame(
-            [TestMiddleware3::class],
-            $route->getData('enabledMiddlewares')
-        );
-    }
-
-    public function testGetEnabledMiddlewaresTwice(): void
-    {
-        $route = Route::get('/')
-            ->middleware(TestMiddleware1::class, TestMiddleware2::class);
-
-        $result1 = $route->getData('enabledMiddlewares');
-        $result2 = $route->getData('enabledMiddlewares');
-
-        $this->assertSame([TestMiddleware1::class, TestMiddleware2::class], $result1);
-        $this->assertSame($result1, $result2);
-    }
-
-    public function testMiddlewaresWithKeys(): void
-    {
-        $route = Route::get('/')
-            ->middleware(m3: TestMiddleware3::class)
-            ->action([TestController::class, 'index'])
-            ->prependMiddleware(m1: TestMiddleware1::class, m2: TestMiddleware2::class)
-            ->disableMiddleware(m1: TestMiddleware1::class);
-
-        $this->assertSame(
-            [TestMiddleware2::class, TestMiddleware3::class, [TestController::class, 'index']],
-            $route->getData('enabledMiddlewares')
-        );
+        $route = new Route([Method::GET], '/', defaults: ['test' => 1, 'foo' => ['bar']]);
     }
 
     public function testDebugInfo(): void
     {
-        $route = Route::get('/')
-            ->name('test')
-            ->host('example.com')
-            ->defaults(['age' => 42])
-            ->override()
-            ->middleware(TestMiddleware1::class, TestMiddleware2::class)
-            ->disableMiddleware(TestMiddleware2::class)
-            ->action('go')
-            ->prependMiddleware(TestMiddleware3::class);
+        $route = new Route(
+            methods: [Method::GET],
+            pattern: '/',
+            name: 'test',
+            action: 'go',
+            middlewares: [TestMiddleware3::class, TestMiddleware1::class, TestMiddleware2::class],
+            defaults: ['age' => 42],
+            hosts: ['example.com'],
+            override: true,
+            disabledMiddlewares: [TestMiddleware2::class]
+        );
 
         $expected = <<<EOL
 Yiisoft\Router\Route Object
@@ -392,6 +212,7 @@ Yiisoft\Router\Route Object
         )
 
     [pattern] => /
+    [action] => go
     [hosts] => Array
         (
             [0] => example.com
@@ -403,13 +224,11 @@ Yiisoft\Router\Route Object
         )
 
     [override] => 1
-    [actionAdded] => 1
     [middlewares] => Array
         (
             [0] => Yiisoft\Router\Tests\Support\TestMiddleware3
             [1] => Yiisoft\Router\Tests\Support\TestMiddleware1
             [2] => Yiisoft\Router\Tests\Support\TestMiddleware2
-            [3] => go
         )
 
     [disabledMiddlewares] => Array
@@ -432,55 +251,24 @@ EOL;
 
     public function testDuplicateHosts(): void
     {
-        $route = Route::get('/')->hosts('a.com', 'b.com', 'a.com');
+        $route = (new Route([Method::GET], '/'))->setHosts(['a.com', 'b.com', 'a.com']);
 
-        $this->assertSame(['a.com', 'b.com'], $route->getData('hosts'));
+        $this->assertSame(['a.com', 'b.com'], $route->getHosts());
     }
 
-    public function testImmutability(): void
+    public function testInvalidHosts(): void
     {
-        $route = Route::get('/');
-        $routeWithAction = $route->action('');
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid $hosts provided, list of string expected.');
 
-        $this->assertNotSame($route, $route->name(''));
-        $this->assertNotSame($route, $route->pattern(''));
-        $this->assertNotSame($route, $route->host(''));
-        $this->assertNotSame($route, $route->hosts(''));
-        $this->assertNotSame($route, $route->override());
-        $this->assertNotSame($route, $route->defaults([]));
-        $this->assertNotSame($route, $route->middleware());
-        $this->assertNotSame($route, $route->action(''));
-        $this->assertNotSame($routeWithAction, $routeWithAction->prependMiddleware());
-        $this->assertNotSame($route, $route->disableMiddleware(''));
+        $route = new Route([Method::GET], '/', hosts: ['b.com', 123]);
     }
 
-    private function getRequestHandler(): RequestHandlerInterface
+    public function testInvalidMethods(): void
     {
-        return new class () implements RequestHandlerInterface {
-            public function handle(ServerRequestInterface $request): ResponseInterface
-            {
-                return new Response(404);
-            }
-        };
-    }
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid $methods provided, list of string expected.');
 
-    private function getDispatcher(?ContainerInterface $container = null): MiddlewareDispatcher
-    {
-        if ($container === null) {
-            return new MiddlewareDispatcher(
-                new MiddlewareFactory($this->getContainer()),
-                $this->createMock(EventDispatcherInterface::class)
-            );
-        }
-
-        return new MiddlewareDispatcher(
-            new MiddlewareFactory($container),
-            $this->createMock(EventDispatcherInterface::class)
-        );
-    }
-
-    private function getContainer(array $instances = []): ContainerInterface
-    {
-        return new Container($instances);
+        $route = new Route([1], '/');
     }
 }
