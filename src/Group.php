@@ -43,9 +43,8 @@ final class Group
     private $corsMiddleware = null;
 
     private function __construct(
-        private ?string $prefix = null
-    ) {
-    }
+        private ?string $prefix = null,
+    ) {}
 
     /**
      * Create a new group instance.
@@ -97,7 +96,7 @@ final class Group
         $new = clone $this;
         array_push(
             $new->middlewares,
-            ...array_values($definition)
+            ...array_values($definition),
         );
 
         $new->enabledMiddlewaresCache = null;
@@ -114,7 +113,7 @@ final class Group
         $new = clone $this;
         array_unshift(
             $new->middlewares,
-            ...array_values($definition)
+            ...array_values($definition),
         );
 
         $new->middlewareAdded = true;

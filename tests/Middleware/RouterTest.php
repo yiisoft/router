@@ -71,14 +71,14 @@ final class RouterTest extends TestCase
     {
         $group = Group::create()
             ->routes(
-                Route::put('/post')->action(static fn () => new Response(204)),
-                Route::post('/post')->action(static fn () => new Response(204)),
+                Route::put('/post')->action(static fn() => new Response(204)),
+                Route::post('/post')->action(static fn() => new Response(204)),
             )
             ->withCors(
                 static function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
                     $response = $handler->handle($request);
                     return $response->withHeader('Test', 'test from options handler');
-                }
+                },
             );
 
         $collector = new RouteCollector();
@@ -105,14 +105,14 @@ final class RouterTest extends TestCase
             ->routes(
                 Group::create()
                     ->routes(
-                        Route::post('/post')->action(static fn () => new Response(204)),
+                        Route::post('/post')->action(static fn() => new Response(204)),
                     )
                     ->withCors(
                         static function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
                             $response = $handler->handle($request);
                             return $response->withHeader('Test', 'test from options handler');
-                        }
-                    )
+                        },
+                    ),
             );
 
         $collector = new RouteCollector();
@@ -171,7 +171,7 @@ final class RouterTest extends TestCase
         return [
             'callable' => [
                 201,
-                static fn () => new Response(201),
+                static fn() => new Response(201),
             ],
             'array' => [
                 202,
@@ -196,8 +196,8 @@ final class RouterTest extends TestCase
                 (new RouteCollector())->addRoute(
                     Route::get('/')
                         ->middleware($middleware)
-                        ->action(static fn () => new Response(200))
-                )
+                        ->action(static fn() => new Response(200)),
+                ),
             ),
             containerDefinitions: [CustomResponseMiddleware::class => new CustomResponseMiddleware(404)],
         );
@@ -213,8 +213,7 @@ final class RouterTest extends TestCase
             public function __construct(
                 private $middleware,
                 private readonly ?RouteCollectionInterface $routeCollection = null,
-            ) {
-            }
+            ) {}
 
             /**
              * Emulates router with a single `GET /` route
@@ -225,7 +224,7 @@ final class RouterTest extends TestCase
                     $route = $this->routeCollection->getRoute(
                         $request->getMethod() . ' ' . $request
                             ->getUri()
-                            ->getPath()
+                            ->getPath(),
                     );
                     return MatchingResult::fromSuccess($route, ['parameter' => 'value']);
                 }
@@ -254,7 +253,7 @@ final class RouterTest extends TestCase
 
     private function createResponseFactory(): ResponseFactoryInterface
     {
-        return new class () implements ResponseFactoryInterface {
+        return new class implements ResponseFactoryInterface {
             public function createResponse(int $code = 200, string $reasonPhrase = ''): ResponseInterface
             {
                 return new Response($code, [], null, '1.1', $reasonPhrase);
@@ -271,14 +270,14 @@ final class RouterTest extends TestCase
             array_merge(
                 [ResponseFactoryInterface::class => $this->createResponseFactory()],
                 $containerDefinitions,
-            )
+            ),
         );
 
         return new Router(
             $this->getMatcher($routeCollection),
             new Psr17Factory(),
             new MiddlewareFactory($container),
-            $currentRoute ?? new CurrentRoute()
+            $currentRoute ?? new CurrentRoute(),
         );
     }
 
@@ -295,7 +294,7 @@ final class RouterTest extends TestCase
 
     private function createRequestHandler(): RequestHandlerInterface
     {
-        return new class () implements RequestHandlerInterface {
+        return new class implements RequestHandlerInterface {
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
                 return new Response(404);
@@ -305,6 +304,6 @@ final class RouterTest extends TestCase
 
     private function createRouteMiddleware(): callable
     {
-        return static fn () => new Response(201);
+        return static fn() => new Response(201);
     }
 }

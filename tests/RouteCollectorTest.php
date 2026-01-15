@@ -35,7 +35,7 @@ final class RouteCollectorTest extends TestCase
         $postGroup = Group::create('/post')
             ->routes(
                 $listRoute,
-                $viewRoute
+                $viewRoute,
             );
 
         $rootGroup = Group::create()
@@ -43,13 +43,13 @@ final class RouteCollectorTest extends TestCase
                 Group::create('/api')
                     ->routes(
                         $logoutRoute,
-                        $postGroup
+                        $postGroup,
                     ),
             );
 
         $testGroup = Group::create()
             ->routes(
-                Route::get('test/')
+                Route::get('test/'),
             );
 
         $collector = new RouteCollector();
@@ -63,11 +63,11 @@ final class RouteCollectorTest extends TestCase
     {
         $collector = new RouteCollector();
 
-        $middleware1 = static fn () => new Response();
-        $middleware2 = static fn () => new Response();
-        $middleware3 = static fn () => new Response();
-        $middleware4 = static fn () => new Response();
-        $middleware5 = static fn () => new Response();
+        $middleware1 = static fn() => new Response();
+        $middleware2 = static fn() => new Response();
+        $middleware3 = static fn() => new Response();
+        $middleware4 = static fn() => new Response();
+        $middleware5 = static fn() => new Response();
 
         $collector
             ->middleware($middleware3, $middleware4)
@@ -85,8 +85,8 @@ final class RouteCollectorTest extends TestCase
     {
         $collector = new RouteCollector();
 
-        $middleware1 = static fn () => new Response();
-        $middleware2 = static fn () => new Response();
+        $middleware1 = static fn() => new Response();
+        $middleware2 = static fn() => new Response();
 
         $collector
             ->middleware(a: $middleware2)

@@ -30,8 +30,8 @@ final class GroupTest extends TestCase
     {
         $group = Group::create();
 
-        $middleware1 = static fn () => new Response();
-        $middleware2 = static fn () => new Response();
+        $middleware1 = static fn() => new Response();
+        $middleware2 = static fn() => new Response();
 
         $group = $group
             ->middleware($middleware1)
@@ -64,7 +64,7 @@ final class GroupTest extends TestCase
 
         $this->assertSame(
             [TestMiddleware2::class, TestMiddleware3::class],
-            $group->getData('enabledMiddlewares')
+            $group->getData('enabledMiddlewares'),
         );
     }
 
@@ -79,7 +79,7 @@ final class GroupTest extends TestCase
 
         $this->assertSame(
             [TestMiddleware3::class, TestMiddleware1::class,  TestMiddleware2::class],
-            $group->getData('enabledMiddlewares')
+            $group->getData('enabledMiddlewares'),
         );
     }
 
@@ -94,7 +94,7 @@ final class GroupTest extends TestCase
 
         $this->assertSame(
             [TestMiddleware3::class],
-            $group->getData('enabledMiddlewares')
+            $group->getData('enabledMiddlewares'),
         );
     }
 
@@ -107,7 +107,7 @@ final class GroupTest extends TestCase
 
         $this->assertSame(
             [TestMiddleware2::class, TestMiddleware3::class],
-            $group->getData('enabledMiddlewares')
+            $group->getData('enabledMiddlewares'),
         );
     }
 
@@ -126,7 +126,7 @@ final class GroupTest extends TestCase
     {
         $group = Group::create();
 
-        $middleware1 = static fn () => new Response();
+        $middleware1 = static fn() => new Response();
 
         $group = $group->prependMiddleware($middleware1);
 
@@ -140,7 +140,7 @@ final class GroupTest extends TestCase
     {
         $request = new ServerRequest('GET', '/outergroup/innergroup/test1');
 
-        $action = static fn (ServerRequestInterface $request) => new Response(200, [], null, '1.1', implode('', $request->getAttributes()));
+        $action = static fn(ServerRequestInterface $request) => new Response(200, [], null, '1.1', implode('', $request->getAttributes()));
 
         $middleware1 = static function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             $request = $request->withAttribute('middleware', 'middleware1');
@@ -161,7 +161,7 @@ final class GroupTest extends TestCase
                         Route::get('/test1')
                             ->action($action)
                             ->name('request1'),
-                    )
+                    ),
             );
 
         $collector = new RouteCollector();
@@ -180,7 +180,7 @@ final class GroupTest extends TestCase
     {
         $request = new ServerRequest('GET', '/group/test1');
 
-        $action = static fn (ServerRequestInterface $request) => new Response(200, [], null, '1.1', implode('', $request->getAttributes()));
+        $action = static fn(ServerRequestInterface $request) => new Response(200, [], null, '1.1', implode('', $request->getAttributes()));
         $middleware1 = function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
             $request = $request->withAttribute('middleware', 'middleware1');
             return $handler->handle($request);
@@ -217,9 +217,9 @@ final class GroupTest extends TestCase
     {
         $request = new ServerRequest('GET', '/group/test1');
 
-        $action = static fn () => new Response(200);
-        $middleware1 = fn () => new Response(403);
-        $middleware2 = fn () => new Response(405);
+        $action = static fn() => new Response(200);
+        $middleware1 = fn() => new Response(403);
+        $middleware2 = fn() => new Response(405);
 
         $group = Group::create('/group')
             ->middleware($middleware1)
@@ -227,7 +227,7 @@ final class GroupTest extends TestCase
             ->routes(
                 Route::get('/test1')
                     ->action($action)
-                    ->name('request1')
+                    ->name('request1'),
             );
 
         $collector = new RouteCollector();
@@ -249,8 +249,8 @@ final class GroupTest extends TestCase
         $listRoute = Route::get('/');
         $viewRoute = Route::get('/{id}');
 
-        $middleware1 = static fn () => new Response();
-        $middleware2 = static fn () => new Response();
+        $middleware1 = static fn() => new Response();
+        $middleware2 = static fn() => new Response();
 
         $root = Group::create()
             ->routes(
@@ -262,8 +262,8 @@ final class GroupTest extends TestCase
                         Group::create('/post')
                             ->routes(
                                 $listRoute,
-                                $viewRoute
-                            )
+                                $viewRoute,
+                            ),
                     ),
             );
 
@@ -325,11 +325,11 @@ final class GroupTest extends TestCase
     {
         $group = Group::create()
             ->routes(
-                Route::get('/info')->action(static fn () => 'info'),
-                Route::post('/info')->action(static fn () => 'info'),
+                Route::get('/info')->action(static fn() => 'info'),
+                Route::post('/info')->action(static fn() => 'info'),
             )
             ->withCors(
-                static fn () => new Response(204)
+                static fn() => new Response(204),
             );
 
         $collector = new RouteCollector();
@@ -344,14 +344,14 @@ final class GroupTest extends TestCase
         $group = Group::create()
             ->routes(
                 Route::get('/info')
-                    ->action(static fn () => 'info')
+                    ->action(static fn() => 'info')
                     ->host('yii.dev'),
                 Route::get('/info')
-                    ->action(static fn () => 'info')
+                    ->action(static fn() => 'info')
                     ->host('yii.test'),
             )
             ->withCors(
-                static fn () => new Response(204)
+                static fn() => new Response(204),
             );
 
         $collector = new RouteCollector();
@@ -366,17 +366,17 @@ final class GroupTest extends TestCase
         $group = Group::create()
             ->routes(
                 Route::get('/info')
-                    ->action(static fn () => 'info')
+                    ->action(static fn() => 'info')
                     ->host('yii.dev'),
                 Route::post('/info')
-                    ->action(static fn () => 'info')
+                    ->action(static fn() => 'info')
                     ->host('yii.dev'),
                 Route::put('/info')
-                    ->action(static fn () => 'info')
+                    ->action(static fn() => 'info')
                     ->host('yii.test'),
             )
             ->withCors(
-                static fn () => new Response(204)
+                static fn() => new Response(204),
             );
 
         $collector = new RouteCollector();
@@ -389,19 +389,19 @@ final class GroupTest extends TestCase
     public function testWithCorsWithNestedGroups(): void
     {
         $group = Group::create()->routes(
-            Route::get('/info')->action(static fn () => 'info'),
-            Route::post('/info')->action(static fn () => 'info'),
+            Route::get('/info')->action(static fn() => 'info'),
+            Route::post('/info')->action(static fn() => 'info'),
             Group::create('/v1')
                 ->routes(
-                    Route::get('/post')->action(static fn () => 'post'),
-                    Route::post('/post')->action(static fn () => 'post'),
-                    Route::options('/options')->action(static fn () => 'options'),
+                    Route::get('/post')->action(static fn() => 'post'),
+                    Route::post('/post')->action(static fn() => 'post'),
+                    Route::options('/options')->action(static fn() => 'options'),
                 )
                 ->withCors(
-                    static fn () => new Response(201)
-                )
+                    static fn() => new Response(201),
+                ),
         )->withCors(
-            static fn () => new Response(204)
+            static fn() => new Response(204),
         );
 
         $collector = new RouteCollector();
@@ -415,18 +415,18 @@ final class GroupTest extends TestCase
     public function testWithCorsWithNestedGroups2(): void
     {
         $group = Group::create()->routes(
-            Route::get('/info')->action(static fn () => 'info'),
-            Route::post('/info')->action(static fn () => 'info'),
-            Route::get('/v1/post')->action(static fn () => 'post'),
+            Route::get('/info')->action(static fn() => 'info'),
+            Route::post('/info')->action(static fn() => 'info'),
+            Route::get('/v1/post')->action(static fn() => 'post'),
             Group::create('/v1')->routes(
-                Route::post('/post')->action(static fn () => 'post'),
-                Route::options('/options')->action(static fn () => 'options'),
+                Route::post('/post')->action(static fn() => 'post'),
+                Route::options('/options')->action(static fn() => 'options'),
             ),
             Group::create('/v1')->routes(
-                Route::put('/post')->action(static fn () => 'post'),
-            )
+                Route::put('/post')->action(static fn() => 'post'),
+            ),
         )->withCors(
-            static fn () => new Response(204)
+            static fn() => new Response(204),
         );
         $collector = new RouteCollector();
         $collector->addRoute($group);
@@ -438,11 +438,11 @@ final class GroupTest extends TestCase
 
     public function testMiddlewareAfterRoutes(): void
     {
-        $group = Group::create()->routes(Route::get('/info')->action(static fn () => 'info'));
+        $group = Group::create()->routes(Route::get('/info')->action(static fn() => 'info'));
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('middleware() can not be used after routes().');
-        $group->middleware(static fn () => new Response());
+        $group->middleware(static fn() => new Response());
     }
 
     public function testDuplicateHosts(): void
@@ -467,7 +467,7 @@ final class GroupTest extends TestCase
 
     private function getRequestHandler(): RequestHandlerInterface
     {
-        return new class () implements RequestHandlerInterface {
+        return new class implements RequestHandlerInterface {
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
                 return new Response(404);
@@ -480,7 +480,7 @@ final class GroupTest extends TestCase
         $container = new Container([]);
         return new MiddlewareDispatcher(
             new MiddlewareFactory($container),
-            $this->createMock(EventDispatcherInterface::class)
+            $this->createMock(EventDispatcherInterface::class),
         );
     }
 }

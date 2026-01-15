@@ -87,7 +87,7 @@
     },
     "scripts": {
         "composer-require-checker": "composer-require-checker",
-        "lint": "php-cs-fixer fix",
+        "cs-fix": "php-cs-fixer fix",
         "rector": "rector",
         "test": "phpunit --testdox --no-interaction",
         "test-watch": "phpunit-watcher watch"

@@ -29,9 +29,7 @@ final class RouteCollection implements RouteCollectionInterface
      */
     private array $routes = [];
 
-    public function __construct(private readonly RouteCollectorInterface $collector)
-    {
-    }
+    public function __construct(private readonly RouteCollectorInterface $collector) {}
 
     public function getRoutes(): array
     {
@@ -164,7 +162,7 @@ final class RouteCollection implements RouteCollectionInterface
         array &$hosts,
         ?string &$pattern,
         Route &$modifiedItem,
-        array &$tree
+        array &$tree,
     ): void {
         /** @var array|callable|string $middleware */
         $middleware = $group->getData('corsMiddleware');
@@ -183,7 +181,7 @@ final class RouteCollection implements RouteCollectionInterface
             $routeName = $optionsRoute->getData('name');
             $tree[] = $routeName;
             $this->routes[$routeName] = $optionsRoute->action(
-                static fn (ResponseFactoryInterface $responseFactory) => $responseFactory->createResponse(204)
+                static fn(ResponseFactoryInterface $responseFactory) => $responseFactory->createResponse(204),
             );
         }
         $modifiedItem = $modifiedItem->prependMiddleware($middleware);
