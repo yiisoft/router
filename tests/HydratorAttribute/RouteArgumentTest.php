@@ -29,7 +29,7 @@ final class RouteArgumentTest extends TestCase
             'c' => 'three',
         ]);
 
-        $input = new class () {
+        $input = new class {
             #[RouteArgument('a')]
             public string $a = '';
             #[RouteArgument('b')]
@@ -49,7 +49,7 @@ final class RouteArgumentTest extends TestCase
     {
         $hydrator = $this->createHydrator([]);
 
-        $input = new class () {
+        $input = new class {
             #[RouteArgument('a')]
             public string $a = '';
             #[RouteArgument('b')]
@@ -86,14 +86,14 @@ final class RouteArgumentTest extends TestCase
             attributeResolverFactory: new ContainerAttributeResolverFactory(
                 new SimpleContainer([
                     RouteArgumentResolver::class => new RouteArgumentResolver($currentRoute),
-                ])
+                ]),
             ),
         );
     }
 
     private function createParameterAttributeResolveContext(): ParameterAttributeResolveContext
     {
-        $reflection = new ReflectionFunction(static fn (int $a) => null);
+        $reflection = new ReflectionFunction(static fn(int $a) => null);
 
         return new ParameterAttributeResolveContext($reflection->getParameters()[0], Result::fail(), new ArrayData());
     }

@@ -33,7 +33,7 @@ final class RouterCollectorTest extends AbstractCollectorTestCase
     public function testWithoutCurrentRoute(): void
     {
         $collector = new RouterCollector(
-            new SimpleContainer()
+            new SimpleContainer(),
         );
         $collector->startup();
 
@@ -53,7 +53,7 @@ final class RouterCollectorTest extends AbstractCollectorTestCase
         $collector = new RouterCollector(
             new SimpleContainer([
                 CurrentRoute::class => $currentRoute,
-            ])
+            ]),
         );
         $collector->startup();
 
@@ -62,7 +62,7 @@ final class RouterCollectorTest extends AbstractCollectorTestCase
         $this->assertSame(['currentRoute'], array_keys($collected));
         $this->assertSame(
             ['matchTime', 'name', 'pattern', 'arguments', 'host', 'uri', 'action', 'middlewares'],
-            array_keys($collected['currentRoute'])
+            array_keys($collected['currentRoute']),
         );
     }
 
@@ -103,15 +103,15 @@ final class RouterCollectorTest extends AbstractCollectorTestCase
         $this->assertArrayHasKey('routeTime', $data);
         $this->assertEquals(
             $this->container->get(RouteCollectionInterface::class)->getRoutes(),
-            $data['routes']
+            $data['routes'],
         );
         $this->assertEquals(
             $this->container->get(RouteCollectionInterface::class)->getRouteTree(),
-            $data['routesTree']
+            $data['routesTree'],
         );
         $this->assertEquals(
             0.001,
-            $data['routeTime']
+            $data['routeTime'],
         );
     }
 

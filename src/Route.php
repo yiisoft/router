@@ -50,7 +50,45 @@ final class Route implements Stringable
     private function __construct(
         private array $methods,
         private string $pattern,
-    ) {
+    ) {}
+
+    public function __toString(): string
+    {
+        $result = $this->name === null
+            ? ''
+            : '[' . $this->name . '] ';
+
+        if ($this->methods !== []) {
+            $result .= implode(',', $this->methods) . ' ';
+        }
+
+        if ($this->hosts) {
+            $quoted = array_map(static fn($host) => preg_quote($host, '/'), $this->hosts);
+
+            if (!preg_match('/' . implode('|', $quoted) . '/', $this->pattern)) {
+                $result .= implode('|', $this->hosts);
+            }
+        }
+
+        $result .= $this->pattern;
+
+        return $result;
+    }
+
+    public function __debugInfo()
+    {
+        return [
+            'name' => $this->name,
+            'methods' => $this->methods,
+            'pattern' => $this->pattern,
+            'hosts' => $this->hosts,
+            'defaults' => $this->defaults,
+            'override' => $this->override,
+            'actionAdded' => $this->actionAdded,
+            'middlewares' => $this->middlewares,
+            'disabledMiddlewares' => $this->disabledMiddlewares,
+            'enabledMiddlewares' => $this->getEnabledMiddlewares(),
+        ];
     }
 
     public static function get(string $pattern): self
@@ -166,7 +204,7 @@ final class Route implements Stringable
         $route = clone $this;
         array_push(
             $route->middlewares,
-            ...array_values($definition)
+            ...array_values($definition),
         );
 
         $route->enabledMiddlewaresCache = null;
@@ -196,7 +234,7 @@ final class Route implements Stringable
         $route = clone $this;
         array_unshift(
             $route->middlewares,
-            ...array_values($definition)
+            ...array_values($definition),
         );
 
         $route->enabledMiddlewaresCache = null;
@@ -225,7 +263,7 @@ final class Route implements Stringable
         $route = clone $this;
         array_push(
             $route->disabledMiddlewares,
-            ...array_values($definition)
+            ...array_values($definition),
         );
 
         $route->enabledMiddlewaresCache = null;
@@ -256,8 +294,8 @@ final class Route implements Stringable
     public function getData(string $key): mixed
     {
         return match ($key) {
-            'name' => $this->name ??
-                (implode(', ', $this->methods) . ' ' . implode('|', $this->hosts) . $this->pattern),
+            'name' => $this->name
+                ?? (implode(', ', $this->methods) . ' ' . implode('|', $this->hosts) . $this->pattern),
             'pattern' => $this->pattern,
             'host' => $this->hosts[0] ?? null,
             'hosts' => $this->hosts,
@@ -268,45 +306,6 @@ final class Route implements Stringable
             'enabledMiddlewares' => $this->getEnabledMiddlewares(),
             default => throw new InvalidArgumentException('Unknown data key: ' . $key),
         };
-    }
-
-    public function __toString(): string
-    {
-        $result = $this->name === null
-            ? ''
-            : '[' . $this->name . '] ';
-
-        if ($this->methods !== []) {
-            $result .= implode(',', $this->methods) . ' ';
-        }
-
-        if ($this->hosts) {
-            $quoted = array_map(static fn ($host) => preg_quote($host, '/'), $this->hosts);
-
-            if (!preg_match('/' . implode('|', $quoted) . '/', $this->pattern)) {
-                $result .= implode('|', $this->hosts);
-            }
-        }
-
-        $result .= $this->pattern;
-
-        return $result;
-    }
-
-    public function __debugInfo()
-    {
-        return [
-            'name' => $this->name,
-            'methods' => $this->methods,
-            'pattern' => $this->pattern,
-            'hosts' => $this->hosts,
-            'defaults' => $this->defaults,
-            'override' => $this->override,
-            'actionAdded' => $this->actionAdded,
-            'middlewares' => $this->middlewares,
-            'disabledMiddlewares' => $this->disabledMiddlewares,
-            'enabledMiddlewares' => $this->getEnabledMiddlewares(),
-        ];
     }
 
     /**

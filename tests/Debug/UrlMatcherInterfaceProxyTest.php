@@ -32,7 +32,7 @@ final class UrlMatcherInterfaceProxyTest extends TestCase
         $collector = new RouterCollector(
             new SimpleContainer([
                 CurrentRoute::class => $currentRoute,
-            ])
+            ]),
         );
         $collector->startup();
 
