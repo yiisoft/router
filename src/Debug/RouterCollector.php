@@ -21,9 +21,7 @@ final class RouterCollector implements SummaryCollectorInterface
 
     private float $matchTime = 0;
 
-    public function __construct(private ContainerInterface $container)
-    {
-    }
+    public function __construct(private ContainerInterface $container) {}
 
     public function collect(float $matchTime): void
     {

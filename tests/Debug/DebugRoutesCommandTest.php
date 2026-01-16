@@ -28,7 +28,7 @@ final class DebugRoutesCommandTest extends TestCase
                     Route::get('/')
                         ->host('example.com')
                         ->defaults(['SpecialArg' => 1])
-                        ->action(fn () => 'Hello, XXXXXX!')
+                        ->action(fn() => 'Hello, XXXXXX!')
                         ->name('site/index'),
                     Route::get('/about')
                         ->action([TestController::class, 'index'])
@@ -63,7 +63,7 @@ final class DebugRoutesCommandTest extends TestCase
                         ->defaults(['SpecialArg' => 1])
                         ->name('site/index')
                         ->middleware(TestMiddleware1::class)
-                        ->action(fn () => 'Hello world!'),
+                        ->action(fn() => 'Hello world!'),
                     Route::get('/about')->name('site/about'),
                 ),
             ),

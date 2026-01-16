@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router\Internal;
 
+use function in_array;
+
 /**
  * @internal
  */

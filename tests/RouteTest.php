@@ -24,6 +24,7 @@ use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
 use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware3;
+use InvalidArgumentException;
 
 final class RouteTest extends TestCase
 {
@@ -61,7 +62,7 @@ final class RouteTest extends TestCase
     {
         $route = Route::get('');
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Unknown data key: wrong');
 
         $route->getData('wrong');
@@ -137,7 +138,7 @@ final class RouteTest extends TestCase
                 'https://yiiframework.com/',
                 'yf.com',
                 'yii.com',
-                'yf.ru'
+                'yf.ru',
             );
 
         $this->assertSame(
@@ -147,7 +148,7 @@ final class RouteTest extends TestCase
                 'yii.com',
                 'yf.ru',
             ],
-            $route->getData('hosts')
+            $route->getData('hosts'),
         );
     }
 
@@ -158,7 +159,7 @@ final class RouteTest extends TestCase
         $multipleRoute = Route::get('/')
             ->hosts(
                 'https://yiiframework.com/',
-                'https://yiiframework.ru/'
+                'https://yiiframework.ru/',
             );
 
         $this->assertCount(1, $route->getData('hosts'));
@@ -200,14 +201,14 @@ final class RouteTest extends TestCase
             ->name('test.route')
             ->host('yiiframework.com');
 
-        $this->assertSame('[test.route] GET,POST ' . $expected, (string)$route);
+        $this->assertSame('[test.route] GET,POST ' . $expected, (string) $route);
     }
 
     public function testToStringSimple(): void
     {
         $route = Route::get('/');
 
-        $this->assertSame('GET /', (string)$route);
+        $this->assertSame('GET /', (string) $route);
     }
 
     public function testDispatcherInjecting(): void
@@ -216,7 +217,7 @@ final class RouteTest extends TestCase
         $container = $this->getContainer(
             [
                 TestController::class => new TestController(),
-            ]
+            ],
         );
 
         $route = Route::get('/')->action([TestController::class, 'index']);
@@ -235,7 +236,7 @@ final class RouteTest extends TestCase
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('middleware() can not be used after action().');
-        $route->middleware(static fn () => new Response());
+        $route->middleware(static fn() => new Response());
     }
 
     public function testPrependMiddlewareBeforeAction(): void
@@ -244,7 +245,7 @@ final class RouteTest extends TestCase
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('prependMiddleware() can not be used before action().');
-        $route->prependMiddleware(static fn () => new Response());
+        $route->prependMiddleware(static fn() => new Response());
     }
 
     public function testDisabledMiddlewareDefinitions(): void
@@ -263,7 +264,7 @@ final class RouteTest extends TestCase
                     TestMiddleware2::class => new TestMiddleware2(),
                     TestMiddleware3::class => new TestMiddleware3(),
                     TestController::class => new TestController(),
-                ])
+                ]),
             )
             ->withMiddlewares($route->getData('enabledMiddlewares'));
 
@@ -288,7 +289,7 @@ final class RouteTest extends TestCase
                     TestMiddleware2::class => new TestMiddleware2(),
                     TestMiddleware3::class => new TestMiddleware3(),
                     TestController::class => new TestController(),
-                ])
+                ]),
             )
             ->withMiddlewares($route->getData('enabledMiddlewares'))
             ->dispatch($request, $this->getRequestHandler());
@@ -310,7 +311,7 @@ final class RouteTest extends TestCase
 
         $this->assertSame(
             [TestMiddleware2::class, TestMiddleware3::class, [TestController::class, 'index']],
-            $route->getData('enabledMiddlewares')
+            $route->getData('enabledMiddlewares'),
         );
     }
 
@@ -325,7 +326,7 @@ final class RouteTest extends TestCase
 
         $this->assertSame(
             [TestMiddleware3::class, TestMiddleware1::class,  TestMiddleware2::class],
-            $route->getData('enabledMiddlewares')
+            $route->getData('enabledMiddlewares'),
         );
     }
 
@@ -340,7 +341,7 @@ final class RouteTest extends TestCase
 
         $this->assertSame(
             [TestMiddleware3::class],
-            $route->getData('enabledMiddlewares')
+            $route->getData('enabledMiddlewares'),
         );
     }
 
@@ -366,7 +367,7 @@ final class RouteTest extends TestCase
 
         $this->assertSame(
             [TestMiddleware2::class, TestMiddleware3::class, [TestController::class, 'index']],
-            $route->getData('enabledMiddlewares')
+            $route->getData('enabledMiddlewares'),
         );
     }
 
@@ -456,7 +457,7 @@ EOL;
 
     private function getRequestHandler(): RequestHandlerInterface
     {
-        return new class () implements RequestHandlerInterface {
+        return new class implements RequestHandlerInterface {
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
                 return new Response(404);
@@ -469,13 +470,13 @@ EOL;
         if ($container === null) {
             return new MiddlewareDispatcher(
                 new MiddlewareFactory($this->getContainer()),
-                $this->createMock(EventDispatcherInterface::class)
+                $this->createMock(EventDispatcherInterface::class),
             );
         }
 
         return new MiddlewareDispatcher(
             new MiddlewareFactory($container),
-            $this->createMock(EventDispatcherInterface::class)
+            $this->createMock(EventDispatcherInterface::class),
         );
     }
 

@@ -16,8 +16,8 @@ final class TestMiddleware2 implements MiddlewareInterface
         return $handler->handle(
             $request->withAttribute(
                 'content',
-                $request->getAttribute('content', '') . '2'
-            )
+                $request->getAttribute('content', '') . '2',
+            ),
         );
     }
 }
