@@ -2,7 +2,7 @@
 
 ## 4.0.3 under development
 
-- no changes in this release.
+- Enh #276: Explicitly import classes, functions, and constants in the "use" section (@rustamwin)
 
 ## 4.0.2 December 13, 2025
 
