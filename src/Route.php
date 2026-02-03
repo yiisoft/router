@@ -202,8 +202,7 @@ final class Route implements Stringable
                 $route->middlewares,
                 ...array_values($definition),
             );
-        }
-        else {
+        } else {
             array_push(
                 $route->middlewares,
                 ...array_values($definition),
