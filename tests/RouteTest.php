@@ -13,7 +13,6 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use RuntimeException;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
@@ -233,10 +232,10 @@ final class RouteTest extends TestCase
     public function testMiddlewareAfterAction(): void
     {
         $route = Route::get('/');
-        $route = $route->middleware( TestMiddleware1::class );
+        $route = $route->middleware(TestMiddleware1::class);
         $route = $route->action([TestController::class, 'index']);
-        $route = $route->middleware( TestMiddleware2::class );
-        
+        $route = $route->middleware(TestMiddleware2::class);
+
         $this->assertSame(
             [TestMiddleware1::class, [TestController::class, 'index'], TestMiddleware2::class],
             $route->getData('enabledMiddlewares'),

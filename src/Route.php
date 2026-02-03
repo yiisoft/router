@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
-use RuntimeException;
 use Stringable;
 use Yiisoft\Http\Method;
 use Yiisoft\Router\Internal\MiddlewareFilter;
