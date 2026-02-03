@@ -89,15 +89,18 @@ final class Group
      */
     public function middleware(array|callable|string ...$definition): self
     {
-        if ($this->routesAdded) {
-            throw new RuntimeException('middleware() can not be used after routes().');
-        }
-
         $new = clone $this;
-        array_push(
-            $new->middlewares,
-            ...array_values($definition),
-        );
+        if ($this->routesAdded) {
+            array_unshift(
+                $new->middlewares,
+                ...array_values($definition),
+            );
+        } else {
+            array_push(
+                $new->middlewares,
+                ...array_values($definition),
+            );
+        }
 
         $new->enabledMiddlewaresCache = null;
 

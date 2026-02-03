@@ -439,10 +439,12 @@ final class GroupTest extends TestCase
     public function testMiddlewareAfterRoutes(): void
     {
         $group = Group::create()->routes(Route::get('/info')->action(static fn() => 'info'));
+        $group = $group->middleware(TestMiddleware1::class, TestMiddleware2::class);
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('middleware() can not be used after routes().');
-        $group->middleware(static fn() => new Response());
+        $this->assertSame(
+            [TestMiddleware1::class, TestMiddleware2::class],
+            $group->getData('enabledMiddlewares'),
+        );
     }
 
     public function testDuplicateHosts(): void
