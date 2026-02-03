@@ -197,10 +197,18 @@ final class Route implements Stringable
     public function middleware(array|callable|string ...$definition): self
     {
         $route = clone $this;
-        array_push(
-            $route->middlewares,
-            ...array_values($definition),
-        );
+        if ($this->actionAdded) {
+            array_unshift(
+                $route->middlewares,
+                ...array_values($definition),
+            );
+        }
+        else {
+            array_push(
+                $route->middlewares,
+                ...array_values($definition),
+            );
+        }
 
         $route->enabledMiddlewaresCache = null;
 

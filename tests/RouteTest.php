@@ -237,7 +237,7 @@ final class RouteTest extends TestCase
         $route = $route->middleware(TestMiddleware2::class);
 
         $this->assertSame(
-            [TestMiddleware1::class, [TestController::class, 'index'], TestMiddleware2::class],
+            [TestMiddleware2::class, TestMiddleware1::class, [TestController::class, 'index']],
             $route->getData('enabledMiddlewares'),
         );
     }
