@@ -232,20 +232,15 @@ final class RouteTest extends TestCase
 
     public function testMiddlewareAfterAction(): void
     {
-        $route = Route::get('/')->action([TestController::class, 'index']);
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('middleware() can not be used after action().');
-        $route->middleware(static fn() => new Response());
-    }
-
-    public function testPrependMiddlewareBeforeAction(): void
-    {
         $route = Route::get('/');
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('prependMiddleware() can not be used before action().');
-        $route->prependMiddleware(static fn() => new Response());
+        $route = $route->middleware( TestMiddleware1::class );
+        $route = $route->action([TestController::class, 'index']);
+        $route = $route->middleware( TestMiddleware2::class );
+        
+        $this->assertSame(
+            [TestMiddleware1::class, [TestController::class, 'index'], TestMiddleware2::class],
+            $route->getData('enabledMiddlewares'),
+        );
     }
 
     public function testDisabledMiddlewareDefinitions(): void

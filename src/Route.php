@@ -197,10 +197,6 @@ final class Route implements Stringable
      */
     public function middleware(array|callable|string ...$definition): self
     {
-        if ($this->actionAdded) {
-            throw new RuntimeException('middleware() can not be used after action().');
-        }
-
         $route = clone $this;
         array_push(
             $route->middlewares,
@@ -227,10 +223,6 @@ final class Route implements Stringable
      */
     public function prependMiddleware(array|callable|string ...$definition): self
     {
-        if (!$this->actionAdded) {
-            throw new RuntimeException('prependMiddleware() can not be used before action().');
-        }
-
         $route = clone $this;
         array_unshift(
             $route->middlewares,
