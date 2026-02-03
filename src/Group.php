@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
-use RuntimeException;
 use Yiisoft\Router\Internal\MiddlewareFilter;
 
 use function in_array;
@@ -28,8 +27,6 @@ final class Group
      */
     private array $hosts = [];
     private ?string $namePrefix = null;
-    private bool $routesAdded = false;
-    private bool $middlewareAdded = false;
     private array $disabledMiddlewares = [];
 
     /**
@@ -58,13 +55,8 @@ final class Group
 
     public function routes(self|Route ...$routes): self
     {
-        if ($this->middlewareAdded) {
-            throw new RuntimeException('routes() can not be used after prependMiddleware().');
-        }
-
         $new = clone $this;
         $new->routes = $routes;
-        $new->routesAdded = true;
 
         return $new;
     }
@@ -89,10 +81,6 @@ final class Group
      */
     public function middleware(array|callable|string ...$definition): self
     {
-        if ($this->routesAdded) {
-            throw new RuntimeException('middleware() can not be used after routes().');
-        }
-
         $new = clone $this;
         array_push(
             $new->middlewares,
@@ -116,7 +104,6 @@ final class Group
             ...array_values($definition),
         );
 
-        $new->middlewareAdded = true;
         $new->enabledMiddlewaresCache = null;
 
         return $new;
