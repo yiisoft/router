@@ -232,9 +232,9 @@ final class RouteTest extends TestCase
     public function testMiddlewareAfterAction(): void
     {
         $route = Route::get('/');
-        $route = $route->middleware(TestMiddleware2::class);
-        $route = $route->action([TestController::class, 'index']);
         $route = $route->middleware(TestMiddleware1::class);
+        $route = $route->action([TestController::class, 'index']);
+        $route = $route->middleware(TestMiddleware2::class);
 
         $this->assertSame(
             [TestMiddleware1::class, TestMiddleware2::class, [TestController::class, 'index']],
