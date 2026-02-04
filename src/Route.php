@@ -206,6 +206,7 @@ final class Route implements Stringable
                 array_values($definition),
                 array_slice($route->middlewares, $this->actionIndex),
             );
+            $route->actionIndex += count($definition);
         } else {
             array_push(
                 $route->middlewares,
@@ -238,6 +239,9 @@ final class Route implements Stringable
             $route->middlewares,
             ...array_values($definition),
         );
+        if ($this->actionAdded && $this->actionIndex >= 0) {
+            $route->actionIndex += count($definition);
+        }
 
         $route->enabledMiddlewaresCache = null;
 
