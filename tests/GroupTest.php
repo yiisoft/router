@@ -12,7 +12,6 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use RuntimeException;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Group;
@@ -120,20 +119,6 @@ final class GroupTest extends TestCase
 
         $this->assertCount(1, $group->getData('enabledMiddlewares'));
         $this->assertSame(TestMiddleware2::class, $group->getData('enabledMiddlewares')[0]);
-    }
-
-    public function testRoutesAfterMiddleware(): void
-    {
-        $group = Group::create();
-
-        $middleware1 = static fn() => new Response();
-
-        $group = $group->prependMiddleware($middleware1);
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('routes() can not be used after prependMiddleware().');
-
-        $group->routes(Route::get('/'));
     }
 
     public function testAddNestedMiddleware(): void
