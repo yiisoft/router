@@ -10,6 +10,8 @@ use Yiisoft\Http\Method;
 use Yiisoft\Router\Internal\MiddlewareFilter;
 
 use function in_array;
+use function array_slice;
+use function count;
 
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
@@ -202,7 +204,7 @@ final class Route implements Stringable
             $route->middlewares = array_merge(
                 array_slice($route->middlewares, 0, $this->actionIndex),
                 array_values($definition),
-                array_slice($route->middlewares, $this->actionIndex)
+                array_slice($route->middlewares, $this->actionIndex),
             );
         } else {
             array_push(
@@ -250,7 +252,7 @@ final class Route implements Stringable
         $route = clone $this;
         $route->middlewares[] = $middlewareDefinition;
         $route->actionAdded = true;
-        $this->actionIndex = count($route->middlewares) -1;
+        $this->actionIndex = count($route->middlewares) - 1;
         return $route;
     }
 
