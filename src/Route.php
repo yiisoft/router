@@ -239,7 +239,7 @@ final class Route implements Stringable
             $route->middlewares,
             ...array_values($definition),
         );
-        if ($this->actionAdded && $this->actionIndex >= 0) {
+        if ($this->actionAdded) {
             $route->actionIndex += count($definition);
         }
 
