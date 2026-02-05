@@ -200,7 +200,7 @@ final class Route implements Stringable
     public function middleware(array|callable|string ...$definition): self
     {
         $route = clone $this;
-        if ($this->actionAdded && $this->actionIndex >= 0) {
+        if ($this->actionAdded) {
             $route->middlewares = array_merge(
                 array_slice($route->middlewares, 0, $this->actionIndex),
                 array_values($definition),
