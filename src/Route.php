@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
-use RuntimeException;
 use Stringable;
 use Yiisoft\Http\Method;
 use Yiisoft\Router\Internal\MiddlewareFilter;
 
 use function in_array;
+use function array_slice;
+use function count;
 
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
@@ -197,15 +198,20 @@ final class Route implements Stringable
      */
     public function middleware(array|callable|string ...$definition): self
     {
-        if ($this->actionAdded) {
-            throw new RuntimeException('middleware() can not be used after action().');
-        }
-
         $route = clone $this;
-        array_push(
-            $route->middlewares,
-            ...array_values($definition),
-        );
+        if ($this->actionAdded) {
+            $lastIndex =  count($route->middlewares) - 1;
+            $route->middlewares = array_merge(
+                array_slice($route->middlewares, 0, $lastIndex),
+                array_values($definition),
+                array_slice($route->middlewares, $lastIndex),
+            );
+        } else {
+            array_push(
+                $route->middlewares,
+                ...array_values($definition),
+            );
+        }
 
         $route->enabledMiddlewaresCache = null;
 
@@ -227,10 +233,6 @@ final class Route implements Stringable
      */
     public function prependMiddleware(array|callable|string ...$definition): self
     {
-        if (!$this->actionAdded) {
-            throw new RuntimeException('prependMiddleware() can not be used before action().');
-        }
-
         $route = clone $this;
         array_unshift(
             $route->middlewares,
