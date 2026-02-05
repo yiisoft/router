@@ -26,7 +26,6 @@ final class Route implements Stringable
     private array $hosts = [];
     private bool $override = false;
     private bool $actionAdded = false;
-    private int $actionIndex = -1;
 
     /**
      * @var array[]|callable[]|string[]
@@ -201,12 +200,12 @@ final class Route implements Stringable
     {
         $route = clone $this;
         if ($this->actionAdded) {
+            $lastIndex =  count($route->middlewares) - 1;
             $route->middlewares = array_merge(
-                array_slice($route->middlewares, 0, $this->actionIndex),
+                array_slice($route->middlewares, 0, $lastIndex),
                 array_values($definition),
-                array_slice($route->middlewares, $this->actionIndex),
+                array_slice($route->middlewares, $lastIndex),
             );
-            $route->actionIndex += count($definition);
         } else {
             array_push(
                 $route->middlewares,
@@ -239,9 +238,6 @@ final class Route implements Stringable
             $route->middlewares,
             ...array_values($definition),
         );
-        if ($this->actionAdded) {
-            $route->actionIndex += count($definition);
-        }
 
         $route->enabledMiddlewaresCache = null;
 
@@ -256,7 +252,6 @@ final class Route implements Stringable
         $route = clone $this;
         $route->middlewares[] = $middlewareDefinition;
         $route->actionAdded = true;
-        $route->actionIndex = count($route->middlewares) - 1;
         return $route;
     }
 
