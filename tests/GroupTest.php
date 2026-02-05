@@ -121,6 +121,15 @@ final class GroupTest extends TestCase
         $this->assertSame(TestMiddleware2::class, $group->getData('enabledMiddlewares')[0]);
     }
 
+    public function testRoutesAfterMiddleware(): void
+    {
+        $group = Group::create()
+            ->prependMiddleware(TestMiddleware1::class)
+            ->routes(Route::get('/'));
+
+        $this->assertSame([TestMiddleware1::class], $group->getData('enabledMiddlewares'));
+    }
+
     public function testAddNestedMiddleware(): void
     {
         $request = new ServerRequest('GET', '/outergroup/innergroup/test1');
