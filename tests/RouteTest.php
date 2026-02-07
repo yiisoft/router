@@ -229,7 +229,7 @@ final class RouteTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
     }
 
-    public function testMiddlewareBeforAction(): void
+    public function testPrependMiddlewareBeforeAction(): void
     {
         $route = Route::get('/');
         $route = $route->prependMiddleware(TestMiddleware1::class);

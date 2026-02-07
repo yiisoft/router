@@ -8,10 +8,9 @@ use InvalidArgumentException;
 use Stringable;
 use Yiisoft\Http\Method;
 use Yiisoft\Router\Internal\MiddlewareFilter;
-
-use function in_array;
 use function array_slice;
 use function count;
+use function in_array;
 
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
@@ -195,6 +194,7 @@ final class Route implements Stringable
     /**
      * Appends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed first.
+     * If no actions have been added, the middleware is added to the end of the list. Otherwise, it is added before the action.
      */
     public function middleware(array|callable|string ...$definition): self
     {
