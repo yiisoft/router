@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use Stringable;
 use Yiisoft\Http\Method;
 use Yiisoft\Router\Internal\MiddlewareFilter;
+
 use function array_slice;
 use function count;
 use function in_array;
