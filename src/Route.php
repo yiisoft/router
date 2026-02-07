@@ -200,7 +200,7 @@ final class Route implements Stringable
     {
         $route = clone $this;
         if ($this->actionAdded) {
-            $lastIndex =  count($route->middlewares) - 1;
+            $lastIndex = count($route->middlewares) - 1;
             $route->middlewares = array_merge(
                 array_slice($route->middlewares, 0, $lastIndex),
                 array_values($definition),
