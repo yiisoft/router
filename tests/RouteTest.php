@@ -231,9 +231,9 @@ final class RouteTest extends TestCase
 
     public function testPrependMiddlewareBeforeAction(): void
     {
-        $route = Route::get('/');
-        $route = $route->prependMiddleware(TestMiddleware1::class);
-        $route = $route->action([TestController::class, 'index']);
+        $route = Route::get('/')
+            ->prependMiddleware(TestMiddleware1::class)
+            ->action([TestController::class, 'index']);
 
         $this->assertSame(
             [TestMiddleware1::class, [TestController::class, 'index']],
@@ -244,10 +244,10 @@ final class RouteTest extends TestCase
     public function testMiddlewareAfterAction(): void
     {
         $route = Route::get('/');
-        $route = $route->middleware(TestMiddleware1::class);
-        $route = $route->action([TestController::class, 'index']);
-        $route = $route->middleware(TestMiddleware2::class);
-        $route = $route->middleware(TestMiddleware3::class);
+        $route = $route->middleware(TestMiddleware1::class)
+            ->action([TestController::class, 'index'])
+            ->middleware(TestMiddleware2::class)
+            ->middleware(TestMiddleware3::class);
 
         $this->assertSame(
             [TestMiddleware1::class, TestMiddleware2::class, TestMiddleware3::class, [TestController::class, 'index']],

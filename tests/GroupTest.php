@@ -22,6 +22,7 @@ use Yiisoft\Router\Tests\Support\Container;
 use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
 use Yiisoft\Router\Tests\Support\TestMiddleware3;
+use Yiisoft\Router\Tests\Support\TestController;
 
 final class GroupTest extends TestCase
 {
@@ -432,12 +433,23 @@ final class GroupTest extends TestCase
 
     public function testMiddlewareAfterRoutes(): void
     {
-        $group = Group::create()->routes(Route::get('/info')->action(static fn() => 'info'));
-        $group = $group->middleware(TestMiddleware1::class, TestMiddleware2::class);
+        $group = Group::create()
+            ->routes(Route::get('/info')
+                ->middleware(TestMiddleware3::class)
+                ->action([TestController::class, 'index']))
+            ->middleware(TestMiddleware1::class, TestMiddleware2::class);
+
+        $collector = new RouteCollector();
+        $collector->addRoute($group);
+        $routeCollection = new RouteCollection($collector);
 
         $this->assertSame(
             [TestMiddleware1::class, TestMiddleware2::class],
             $group->getData('enabledMiddlewares'),
+        );
+        $this->assertSame(
+            [TestMiddleware1::class, TestMiddleware2::class, TestMiddleware3::class, [TestController::class, 'index']],
+            $routeCollection->getRoute('GET /info')->getData('enabledMiddlewares'),
         );
     }
 
