@@ -3,6 +3,7 @@
 ## 4.0.3 under development
 
 - Enh #276: Explicitly import classes, functions, and constants in the "use" section (@rustamwin)
+- Enh #277: Remove restrictions from `prependMiddleware()` and `middleware()` methods (@klsoft-web)
 
 ## 4.0.2 December 13, 2025
 

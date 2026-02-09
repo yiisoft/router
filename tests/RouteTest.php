@@ -13,7 +13,6 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use RuntimeException;
 use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
@@ -230,22 +229,30 @@ final class RouteTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
     }
 
-    public function testMiddlewareAfterAction(): void
-    {
-        $route = Route::get('/')->action([TestController::class, 'index']);
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('middleware() can not be used after action().');
-        $route->middleware(static fn() => new Response());
-    }
-
     public function testPrependMiddlewareBeforeAction(): void
     {
-        $route = Route::get('/');
+        $route = Route::get('/')
+            ->prependMiddleware(TestMiddleware1::class)
+            ->action([TestController::class, 'index']);
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('prependMiddleware() can not be used before action().');
-        $route->prependMiddleware(static fn() => new Response());
+        $this->assertSame(
+            [TestMiddleware1::class, [TestController::class, 'index']],
+            $route->getData('enabledMiddlewares'),
+        );
+    }
+
+    public function testMiddlewareAfterAction(): void
+    {
+        $route = Route::get('/');
+        $route = $route->middleware(TestMiddleware1::class)
+            ->action([TestController::class, 'index'])
+            ->middleware(TestMiddleware2::class)
+            ->middleware(TestMiddleware3::class);
+
+        $this->assertSame(
+            [TestMiddleware1::class, TestMiddleware2::class, TestMiddleware3::class, [TestController::class, 'index']],
+            $route->getData('enabledMiddlewares'),
+        );
     }
 
     public function testDisabledMiddlewareDefinitions(): void

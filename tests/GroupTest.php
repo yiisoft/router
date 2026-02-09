@@ -12,7 +12,6 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use RuntimeException;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Group;
@@ -23,6 +22,7 @@ use Yiisoft\Router\Tests\Support\Container;
 use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
 use Yiisoft\Router\Tests\Support\TestMiddleware3;
+use Yiisoft\Router\Tests\Support\TestController;
 
 final class GroupTest extends TestCase
 {
@@ -124,16 +124,11 @@ final class GroupTest extends TestCase
 
     public function testRoutesAfterMiddleware(): void
     {
-        $group = Group::create();
+        $group = Group::create()
+            ->prependMiddleware(TestMiddleware1::class)
+            ->routes(Route::get('/'));
 
-        $middleware1 = static fn() => new Response();
-
-        $group = $group->prependMiddleware($middleware1);
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('routes() can not be used after prependMiddleware().');
-
-        $group->routes(Route::get('/'));
+        $this->assertSame([TestMiddleware1::class], $group->getData('enabledMiddlewares'));
     }
 
     public function testAddNestedMiddleware(): void
@@ -438,11 +433,24 @@ final class GroupTest extends TestCase
 
     public function testMiddlewareAfterRoutes(): void
     {
-        $group = Group::create()->routes(Route::get('/info')->action(static fn() => 'info'));
+        $group = Group::create()
+            ->routes(Route::get('/info')
+                ->middleware(TestMiddleware3::class)
+                ->action([TestController::class, 'index']))
+            ->middleware(TestMiddleware1::class, TestMiddleware2::class);
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('middleware() can not be used after routes().');
-        $group->middleware(static fn() => new Response());
+        $collector = new RouteCollector();
+        $collector->addRoute($group);
+        $routeCollection = new RouteCollection($collector);
+
+        $this->assertSame(
+            [TestMiddleware1::class, TestMiddleware2::class],
+            $group->getData('enabledMiddlewares'),
+        );
+        $this->assertSame(
+            [TestMiddleware1::class, TestMiddleware2::class, TestMiddleware3::class, [TestController::class, 'index']],
+            $routeCollection->getRoute('GET /info')->getData('enabledMiddlewares'),
+        );
     }
 
     public function testDuplicateHosts(): void
