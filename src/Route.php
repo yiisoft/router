@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
-use RuntimeException;
 use Stringable;
 use Yiisoft\Http\Method;
 use Yiisoft\Router\Internal\MiddlewareFilter;
 
+use function array_slice;
+use function count;
 use function in_array;
 
 /**
@@ -177,25 +178,31 @@ final class Route implements Stringable
     public function defaults(array $defaults): self
     {
         $route = clone $this;
-        $route->defaults = array_map('\strval', $defaults);
+        $route->defaults = array_map(\strval(...), $defaults);
         return $route;
     }
 
     /**
      * Appends a handler middleware definition that should be invoked for a matched route.
      * First added handler will be executed first.
+     * If no actions have been added, the middleware is added to the end of the list. Otherwise, it is added before the action.
      */
     public function middleware(array|callable|string ...$definition): self
     {
-        if ($this->actionAdded) {
-            throw new RuntimeException('middleware() can not be used after action().');
-        }
-
         $route = clone $this;
-        array_push(
-            $route->middlewares,
-            ...array_values($definition)
-        );
+        if ($this->actionAdded) {
+            $lastIndex = count($route->middlewares) - 1;
+            $route->middlewares = array_merge(
+                array_slice($route->middlewares, 0, $lastIndex),
+                array_values($definition),
+                array_slice($route->middlewares, $lastIndex),
+            );
+        } else {
+            array_push(
+                $route->middlewares,
+                ...array_values($definition),
+            );
+        }
 
         $route->enabledMiddlewaresCache = null;
 
@@ -217,14 +224,10 @@ final class Route implements Stringable
      */
     public function prependMiddleware(array|callable|string ...$definition): self
     {
-        if (!$this->actionAdded) {
-            throw new RuntimeException('prependMiddleware() can not be used before action().');
-        }
-
         $route = clone $this;
         array_unshift(
             $route->middlewares,
-            ...array_values($definition)
+            ...array_values($definition),
         );
 
         $route->enabledMiddlewaresCache = null;
@@ -254,7 +257,7 @@ final class Route implements Stringable
         $route = clone $this;
         array_push(
             $route->disabledMiddlewares,
-            ...array_values($definition)
+            ...array_values($definition),
         );
 
         $route->enabledMiddlewaresCache = null;
@@ -285,8 +288,8 @@ final class Route implements Stringable
     public function getData(string $key): mixed
     {
         return match ($key) {
-            'name' => $this->name ??
-                (implode(', ', $this->methods) . ' ' . implode('|', $this->hosts) . $this->pattern),
+            'name' => $this->name
+                ?? (implode(', ', $this->methods) . ' ' . implode('|', $this->hosts) . $this->pattern),
             'pattern' => $this->pattern,
             'host' => $this->hosts[0] ?? null,
             'hosts' => $this->hosts,
@@ -378,6 +381,7 @@ final class Route implements Stringable
     private function getEnabledMiddlewares(): array
     {
         if ($this->enabledMiddlewaresCache !== null) {
+            /** @infection-ignore-all */
             return $this->enabledMiddlewaresCache;
         }
 

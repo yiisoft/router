@@ -96,12 +96,12 @@ final class RouteCollectionTest extends TestCase
     public function testRouteWithoutAction(): void
     {
         $group = Group::create()
-                      ->middleware(fn () => 1)
+                      ->middleware(fn() => 1)
                       ->routes(
                           Route::get('/test')
-                               ->action(fn () => 2)
+                               ->action(fn() => 2)
                                ->name('test'),
-                          Route::get('/images/{sile}')->name('image')
+                          Route::get('/images/{sile}')->name('image'),
                       );
 
         $collector = new RouteCollector();
@@ -117,13 +117,13 @@ final class RouteCollectionTest extends TestCase
         $group1 = Group::create('/api')
                        ->routes(
                            Route::get('/test')
-                                ->action(fn () => 2)
+                                ->action(fn() => 2)
                                 ->name('/test'),
                            Route::get('/images/{sile}')->name('/image'),
                            Group::create('/v1')
                                 ->routes(
                                     Route::get('/posts')->name('/posts'),
-                                    Route::get('/post/{sile}')->name('/post/view')
+                                    Route::get('/post/{sile}')->name('/post/view'),
                                 )
                                 ->namePrefix('/v1'),
                            Group::create('/v1')
@@ -160,19 +160,19 @@ final class RouteCollectionTest extends TestCase
                 '[/api/posts] GET /api/posts',
                 '[/api/post/view] GET /api/post/{sile}',
             ],
-            $routeTree
+            $routeTree,
         );
     }
 
     public function testGetRoutes(): void
     {
         $group = Group::create()
-                      ->middleware(fn () => 1)
+                      ->middleware(fn() => 1)
                       ->routes(
                           Route::get('/test')
-                               ->action(fn () => 2)
+                               ->action(fn() => 2)
                                ->name('test'),
-                          Route::get('/images/{sile}')->name('image')
+                          Route::get('/images/{sile}')->name('image'),
                       );
 
         $collector = new RouteCollector();
@@ -190,14 +190,14 @@ final class RouteCollectionTest extends TestCase
                       ->routes(
                           Group::create()
                                ->routes(
-                                   Route::get('/project/{name}')->name('project')
+                                   Route::get('/project/{name}')->name('project'),
                                )
                                ->hosts('https://yiipowered.com/', 'https://yiiframework.ru/'),
                           Group::create()
                                ->routes(
-                                   Route::get('/user/{username}')->name('user')
+                                   Route::get('/user/{username}')->name('user'),
                                ),
-                          Route::get('/images/{name}')->name('image')
+                          Route::get('/images/{name}')->name('image'),
                       )
                       ->host('https://yiiframework.com/');
 
@@ -221,15 +221,15 @@ final class RouteCollectionTest extends TestCase
                           Group::create()->routes(
                               Group::create('/v1')
                                    ->routes(
-                                       Route::get('/package/downloads/{package}')->name('/package/downloads')
+                                       Route::get('/package/downloads/{package}')->name('/package/downloads'),
                                    )
                                    ->namePrefix('/v1'),
                               Group::create()->routes(
-                                  Route::get('')->name('/index')
+                                  Route::get('')->name('/index'),
                               ),
                               Route::get('/post/{slug}')->name('/post/view'),
                               Route::get('/user/{username}'),
-                          )
+                          ),
                       )->namePrefix('api');
 
         $collector = new RouteCollector();
@@ -248,12 +248,12 @@ final class RouteCollectionTest extends TestCase
 
     public function testCollectorMiddlewareFullstackCalled(): void
     {
-        $action = fn (ServerRequestInterface $request) => new Response(
+        $action = fn(ServerRequestInterface $request) => new Response(
             200,
             [],
             null,
             '1.1',
-            implode('', $request->getAttributes())
+            implode('', $request->getAttributes()),
         );
         $listRoute = Route::get('/')
                           ->action($action)
@@ -306,7 +306,7 @@ final class RouteCollectionTest extends TestCase
                          ->name('main');
 
         $collector->addRoute(
-            $groupWrapped ? Group::create()->routes($rawRoute) : $rawRoute
+            $groupWrapped ? Group::create()->routes($rawRoute) : $rawRoute,
         );
 
         $route = (new RouteCollection($collector))->getRoute('main');
@@ -318,7 +318,7 @@ final class RouteCollectionTest extends TestCase
                     TestMiddleware2::class => new TestMiddleware2(),
                     TestMiddleware3::class => new TestMiddleware3(),
                     TestController::class => new TestController(),
-                ])
+                ]),
             )
             ->withMiddlewares($route->getData('enabledMiddlewares'));
 
@@ -335,7 +335,7 @@ final class RouteCollectionTest extends TestCase
         $collector->middleware(TestMiddleware1::class);
 
         $collector->addRoute(
-            Route::get('i/{image}')->name('image')
+            Route::get('i/{image}')->name('image'),
         );
 
         $route = (new RouteCollection($collector))->getRoute('image');
@@ -344,7 +344,7 @@ final class RouteCollectionTest extends TestCase
             ->getDispatcher(
                 new SimpleContainer([
                     TestMiddleware1::class => new TestMiddleware1(),
-                ])
+                ]),
             )
             ->withMiddlewares($route->getData('enabledMiddlewares'));
 
@@ -355,7 +355,7 @@ final class RouteCollectionTest extends TestCase
 
     private function getRequestHandler(): RequestHandlerInterface
     {
-        return new class () implements RequestHandlerInterface {
+        return new class implements RequestHandlerInterface {
             public function handle(ServerRequestInterface $request): Response
             {
                 return new Response(404);
@@ -368,7 +368,7 @@ final class RouteCollectionTest extends TestCase
         $container ??= $this->createMock(ContainerInterface::class);
         return new MiddlewareDispatcher(
             new MiddlewareFactory($container),
-            $this->createMock(EventDispatcherInterface::class)
+            $this->createMock(EventDispatcherInterface::class),
         );
     }
 }

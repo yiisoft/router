@@ -1,8 +1,13 @@
 # Yii Router Change Log
 
-## 4.0.2 under development
+## 4.0.3 under development
 
-- no changes in this release.
+- Enh #276: Explicitly import classes, functions, and constants in the "use" section (@rustamwin)
+- Enh #277: Remove restrictions from `prependMiddleware()` and `middleware()` methods (@klsoft-web)
+
+## 4.0.2 December 13, 2025
+
+- Enh #275: Add PHP 8.5 support (@vjik)
 
 ## 4.0.1 September 23, 2025
 
@@ -11,7 +16,7 @@
 
 ## 4.0.0 February 25, 2025
 
-- Сhg #247: Change `UrlGeneratorInterface` contract: on URL generation all unused arguments must be moved to query
+- Chg #247: Change `UrlGeneratorInterface` contract: on URL generation all unused arguments must be moved to query
   parameters, if query parameter with such name doesn't exist (@vjik)
 - New #195: Add debug collector for `yiisoft/yii-debug` (@xepozz)
 - New #262: Add `$hash` parameter to `UrlGeneratorInterface` methods: `generate()`, `generateAbsolute()` and

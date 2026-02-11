@@ -15,12 +15,16 @@ use Yiisoft\Router\RouteCollectionInterface;
 use Yiisoft\VarDumper\VarDumper;
 use Yiisoft\Yii\Debug\Debugger;
 
+use function count;
+use function is_array;
+use function is_string;
+
 /**
  * @infection-ignore-all
  */
 #[AsCommand(
     name: DebugRoutesCommand::COMMAND_NAME,
-    description: 'Show information about registered routes'
+    description: 'Show information about registered routes',
 )]
 final class DebugRoutesCommand extends Command
 {
@@ -126,7 +130,7 @@ final class DebugRoutesCommand extends Command
             return $value[0] . '::' . $value[1];
         }
         if (is_array($value) && $this->isArrayList($value)) {
-            return implode(', ', array_map(fn ($item) => $this->export($item), $value));
+            return implode(', ', array_map($this->export(...), $value));
         }
         if (is_string($value)) {
             return $value;

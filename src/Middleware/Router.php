@@ -26,7 +26,7 @@ final class Router implements MiddlewareInterface
         private readonly ResponseFactoryInterface $responseFactory,
         MiddlewareFactory $middlewareFactory,
         private readonly CurrentRoute $currentRoute,
-        ?EventDispatcherInterface $eventDispatcher = null
+        ?EventDispatcherInterface $eventDispatcher = null,
     ) {
         $this->dispatcher = new MiddlewareDispatcher($middlewareFactory, $eventDispatcher);
     }
