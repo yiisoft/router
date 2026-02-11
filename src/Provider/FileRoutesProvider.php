@@ -7,15 +7,21 @@ namespace Yiisoft\Router\Provider;
 use Closure;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
+use CallbackFilterIterator;
+use FilesystemIterator;
+use RuntimeException;
+use SplFileInfo;
+
+use function is_array;
+
+use const EXTR_SKIP;
 
 /**
  * A file provider provides routes from a file or directory of files.
  */
 final class FileRoutesProvider implements RoutesProviderInterface
 {
-    public function __construct(private readonly string $file, private readonly array $scope = [])
-    {
-    }
+    public function __construct(private readonly string $file, private readonly array $scope = []) {}
 
     public function getRoutes(): array
     {
@@ -28,27 +34,27 @@ final class FileRoutesProvider implements RoutesProviderInterface
             return require $file;
         }, null);
         if (!file_exists($this->file)) {
-            throw new \RuntimeException(
-                'Failed to provide routes from "' . $this->file . '". File or directory not found.'
+            throw new RuntimeException(
+                'Failed to provide routes from "' . $this->file . '". File or directory not found.',
             );
         }
         if (is_dir($this->file) && !is_file($this->file)) {
             $directoryRoutes = [];
-            $files = new \CallbackFilterIterator(
-                new \FilesystemIterator(
+            $files = new CallbackFilterIterator(
+                new FilesystemIterator(
                     $this->file,
-                    \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::FOLLOW_SYMLINKS
+                    FilesystemIterator::SKIP_DOTS | FilesystemIterator::FOLLOW_SYMLINKS,
                 ),
-                fn (\SplFileInfo $fileInfo) => $fileInfo->isFile() && $fileInfo->getExtension() === 'php'
+                fn(SplFileInfo $fileInfo) => $fileInfo->isFile() && $fileInfo->getExtension() === 'php',
             );
-            /** @var \SplFileInfo[] $files */
+            /** @var SplFileInfo[] $files */
             foreach ($files as $file) {
                 /** @var mixed $fileRoutes */
                 $fileRoutes = $scopeRequire($file->getRealPath(), $this->scope);
                 if (is_array($fileRoutes) && $this->isRoutesAreValid($fileRoutes)) {
                     array_push(
                         $directoryRoutes,
-                        ...$fileRoutes
+                        ...$fileRoutes,
                     );
                 }
             }

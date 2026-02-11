@@ -9,6 +9,9 @@ use InvalidArgumentException;
 use Yiisoft\Router\Internal\MiddlewareFilter;
 
 use function in_array;
+use function is_array;
+use function is_callable;
+use function is_string;
 
 #[Attribute(Attribute::TARGET_CLASS)]
 final class Group
@@ -57,13 +60,14 @@ final class Group
         array $hosts = [],
         private ?string $namePrefix = null,
         private array $disabledMiddlewares = [],
-        array|callable|string|null $corsMiddleware = null
+        array|callable|string|null $corsMiddleware = null,
     ) {
         $this->assertMiddlewares($middlewares);
         $this->assertHosts($hosts);
         $this->middlewares = $middlewares;
         $this->hosts = $hosts;
-        $this->corsMiddleware = $corsMiddleware;}
+        $this->corsMiddleware = $corsMiddleware;
+    }
 
     /**
      * Create a new group instance.
@@ -230,7 +234,7 @@ final class Group
             }
 
             throw new InvalidArgumentException(
-                'Invalid $middlewareDefinitions provided, list of string or array or callable expected.'
+                'Invalid $middlewareDefinitions provided, list of string or array or callable expected.',
             );
         }
     }

@@ -35,7 +35,7 @@ final class Route implements RouteAttributeInterface
         array $defaults = [],
         array $hosts = [],
         bool $override = false,
-        array $disabledMiddlewares = []
+        array $disabledMiddlewares = [],
     ) {
         $this->route = new RouteObject(
             methods: $methods,
@@ -45,7 +45,7 @@ final class Route implements RouteAttributeInterface
             defaults: $defaults,
             hosts: $hosts,
             override: $override,
-            disabledMiddlewares: $disabledMiddlewares
+            disabledMiddlewares: $disabledMiddlewares,
         );
     }
 

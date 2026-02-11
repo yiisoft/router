@@ -23,6 +23,7 @@ use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
 use Yiisoft\Router\Tests\Support\TestMiddleware3;
 use Yiisoft\Router\Tests\Support\TestController;
+use stdClass;
 
 final class GroupTest extends TestCase
 {
@@ -46,8 +47,8 @@ final class GroupTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid $middlewareDefinitions provided, list of string or array or callable expected.');
 
-        $middleware = static fn () => new Response();
-        $group = new Group('/api', [$middleware, new \stdClass()]);
+        $middleware = static fn() => new Response();
+        $group = new Group('/api', [$middleware, new stdClass()]);
     }
 
     public function testDisabledMiddlewareDefinitions(): void
@@ -493,7 +494,7 @@ final class GroupTest extends TestCase
     public function testBuiltMiddlewares(): void
     {
         $group = Group::create()
-            ->middleware(static fn () => new Response(200))
+            ->middleware(static fn() => new Response(200))
             ->prependMiddleware(TestMiddleware1::class);
 
         $builtMiddlewareDefinitions = $group->getData('enabledMiddlewares');

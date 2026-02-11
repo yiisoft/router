@@ -12,6 +12,9 @@ use Yiisoft\Router\Internal\MiddlewareFilter;
 use function array_slice;
 use function count;
 use function in_array;
+use function is_array;
+use function is_callable;
+use function is_string;
 
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
@@ -75,11 +78,50 @@ final class Route implements Stringable
         $this->middlewares = $middlewares;
         $this->methods = $methods;
         $this->hosts = $hosts;
-        $this->defaults = array_map('\strval', $defaults);
+        $this->defaults = array_map(\strval(...), $defaults);
         if (!empty($action)) {
             $this->middlewares[] = $action;
             $this->actionAdded = true;
         }
+    }
+
+    public function __toString(): string
+    {
+        $result = $this->name === null
+            ? ''
+            : '[' . $this->name . '] ';
+
+        if ($this->methods !== []) {
+            $result .= implode(',', $this->methods) . ' ';
+        }
+
+        if (!empty($this->hosts)) {
+            $quoted = array_map(static fn($host) => preg_quote($host, '/'), $this->hosts);
+
+            if (!preg_match('/' . implode('|', $quoted) . '/', $this->pattern)) {
+                $result .= implode('|', $this->hosts);
+            }
+        }
+
+        $result .= $this->pattern;
+
+        return $result;
+    }
+
+    public function __debugInfo()
+    {
+        return [
+            'name' => $this->name,
+            'methods' => $this->methods,
+            'pattern' => $this->pattern,
+            'hosts' => $this->hosts,
+            'defaults' => $this->defaults,
+            'override' => $this->override,
+            'actionAdded' => $this->actionAdded,
+            'middlewares' => $this->middlewares,
+            'disabledMiddlewares' => $this->disabledMiddlewares,
+            'enabledMiddlewares' => $this->getEnabledMiddlewares(),
+        ];
     }
 
     public static function get(string $pattern): self
@@ -302,45 +344,6 @@ final class Route implements Stringable
         };
     }
 
-    public function __toString(): string
-    {
-        $result = $this->name === null
-            ? ''
-            : '[' . $this->name . '] ';
-
-        if ($this->methods !== []) {
-            $result .= implode(',', $this->methods) . ' ';
-        }
-
-        if (!empty($this->hosts)) {
-            $quoted = array_map(static fn ($host) => preg_quote($host, '/'), $this->hosts);
-
-            if (!preg_match('/' . implode('|', $quoted) . '/', $this->pattern)) {
-                $result .= implode('|', $this->hosts);
-            }
-        }
-
-        $result .= $this->pattern;
-
-        return $result;
-    }
-
-    public function __debugInfo()
-    {
-        return [
-            'name' => $this->name,
-            'methods' => $this->methods,
-            'pattern' => $this->pattern,
-            'hosts' => $this->hosts,
-            'defaults' => $this->defaults,
-            'override' => $this->override,
-            'actionAdded' => $this->actionAdded,
-            'middlewares' => $this->middlewares,
-            'disabledMiddlewares' => $this->disabledMiddlewares,
-            'enabledMiddlewares' => $this->getEnabledMiddlewares(),
-        ];
-    }
-
     /**
      * @psalm-assert array<string> $items
      */
@@ -369,7 +372,7 @@ final class Route implements Stringable
             }
 
             throw new InvalidArgumentException(
-                'Invalid $middlewareDefinitions provided, list of string or array or callable expected.'
+                'Invalid $middlewareDefinitions provided, list of string or array or callable expected.',
             );
         }
     }

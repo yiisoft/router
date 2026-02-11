@@ -33,7 +33,7 @@ final class Head implements RouteAttributeInterface
         array $defaults = [],
         array $hosts = [],
         bool $override = false,
-        array $disabledMiddlewares = []
+        array $disabledMiddlewares = [],
     ) {
         $this->route = new Route(
             methods: [Method::HEAD],
@@ -43,7 +43,7 @@ final class Head implements RouteAttributeInterface
             defaults: $defaults,
             hosts: $hosts,
             override: $override,
-            disabledMiddlewares: $disabledMiddlewares
+            disabledMiddlewares: $disabledMiddlewares,
         );
     }
 

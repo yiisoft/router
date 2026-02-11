@@ -6,6 +6,9 @@ namespace Yiisoft\Router\Tests\Provider;
 
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Router\Provider\FileRoutesProvider;
+use RuntimeException;
+
+use function dirname;
 
 class FileRoutesProviderTest extends TestCase
 {
@@ -35,7 +38,7 @@ class FileRoutesProviderTest extends TestCase
     public function testGetRoutesWithNotExistFile(): void
     {
         $file = __DIR__ . '/wrong.php';
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Failed to provide routes from "' . $file . '". File or directory not found.');
 
         $provider = new FileRoutesProvider($file);

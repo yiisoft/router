@@ -33,7 +33,7 @@ final class Delete implements RouteAttributeInterface
         array $defaults = [],
         array $hosts = [],
         bool $override = false,
-        array $disabledMiddlewares = []
+        array $disabledMiddlewares = [],
     ) {
         $this->route = new Route(
             methods: [Method::DELETE],
@@ -43,7 +43,7 @@ final class Delete implements RouteAttributeInterface
             defaults: $defaults,
             hosts: $hosts,
             override: $override,
-            disabledMiddlewares: $disabledMiddlewares
+            disabledMiddlewares: $disabledMiddlewares,
         );
     }
 

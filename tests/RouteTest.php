@@ -46,7 +46,7 @@ final class RouteTest extends TestCase
 
     public function testEmptyMethods(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('$methods cannot be empty.');
 
         new Route([], '');
@@ -280,10 +280,10 @@ final class RouteTest extends TestCase
 
     public function testInvalidMiddlewares(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid $middlewareDefinitions provided, list of string or array or callable expected.');
 
-        $route = new Route([Method::GET], '/', middlewares: [static fn () => new Response(), (object) ['test' => 1]]);
+        $route = new Route([Method::GET], '/', middlewares: [static fn() => new Response(), (object) ['test' => 1]]);
     }
 
     public function testDisabledMiddlewareDefinitions(): void
@@ -478,7 +478,7 @@ EOL;
 
     public function testInvalidHosts(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid $hosts provided, list of string expected.');
 
         $route = new Route([Method::GET], '/', hosts: ['b.com', 123]);
@@ -505,7 +505,7 @@ EOL;
     {
         $route = Route::get('')
                       ->middleware(TestMiddleware1::class)
-                      ->action(static fn () => new Response(200));
+                      ->action(static fn() => new Response(200));
 
         $builtMiddlewareDefinitions = $route->getData('enabledMiddlewares');
 

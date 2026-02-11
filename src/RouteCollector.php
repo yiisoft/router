@@ -36,7 +36,7 @@ final class RouteCollector implements RouteCollectorInterface
     {
         array_push(
             $this->providers,
-            ...array_values($provider)
+            ...array_values($provider),
         );
         return $this;
     }
@@ -64,7 +64,7 @@ final class RouteCollector implements RouteCollectorInterface
         foreach ($this->providers as $provider) {
             array_push(
                 $this->items,
-                ...$provider->getRoutes()
+                ...$provider->getRoutes(),
             );
         }
         return $this->items;
