@@ -202,11 +202,15 @@ final class Route implements Stringable
     {
         $route = clone $this;
         if ($this->actionAdded) {
+            /**
+             * @psalm-suppress PropertyTypeCoercion Keys in the replacement array are not preserved.
+             * @infection-ignore-all
+             */
             array_splice(
                 $route->middlewares,
                 offset: count($route->middlewares) - 1,
                 length: 0,
-                replacement: array_values($definition),
+                replacement: $definition,
             );
         } else {
             array_push(
