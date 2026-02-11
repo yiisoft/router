@@ -9,7 +9,6 @@ use Stringable;
 use Yiisoft\Http\Method;
 use Yiisoft\Router\Internal\MiddlewareFilter;
 
-use function array_slice;
 use function array_splice;
 use function count;
 use function in_array;
