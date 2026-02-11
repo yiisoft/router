@@ -88,6 +88,7 @@
     "scripts": {
         "composer-require-checker": "composer-require-checker",
         "cs-fix": "php-cs-fixer fix",
+        "psalm": "psalm",
         "rector": "rector",
         "test": "phpunit --testdox --no-interaction",
         "test-watch": "phpunit-watcher watch"
