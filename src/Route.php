@@ -9,7 +9,7 @@ use Stringable;
 use Yiisoft\Http\Method;
 use Yiisoft\Router\Internal\MiddlewareFilter;
 
-use function array_slice;
+use function array_splice;
 use function count;
 use function in_array;
 
@@ -201,11 +201,15 @@ final class Route implements Stringable
     {
         $route = clone $this;
         if ($this->actionAdded) {
-            $lastIndex = count($route->middlewares) - 1;
-            $route->middlewares = array_merge(
-                array_slice($route->middlewares, 0, $lastIndex),
-                array_values($definition),
-                array_slice($route->middlewares, $lastIndex),
+            /**
+             * @psalm-suppress PropertyTypeCoercion Keys in the replacement array are not preserved.
+             * @infection-ignore-all
+             */
+            array_splice(
+                $route->middlewares,
+                offset: count($route->middlewares) - 1,
+                length: 0,
+                replacement: $definition,
             );
         } else {
             array_push(
