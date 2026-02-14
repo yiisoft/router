@@ -73,6 +73,9 @@ final class MatchingResult
         return $this->methods;
     }
 
+    /**
+     * @psalm-assert-if-true !null $this->route
+     */
     public function route(): Route
     {
         if ($this->route === null) {

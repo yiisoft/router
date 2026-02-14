@@ -23,6 +23,7 @@ use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
 use Yiisoft\Router\Tests\Support\TestMiddleware3;
 use Yiisoft\Router\Tests\Support\TestController;
+use stdClass;
 
 final class GroupTest extends TestCase
 {
@@ -39,6 +40,15 @@ final class GroupTest extends TestCase
         $this->assertCount(2, $group->getData('enabledMiddlewares'));
         $this->assertSame($middleware1, $group->getData('enabledMiddlewares')[0]);
         $this->assertSame($middleware2, $group->getData('enabledMiddlewares')[1]);
+    }
+
+    public function testInvalidMiddlewares(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid $middlewareDefinitions provided, list of string or array or callable expected.');
+
+        $middleware = static fn() => new Response();
+        $group = new Group('/api', [$middleware, new stdClass()]);
     }
 
     public function testDisabledMiddlewareDefinitions(): void
@@ -299,6 +309,14 @@ final class GroupTest extends TestCase
         $this->assertSame(['https://yiiframework.com', 'https://yiiframework.ru'], $group->getData('hosts'));
     }
 
+    public function testInvalidHosts(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid $hosts provided, list of string expected.');
+
+        $group = new Group(hosts: ['https://yiiframework.com/', 123]);
+    }
+
     public function testName(): void
     {
         $group = Group::create()->namePrefix('api');
@@ -471,6 +489,17 @@ final class GroupTest extends TestCase
         $this->assertNotSame($group, $group->namePrefix(''));
         $this->assertNotSame($group, $group->hosts());
         $this->assertNotSame($group, $group->disableMiddleware());
+    }
+
+    public function testBuiltMiddlewares(): void
+    {
+        $group = Group::create()
+            ->middleware(static fn() => new Response(200))
+            ->prependMiddleware(TestMiddleware1::class);
+
+        $builtMiddlewareDefinitions = $group->getData('enabledMiddlewares');
+
+        $this->assertSame($builtMiddlewareDefinitions, $group->getData('enabledMiddlewares'));
     }
 
     private function getRequestHandler(): RequestHandlerInterface

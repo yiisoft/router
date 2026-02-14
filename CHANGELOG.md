@@ -33,6 +33,12 @@
 
 - New #203, #237: Add `RouteArgument` attribute for Yii Hydrator (@vjik)
 - Enh #202: Add support for `psr/http-message` version `^2.0` (@vjik)
+- New #196: Add PHP Attributes support (@rustamwin)
+- New #196: Add `RoutesProviderInterface` interface providing routes from various resources (@rustamwin) 
+- Enh #196: The `Group` and `Route` classes have been refactored to be DTO objects & dispatcher-independent. (@rustamwin)
+- Enh #196: The `MatchingResult` class has been improved to be dispatcher-independent (@rustamwin)
+- Chg #196: The implementation of `MatchingResult` from `MiddlewareInterface` has been removed, so
+  it is no longer middleware. (@rustamwin)
 
 ## 3.0.0 February 17, 2023
 

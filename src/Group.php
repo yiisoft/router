@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
+use Attribute;
 use InvalidArgumentException;
 use Yiisoft\Router\Internal\MiddlewareFilter;
 
 use function in_array;
+use function is_array;
+use function is_callable;
+use function is_string;
 
+#[Attribute(Attribute::TARGET_CLASS)]
 final class Group
 {
     /**
@@ -26,8 +31,8 @@ final class Group
      * @var string[]
      */
     private array $hosts = [];
-    private ?string $namePrefix = null;
-    private array $disabledMiddlewares = [];
+    private bool $routesAdded = false;
+    private bool $middlewareAdded = false;
 
     /**
      * @psalm-var list<array|callable|string>|null
@@ -39,9 +44,30 @@ final class Group
      */
     private $corsMiddleware = null;
 
-    private function __construct(
+    /**
+     * @param array[]|callable[]|string[] $middlewares Middleware definitions.
+     * @param string[] $hosts List of host names.
+     * @param string|null $namePrefix Prefix for route names.
+     * @param array $disabledMiddlewares Excludes middleware from being invoked when action is handled.
+     * It is useful to avoid invoking one of the parent group middleware for
+     * a certain route.
+     *
+     * @psalm-param list<array|callable|string> $middlewares
+     */
+    public function __construct(
         private ?string $prefix = null,
-    ) {}
+        array $middlewares = [],
+        array $hosts = [],
+        private ?string $namePrefix = null,
+        private array $disabledMiddlewares = [],
+        array|callable|string|null $corsMiddleware = null,
+    ) {
+        $this->assertMiddlewares($middlewares);
+        $this->assertHosts($hosts);
+        $this->middlewares = $middlewares;
+        $this->hosts = $hosts;
+        $this->corsMiddleware = $corsMiddleware;
+    }
 
     /**
      * Create a new group instance.
@@ -185,6 +211,32 @@ final class Group
             'enabledMiddlewares' => $this->getEnabledMiddlewares(),
             default => throw new InvalidArgumentException('Unknown data key: ' . $key),
         };
+    }
+
+    private function assertHosts(array $hosts): void
+    {
+        foreach ($hosts as $host) {
+            if (!is_string($host)) {
+                throw new InvalidArgumentException('Invalid $hosts provided, list of string expected.');
+            }
+        }
+    }
+
+    /**
+     * @psalm-assert array<array|callable|string> $middlewareDefinitions
+     */
+    private function assertMiddlewares(array $middlewareDefinitions): void
+    {
+        /** @var mixed $middlewareDefinition */
+        foreach ($middlewareDefinitions as $middlewareDefinition) {
+            if (is_string($middlewareDefinition) || is_callable($middlewareDefinition) || is_array($middlewareDefinition)) {
+                continue;
+            }
+
+            throw new InvalidArgumentException(
+                'Invalid $middlewareDefinitions provided, list of string or array or callable expected.',
+            );
+        }
     }
 
     /**
