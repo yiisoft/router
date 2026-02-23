@@ -4,12 +4,19 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
+use Yiisoft\Router\Provider\RoutesProviderInterface;
+
 interface RouteCollectorInterface
 {
     /**
      * Add a route or a group of routes.
      */
     public function addRoute(Route|Group ...$routes): self;
+
+    /**
+     * Add a provider of routes
+     */
+    public function addProvider(RoutesProviderInterface ...$provider): self;
 
     /**
      * Appends a handler middleware definition that should be invoked for a matched route.
