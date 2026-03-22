@@ -20,6 +20,15 @@ class OptionsTest extends TestCase
         $this->assertSame([Method::OPTIONS], $route->getData('methods'));
     }
 
+    public function testOverrideDefaultIsFalse(): void
+    {
+        $attribute = new Options('/');
+
+        $route = $attribute->getRoute();
+
+        $this->assertFalse($route->getData('override'));
+    }
+
     public function testOverride(): void
     {
         $attribute = new Options('/', override: true);

@@ -19,6 +19,7 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\Tests\Support\AssertTrait;
 use Yiisoft\Router\Tests\Support\Container;
+use Yiisoft\Router\Tests\Support\CustomResponseMiddleware;
 use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
@@ -35,12 +36,12 @@ final class RouteTest extends TestCase
             methods: [Method::GET],
             pattern: '/',
             action: [TestController::class, 'index'],
-            middlewares: [TestMiddleware1::class],
+            middlewares: [TestMiddleware1::class, fn() => new Response(), TestMiddleware2::class],
             override: true,
         );
 
         $this->assertInstanceOf(Route::class, $route);
-        $this->assertCount(2, $route->getData('enabledMiddlewares'));
+        $this->assertCount(4, $route->getData('enabledMiddlewares'));
         $this->assertTrue($route->getData('override'));
     }
 
@@ -278,6 +279,44 @@ final class RouteTest extends TestCase
         );
     }
 
+    public function testDefaultsConvertedToStringInConstructor(): void
+    {
+        $route = new Route(
+            methods: [Method::GET],
+            pattern: '/{language}',
+            defaults: ['language' => 'en', 'age' => 42],
+        );
+
+        $this->assertSame([
+            'language' => 'en',
+            'age' => '42',
+        ], $route->getData('defaults'));
+    }
+
+    public function testActionAddedViaConstructorMiddlewareInsertedBefore(): void
+    {
+        $route = new Route(
+            methods: [Method::GET],
+            pattern: '/',
+            action: [TestController::class, 'index'],
+        );
+
+        $route = $route->middleware(TestMiddleware1::class);
+
+        $this->assertSame(
+            [TestMiddleware1::class, [TestController::class, 'index']],
+            $route->getData('enabledMiddlewares'),
+        );
+    }
+
+    public function testInvalidMiddlewareAfterString(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid $middlewareDefinitions provided, list of string or array or callable expected.');
+
+        new Route([Method::GET], '/', middlewares: ['ValidString', (object) ['test' => 1]]);
+    }
+
     public function testInvalidMiddlewares(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -398,13 +437,13 @@ final class RouteTest extends TestCase
     public function testMiddlewaresWithKeys(): void
     {
         $route = Route::get('/')
-            ->middleware(m3: TestMiddleware3::class)
+            ->middleware(m3: TestMiddleware3::class, custom: $custom = ['class' => CustomResponseMiddleware::class, '__construct()' => ['code' => 500]])
             ->action([TestController::class, 'index'])
             ->prependMiddleware(m1: TestMiddleware1::class, m2: TestMiddleware2::class)
             ->disableMiddleware(m1: TestMiddleware1::class);
 
         $this->assertSame(
-            [TestMiddleware2::class, TestMiddleware3::class, [TestController::class, 'index']],
+            [TestMiddleware2::class, TestMiddleware3::class, $custom, [TestController::class, 'index']],
             $route->getData('enabledMiddlewares'),
         );
     }

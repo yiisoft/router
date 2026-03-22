@@ -20,6 +20,15 @@ final class HeadTest extends TestCase
         $this->assertSame([Method::HEAD], $route->getData('methods'));
     }
 
+    public function testOverrideDefaultIsFalse(): void
+    {
+        $attribute = new Head('/');
+
+        $route = $attribute->getRoute();
+
+        $this->assertFalse($route->getData('override'));
+    }
+
     public function testOverride(): void
     {
         $attribute = new Head('/', override: true);

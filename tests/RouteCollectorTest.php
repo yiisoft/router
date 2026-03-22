@@ -8,6 +8,7 @@ use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Provider\ArrayRoutesProvider;
+use Yiisoft\Router\Provider\FileRoutesProvider;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollector;
 
@@ -86,7 +87,7 @@ final class RouteCollectorTest extends TestCase
             );
 
         $collector = new RouteCollector();
-        $collector->addProvider(new ArrayRoutesProvider([$rootGroup, $postGroup, $testGroup]));
+        $collector->addProvider(new ArrayRoutesProvider([$rootGroup, $postGroup, $testGroup]), file: new FileRoutesProvider(__DIR__ . '/Support/resources/foo.php'));
 
         $this->assertCount(3, $collector->getItems());
         $this->assertContainsOnlyInstancesOf(Group::class, $collector->getItems());

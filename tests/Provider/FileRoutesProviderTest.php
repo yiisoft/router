@@ -53,4 +53,26 @@ class FileRoutesProviderTest extends TestCase
 
         $this->assertEmpty($provider->getRoutes());
     }
+
+    public function testGetRoutesWithScope(): void
+    {
+        $file = dirname(__DIR__) . '/Support/resources/scope/scope_routes.php';
+
+        $provider = new FileRoutesProvider($file, ['prefix' => '/api']);
+        $routes = $provider->getRoutes();
+
+        $this->assertCount(1, $routes);
+        $this->assertSame('/api/test', $routes[0]->getData('pattern'));
+    }
+
+    public function testGetRoutesInDirectoryWithNonPhpFiles(): void
+    {
+        $dir = dirname(__DIR__) . '/Support/resources/mixed_dir';
+
+        $provider = new FileRoutesProvider($dir);
+        $routes = $provider->getRoutes();
+
+        $this->assertCount(1, $routes);
+        $this->assertSame('/mixed', $routes[0]->getData('pattern'));
+    }
 }

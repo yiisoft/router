@@ -20,6 +20,15 @@ class PutTest extends TestCase
         $this->assertSame([Method::PUT], $route->getData('methods'));
     }
 
+    public function testOverrideDefaultIsFalse(): void
+    {
+        $attribute = new Put('/');
+
+        $route = $attribute->getRoute();
+
+        $this->assertFalse($route->getData('override'));
+    }
+
     public function testOverride(): void
     {
         $attribute = new Put('/', override: true);

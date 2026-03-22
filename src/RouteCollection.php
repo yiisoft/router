@@ -94,7 +94,7 @@ final class RouteCollection implements RouteCollectionInterface
     }
 
     /**
-     * Inject a Group instance into route and item arrays.
+     * Inject a Group instance into the route and the item arrays.
      *
      * @psalm-param Items $tree
      */

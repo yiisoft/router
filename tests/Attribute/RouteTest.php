@@ -20,6 +20,15 @@ class RouteTest extends TestCase
         $this->assertSame([Method::GET, Method::HEAD], $route->getData('methods'));
     }
 
+    public function testOverrideDefaultIsFalse(): void
+    {
+        $attribute = new Route([Method::GET, Method::HEAD], '/');
+
+        $route = $attribute->getRoute();
+
+        $this->assertFalse($route->getData('override'));
+    }
+
     public function testOverride(): void
     {
         $attribute = new Route([Method::GET, Method::HEAD], '/', override: true);

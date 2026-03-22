@@ -20,6 +20,15 @@ class PostTest extends TestCase
         $this->assertSame([Method::POST], $route->getData('methods'));
     }
 
+    public function testOverrideDefaultIsFalse(): void
+    {
+        $attribute = new Post('/');
+
+        $route = $attribute->getRoute();
+
+        $this->assertFalse($route->getData('override'));
+    }
+
     public function testOverride(): void
     {
         $attribute = new Post('/', override: true);

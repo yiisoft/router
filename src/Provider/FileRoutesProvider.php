@@ -38,11 +38,13 @@ final class FileRoutesProvider implements RoutesProviderInterface
                 'Failed to provide routes from "' . $this->file . '". File or directory not found.',
             );
         }
+        /** @infection-ignore-all Equivalent: is_dir implies !is_file for valid paths after file_exists check */
         if (is_dir($this->file) && !is_file($this->file)) {
             $directoryRoutes = [];
             $files = new CallbackFilterIterator(
                 new FilesystemIterator(
                     $this->file,
+                    /** @infection-ignore-all Bitwise flags; CallbackFilterIterator already filters by extension */
                     FilesystemIterator::SKIP_DOTS | FilesystemIterator::FOLLOW_SYMLINKS,
                 ),
                 fn(SplFileInfo $fileInfo) => $fileInfo->isFile() && $fileInfo->getExtension() === 'php',

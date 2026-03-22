@@ -502,6 +502,21 @@ final class GroupTest extends TestCase
         $this->assertSame($builtMiddlewareDefinitions, $group->getData('enabledMiddlewares'));
     }
 
+    public function testValidHostsInConstructor(): void
+    {
+        $group = new Group(hosts: ['example.com', 'test.com']);
+
+        $this->assertSame(['example.com', 'test.com'], $group->getData('hosts'));
+    }
+
+    public function testValidMiddlewaresInConstructor(): void
+    {
+        $callable = static fn() => new Response();
+        $group = new Group(middlewares: ['SomeClass', $callable, ['Class', 'method']]);
+
+        $this->assertCount(3, $group->getData('enabledMiddlewares'));
+    }
+
     private function getRequestHandler(): RequestHandlerInterface
     {
         return new class implements RequestHandlerInterface {

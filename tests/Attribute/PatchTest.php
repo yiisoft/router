@@ -20,6 +20,15 @@ class PatchTest extends TestCase
         $this->assertSame([Method::PATCH], $route->getData('methods'));
     }
 
+    public function testOverrideDefaultIsFalse(): void
+    {
+        $attribute = new Patch('/');
+
+        $route = $attribute->getRoute();
+
+        $this->assertFalse($route->getData('override'));
+    }
+
     public function testOverride(): void
     {
         $attribute = new Patch('/', override: true);
