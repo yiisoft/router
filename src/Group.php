@@ -31,8 +31,6 @@ final class Group
      * @var string[]
      */
     private array $hosts = [];
-    private bool $routesAdded = false;
-    private bool $middlewareAdded = false;
 
     /**
      * @psalm-var list<array|callable|string>|null

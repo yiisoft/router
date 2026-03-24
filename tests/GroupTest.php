@@ -511,7 +511,7 @@ final class GroupTest extends TestCase
 
     public function testValidMiddlewaresInConstructor(): void
     {
-        $callable = static fn() => new Response();
+        $callable = static fn(): ResponseInterface => new Response();
         $group = new Group(middlewares: ['SomeClass', $callable, ['Class', 'method']]);
 
         $this->assertCount(3, $group->getData('enabledMiddlewares'));
