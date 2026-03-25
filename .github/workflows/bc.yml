@@ -31,5 +31,4 @@ jobs:
         ['ubuntu-latest']
       php: >-
         ['8.5']
-      required-packages: >-
-        ['yii-debug', 'hydrator']
+      usePackageBin: true
