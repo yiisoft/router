@@ -66,6 +66,19 @@ final class RouterCollectorTest extends AbstractCollectorTestCase
         );
     }
 
+    public function testWithCurrentRouteWithoutMatchedRoute(): void
+    {
+        $collector = new RouterCollector(
+            new SimpleContainer([
+                CurrentRoute::class => new CurrentRoute(),
+            ]),
+        );
+        $collector->startup();
+
+        $this->assertSame([], $collector->getSummary());
+        $this->assertSame(['currentRoute' => null], $collector->getCollected());
+    }
+
     /**
      * @param CollectorInterface|RouterCollector $collector
      */
