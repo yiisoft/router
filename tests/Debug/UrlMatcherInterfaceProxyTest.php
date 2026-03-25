@@ -59,9 +59,9 @@ final class UrlMatcherInterfaceProxyTest extends TestCase
         $proxy = new UrlMatcherInterfaceProxy(new UrlMatcherStub($result), $collector);
 
         $proxyResult = $proxy->match($request);
-        $summary = $collector->getSummary();
-
         $this->assertSame($result, $proxyResult);
+
+        $summary = $collector->getSummary();
         $this->assertArrayHasKey('matchTime', $summary);
         $this->assertGreaterThanOrEqual(0, $summary['matchTime']);
     }
