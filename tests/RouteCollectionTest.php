@@ -164,6 +164,27 @@ final class RouteCollectionTest extends TestCase
         );
     }
 
+    public function testGetRouteTreeReturnsRouteInstances(): void
+    {
+        $collector = new RouteCollector();
+        $collector->addRoute(
+            Group::create('/api')
+                ->routes(
+                    Route::get('/posts')->name('/posts'),
+                    Group::create('/v1')
+                        ->routes(Route::get('/comments')->name('/comments')),
+                )
+                ->namePrefix('/api'),
+        );
+
+        $routeTree = (new RouteCollection($collector))->getRouteTree(false);
+
+        $this->assertInstanceOf(Route::class, $routeTree[0]);
+        $this->assertSame('/api/posts', $routeTree[0]->getData('name'));
+        $this->assertInstanceOf(Route::class, $routeTree['/v1'][0]);
+        $this->assertSame('/api/comments', $routeTree['/v1'][0]->getData('name'));
+    }
+
     public function testGetRoutes(): void
     {
         $group = Group::create()
@@ -351,6 +372,24 @@ final class RouteCollectionTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Stack is empty.');
         $dispatcher->dispatch($request, $this->getRequestHandler());
+    }
+
+    public function testCorsOptionsRouteIsNotDuplicatedForSamePatternAndHosts(): void
+    {
+        $collector = new RouteCollector();
+        $collector->addRoute(
+            Group::create()
+                ->routes(
+                    Route::post('/post')->host('https://example.com')->name('post.create'),
+                    Route::put('/post')->host('https://example.com')->name('post.update'),
+                )
+                ->withCors(static fn() => new Response(204)),
+        );
+
+        $routes = (new RouteCollection($collector))->getRoutes();
+
+        $this->assertArrayHasKey('OPTIONS https://example.com/post', $routes);
+        $this->assertCount(3, $routes);
     }
 
     private function getRequestHandler(): RequestHandlerInterface
