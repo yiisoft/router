@@ -10,9 +10,12 @@ use Yiisoft\Di\Container;
 use Yiisoft\Di\ContainerConfig;
 use Yiisoft\Di\StateResetter;
 use Yiisoft\Router\CurrentRoute;
+use Yiisoft\Router\Debug\RouterCollector;
+use Yiisoft\Router\Debug\UrlMatcherInterfaceProxy;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollector;
 use Yiisoft\Router\RouteCollectorInterface;
+use Yiisoft\Router\UrlMatcherInterface;
 
 use function dirname;
 
@@ -41,6 +44,28 @@ final class ConfigTest extends TestCase
         $this->assertNull($currentRoute->getName());
         $this->assertNull($currentRoute->getUri());
         $this->assertSame([], $currentRoute->getArguments());
+    }
+
+    public function testParams(): void
+    {
+        $params = require dirname(__DIR__) . '/config/params.php';
+
+        $this->assertSame(
+            [
+                'yiisoft/yii-debug' => [
+                    'collectors.web' => [
+                        RouterCollector::class,
+                    ],
+                    'trackedServices' => [
+                        UrlMatcherInterface::class => [
+                            UrlMatcherInterfaceProxy::class,
+                            RouterCollector::class,
+                        ],
+                    ],
+                ],
+            ],
+            $params,
+        );
     }
 
     private function createContainer(): Container
