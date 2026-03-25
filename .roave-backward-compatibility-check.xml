@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<roave-bc-check
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="vendor/roave/backward-compatibility-check/Resources/schema.xsd">
+    <baseline>
+        <ignored-regex>#\[BC\] SKIPPED: .*"Symfony\\Component\\Console\\Command\\Command".*#</ignored-regex>
+        <ignored-regex>#\[BC\] SKIPPED: .*"Yiisoft\\Yii\\Debug\\Collector\\CollectorTrait".*#</ignored-regex>
+        <ignored-regex>#\[BC\] SKIPPED: .*"Yiisoft\\Yii\\Debug\\Collector\\SummaryCollectorInterface".*#</ignored-regex>
+        <ignored-regex>#\[BC\] SKIPPED: .*"Yiisoft\\Hydrator\\Attribute\\Parameter\\ParameterAttributeInterface".*#</ignored-regex>
+        <ignored-regex>#\[BC\] SKIPPED: .*"Yiisoft\\Hydrator\\Attribute\\Parameter\\ParameterAttributeResolverInterface".*#</ignored-regex>
+    </baseline>
+</roave-bc-check>
