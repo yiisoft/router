@@ -23,9 +23,7 @@ final class RouteCollector implements RouteCollectorInterface
     /**
      * @param RoutesProviderInterface[] $providers
      */
-    public function __construct(private readonly array $providers = [])
-    {
-    }
+    public function __construct(private readonly array $providers = []) {}
 
     public function addRoute(Route|Group ...$routes): RouteCollectorInterface
     {
