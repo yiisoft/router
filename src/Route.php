@@ -77,9 +77,9 @@ final class Route implements Stringable
         $this->assertListOfStrings($hosts, 'hosts');
         $this->middlewares = $middlewares;
         $this->methods = $methods;
-        $this->hosts = $hosts;
+        $this->hosts = $this->normalizeHosts($hosts);
         $this->defaults = array_map(\strval(...), $defaults);
-        if (!empty($action)) {
+        if ($action !== null) {
             $this->middlewares[] = $action;
             $this->actionAdded = true;
         }
@@ -189,15 +189,7 @@ final class Route implements Stringable
     public function hosts(string ...$hosts): self
     {
         $route = clone $this;
-        $route->hosts = [];
-
-        foreach ($hosts as $host) {
-            $host = rtrim($host, '/');
-
-            if ($host !== '' && !in_array($host, $route->hosts, true)) {
-                $route->hosts[] = $host;
-            }
-        }
+        $route->hosts = $this->normalizeHosts($hosts);
 
         return $route;
     }
@@ -346,6 +338,24 @@ final class Route implements Stringable
             'enabledMiddlewares' => $this->getEnabledMiddlewares(),
             default => throw new InvalidArgumentException('Unknown data key: ' . $key),
         };
+    }
+
+    /**
+     * @param string[] $hosts
+     *
+     * @return array<array-key, string>
+     */
+    private function normalizeHosts(array $hosts): array
+    {
+        $normalizedHosts = [];
+        foreach ($hosts as $host) {
+            $host = rtrim($host, '/');
+
+            if ($host !== '' && !in_array($host, $normalizedHosts, true)) {
+                $normalizedHosts[] = $host;
+            }
+        }
+        return $normalizedHosts;
     }
 
     /**

@@ -13,6 +13,7 @@ use RuntimeException;
 use SplFileInfo;
 
 use function is_array;
+use function iterator_to_array;
 
 use const EXTR_SKIP;
 
@@ -45,14 +46,20 @@ final class FileRoutesProvider implements RoutesProviderInterface
                 new FilesystemIterator(
                     $this->file,
                     /** @infection-ignore-all Bitwise flags; CallbackFilterIterator already filters by extension */
-                    FilesystemIterator::SKIP_DOTS | FilesystemIterator::FOLLOW_SYMLINKS,
+                    FilesystemIterator::SKIP_DOTS,
                 ),
                 fn(SplFileInfo $fileInfo) => $fileInfo->isFile() && $fileInfo->getExtension() === 'php',
             );
+            $files = iterator_to_array($files, false);
             /** @var SplFileInfo[] $files */
+            usort($files, static fn(SplFileInfo $a, SplFileInfo $b) => $a->getFilename() <=> $b->getFilename());
             foreach ($files as $file) {
+                $realPath = $file->getRealPath();
+                if ($realPath === false) {
+                    continue;
+                }
                 /** @var mixed $fileRoutes */
-                $fileRoutes = $scopeRequire($file->getRealPath(), $this->scope);
+                $fileRoutes = $scopeRequire($realPath, $this->scope);
                 if (is_array($fileRoutes) && $this->isRoutesAreValid($fileRoutes)) {
                     array_push(
                         $directoryRoutes,
@@ -78,9 +85,7 @@ final class FileRoutesProvider implements RoutesProviderInterface
     private function isRoutesAreValid(array $routes): bool
     {
         foreach ($routes as $route) {
-            if (
-                !is_a($route, Route::class, true) && !is_a($route, Group::class, true)
-            ) {
+            if (!$route instanceof Route && !$route instanceof Group) {
                 return false;
             }
         }

@@ -63,7 +63,7 @@ final class Group
         $this->assertMiddlewares($middlewares);
         $this->assertHosts($hosts);
         $this->middlewares = $middlewares;
-        $this->hosts = $hosts;
+        $this->hosts = $this->normalizeHosts($hosts);
         $this->corsMiddleware = $corsMiddleware;
     }
 
@@ -148,14 +148,7 @@ final class Group
     public function hosts(string ...$hosts): self
     {
         $new = clone $this;
-
-        foreach ($hosts as $host) {
-            $host = rtrim($host, '/');
-
-            if ($host !== '' && !in_array($host, $new->hosts, true)) {
-                $new->hosts[] = $host;
-            }
-        }
+        $new->hosts = $this->normalizeHosts($hosts);
 
         return $new;
     }
@@ -251,5 +244,24 @@ final class Group
         $this->enabledMiddlewaresCache = MiddlewareFilter::filter($this->middlewares, $this->disabledMiddlewares);
 
         return $this->enabledMiddlewaresCache;
+    }
+
+    /**
+     * @param string[] $hosts
+     *
+     * @return array<array-key, string>
+     */
+    private function normalizeHosts(array $hosts): array
+    {
+        $normalizedHosts = [];
+        foreach ($hosts as $host) {
+            $host = rtrim($host, '/');
+
+            if ($host !== '' && !in_array($host, $normalizedHosts, true)) {
+                $normalizedHosts[] = $host;
+            }
+        }
+
+        return $normalizedHosts;
     }
 }

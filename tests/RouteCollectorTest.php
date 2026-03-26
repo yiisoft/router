@@ -61,7 +61,7 @@ final class RouteCollectorTest extends TestCase
         $this->assertContainsOnlyInstancesOf(Group::class, $collector->getItems());
     }
 
-    public function testAddProvider(): void
+    public function testWithProvider(): void
     {
         $logoutRoute = Route::post('/logout');
         $listRoute = Route::get('/');
@@ -86,11 +86,21 @@ final class RouteCollectorTest extends TestCase
                 Route::get('test/'),
             );
 
-        $collector = new RouteCollector();
-        $collector->addProvider(new ArrayRoutesProvider([$rootGroup, $postGroup, $testGroup]), file: new FileRoutesProvider(__DIR__ . '/Support/resources/foo.php'));
+        $collector = new RouteCollector([new ArrayRoutesProvider([$rootGroup, $postGroup, $testGroup]), new FileRoutesProvider(__DIR__ . '/Support/resources/foo.php')]);
 
         $this->assertCount(3, $collector->getItems());
         $this->assertContainsOnlyInstancesOf(Group::class, $collector->getItems());
+    }
+
+    public function testEnsureProvidersCollectedOnce(): void
+    {
+        $collector = new RouteCollector([new ArrayRoutesProvider([Route::get('/')])]);
+        $collector->addRoute(Route::get('/test'));
+        $this->assertCount(2, $collector->getItems());
+        $this->assertContainsOnlyInstancesOf(Route::class, $collector->getItems());
+
+        $collector->addRoute(Route::get('/test2'));
+        $this->assertCount(3, $collector->getItems());
     }
 
     public function testAddMiddleware(): void

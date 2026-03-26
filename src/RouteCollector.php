@@ -16,27 +16,28 @@ final class RouteCollector implements RouteCollectorInterface
     /**
      * @var RoutesProviderInterface[]
      */
-    private array $providers = [];
+    private array $providers;
 
     /**
      * @var array[]|callable[]|string[]
      */
     private array $middlewareDefinitions = [];
 
+    private bool $providersAreInjected = false;
+
+    /**
+     * @param RoutesProviderInterface[] $providers
+     */
+    public function __construct(array $providers = [])
+    {
+        $this->providers = $providers;
+    }
+
     public function addRoute(Route|Group ...$routes): RouteCollectorInterface
     {
         array_push(
             $this->items,
             ...array_values($routes),
-        );
-        return $this;
-    }
-
-    public function addProvider(RoutesProviderInterface ...$provider): RouteCollectorInterface
-    {
-        array_push(
-            $this->providers,
-            ...array_values($provider),
         );
         return $this;
     }
@@ -61,11 +62,14 @@ final class RouteCollector implements RouteCollectorInterface
 
     public function getItems(): array
     {
-        foreach ($this->providers as $provider) {
-            array_push(
-                $this->items,
-                ...$provider->getRoutes(),
-            );
+        if (!$this->providersAreInjected) {
+            foreach ($this->providers as $provider) {
+                array_push(
+                    $this->items,
+                    ...$provider->getRoutes(),
+                );
+            }
+            $this->providersAreInjected = true;
         }
         return $this->items;
     }
