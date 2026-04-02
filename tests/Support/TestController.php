@@ -7,8 +7,6 @@ namespace Yiisoft\Router\Tests\Support;
 use Nyholm\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\Router\Attribute\Get;
-use Yiisoft\Router\Group;
 
 final class TestController
 {

@@ -11,6 +11,8 @@ use Yiisoft\Router\Route as RouteObject;
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 final class Route implements RouteAttributeInterface
 {
+    private readonly RouteObject $route;
+
     /**
      * @param string[] $methods HTTP methods that the route should match.
      * @param string $pattern Route pattern.
@@ -46,8 +48,6 @@ final class Route implements RouteAttributeInterface
             disabledMiddlewares: $disabledMiddlewares,
         );
     }
-
-    private readonly RouteObject $route;
 
     public function getRoute(): RouteObject
     {
