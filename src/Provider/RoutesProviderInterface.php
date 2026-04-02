@@ -8,7 +8,7 @@ use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 
 /**
- * `RoutesProviderInterface` provides routes.
+ * `RoutesProviderInterface` provides routes to route collector.
  */
 interface RoutesProviderInterface
 {

@@ -53,15 +53,15 @@ final class Group
      * @psalm-param list<array|callable|string> $middlewares
      */
     public function __construct(
-        private ?string $prefix = null,
+        private readonly ?string $prefix = null,
         array $middlewares = [],
         array $hosts = [],
         private ?string $namePrefix = null,
         private array $disabledMiddlewares = [],
         array|callable|string|null $corsMiddleware = null,
     ) {
-        $this->assertMiddlewares($middlewares);
-        $this->assertHosts($hosts);
+        $this->assertMiddlewaresValid($middlewares);
+        $this->assertHostsValid($hosts);
         $this->middlewares = $middlewares;
         $this->hosts = $this->normalizeHosts($hosts);
         $this->corsMiddleware = $corsMiddleware;
@@ -204,7 +204,7 @@ final class Group
         };
     }
 
-    private function assertHosts(array $hosts): void
+    private function assertHostsValid(array $hosts): void
     {
         foreach ($hosts as $host) {
             if (!is_string($host)) {
@@ -216,7 +216,7 @@ final class Group
     /**
      * @psalm-assert array<array|callable|string> $middlewareDefinitions
      */
-    private function assertMiddlewares(array $middlewareDefinitions): void
+    private function assertMiddlewaresValid(array $middlewareDefinitions): void
     {
         /** @var mixed $middlewareDefinition */
         foreach ($middlewareDefinitions as $middlewareDefinition) {

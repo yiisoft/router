@@ -60,7 +60,7 @@ final class FileRoutesProvider implements RoutesProviderInterface
                 }
                 /** @var mixed $fileRoutes */
                 $fileRoutes = $scopeRequire($realPath, $this->scope);
-                if (is_array($fileRoutes) && $this->isRoutesAreValid($fileRoutes)) {
+                if (is_array($fileRoutes) && $this->areRoutesValid($fileRoutes)) {
                     array_push(
                         $directoryRoutes,
                         ...$fileRoutes,
@@ -72,7 +72,7 @@ final class FileRoutesProvider implements RoutesProviderInterface
 
         /** @var mixed $routes */
         $routes = $scopeRequire($this->file, $this->scope);
-        if (is_array($routes) && $this->isRoutesAreValid($routes)) {
+        if (is_array($routes) && $this->areRoutesValid($routes)) {
             return $routes;
         }
 
@@ -82,7 +82,7 @@ final class FileRoutesProvider implements RoutesProviderInterface
     /**
      * @psalm-assert-if-true Route[]|Group[] $routes
      */
-    private function isRoutesAreValid(array $routes): bool
+    private function areRoutesValid(array $routes): bool
     {
         foreach ($routes as $route) {
             if (!$route instanceof Route && !$route instanceof Group) {

@@ -11,16 +11,14 @@ use Yiisoft\Router\Route as RouteObject;
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 final class Route implements RouteAttributeInterface
 {
-    private readonly RouteObject $route;
-
     /**
      * @param string[] $methods HTTP methods that the route should match.
      * @param string $pattern Route pattern.
      * @param string|null $name Route name. If not set, it will be generated automatically.
-     * @param array<callable|string> $middlewares Middlewares to be added to the route.
-     * @param string[] $hosts Hosts that the route should match.
+     * @param array[]|callable[]|string[] $middlewares Middlewares to be added to the route.
      * @param array<string,scalar|Stringable|null> $defaults Parameter default values indexed by parameter names.
-     * @param bool $override Marks route as override. When added it will replace existing route with the same name.
+     * @param string[] $hosts Hosts that the route should match.
+     * @param bool $override Marks route as override. When added, it will replace the existing route with the same name.
      * @param array $disabledMiddlewares Excludes middleware from being invoked when action is handled.
      * It is useful to avoid invoking one of the parent group middleware for
      * a certain route.
@@ -48,6 +46,8 @@ final class Route implements RouteAttributeInterface
             disabledMiddlewares: $disabledMiddlewares,
         );
     }
+
+    private readonly RouteObject $route;
 
     public function getRoute(): RouteObject
     {
