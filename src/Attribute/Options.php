@@ -9,6 +9,9 @@ use Stringable;
 use Yiisoft\Http\Method;
 use Yiisoft\Router\Route;
 
+/**
+ * Route attribute that defines an OPTIONS HTTP method route.
+ */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 final class Options implements RouteAttributeInterface
 {

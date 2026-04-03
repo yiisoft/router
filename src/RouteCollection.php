@@ -13,6 +13,8 @@ use function in_array;
 use function is_array;
 
 /**
+ * Collection of routes that manages route registration and builds a route tree.
+ *
  * @psalm-type Items = array<array-key,array|string>
  */
 final class RouteCollection implements RouteCollectionInterface
@@ -29,6 +31,9 @@ final class RouteCollection implements RouteCollectionInterface
      */
     private array $routes = [];
 
+    /**
+     * @param RouteCollectorInterface $collector The route collector to use.
+     */
     public function __construct(private readonly RouteCollectorInterface $collector) {}
 
     public function getRoutes(): array

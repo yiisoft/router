@@ -8,11 +8,13 @@ use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 
 /**
- * `RoutesProviderInterface` provides routes to route collector.
+ * Provides routes and route groups to route collector.
  */
 interface RoutesProviderInterface
 {
     /**
+     * Returns an array of routes and/or route groups.
+     *
      * @return Group[]|Route[]
      */
     public function getRoutes(): array;

@@ -7,6 +7,9 @@ namespace Yiisoft\Router;
 use RuntimeException;
 use Yiisoft\Http\Method;
 
+/**
+ * Result of matching a request against routes.
+ */
 final class MatchingResult
 {
     /**
@@ -51,6 +54,11 @@ final class MatchingResult
         return $this->route !== null;
     }
 
+    /**
+     * Checks if the request method was not allowed for the matched route.
+     *
+     * @return bool True if the method was not allowed, false otherwise.
+     */
     public function isMethodFailure(): bool
     {
         return $this->route === null && $this->methods !== Method::ALL;

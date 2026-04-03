@@ -7,6 +7,9 @@ namespace Yiisoft\Router\Provider;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\Group;
 
+/**
+ * Routes provider that is initialized with an array of routes and groups.
+ */
 final class ArrayRoutesProvider implements RoutesProviderInterface
 {
     /**

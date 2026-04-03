@@ -13,6 +13,9 @@ use function is_array;
 use function is_callable;
 use function is_string;
 
+/**
+ * Route group that allows organizing routes with common properties.
+ */
 #[Attribute(Attribute::TARGET_CLASS)]
 final class Group
 {
@@ -77,6 +80,12 @@ final class Group
         return new self($prefix);
     }
 
+    /**
+     * Sets the routes for this group.
+     *
+     * @param self|Route ...$routes Routes or sub-groups to include in this group.
+     * @return self New instance with the specified routes.
+     */
     public function routes(self|Route ...$routes): self
     {
         $new = clone $this;
@@ -133,6 +142,12 @@ final class Group
         return $new;
     }
 
+    /**
+     * Sets the name prefix for all routes in this group.
+     *
+     * @param string $namePrefix Prefix to prepend to route names.
+     * @return self New instance with the specified name prefix.
+     */
     public function namePrefix(string $namePrefix): self
     {
         $new = clone $this;
@@ -140,11 +155,23 @@ final class Group
         return $new;
     }
 
+    /**
+     * Adds a host requirement for all routes in this group.
+     *
+     * @param string $host Host name to match.
+     * @return self New instance with the specified host.
+     */
     public function host(string $host): self
     {
         return $this->hosts($host);
     }
 
+    /**
+     * Sets host requirements for all routes in this group.
+     *
+     * @param string ...$hosts Host names to match.
+     * @return self New instance with the specified hosts.
+     */
     public function hosts(string ...$hosts): self
     {
         $new = clone $this;
@@ -172,22 +199,12 @@ final class Group
     }
 
     /**
-     * @psalm-template T as string
+     * Returns group data by key.
      *
-     * @psalm-param T $key
-     *
-     * @psalm-return (
-     *   T is ('prefix'|'namePrefix'|'host') ? string|null :
-     *   (T is 'routes' ? Group[]|Route[] :
-     *     (T is 'hosts' ? array<array-key, string> :
-     *       (T is ('hasCorsMiddleware') ? bool :
-     *         (T is 'enabledMiddlewares' ? list<array|callable|string> :
-     *           (T is 'corsMiddleware' ? array|callable|string|null : mixed)
-     *         )
-     *       )
-     *     )
-     *   )
-     * )
+     * @param string $key Data key to retrieve (`prefix`, `namePrefix`, `host`, `hosts`, `corsMiddleware`, `routes`,
+     * `hasCorsMiddleware`, `enabledMiddlewares`).
+     * @return mixed The requested data.
+     * @throws InvalidArgumentException If the key is unknown.
      */
     public function getData(string $key): mixed
     {

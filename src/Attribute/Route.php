@@ -8,6 +8,9 @@ use Attribute;
 use Stringable;
 use Yiisoft\Router\Route as RouteObject;
 
+/**
+ * Route attribute that defines a route with custom HTTP methods.
+ */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 final class Route implements RouteAttributeInterface
 {

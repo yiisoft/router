@@ -85,6 +85,11 @@ final class Route implements Stringable
         }
     }
 
+    /**
+     * Returns a string representation of the route.
+     *
+     * @return string String representation including name (if set), methods, hosts, and pattern.
+     */
     public function __toString(): string
     {
         $result = $this->name === null
@@ -108,6 +113,11 @@ final class Route implements Stringable
         return $result;
     }
 
+    /**
+     * Returns debug information about the route.
+     *
+     * @return array Array with route properties for debugging.
+     */
     public function __debugInfo()
     {
         return [
@@ -124,36 +134,78 @@ final class Route implements Stringable
         ];
     }
 
+    /**
+     * Creates a GET route.
+     *
+     * @param string $pattern URL pattern.
+     * @return self New route instance.
+     */
     public static function get(string $pattern): self
     {
         return self::methods([Method::GET], $pattern);
     }
 
+    /**
+     * Creates a POST route.
+     *
+     * @param string $pattern URL pattern.
+     * @return self New route instance.
+     */
     public static function post(string $pattern): self
     {
         return self::methods([Method::POST], $pattern);
     }
 
+    /**
+     * Creates a PUT route.
+     *
+     * @param string $pattern URL pattern.
+     * @return self New route instance.
+     */
     public static function put(string $pattern): self
     {
         return self::methods([Method::PUT], $pattern);
     }
 
+    /**
+     * Creates a DELETE route.
+     *
+     * @param string $pattern URL pattern.
+     * @return self New route instance.
+     */
     public static function delete(string $pattern): self
     {
         return self::methods([Method::DELETE], $pattern);
     }
 
+    /**
+     * Creates a PATCH route.
+     *
+     * @param string $pattern URL pattern.
+     * @return self New route instance.
+     */
     public static function patch(string $pattern): self
     {
         return self::methods([Method::PATCH], $pattern);
     }
 
+    /**
+     * Creates a HEAD route.
+     *
+     * @param string $pattern URL pattern.
+     * @return self New route instance.
+     */
     public static function head(string $pattern): self
     {
         return self::methods([Method::HEAD], $pattern);
     }
 
+    /**
+     * Creates an OPTIONS route.
+     *
+     * @param string $pattern URL pattern.
+     * @return self New route instance.
+     */
     public static function options(string $pattern): self
     {
         return self::methods([Method::OPTIONS], $pattern);
@@ -167,6 +219,12 @@ final class Route implements Stringable
         return new self($methods, $pattern);
     }
 
+    /**
+     * Sets the route name.
+     *
+     * @param string $name Route name.
+     * @return self New instance with the specified name.
+     */
     public function name(string $name): self
     {
         $route = clone $this;
@@ -174,6 +232,12 @@ final class Route implements Stringable
         return $route;
     }
 
+    /**
+     * Sets the URL pattern.
+     *
+     * @param string $pattern URL pattern.
+     * @return self New instance with the specified pattern.
+     */
     public function pattern(string $pattern): self
     {
         $new = clone $this;
@@ -181,11 +245,23 @@ final class Route implements Stringable
         return $new;
     }
 
+    /**
+     * Adds a host requirement.
+     *
+     * @param string $host Host name to match.
+     * @return self New instance with the specified host.
+     */
     public function host(string $host): self
     {
         return $this->hosts($host);
     }
 
+    /**
+     * Sets host requirements.
+     *
+     * @param string ...$hosts Host names to match.
+     * @return self New instance with the specified hosts.
+     */
     public function hosts(string ...$hosts): self
     {
         $route = clone $this;
@@ -304,24 +380,12 @@ final class Route implements Stringable
     }
 
     /**
-     * @psalm-template T as string
+     * Returns route data by key.
      *
-     * @psalm-param T $key
-     *
-     * @psalm-return (
-     *   T is ('name'|'pattern') ? string :
-     *       (T is 'host' ? string|null :
-     *           (T is 'hosts' ? array<array-key, string> :
-     *               (T is 'methods' ? array<array-key,string> :
-     *                   (T is 'defaults' ? array<string,string> :
-     *                       (T is ('override'|'hasMiddlewares') ? bool :
-     *                           (T is 'enabledMiddlewares' ? array<array-key,array|callable|string> : mixed)
-     *                       )
-     *                   )
-     *               )
-     *           )
-     *       )
-     *    )
+     * @param string $key Data key to retrieve (`name`, `pattern`, `host`, `hosts`, `methods`, `defaults`, `override`,
+     * `hasMiddlewares`, `enabledMiddlewares`).
+     * @return mixed The requested data.
+     * @throws InvalidArgumentException If the key is unknown.
      */
     public function getData(string $key): mixed
     {
