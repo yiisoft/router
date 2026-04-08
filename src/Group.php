@@ -74,6 +74,8 @@ final class Group
      * Create a new group instance.
      *
      * @param string|null $prefix URL prefix to prepend to all routes of the group.
+     *
+     * @deprecated Use `new Group()` instead.
      */
     public static function create(?string $prefix = null): self
     {

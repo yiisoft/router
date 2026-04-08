@@ -8,6 +8,8 @@ use Yiisoft\Router\Provider\RoutesProviderInterface;
 
 /**
  * Simple route collector that manages routes, groups, and middleware definitions.
+ *
+ * @deprecated Will be removed in the next major release.
  */
 final class RouteCollector implements RouteCollectorInterface
 {
