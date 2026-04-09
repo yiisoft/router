@@ -137,10 +137,10 @@ final class Route implements Stringable
     /**
      * Creates a GET route.
      *
-     * `@param` string $pattern URL pattern.
-     * `@return` self New route instance.
+     * @param string $pattern URL pattern.
+     * @return self New route instance.
      *
-     * `@deprecated` Use `new Route()` instead.
+     * @deprecated Use `new Route()` instead.
      */
     public static function get(string $pattern): self
     {
@@ -153,7 +153,7 @@ final class Route implements Stringable
      * @param string $pattern URL pattern.
      * @return self New route instance.
      *
-     * @deprecated Use `new Router()` instead.
+     * @deprecated Use `new Route()` instead.
      */
     public static function post(string $pattern): self
     {
@@ -166,7 +166,7 @@ final class Route implements Stringable
      * @param string $pattern URL pattern.
      * @return self New route instance.
      *
-     * @deprecated Use `new Router()` instead.
+     * @deprecated Use `new Route()` instead.
      */
     public static function put(string $pattern): self
     {
@@ -179,7 +179,7 @@ final class Route implements Stringable
      * @param string $pattern URL pattern.
      * @return self New route instance.
      *
-     * @deprecated Use `new Router()` instead.
+     * @deprecated Use `new Route()` instead.
      */
     public static function delete(string $pattern): self
     {
@@ -192,7 +192,7 @@ final class Route implements Stringable
      * @param string $pattern URL pattern.
      * @return self New route instance.
      *
-     * @deprecated Use `new Router()` instead.
+     * @deprecated Use `new Route()` instead.
      */
     public static function patch(string $pattern): self
     {
@@ -205,7 +205,7 @@ final class Route implements Stringable
      * @param string $pattern URL pattern.
      * @return self New route instance.
      *
-     * @deprecated Use `new Router()` instead.
+     * @deprecated Use `new Route()` instead.
      */
     public static function head(string $pattern): self
     {
@@ -218,7 +218,7 @@ final class Route implements Stringable
      * @param string $pattern URL pattern.
      * @return self New route instance.
      *
-     * @deprecated Use `new Router()` instead.
+     * @deprecated Use `new Route()` instead.
      */
     public static function options(string $pattern): self
     {
@@ -228,7 +228,7 @@ final class Route implements Stringable
     /**
      * @param string[] $methods
      *
-     * @deprecated Use `new Router()` instead.
+     * @deprecated Use `new Route()` instead.
      */
     public static function methods(array $methods, string $pattern): self
     {
