@@ -8,7 +8,6 @@ use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Provider\ArrayRoutesProvider;
-use Yiisoft\Router\Provider\FileRoutesProvider;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollector;
 
