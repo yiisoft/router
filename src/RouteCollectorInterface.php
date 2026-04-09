@@ -6,6 +6,8 @@ namespace Yiisoft\Router;
 
 /**
  * Interface for route collectors that manage route registration.
+ *
+ * @deprecated Will be removed in the next major release.
  */
 interface RouteCollectorInterface
 {
