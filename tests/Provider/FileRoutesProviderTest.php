@@ -45,13 +45,14 @@ class FileRoutesProviderTest extends TestCase
         $provider->getRoutes();
     }
 
-    public function testGetRoutesWithEmptyRoutes(): void
+    public function testGetRoutesWithInvalidRoutes(): void
     {
         $file = dirname(__DIR__) . '/Support/resources/foo.php';
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Failed to provide routes from "' . $file . '". File must return an array of Route or Group instances.');
 
         $provider = new FileRoutesProvider($file);
-
-        $this->assertEmpty($provider->getRoutes());
+        $provider->getRoutes();
     }
 
     public function testGetRoutesWithScope(): void

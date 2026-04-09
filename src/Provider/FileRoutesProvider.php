@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router\Provider;
 
-use Closure;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 use CallbackFilterIterator;
@@ -26,14 +25,11 @@ final class FileRoutesProvider implements RoutesProviderInterface
 
     public function getRoutes(): array
     {
-        /** @var Closure $scopeRequire */
-        $scopeRequire = Closure::bind(static function (string $file, array $scope): mixed {
+        $scopeRequire = static function (string $file, array $scope): mixed {
             extract($scope, EXTR_SKIP);
-            /**
-             * @psalm-suppress UnresolvableInclude
-             */
+            /** @psalm-suppress UnresolvableInclude */
             return require $file;
-        }, null);
+        };
         if (!file_exists($this->file)) {
             throw new RuntimeException(
                 'Failed to provide routes from "' . $this->file . '". File or directory not found.',
@@ -72,11 +68,12 @@ final class FileRoutesProvider implements RoutesProviderInterface
 
         /** @var mixed $routes */
         $routes = $scopeRequire($this->file, $this->scope);
-        if (is_array($routes) && $this->areRoutesValid($routes)) {
-            return $routes;
+        if (!is_array($routes) || !$this->areRoutesValid($routes)) {
+            throw new RuntimeException(
+                'Failed to provide routes from "' . $this->file . '". File must return an array of Route or Group instances.',
+            );
         }
-
-        return [];
+        return $routes;
     }
 
     /**

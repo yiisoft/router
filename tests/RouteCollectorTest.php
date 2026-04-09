@@ -86,7 +86,7 @@ final class RouteCollectorTest extends TestCase
                 Route::get('test/'),
             );
 
-        $collector = new RouteCollector([new ArrayRoutesProvider([$rootGroup, $postGroup, $testGroup]), new FileRoutesProvider(__DIR__ . '/Support/resources/foo.php')]);
+        $collector = new RouteCollector([new ArrayRoutesProvider([$rootGroup, $postGroup, $testGroup])]);
 
         $this->assertCount(3, $collector->getItems());
         $this->assertContainsOnlyInstancesOf(Group::class, $collector->getItems());
