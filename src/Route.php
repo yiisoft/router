@@ -137,10 +137,10 @@ final class Route implements Stringable
     /**
      * Creates a GET route.
      *
-     * @param string $pattern URL pattern.
-     * @return self New route instance.
+     * `@param` string $pattern URL pattern.
+     * `@return` self New route instance.
      *
-     * @deprecated Use `new Router()` instead.
+     * `@deprecated` Use `new Route()` instead.
      */
     public static function get(string $pattern): self
     {
