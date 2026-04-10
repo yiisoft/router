@@ -46,10 +46,12 @@ final class Group
     private $corsMiddleware = null;
 
     /**
+     * @param string|null $prefix URL prefix to prepend to all routes of the group.
      * @param array[]|callable[]|string[] $middlewares Middleware definitions.
      * @param string[] $hosts List of host names.
      * @param string|null $namePrefix Prefix for route names.
      * @param array $disabledMiddlewares Excludes middleware from being invoked when action is handled.
+     * @param array|callable|string|null $corsMiddleware Middleware definition for CORS requests.
      * It is useful to avoid invoking one of the parent group middleware for
      * a certain route.
      *
