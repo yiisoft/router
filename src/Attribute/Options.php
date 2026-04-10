@@ -40,7 +40,7 @@ final class Options implements RouteAttributeInterface
         array $disabledMiddlewares = [],
     ) {
         $this->route = new Route(
-            methods: [Method::OPTIONS],
+            method: [Method::OPTIONS],
             pattern: $pattern,
             name: $name,
             middlewares: $middlewares,

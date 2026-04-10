@@ -40,7 +40,7 @@ final class Get implements RouteAttributeInterface
         array $disabledMiddlewares = [],
     ) {
         $this->route = new Route(
-            methods: [Method::GET],
+            method: [Method::GET],
             pattern: $pattern,
             name: $name,
             middlewares: $middlewares,

@@ -40,7 +40,7 @@ final class Delete implements RouteAttributeInterface
         array $disabledMiddlewares = [],
     ) {
         $this->route = new Route(
-            methods: [Method::DELETE],
+            method: [Method::DELETE],
             pattern: $pattern,
             name: $name,
             middlewares: $middlewares,

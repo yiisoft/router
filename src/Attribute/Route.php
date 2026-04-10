@@ -41,7 +41,7 @@ final class Route implements RouteAttributeInterface
         array $disabledMiddlewares = [],
     ) {
         $this->route = new RouteObject(
-            methods: $methods,
+            method: $methods,
             pattern: $pattern,
             name: $name,
             middlewares: $middlewares,

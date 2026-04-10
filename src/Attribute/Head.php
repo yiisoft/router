@@ -40,7 +40,7 @@ final class Head implements RouteAttributeInterface
         array $disabledMiddlewares = [],
     ) {
         $this->route = new Route(
-            methods: [Method::HEAD],
+            method: [Method::HEAD],
             pattern: $pattern,
             name: $name,
             middlewares: $middlewares,

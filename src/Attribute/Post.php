@@ -40,7 +40,7 @@ final class Post implements RouteAttributeInterface
         array $disabledMiddlewares = [],
     ) {
         $this->route = new Route(
-            methods: [Method::POST],
+            method: [Method::POST],
             pattern: $pattern,
             name: $name,
             middlewares: $middlewares,

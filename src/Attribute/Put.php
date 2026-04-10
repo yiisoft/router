@@ -40,7 +40,7 @@ final class Put implements RouteAttributeInterface
         array $disabledMiddlewares = [],
     ) {
         $this->route = new Route(
-            methods: [Method::PUT],
+            method: [Method::PUT],
             pattern: $pattern,
             name: $name,
             middlewares: $middlewares,

@@ -33,7 +33,7 @@ final class RouteTest extends TestCase
     public function testSimpleInstance(): void
     {
         $route = new Route(
-            methods: [Method::GET],
+            method: [Method::GET],
             pattern: '/',
             action: [TestController::class, 'index'],
             middlewares: [TestMiddleware1::class, fn() => new Response(), TestMiddleware2::class],
@@ -48,9 +48,16 @@ final class RouteTest extends TestCase
     public function testEmptyMethods(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('$methods cannot be empty.');
+        $this->expectExceptionMessage('$method cannot be empty.');
 
         new Route([], '');
+    }
+
+    public function testStringMethodConvertedToArray(): void
+    {
+        $route = new Route(Method::POST, '/');
+
+        $this->assertSame([Method::POST], $route->getData('methods'));
     }
 
     public function testName(): void
@@ -282,7 +289,7 @@ final class RouteTest extends TestCase
     public function testDefaultsConvertedToStringInConstructor(): void
     {
         $route = new Route(
-            methods: [Method::GET],
+            method: [Method::GET],
             pattern: '/{language}',
             defaults: ['language' => 'en', 'age' => 42],
         );
@@ -296,7 +303,7 @@ final class RouteTest extends TestCase
     public function testActionAddedViaConstructorMiddlewareInsertedBefore(): void
     {
         $route = new Route(
-            methods: [Method::GET],
+            method: [Method::GET],
             pattern: '/',
             action: [TestController::class, 'index'],
         );

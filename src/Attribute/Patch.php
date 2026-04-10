@@ -40,7 +40,7 @@ final class Patch implements RouteAttributeInterface
         array $disabledMiddlewares = [],
     ) {
         $this->route = new Route(
-            methods: [Method::PATCH],
+            method: [Method::PATCH],
             pattern: $pattern,
             name: $name,
             middlewares: $middlewares,

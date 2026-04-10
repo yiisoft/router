@@ -56,10 +56,11 @@ final class Route implements Stringable
      * It is useful to avoid invoking one of the parent group middleware for
      * a certain route.
      *
+     * @param string|string[] $method HTTP method or list of methods.
      * @psalm-param list<array|callable|string> $middlewares
      */
     public function __construct(
-        array $methods,
+        string|array $method,
         private string $pattern,
         private ?string $name = null,
         array|callable|string|null $action = null,
@@ -69,8 +70,10 @@ final class Route implements Stringable
         private bool $override = false,
         private array $disabledMiddlewares = [],
     ) {
+        $methods = is_string($method) ? [$method] : $method;
+
         if (empty($methods)) {
-            throw new InvalidArgumentException('$methods cannot be empty.');
+            throw new InvalidArgumentException('$method cannot be empty.');
         }
         $this->assertListOfStrings($methods, 'methods');
         $this->assertMiddlewares($middlewares);
