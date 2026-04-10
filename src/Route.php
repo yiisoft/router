@@ -73,7 +73,7 @@ final class Route implements Stringable
         private bool $override = false,
         private array $disabledMiddlewares = [],
     ) {
-        $methods = (array)$method;
+        $methods = (array) $method;
 
         if (empty($methods)) {
             throw new InvalidArgumentException('$method cannot be empty.');
