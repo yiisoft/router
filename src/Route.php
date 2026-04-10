@@ -75,7 +75,7 @@ final class Route implements Stringable
     ) {
         $methods = (array) $method;
 
-        if (empty($methods)) {
+        if ($methods === []) {
             throw new InvalidArgumentException('$method cannot be empty.');
         }
         $this->assertListOfStrings($methods, 'methods');
@@ -106,7 +106,7 @@ final class Route implements Stringable
             $result .= implode(',', $this->methods) . ' ';
         }
 
-        if (!empty($this->hosts)) {
+        if ($this->hosts !== []) {
             $quoted = array_map(static fn($host) => preg_quote($host, '/'), $this->hosts);
 
             if (!preg_match('/' . implode('|', $quoted) . '/', $this->pattern)) {
