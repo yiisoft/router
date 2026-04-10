@@ -19,7 +19,7 @@ final class Options implements RouteAttributeInterface
 
     /**
      * @param string $pattern Route pattern.
-     * @param string|null $name Route name. If not set, it will be generated automatically.
+     * @param string|null $name Route name.
      * @param array[]|callable[]|string[] $middlewares Middlewares to be added to the route.
      * @param array<string,scalar|Stringable|null> $defaults Parameter default values indexed by parameter names.
      * @param string[] $hosts Hosts that the route should match.
