@@ -47,16 +47,19 @@ final class Route implements Stringable
     private array $defaults = [];
 
     /**
+     * @param string|string[] $method HTTP method or list of methods.
+     * @param string $pattern URL pattern.
      * @param array|callable|string|null $action Action handler. It is a primary middleware definition that
      * should be invoked last for a matched route.
+     * @param string|null $name Route name.
      * @param array[]|callable[]|string[] $middlewares Middleware definitions.
      * @param array<string,scalar|Stringable|null> $defaults Parameter default values indexed by parameter names.
+     * @param string[] $hosts Hosts that the route should match.
      * @param bool $override Marks route as override. When added it will replace existing route with the same name.
      * @param array $disabledMiddlewares Excludes middleware from being invoked when action is handled.
      * It is useful to avoid invoking one of the parent group middleware for
      * a certain route.
      *
-     * @param string|string[] $method HTTP method or list of methods.
      * @psalm-param list<array|callable|string> $middlewares
      */
     public function __construct(
