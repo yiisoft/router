@@ -62,8 +62,8 @@ final class Route implements Stringable
     public function __construct(
         string|array $method,
         private string $pattern,
-        private ?string $name = null,
         array|callable|string|null $action = null,
+        private ?string $name = null,
         array $middlewares = [],
         array $defaults = [],
         array $hosts = [],
