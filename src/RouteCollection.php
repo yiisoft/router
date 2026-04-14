@@ -32,8 +32,9 @@ final class RouteCollection implements RouteCollectionInterface
     private array $routes = [];
 
     /**
-     * @param RouteCollectorInterface $collector The route collector to use.
      * @psalm-suppress DeprecatedInterface. Will be removed in the next major release.
+     *
+     * @param RouteCollectorInterface $collector The route collector to use.
      */
     public function __construct(private readonly RouteCollectorInterface $collector) {}
 
@@ -162,6 +163,7 @@ final class RouteCollection implements RouteCollectionInterface
 
     /**
      * @psalm-param Items $tree
+     * @psalm-suppress DeprecatedMethod. Will be removed in the next major release.
      */
     private function processCors(
         Group $group,
