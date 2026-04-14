@@ -10,6 +10,7 @@ use Yiisoft\Router\Provider\RoutesProviderInterface;
  * Simple route collector that manages routes, groups, and middleware definitions.
  *
  * @deprecated Will be removed in the next major release.
+ * @psalm-suppress DeprecatedInterface. Will be removed in the next major release.
  */
 final class RouteCollector implements RouteCollectorInterface
 {
@@ -71,12 +72,14 @@ final class RouteCollector implements RouteCollectorInterface
     public function getItems(): array
     {
         if (!$this->providersAreInjected) {
+            $providerItems = [];
             foreach ($this->providers as $provider) {
                 array_push(
-                    $this->items,
+                    $providerItems,
                     ...$provider->getRoutes(),
                 );
             }
+            array_push($this->items, ...$providerItems);
             $this->providersAreInjected = true;
         }
         return $this->items;

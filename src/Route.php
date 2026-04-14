@@ -18,6 +18,8 @@ use function is_string;
 
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
+ *
+ * @psalm-suppress DeprecatedMethod. Will be removed in the next major release.
  */
 final class Route implements Stringable
 {
@@ -293,7 +295,7 @@ final class Route implements Stringable
     }
 
     /**
-     * Marks route as override. When added it will replace existing route with the same name.
+     * Marks route as override. When added, it will replace existing route with the same name.
      */
     public function override(): self
     {
@@ -406,8 +408,35 @@ final class Route implements Stringable
      *
      * @param string $key Data key to retrieve (`name`, `pattern`, `host`, `hosts`, `methods`, `defaults`, `override`,
      * `hasMiddlewares`, `enabledMiddlewares`).
-     * @return mixed The requested data.
+     * 1. `name` - route name.
+     * 2. `pattern` - route pattern.
+     * 3. `host` - first host requirement.
+     * 4. `hosts` - all host requirements.
+     * 5. `methods` - all HTTP methods.
+     * 6. `defaults` - all default parameter values.
+     * 7. `override` - whether the route is marked as override.
+     * 8. `hasMiddlewares` - whether the route has any middlewares.
+     * 9. `enabledMiddlewares` - all enabled middlewares.
+     *
+     * @psalm-template T as string
+     *
+     * @psalm-param T $key
+     * @psalm-return (
+     *    T is ('name'|'pattern') ? string :
+     *        (T is 'host' ? string|null :
+     *            (T is 'hosts' ? array<array-key, string> :
+     *                (T is 'methods' ? array<array-key,string> :
+     *                    (T is 'defaults' ? array<string,string> :
+     *                        (T is ('override'|'hasMiddlewares') ? bool :
+     *                            (T is 'enabledMiddlewares' ? array<array-key,array|callable|string> : mixed)
+     *                        )
+     *                    )
+     *                )
+     *            )
+     *        )
+     *     )
      * @throws InvalidArgumentException If the key is unknown.
+     * @return mixed The requested data.
      */
     public function getData(string $key): mixed
     {
