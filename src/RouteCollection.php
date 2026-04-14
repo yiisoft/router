@@ -33,6 +33,7 @@ final class RouteCollection implements RouteCollectionInterface
 
     /**
      * @param RouteCollectorInterface $collector The route collector to use.
+     * @psalm-suppress DeprecatedInterface. Will be removed in the next major release.
      */
     public function __construct(private readonly RouteCollectorInterface $collector) {}
 

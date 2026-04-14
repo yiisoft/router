@@ -207,8 +207,32 @@ final class Group
      *
      * @param string $key Data key to retrieve (`prefix`, `namePrefix`, `host`, `hosts`, `corsMiddleware`, `routes`,
      * `hasCorsMiddleware`, `enabledMiddlewares`).
-     * @return mixed The requested data.
+     * 1. `prefix` - URL prefix to prepend to all routes of the group.
+     * 2. `namePrefix` - Prefix for route names.
+     * 3. `host` - first host requirement.
+     * 4. `hosts` - all host requirements.
+     * 5. `corsMiddleware` - Middleware definition for CORS requests.
+     * 6. `routes` - routes or sub-groups to include in this group.
+     * 7. `hasCorsMiddleware` - whether the group has CORS middleware.
+     * 8. `enabledMiddlewares` - all enabled middlewares.
+     *
+     * @psalm-template T as string
+     * @psalm-param T $key
+     *
      * @throws InvalidArgumentException If the key is unknown.
+     * @return mixed The requested data.
+     * @psalm-return (
+     *    T is ('prefix'|'namePrefix'|'host') ? string|null :
+     *    (T is 'routes' ? Group[]|Route[] :
+     *      (T is 'hosts' ? array<array-key, string> :
+     *        (T is ('hasCorsMiddleware') ? bool :
+     *          (T is 'enabledMiddlewares' ? list<array|callable|string> :
+     *            (T is 'corsMiddleware' ? array|callable|string|null : mixed)
+     *          )
+     *        )
+     *      )
+     *    )
+     *  )
      */
     public function getData(string $key): mixed
     {
