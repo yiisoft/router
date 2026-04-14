@@ -16,6 +16,7 @@ use function is_array;
  * Collection of routes that manages route registration and builds a route tree.
  *
  * @psalm-type Items = array<array-key,array|string>
+ * @psalm-suppress DeprecatedInterface. Will be removed in the next major release.
  */
 final class RouteCollection implements RouteCollectionInterface
 {
@@ -32,8 +33,6 @@ final class RouteCollection implements RouteCollectionInterface
     private array $routes = [];
 
     /**
-     * @psalm-suppress DeprecatedInterface. Will be removed in the next major release.
-     *
      * @param RouteCollectorInterface $collector The route collector to use.
      */
     public function __construct(private readonly RouteCollectorInterface $collector) {}
