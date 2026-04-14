@@ -15,6 +15,7 @@ use function in_array;
 use function is_array;
 use function is_callable;
 use function is_string;
+use function strval;
 
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
@@ -86,7 +87,7 @@ final class Route implements Stringable
         $this->middlewares = $middlewares;
         $this->methods = $methods;
         $this->hosts = $this->normalizeHosts($hosts);
-        $this->defaults = array_map(\strval(...), $defaults);
+        $this->defaults = array_map(strval(...), $defaults);
         if ($action !== null) {
             $this->middlewares[] = $action;
             $this->actionAdded = true;
@@ -312,7 +313,7 @@ final class Route implements Stringable
     public function defaults(array $defaults): self
     {
         $route = clone $this;
-        $route->defaults = array_map(\strval(...), $defaults);
+        $route->defaults = array_map(strval(...), $defaults);
         return $route;
     }
 
