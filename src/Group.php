@@ -7,6 +7,11 @@ namespace Yiisoft\Router;
 use InvalidArgumentException;
 use Yiisoft\Router\Internal\MiddlewareFilter;
 
+use function in_array;
+use function is_array;
+use function is_callable;
+use function is_string;
+
 final class Group
 {
     /**
@@ -47,12 +52,13 @@ final class Group
         array $middlewares = [],
         array $hosts = [],
         private array $disabledMiddlewares = [],
-        array|callable|string|null $corsMiddleware = null
+        array|callable|string|null $corsMiddleware = null,
     ) {
         $this->setRoutes($routes);
         $this->setMiddlewares($middlewares);
         $this->setHosts($hosts);
-        $this->corsMiddleware = $corsMiddleware;}
+        $this->corsMiddleware = $corsMiddleware;
+    }
 
     /**
      * @return Group[]|RoutableInterface[]|Route[]
@@ -111,7 +117,7 @@ final class Group
     {
         foreach ($hosts as $host) {
             if (!is_string($host)) {
-                throw new \InvalidArgumentException('Invalid $hosts provided, list of string expected.');
+                throw new InvalidArgumentException('Invalid $hosts provided, list of string expected.');
             }
             $host = rtrim($host, '/');
 
@@ -173,8 +179,8 @@ final class Group
                 continue;
             }
 
-            throw new \InvalidArgumentException(
-                'Invalid $middlewares provided, list of string or array or callable expected.'
+            throw new InvalidArgumentException(
+                'Invalid $middlewares provided, list of string or array or callable expected.',
             );
         }
     }
@@ -190,8 +196,8 @@ final class Group
                 continue;
             }
 
-            throw new \InvalidArgumentException(
-                'Invalid $routes provided, array of `Route` or `Group` or `RoutableInterface` instance expected.'
+            throw new InvalidArgumentException(
+                'Invalid $routes provided, array of `Route` or `Group` or `RoutableInterface` instance expected.',
             );
         }
     }

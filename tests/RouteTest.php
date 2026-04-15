@@ -66,7 +66,7 @@ final class RouteTest extends TestCase
 
     public function testEmptyMethods(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('$methods cannot be empty.');
 
         new Route([], '');
@@ -175,15 +175,15 @@ final class RouteTest extends TestCase
 
     public function testInvalidMiddlewares(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid $middlewares provided, list of string or array or callable expected.');
 
-        $route = new Route([Method::GET], '/', middlewares: [static fn () => new Response(), (object) ['test' => 1]]);
+        $route = new Route([Method::GET], '/', middlewares: [static fn() => new Response(), (object) ['test' => 1]]);
     }
 
     public function testInvalidDefaults(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid $defaults provided, indexed array of scalar or `Stringable` or null expected.');
 
         new Route([Method::GET], '/', defaults: ['test' => 1, 'foo' => ['bar']]);
@@ -200,7 +200,7 @@ final class RouteTest extends TestCase
             defaults: ['age' => 42],
             hosts: ['example.com'],
             override: true,
-            disabledMiddlewares: [TestMiddleware2::class]
+            disabledMiddlewares: [TestMiddleware2::class],
         );
 
         $expected = <<<EOL
@@ -259,7 +259,7 @@ EOL;
 
     public function testInvalidHosts(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid $hosts provided, list of string expected.');
 
         $route = new Route([Method::GET], '/', hosts: ['b.com', 123]);
@@ -267,7 +267,7 @@ EOL;
 
     public function testInvalidMethods(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid $methods provided, list of string expected.');
 
         $route = new Route([1], '/');

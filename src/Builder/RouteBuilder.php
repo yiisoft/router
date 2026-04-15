@@ -15,7 +15,7 @@ use Yiisoft\Router\Route;
  */
 final class RouteBuilder implements RoutableInterface
 {
-    private null|string $name = null;
+    private ?string $name = null;
 
     /**
      * @var array|callable|string|null
@@ -48,8 +48,7 @@ final class RouteBuilder implements RoutableInterface
     private function __construct(
         private readonly array $methods,
         private string $pattern,
-    ) {
-    }
+    ) {}
 
     public static function get(string $pattern): self
     {
@@ -152,7 +151,7 @@ final class RouteBuilder implements RoutableInterface
         $route = clone $this;
         array_push(
             $route->middlewares,
-            ...array_values($definition)
+            ...array_values($definition),
         );
 
         return $route;
@@ -167,7 +166,7 @@ final class RouteBuilder implements RoutableInterface
         $route = clone $this;
         array_unshift(
             $route->middlewares,
-            ...array_values($definition)
+            ...array_values($definition),
         );
 
         return $route;
@@ -193,7 +192,7 @@ final class RouteBuilder implements RoutableInterface
         $route = clone $this;
         array_push(
             $route->disabledMiddlewares,
-            ...array_values($definition)
+            ...array_values($definition),
         );
 
         return $route;
@@ -210,7 +209,7 @@ final class RouteBuilder implements RoutableInterface
             defaults: $this->defaults,
             hosts: $this->hosts,
             override: $this->override,
-            disabledMiddlewares: $this->disabledMiddlewares
+            disabledMiddlewares: $this->disabledMiddlewares,
         );
     }
 }

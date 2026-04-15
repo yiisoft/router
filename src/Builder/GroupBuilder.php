@@ -42,8 +42,7 @@ final class GroupBuilder implements RoutableInterface
     private function __construct(
         private readonly ?string $prefix = null,
         private ?string $namePrefix = null,
-    ) {
-    }
+    ) {}
 
     /**
      * Create a new group instance.
@@ -95,7 +94,7 @@ final class GroupBuilder implements RoutableInterface
         $new = clone $this;
         array_push(
             $new->middlewares,
-            ...array_values($definition)
+            ...array_values($definition),
         );
 
         return $new;
@@ -110,7 +109,7 @@ final class GroupBuilder implements RoutableInterface
         $new = clone $this;
         array_unshift(
             $new->middlewares,
-            ...array_values($definition)
+            ...array_values($definition),
         );
 
         $new->middlewareAdded = true;
@@ -163,7 +162,7 @@ final class GroupBuilder implements RoutableInterface
             middlewares: $this->middlewares,
             hosts: $this->hosts,
             disabledMiddlewares: $this->disabledMiddlewares,
-            corsMiddleware: $this->corsMiddleware
+            corsMiddleware: $this->corsMiddleware,
         );
     }
 }

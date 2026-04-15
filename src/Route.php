@@ -8,6 +8,12 @@ use InvalidArgumentException;
 use Stringable;
 use Yiisoft\Router\Internal\MiddlewareFilter;
 
+use function in_array;
+use function is_array;
+use function is_callable;
+use function is_scalar;
+use function is_string;
+
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
  */
@@ -70,6 +76,45 @@ final class Route implements Stringable
         $this->setMiddlewares($middlewares);
         $this->setHosts($hosts);
         $this->setDefaults($defaults);
+    }
+
+    public function __toString(): string
+    {
+        $result = $this->name === null
+            ? ''
+            : '[' . $this->name . '] ';
+
+        if ($this->methods !== []) {
+            $result .= implode(',', $this->methods) . ' ';
+        }
+
+        if (!empty($this->hosts)) {
+            $quoted = array_map(static fn($host) => preg_quote($host, '/'), $this->hosts);
+
+            if (!preg_match('/' . implode('|', $quoted) . '/', $this->pattern)) {
+                $result .= implode('|', $this->hosts);
+            }
+        }
+
+        $result .= $this->pattern;
+
+        return $result;
+    }
+
+    public function __debugInfo()
+    {
+        return [
+            'name' => $this->name,
+            'methods' => $this->methods,
+            'pattern' => $this->pattern,
+            'action' => $this->action,
+            'hosts' => $this->hosts,
+            'defaults' => $this->defaults,
+            'override' => $this->override,
+            'middlewares' => $this->middlewares,
+            'disabledMiddlewares' => $this->disabledMiddlewares,
+            'enabledMiddlewares' => $this->getEnabledMiddlewares(),
+        ];
     }
 
     /**
@@ -192,7 +237,7 @@ final class Route implements Stringable
         foreach ($defaults as $key => $value) {
             if (!is_scalar($value) && !($value instanceof Stringable) && null !== $value) {
                 throw new InvalidArgumentException(
-                    'Invalid $defaults provided, indexed array of scalar or `Stringable` or null expected.'
+                    'Invalid $defaults provided, indexed array of scalar or `Stringable` or null expected.',
                 );
             }
             $this->defaults[$key] = (string) $value;
@@ -225,45 +270,6 @@ final class Route implements Stringable
         return $this;
     }
 
-    public function __toString(): string
-    {
-        $result = $this->name === null
-            ? ''
-            : '[' . $this->name . '] ';
-
-        if ($this->methods !== []) {
-            $result .= implode(',', $this->methods) . ' ';
-        }
-
-        if (!empty($this->hosts)) {
-            $quoted = array_map(static fn ($host) => preg_quote($host, '/'), $this->hosts);
-
-            if (!preg_match('/' . implode('|', $quoted) . '/', $this->pattern)) {
-                $result .= implode('|', $this->hosts);
-            }
-        }
-
-        $result .= $this->pattern;
-
-        return $result;
-    }
-
-    public function __debugInfo()
-    {
-        return [
-            'name' => $this->name,
-            'methods' => $this->methods,
-            'pattern' => $this->pattern,
-            'action' => $this->action,
-            'hosts' => $this->hosts,
-            'defaults' => $this->defaults,
-            'override' => $this->override,
-            'middlewares' => $this->middlewares,
-            'disabledMiddlewares' => $this->disabledMiddlewares,
-            'enabledMiddlewares' => $this->getEnabledMiddlewares(),
-        ];
-    }
-
     /**
      * @psalm-assert list<array|callable|string> $middlewares
      */
@@ -280,7 +286,7 @@ final class Route implements Stringable
             }
 
             throw new InvalidArgumentException(
-                'Invalid $middlewares provided, list of string or array or callable expected.'
+                'Invalid $middlewares provided, list of string or array or callable expected.',
             );
         }
     }

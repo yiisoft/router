@@ -125,7 +125,7 @@ final class RouteBuilderTest extends TestCase
                 'https://yiiframework.com/',
                 'yf.com',
                 'yii.com',
-                'yf.ru'
+                'yf.ru',
             );
 
         $this->assertSame(
@@ -135,7 +135,7 @@ final class RouteBuilderTest extends TestCase
                 'yii.com',
                 'yf.ru',
             ],
-            $route->toRoute()->getHosts()
+            $route->toRoute()->getHosts(),
         );
     }
 
@@ -146,7 +146,7 @@ final class RouteBuilderTest extends TestCase
         $multipleRoute = Route::get('/')
             ->hosts(
                 'https://yiiframework.com/',
-                'https://yiiframework.ru/'
+                'https://yiiframework.ru/',
             );
 
         $this->assertCount(1, $route->toRoute()->getHosts());
@@ -190,14 +190,14 @@ final class RouteBuilderTest extends TestCase
             ->name('test.route')
             ->host('yiiframework.com');
 
-        $this->assertSame('[test.route] GET,POST ' . $expected, (string)$route->toRoute());
+        $this->assertSame('[test.route] GET,POST ' . $expected, (string) $route->toRoute());
     }
 
     public function testToStringSimple(): void
     {
         $route = Route::get('/');
 
-        $this->assertSame('GET /', (string)$route->toRoute());
+        $this->assertSame('GET /', (string) $route->toRoute());
     }
 
     public function testDispatcherInjecting(): void
@@ -206,7 +206,7 @@ final class RouteBuilderTest extends TestCase
         $container = $this->getContainer(
             [
                 TestController::class => new TestController(),
-            ]
+            ],
         );
 
         $route = Route::get('/')->action([TestController::class, 'index']);
@@ -235,7 +235,7 @@ final class RouteBuilderTest extends TestCase
                     TestMiddleware2::class => new TestMiddleware2(),
                     TestMiddleware3::class => new TestMiddleware3(),
                     TestController::class => new TestController(),
-                ])
+                ]),
             )
             ->withMiddlewares($route->toRoute()->getEnabledMiddlewares());
 
@@ -260,7 +260,7 @@ final class RouteBuilderTest extends TestCase
                     TestMiddleware2::class => new TestMiddleware2(),
                     TestMiddleware3::class => new TestMiddleware3(),
                     TestController::class => new TestController(),
-                ])
+                ]),
             )
             ->withMiddlewares($route->toRoute()->getEnabledMiddlewares())
             ->dispatch($request, $this->getRequestHandler());
@@ -282,7 +282,7 @@ final class RouteBuilderTest extends TestCase
 
         $this->assertSame(
             [TestMiddleware2::class, TestMiddleware3::class, [TestController::class, 'index']],
-            $route->toRoute()->getEnabledMiddlewares()
+            $route->toRoute()->getEnabledMiddlewares(),
         );
     }
 
@@ -297,7 +297,7 @@ final class RouteBuilderTest extends TestCase
 
         $this->assertSame(
             [TestMiddleware3::class, TestMiddleware1::class,  TestMiddleware2::class],
-            $route->toRoute()->getEnabledMiddlewares()
+            $route->toRoute()->getEnabledMiddlewares(),
         );
     }
 
@@ -312,7 +312,7 @@ final class RouteBuilderTest extends TestCase
 
         $this->assertSame(
             [TestMiddleware3::class],
-            $route->toRoute()->getEnabledMiddlewares()
+            $route->toRoute()->getEnabledMiddlewares(),
         );
     }
 
@@ -338,7 +338,7 @@ final class RouteBuilderTest extends TestCase
 
         $this->assertSame(
             [TestMiddleware2::class, TestMiddleware3::class, [TestController::class, 'index']],
-            $route->toRoute()->getEnabledMiddlewares()
+            $route->toRoute()->getEnabledMiddlewares(),
         );
     }
 
@@ -361,7 +361,7 @@ final class RouteBuilderTest extends TestCase
 
     private function getRequestHandler(): RequestHandlerInterface
     {
-        return new class () implements RequestHandlerInterface {
+        return new class implements RequestHandlerInterface {
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
                 return new Response(404);
@@ -369,18 +369,18 @@ final class RouteBuilderTest extends TestCase
         };
     }
 
-    private function getDispatcher(ContainerInterface|null $container = null): MiddlewareDispatcher
+    private function getDispatcher(?ContainerInterface $container = null): MiddlewareDispatcher
     {
         if ($container === null) {
             return new MiddlewareDispatcher(
                 new MiddlewareFactory($this->getContainer()),
-                $this->createMock(EventDispatcherInterface::class)
+                $this->createMock(EventDispatcherInterface::class),
             );
         }
 
         return new MiddlewareDispatcher(
             new MiddlewareFactory($container),
-            $this->createMock(EventDispatcherInterface::class)
+            $this->createMock(EventDispatcherInterface::class),
         );
     }
 

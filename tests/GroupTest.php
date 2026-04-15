@@ -13,7 +13,7 @@ use Yiisoft\Router\Route;
 use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
 use Yiisoft\Router\Tests\Support\TestMiddleware3;
-use Yiisoft\Router\Tests\Support\TestController;
+use stdClass;
 
 final class GroupTest extends TestCase
 {
@@ -47,7 +47,7 @@ final class GroupTest extends TestCase
 
         $this->assertSame(
             [TestMiddleware2::class, TestMiddleware3::class],
-            $group->getEnabledMiddlewares()
+            $group->getEnabledMiddlewares(),
         );
     }
 
@@ -62,7 +62,7 @@ final class GroupTest extends TestCase
 
         $this->assertSame(
             [TestMiddleware3::class],
-            $group->getEnabledMiddlewares()
+            $group->getEnabledMiddlewares(),
         );
     }
 
@@ -71,8 +71,8 @@ final class GroupTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid $middlewares provided, list of string or array or callable expected.');
 
-        $middleware = static fn () => new Response();
-        $group = new Group('/api', middlewares: [$middleware, new \stdClass()]);
+        $middleware = static fn() => new Response();
+        $group = new Group('/api', middlewares: [$middleware, new stdClass()]);
     }
 
     public function testHosts(): void
@@ -106,7 +106,7 @@ final class GroupTest extends TestCase
 
     public function testCors(): void
     {
-        $group = (new Group())->setCorsMiddleware($cors = static fn () => new Response());
+        $group = (new Group())->setCorsMiddleware($cors = static fn() => new Response());
 
         $this->assertSame($cors, $group->getCorsMiddleware());
     }
@@ -123,6 +123,6 @@ final class GroupTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid $routes provided, array of `Route` or `Group` or `RoutableInterface` instance expected.');
 
-        $group = (new Group())->setRoutes([new Route([Method::GET], ''), new \stdClass()]);
+        $group = (new Group())->setRoutes([new Route([Method::GET], ''), new stdClass()]);
     }
 }
