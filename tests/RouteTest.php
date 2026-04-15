@@ -53,6 +53,14 @@ final class RouteTest extends TestCase
         new Route([], '');
     }
 
+    public function testInvalidMethods(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid $methods provided, list of string expected.');
+
+        new Route([Method::GET, 1], '');
+    }
+
     public function testStringMethodConvertedToArray(): void
     {
         $route = new Route(Method::POST, '/');
