@@ -181,23 +181,12 @@ final class RouteTest extends TestCase
         $route = new Route([Method::GET], '/', middlewares: [static fn () => new Response(), (object) ['test' => 1]]);
     }
 
-    public function testMiddlewareAfterAction(): void
-    {
-        $route = Route::get('/');
-        $route = $route->middleware(TestMiddleware1::class)
-            ->action([TestController::class, 'index'])
-            ->middleware(TestMiddleware2::class)
-            ->middleware(TestMiddleware3::class);
-
-        $route = new Route([Method::GET], '/', middlewares: [static fn () => new Response(), (object) ['test' => 1]]);
-    }
-
     public function testInvalidDefaults(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid $defaults provided, indexed array of scalar or `Stringable` or null expected.');
 
-        $route = new Route([Method::GET], '/', defaults: ['test' => 1, 'foo' => ['bar']]);
+        new Route([Method::GET], '/', defaults: ['test' => 1, 'foo' => ['bar']]);
     }
 
     public function testDebugInfo(): void

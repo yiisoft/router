@@ -173,7 +173,7 @@ final class RouteBuilderTest extends TestCase
         $this->assertTrue($route->toRoute()->isOverride());
     }
 
-    public function dataToString(): array
+    public static function dataToString(): array
     {
         return [
             ['yiiframework.com/', '/'],
@@ -369,7 +369,7 @@ final class RouteBuilderTest extends TestCase
         };
     }
 
-    private function getDispatcher(ContainerInterface $container = null): MiddlewareDispatcher
+    private function getDispatcher(ContainerInterface|null $container = null): MiddlewareDispatcher
     {
         if ($container === null) {
             return new MiddlewareDispatcher(

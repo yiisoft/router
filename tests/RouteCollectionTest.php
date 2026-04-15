@@ -179,10 +179,10 @@ final class RouteCollectionTest extends TestCase
 
         $routeTree = (new RouteCollection($collector))->getRouteTree(false);
 
-        $this->assertInstanceOf(Route::class, $routeTree[0]);
-        $this->assertSame('/api/posts', $routeTree[0]->getData('name'));
-        $this->assertInstanceOf(Route::class, $routeTree['/v1'][0]);
-        $this->assertSame('/api/comments', $routeTree['/v1'][0]->getData('name'));
+        $this->assertInstanceOf(\Yiisoft\Router\Route::class, $routeTree[0]);
+        $this->assertSame('/api/posts', $routeTree[0]->getName());
+        $this->assertInstanceOf(\Yiisoft\Router\Route::class, $routeTree['/v1'][0]);
+        $this->assertSame('/api/comments', $routeTree['/v1'][0]->getName());
     }
 
     public function testGetRoutes(): void

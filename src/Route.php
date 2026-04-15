@@ -58,7 +58,7 @@ final class Route implements Stringable
         array $methods,
         private string $pattern,
         private ?string $name = null,
-        array|callable|string $action = null,
+        array|callable|string|null $action = null,
         array $middlewares = [],
         array $defaults = [],
         array $hosts = [],

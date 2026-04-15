@@ -18,7 +18,7 @@ class CurrentRouteTest extends TestCase
         $currentRoute = new CurrentRoute();
 
         $this->assertNull($currentRoute->getName());
-        $this->assertNull($currentRoute->getHost());
+        $this->assertNull($currentRoute->getHosts());
         $this->assertNull($currentRoute->getPattern());
         $this->assertNull($currentRoute->getMethods());
         $this->assertNull($currentRoute->getUri());
