@@ -13,6 +13,7 @@ use Yiisoft\Router\Route;
 use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
 use Yiisoft\Router\Tests\Support\TestMiddleware3;
+use Yiisoft\Router\Tests\Support\TestController;
 
 final class GroupTest extends TestCase
 {

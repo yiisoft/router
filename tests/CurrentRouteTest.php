@@ -13,6 +13,20 @@ use Yiisoft\Router\Route;
 
 class CurrentRouteTest extends TestCase
 {
+    public function testGettersReturnDefaultValuesWhenRouteIsNotSet(): void
+    {
+        $currentRoute = new CurrentRoute();
+
+        $this->assertNull($currentRoute->getName());
+        $this->assertNull($currentRoute->getHost());
+        $this->assertNull($currentRoute->getPattern());
+        $this->assertNull($currentRoute->getMethods());
+        $this->assertNull($currentRoute->getUri());
+        $this->assertSame([], $currentRoute->getArguments());
+        $this->assertNull($currentRoute->getArgument('missing'));
+        $this->assertSame('default', $currentRoute->getArgument('missing', 'default'));
+    }
+
     public function testGetName(): void
     {
         $route = new Route([Method::GET], '', 'test');

@@ -15,9 +15,8 @@ final class UrlMatcherInterfaceProxy implements UrlMatcherInterface
 {
     public function __construct(
         private readonly UrlMatcherInterface $urlMatcher,
-        private readonly RouterCollector $routerCollector
-    ) {
-    }
+        private readonly RouterCollector $routerCollector,
+    ) {}
 
     public function match(ServerRequestInterface $request): MatchingResult
     {

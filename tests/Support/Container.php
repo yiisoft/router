@@ -6,11 +6,11 @@ namespace Yiisoft\Router\Tests\Support;
 
 use Psr\Container\ContainerInterface;
 
+use function array_key_exists;
+
 final class Container implements ContainerInterface
 {
-    public function __construct(private array $instances)
-    {
-    }
+    public function __construct(private array $instances) {}
 
     public function get($id)
     {

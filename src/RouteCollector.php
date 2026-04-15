@@ -20,7 +20,7 @@ final class RouteCollector implements RouteCollectorInterface
     {
         array_push(
             $this->items,
-            ...array_values($routes)
+            ...array_values($routes),
         );
         return $this;
     }
@@ -29,7 +29,7 @@ final class RouteCollector implements RouteCollectorInterface
     {
         array_push(
             $this->middlewares,
-            ...array_values($definition)
+            ...array_values($definition),
         );
         return $this;
     }
@@ -38,7 +38,7 @@ final class RouteCollector implements RouteCollectorInterface
     {
         array_unshift(
             $this->middlewares,
-            ...array_values($definition)
+            ...array_values($definition),
         );
         return $this;
     }

@@ -11,9 +11,8 @@ use Yiisoft\Router\UrlMatcherInterface;
 final class UrlMatcherStub implements UrlMatcherInterface
 {
     public function __construct(
-        private readonly MatchingResult $result
-    ) {
-    }
+        private readonly MatchingResult $result,
+    ) {}
 
     public function match(ServerRequestInterface $request): MatchingResult
     {

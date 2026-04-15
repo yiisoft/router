@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
+use InvalidArgumentException;
 use Yiisoft\Router\Internal\MiddlewareFilter;
 
 final class Group
@@ -51,8 +52,7 @@ final class Group
         $this->setRoutes($routes);
         $this->setMiddlewares($middlewares);
         $this->setHosts($hosts);
-        $this->corsMiddleware = $corsMiddleware;
-    }
+        $this->corsMiddleware = $corsMiddleware;}
 
     /**
      * @return Group[]|RoutableInterface[]|Route[]

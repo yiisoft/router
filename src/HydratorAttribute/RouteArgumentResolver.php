@@ -17,8 +17,7 @@ final class RouteArgumentResolver implements ParameterAttributeResolverInterface
 {
     public function __construct(
         private readonly CurrentRoute $currentRoute,
-    ) {
-    }
+    ) {}
 
     public function getParameterValue(
         ParameterAttributeInterface $attribute,

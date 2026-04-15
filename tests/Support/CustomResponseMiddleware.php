@@ -14,8 +14,7 @@ final class CustomResponseMiddleware implements MiddlewareInterface
 {
     public function __construct(
         private readonly int $code,
-    ) {
-    }
+    ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {

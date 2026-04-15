@@ -58,7 +58,7 @@ interface UrlGeneratorInterface
         array $queryParameters = [],
         ?string $hash = null,
         ?string $scheme = null,
-        ?string $host = null
+        ?string $host = null,
     ): string;
 
     /**
@@ -77,7 +77,7 @@ interface UrlGeneratorInterface
         array $replacedArguments,
         array $queryParameters = [],
         ?string $hash = null,
-        ?string $fallbackRouteName = null
+        ?string $fallbackRouteName = null,
     ): string;
 
     public function getUriPrefix(): string;

@@ -14,6 +14,7 @@ use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
 use Yiisoft\Router\Tests\Support\TestMiddleware3;
+use InvalidArgumentException;
 
 final class RouteTest extends TestCase
 {
@@ -123,7 +124,7 @@ final class RouteTest extends TestCase
                 'yii.com',
                 'yf.ru',
             ],
-            $route->getHosts()
+            $route->getHosts(),
         );
     }
 
@@ -176,6 +177,17 @@ final class RouteTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid $middlewares provided, list of string or array or callable expected.');
+
+        $route = new Route([Method::GET], '/', middlewares: [static fn () => new Response(), (object) ['test' => 1]]);
+    }
+
+    public function testMiddlewareAfterAction(): void
+    {
+        $route = Route::get('/');
+        $route = $route->middleware(TestMiddleware1::class)
+            ->action([TestController::class, 'index'])
+            ->middleware(TestMiddleware2::class)
+            ->middleware(TestMiddleware3::class);
 
         $route = new Route([Method::GET], '/', middlewares: [static fn () => new Response(), (object) ['test' => 1]]);
     }

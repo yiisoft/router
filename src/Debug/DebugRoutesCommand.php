@@ -15,12 +15,16 @@ use Yiisoft\Router\RouteCollectionInterface;
 use Yiisoft\VarDumper\VarDumper;
 use Yiisoft\Yii\Debug\Debugger;
 
+use function count;
+use function is_array;
+use function is_string;
+
 /**
  * @infection-ignore-all
  */
 #[AsCommand(
     name: DebugRoutesCommand::COMMAND_NAME,
-    description: 'Show information about registered routes'
+    description: 'Show information about registered routes',
 )]
 final class DebugRoutesCommand extends Command
 {

@@ -12,7 +12,7 @@ trait AssertTrait
     protected function assertSameStringsIgnoringLineEndingsAndSpaces(
         string $expected,
         string $actual,
-        string $message = ''
+        string $message = '',
     ): void {
         $expected = self::normalizeLineEndings($expected);
         $actual = self::normalizeLineEndings($actual);

@@ -20,9 +20,7 @@ final class MatchingResult
      */
     private array $methods = [];
 
-    private function __construct(private readonly ?Route $route)
-    {
-    }
+    private function __construct(private readonly ?Route $route) {}
 
     /**
      * @param string[] $arguments
