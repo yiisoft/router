@@ -5,6 +5,8 @@
 - New #196: Add PHP Attributes support (@rustamwin)
 - New #196: Add `RoutesProviderInterface` interface providing routes from various resources (@rustamwin)
 - Bug #196: Fix the behavior of `Group::hosts()` method to be consistent with `Route::hosts()` method (@rustamwin)
+- Chg #196: Make constructor of `Route` and `Group` classes public (@rustamwin)
+- Chg #196: Deprecate static methods of `Route` and `Group` classes (@rustamwin)
 - Enh #276: Explicitly import classes, functions, and constants in the "use" section (@rustamwin)
 - Enh #277, #281: Remove restrictions from `prependMiddleware()` and `middleware()` methods (@klsoft-web, @vjik)
 
