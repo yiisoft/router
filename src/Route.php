@@ -179,6 +179,10 @@ final class Route implements Stringable
         }
 
         $this->enabledMiddlewaresCache = MiddlewareFilter::filter($this->middlewares, $this->disabledMiddlewares);
+        if ($this->action !== null) {
+            $this->enabledMiddlewaresCache[] = $this->action;
+        }
+
         return $this->enabledMiddlewaresCache;
     }
 
@@ -239,7 +243,7 @@ final class Route implements Stringable
                     'Invalid $defaults provided, indexed array of scalar or `Stringable` or null expected.',
                 );
             }
-            $defaults[$key] = (string) $value;
+            $this->defaults[$key] = (string) $value;
         }
         return $this;
     }
