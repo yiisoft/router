@@ -21,7 +21,7 @@ final class RouterCollector implements SummaryCollectorInterface
 
     private float $matchTime = 0;
 
-    public function __construct(private ContainerInterface $container) {}
+    public function __construct(private readonly ContainerInterface $container) {}
 
     public function collect(float $matchTime): void
     {
@@ -128,6 +128,9 @@ final class RouterCollector implements SummaryCollectorInterface
             return [[], null];
         }
 
-        return [$route->getMiddlewares(), $route->getAction()];
+        $middlewares = $route->getEnabledMiddlewares();
+        $action = $route->getAction();
+
+        return [$middlewares, $action];
     }
 }

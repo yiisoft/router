@@ -115,6 +115,7 @@ final class Group
 
     public function setHosts(array $hosts): self
     {
+        $this->hosts = [];
         foreach ($hosts as $host) {
             if (!is_string($host)) {
                 throw new InvalidArgumentException('Invalid $hosts provided, list of string expected.');

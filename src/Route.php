@@ -155,7 +155,7 @@ final class Route implements Stringable
 
     public function getName(): string
     {
-        return $this->name ??= (implode(', ', $this->methods) . ' ' . implode('|', $this->hosts) . $this->pattern);
+        return $this->name ?? (implode(', ', $this->methods) . ' ' . implode('|', $this->hosts) . $this->pattern);
     }
 
     public function isOverride(): bool
@@ -179,10 +179,6 @@ final class Route implements Stringable
         }
 
         $this->enabledMiddlewaresCache = MiddlewareFilter::filter($this->middlewares, $this->disabledMiddlewares);
-        if ($this->action !== null) {
-            $this->enabledMiddlewaresCache[] = $this->action;
-        }
-
         return $this->enabledMiddlewaresCache;
     }
 
@@ -191,6 +187,7 @@ final class Route implements Stringable
         if (empty($methods)) {
             throw new InvalidArgumentException('$methods cannot be empty.');
         }
+        $this->methods = [];
         foreach ($methods as $method) {
             if (!is_string($method)) {
                 throw new InvalidArgumentException('Invalid $methods provided, list of string expected.');
@@ -220,6 +217,7 @@ final class Route implements Stringable
     public function setAction(callable|array|string|null $action): self
     {
         $this->action = $action;
+        $this->enabledMiddlewaresCache = null;
         return $this;
     }
 
@@ -233,6 +231,7 @@ final class Route implements Stringable
 
     public function setDefaults(array $defaults): self
     {
+        $this->defaults = [];
         /** @var mixed $value */
         foreach ($defaults as $key => $value) {
             if (!is_scalar($value) && !($value instanceof Stringable) && null !== $value) {
@@ -240,7 +239,7 @@ final class Route implements Stringable
                     'Invalid $defaults provided, indexed array of scalar or `Stringable` or null expected.',
                 );
             }
-            $this->defaults[$key] = (string) $value;
+            $defaults[$key] = (string) $value;
         }
         return $this;
     }
