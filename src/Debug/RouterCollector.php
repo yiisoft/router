@@ -128,9 +128,6 @@ final class RouterCollector implements SummaryCollectorInterface
             return [[], null];
         }
 
-        $middlewares = $route->getEnabledMiddlewares();
-        $action = array_pop($middlewares);
-
-        return [$middlewares, $action];
+        return [$route->getEnabledMiddlewares(), $route->getAction()];
     }
 }

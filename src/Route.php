@@ -114,6 +114,7 @@ final class Route implements Stringable
             'middlewares' => $this->middlewares,
             'disabledMiddlewares' => $this->disabledMiddlewares,
             'enabledMiddlewares' => $this->getEnabledMiddlewares(),
+            'enabledMiddlewaresAndAction' => $this->getEnabledMiddlewaresAndAction(),
         ];
     }
 
@@ -178,12 +179,25 @@ final class Route implements Stringable
             return $this->enabledMiddlewaresCache;
         }
 
-        $this->enabledMiddlewaresCache = MiddlewareFilter::filter($this->middlewares, $this->disabledMiddlewares);
-        if ($this->action !== null) {
-            $this->enabledMiddlewaresCache[] = $this->action;
-        }
+        return $this->enabledMiddlewaresCache = MiddlewareFilter::filter(
+            $this->middlewares,
+            $this->disabledMiddlewares,
+        );
+    }
 
-        return $this->enabledMiddlewaresCache;
+    /**
+     * Returns the dispatch pipeline: enabled middlewares with the action appended as the final handler.
+     *
+     * @return array[]|callable[]|string[]
+     * @psalm-return list<array|callable|string>
+     */
+    public function getEnabledMiddlewaresAndAction(): array
+    {
+        $stack = $this->getEnabledMiddlewares();
+        if ($this->action !== null) {
+            $stack[] = $this->action;
+        }
+        return $stack;
     }
 
     public function setMethods(array $methods): self
@@ -221,7 +235,6 @@ final class Route implements Stringable
     public function setAction(callable|array|string|null $action): self
     {
         $this->action = $action;
-        $this->enabledMiddlewaresCache = null;
         return $this;
     }
 

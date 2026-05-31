@@ -122,7 +122,7 @@ final class GroupBuilderTest extends TestCase
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('request1');
         $response = $this->getDispatcher()
-                         ->withMiddlewares($route->getEnabledMiddlewares())
+                         ->withMiddlewares($route->getEnabledMiddlewaresAndAction())
                          ->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('middleware2', $response->getReasonPhrase());
@@ -164,7 +164,7 @@ final class GroupBuilderTest extends TestCase
         $route = $routeCollection->getRoute('request1');
 
         $response = $this->getDispatcher()
-                         ->withMiddlewares($route->getEnabledMiddlewares())
+                         ->withMiddlewares($route->getEnabledMiddlewaresAndAction())
                          ->dispatch($request, $this->getRequestHandler());
 
         $this->assertSame(200, $response->getStatusCode());
@@ -195,7 +195,7 @@ final class GroupBuilderTest extends TestCase
         $route = $routeCollection->getRoute('request1');
 
         $response = $this->getDispatcher()
-                         ->withMiddlewares($route->getEnabledMiddlewares())
+                         ->withMiddlewares($route->getEnabledMiddlewaresAndAction())
                          ->dispatch($request, $this->getRequestHandler());
 
         $this->assertSame(403, $response->getStatusCode());

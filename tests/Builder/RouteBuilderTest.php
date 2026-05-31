@@ -213,7 +213,7 @@ final class RouteBuilderTest extends TestCase
 
         $response = $this
             ->getDispatcher($container)
-            ->withMiddlewares($route->toRoute()->getEnabledMiddlewares())
+            ->withMiddlewares($route->toRoute()->getEnabledMiddlewaresAndAction())
             ->dispatch($request, $this->getRequestHandler());
 
         $this->assertSame(200, $response->getStatusCode());
@@ -237,7 +237,7 @@ final class RouteBuilderTest extends TestCase
                     TestController::class => new TestController(),
                 ]),
             )
-            ->withMiddlewares($route->toRoute()->getEnabledMiddlewares());
+            ->withMiddlewares($route->toRoute()->getEnabledMiddlewaresAndAction());
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
@@ -262,7 +262,7 @@ final class RouteBuilderTest extends TestCase
                     TestController::class => new TestController(),
                 ]),
             )
-            ->withMiddlewares($route->toRoute()->getEnabledMiddlewares())
+            ->withMiddlewares($route->toRoute()->getEnabledMiddlewaresAndAction())
             ->dispatch($request, $this->getRequestHandler());
 
         $this->assertSame(200, $response->getStatusCode());
@@ -276,13 +276,13 @@ final class RouteBuilderTest extends TestCase
             ->disableMiddleware(TestMiddleware1::class)
             ->action([TestController::class, 'index']);
 
-        $route->toRoute()->getEnabledMiddlewares();
+        $route->toRoute()->getEnabledMiddlewaresAndAction();
 
         $route = $route->prependMiddleware(TestMiddleware1::class, TestMiddleware2::class);
 
         $this->assertSame(
             [TestMiddleware2::class, TestMiddleware3::class, [TestController::class, 'index']],
-            $route->toRoute()->getEnabledMiddlewares(),
+            $route->toRoute()->getEnabledMiddlewaresAndAction(),
         );
     }
 
@@ -338,7 +338,7 @@ final class RouteBuilderTest extends TestCase
 
         $this->assertSame(
             [TestMiddleware2::class, TestMiddleware3::class, [TestController::class, 'index']],
-            $route->toRoute()->getEnabledMiddlewares(),
+            $route->toRoute()->getEnabledMiddlewaresAndAction(),
         );
     }
 

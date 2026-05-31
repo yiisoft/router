@@ -16,8 +16,11 @@ use Psr\Http\Server\RequestHandlerInterface;
 use RuntimeException;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
+use Yiisoft\Http\Method;
 use Yiisoft\Router\Builder\GroupBuilder as Group;
 use Yiisoft\Router\Builder\RouteBuilder as Route;
+use Yiisoft\Router\Group as RawGroup;
+use Yiisoft\Router\Route as RawRoute;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollector;
 use Yiisoft\Router\RouteNotFoundException;
@@ -91,6 +94,31 @@ final class RouteCollectionTest extends TestCase
         $routeCollection = new RouteCollection($collector);
         $route = $routeCollection->getRoute('my-route');
         $this->assertSame('/{id}', $route->getPattern());
+    }
+
+    public function testCollectorCanBeReusedWithRawRouteAndGroupInstances(): void
+    {
+        $route = new RawRoute([Method::GET], '/users', 'users');
+        $group = new RawGroup(
+            prefix: '/api',
+            namePrefix: 'api/',
+            routes: [new RawRoute([Method::GET], '/posts', 'posts')],
+        );
+
+        $collector = new RouteCollector();
+        $collector->middleware(static fn() => new Response());
+        $collector->addRoute($group, $route);
+
+        $first = new RouteCollection($collector);
+        $second = new RouteCollection($collector);
+
+        $this->assertSame('/api/posts', $first->getRoute('api/posts')->getPattern());
+        $this->assertSame('/users', $first->getRoute('users')->getPattern());
+        $this->assertSame('/api/posts', $second->getRoute('api/posts')->getPattern());
+        $this->assertSame('/users', $second->getRoute('users')->getPattern());
+
+        $this->assertSame('/posts', $group->getRoutes()[0]->getPattern());
+        $this->assertSame('/users', $route->getPattern());
     }
 
     public function testRouteWithoutAction(): void
@@ -299,10 +327,10 @@ final class RouteCollectionTest extends TestCase
         $route2 = $routeCollection->getRoute('view');
         $request = new ServerRequest('GET', '/');
         $response1 = $this->getDispatcher()
-            ->withMiddlewares($route1->getEnabledMiddlewares())
+            ->withMiddlewares($route1->getEnabledMiddlewaresAndAction())
             ->dispatch($request, $this->getRequestHandler());
         $response2 = $this->getDispatcher()
-            ->withMiddlewares($route2->getEnabledMiddlewares())
+            ->withMiddlewares($route2->getEnabledMiddlewaresAndAction())
             ->dispatch($request, $this->getRequestHandler());
 
         $this->assertEquals('middleware1', $response1->getReasonPhrase());
@@ -341,7 +369,7 @@ final class RouteCollectionTest extends TestCase
                     TestController::class => new TestController(),
                 ]),
             )
-            ->withMiddlewares($route->getEnabledMiddlewares());
+            ->withMiddlewares($route->getEnabledMiddlewaresAndAction());
 
         $response = $dispatcher->dispatch($request, $this->getRequestHandler());
         $this->assertSame(200, $response->getStatusCode());
@@ -367,7 +395,7 @@ final class RouteCollectionTest extends TestCase
                     TestMiddleware1::class => new TestMiddleware1(),
                 ]),
             )
-            ->withMiddlewares($route->getEnabledMiddlewares());
+            ->withMiddlewares($route->getEnabledMiddlewaresAndAction());
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Stack is empty.');

@@ -31,7 +31,8 @@ final class RouteTest extends TestCase
         );
 
         $this->assertInstanceOf(Route::class, $route);
-        $this->assertCount(2, $route->getEnabledMiddlewares());
+        $this->assertCount(1, $route->getEnabledMiddlewares());
+        $this->assertCount(2, $route->getEnabledMiddlewaresAndAction());
         $this->assertTrue($route->isOverride());
     }
 
@@ -238,6 +239,12 @@ Yiisoft\Router\Route Object
         )
 
     [enabledMiddlewares] => Array
+        (
+            [0] => Yiisoft\Router\Tests\Support\TestMiddleware3
+            [1] => Yiisoft\Router\Tests\Support\TestMiddleware1
+        )
+
+    [enabledMiddlewaresAndAction] => Array
         (
             [0] => Yiisoft\Router\Tests\Support\TestMiddleware3
             [1] => Yiisoft\Router\Tests\Support\TestMiddleware1
