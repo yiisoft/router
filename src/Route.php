@@ -6,26 +6,34 @@ namespace Yiisoft\Router;
 
 use InvalidArgumentException;
 use Stringable;
-use Yiisoft\Http\Method;
 use Yiisoft\Router\Internal\MiddlewareFilter;
 
-use function array_splice;
-use function count;
 use function in_array;
+use function is_array;
+use function is_callable;
+use function is_scalar;
+use function is_string;
 
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
  */
 final class Route implements Stringable
 {
-    private ?string $name = null;
+    /**
+     * @var string[]
+     * @psalm-var array<array-key, string>
+     */
+    private array $methods = [];
 
     /**
      * @var string[]
      */
     private array $hosts = [];
-    private bool $override = false;
-    private bool $actionAdded = false;
+
+    /**
+     * @var array|callable|string|null
+     */
+    private $action = null;
 
     /**
      * @var array[]|callable[]|string[]
@@ -33,25 +41,42 @@ final class Route implements Stringable
      */
     private array $middlewares = [];
 
-    private array $disabledMiddlewares = [];
-
     /**
      * @psalm-var list<array|callable|string>|null
      */
     private ?array $enabledMiddlewaresCache = null;
 
     /**
-     * @var array<string,string>
+     * @var array<array-key,string>
      */
     private array $defaults = [];
 
     /**
-     * @param string[] $methods
+     * @param array|callable|string|null $action Action handler. It is a primary middleware definition that
+     * should be invoked last for a matched route.
+     * @param array<array-key,scalar|Stringable|null> $defaults Parameter default values indexed by parameter names.
+     * @param bool $override Marks route as override. When added it will replace existing route with the same name.
+     * @param array $disabledMiddlewares Excludes middleware from being invoked when action is handled.
+     * It is useful to avoid invoking one of the parent group middleware for
+     * a certain route.
      */
-    private function __construct(
-        private array $methods,
+    public function __construct(
+        array $methods,
         private string $pattern,
-    ) {}
+        private ?string $name = null,
+        array|callable|string|null $action = null,
+        array $middlewares = [],
+        array $defaults = [],
+        array $hosts = [],
+        private bool $override = false,
+        private array $disabledMiddlewares = [],
+    ) {
+        $this->setMethods($methods);
+        $this->action = $action;
+        $this->setMiddlewares($middlewares);
+        $this->setHosts($hosts);
+        $this->setDefaults($defaults);
+    }
 
     public function __toString(): string
     {
@@ -63,7 +88,7 @@ final class Route implements Stringable
             $result .= implode(',', $this->methods) . ' ';
         }
 
-        if ($this->hosts) {
+        if (!empty($this->hosts)) {
             $quoted = array_map(static fn($host) => preg_quote($host, '/'), $this->hosts);
 
             if (!preg_match('/' . implode('|', $quoted) . '/', $this->pattern)) {
@@ -82,252 +107,203 @@ final class Route implements Stringable
             'name' => $this->name,
             'methods' => $this->methods,
             'pattern' => $this->pattern,
+            'action' => $this->action,
             'hosts' => $this->hosts,
             'defaults' => $this->defaults,
             'override' => $this->override,
-            'actionAdded' => $this->actionAdded,
             'middlewares' => $this->middlewares,
             'disabledMiddlewares' => $this->disabledMiddlewares,
             'enabledMiddlewares' => $this->getEnabledMiddlewares(),
+            'enabledMiddlewaresAndAction' => $this->getEnabledMiddlewaresAndAction(),
         ];
     }
 
-    public static function get(string $pattern): self
+    /**
+     * @return string[]
+     */
+    public function getMethods(): array
     {
-        return self::methods([Method::GET], $pattern);
+        return $this->methods;
     }
 
-    public static function post(string $pattern): self
+    public function getAction(): array|callable|string|null
     {
-        return self::methods([Method::POST], $pattern);
+        return $this->action;
     }
 
-    public static function put(string $pattern): self
+    public function getMiddlewares(): array
     {
-        return self::methods([Method::PUT], $pattern);
-    }
-
-    public static function delete(string $pattern): self
-    {
-        return self::methods([Method::DELETE], $pattern);
-    }
-
-    public static function patch(string $pattern): self
-    {
-        return self::methods([Method::PATCH], $pattern);
-    }
-
-    public static function head(string $pattern): self
-    {
-        return self::methods([Method::HEAD], $pattern);
-    }
-
-    public static function options(string $pattern): self
-    {
-        return self::methods([Method::OPTIONS], $pattern);
+        return $this->middlewares;
     }
 
     /**
-     * @param string[] $methods
+     * @return string[]
      */
-    public static function methods(array $methods, string $pattern): self
+    public function getHosts(): array
     {
-        return new self($methods, $pattern);
+        return $this->hosts;
     }
 
-    public function name(string $name): self
+    public function getDefaults(): array
     {
-        $route = clone $this;
-        $route->name = $name;
-        return $route;
+        return $this->defaults;
     }
 
-    public function pattern(string $pattern): self
+    public function getPattern(): string
     {
-        $new = clone $this;
-        $new->pattern = $pattern;
-        return $new;
+        return $this->pattern;
     }
 
-    public function host(string $host): self
+    public function getName(): string
     {
-        return $this->hosts($host);
+        return $this->name ?? (implode(', ', $this->methods) . ' ' . implode('|', $this->hosts) . $this->pattern);
     }
 
-    public function hosts(string ...$hosts): self
+    public function isOverride(): bool
     {
-        $route = clone $this;
-        $route->hosts = [];
-
-        foreach ($hosts as $host) {
-            $host = rtrim($host, '/');
-
-            if ($host !== '' && !in_array($host, $route->hosts, true)) {
-                $route->hosts[] = $host;
-            }
-        }
-
-        return $route;
+        return $this->override;
     }
 
-    /**
-     * Marks route as override. When added it will replace existing route with the same name.
-     */
-    public function override(): self
+    public function getDisabledMiddlewares(): array
     {
-        $route = clone $this;
-        $route->override = true;
-        return $route;
-    }
-
-    /**
-     * Parameter default values indexed by parameter names.
-     *
-     * @psalm-param array<string,null|Stringable|scalar> $defaults
-     */
-    public function defaults(array $defaults): self
-    {
-        $route = clone $this;
-        $route->defaults = array_map(\strval(...), $defaults);
-        return $route;
-    }
-
-    /**
-     * Appends a handler middleware definition that should be invoked for a matched route.
-     * First added handler will be executed first.
-     * If no actions have been added, the middleware is added to the end of the list. Otherwise, it is added before the action.
-     */
-    public function middleware(array|callable|string ...$definition): self
-    {
-        $route = clone $this;
-        if ($this->actionAdded) {
-            /**
-             * @psalm-suppress PropertyTypeCoercion Keys in the replacement array are not preserved.
-             * @infection-ignore-all
-             */
-            array_splice(
-                $route->middlewares,
-                offset: count($route->middlewares) - 1,
-                length: 0,
-                replacement: $definition,
-            );
-        } else {
-            array_push(
-                $route->middlewares,
-                ...array_values($definition),
-            );
-        }
-
-        $route->enabledMiddlewaresCache = null;
-
-        return $route;
-    }
-
-    /**
-     * Prepends a handler middleware definition that should be invoked for a matched route. Last added handlers will be
-     * executed first.
-     *
-     * Passed definitions will be added to beginning. For example:
-     *
-     * ```php
-     * // Resulting middleware stack order: Middleware1, Middleware2, Middleware3
-     * Route::get('/')
-     *   ->middleware(Middleware3::class)
-     *   ->prependMiddleware(Middleware1::class, Middleware2::class)
-     * ```
-     */
-    public function prependMiddleware(array|callable|string ...$definition): self
-    {
-        $route = clone $this;
-        array_unshift(
-            $route->middlewares,
-            ...array_values($definition),
-        );
-
-        $route->enabledMiddlewaresCache = null;
-
-        return $route;
-    }
-
-    /**
-     * Appends action handler. It is a primary middleware definition that should be invoked last for a matched route.
-     */
-    public function action(array|callable|string $middlewareDefinition): self
-    {
-        $route = clone $this;
-        $route->middlewares[] = $middlewareDefinition;
-        $route->actionAdded = true;
-        return $route;
-    }
-
-    /**
-     * Excludes middleware from being invoked when action is handled.
-     * It is useful to avoid invoking one of the parent group middleware for
-     * a certain route.
-     */
-    public function disableMiddleware(mixed ...$definition): self
-    {
-        $route = clone $this;
-        array_push(
-            $route->disabledMiddlewares,
-            ...array_values($definition),
-        );
-
-        $route->enabledMiddlewaresCache = null;
-
-        return $route;
-    }
-
-    /**
-     * @psalm-template T as string
-     *
-     * @psalm-param T $key
-     *
-     * @psalm-return (
-     *   T is ('name'|'pattern') ? string :
-     *       (T is 'host' ? string|null :
-     *           (T is 'hosts' ? array<array-key, string> :
-     *               (T is 'methods' ? array<array-key,string> :
-     *                   (T is 'defaults' ? array<string,string> :
-     *                       (T is ('override'|'hasMiddlewares') ? bool :
-     *                           (T is 'enabledMiddlewares' ? array<array-key,array|callable|string> : mixed)
-     *                       )
-     *                   )
-     *               )
-     *           )
-     *       )
-     *    )
-     */
-    public function getData(string $key): mixed
-    {
-        return match ($key) {
-            'name' => $this->name
-                ?? (implode(', ', $this->methods) . ' ' . implode('|', $this->hosts) . $this->pattern),
-            'pattern' => $this->pattern,
-            'host' => $this->hosts[0] ?? null,
-            'hosts' => $this->hosts,
-            'methods' => $this->methods,
-            'defaults' => $this->defaults,
-            'override' => $this->override,
-            'hasMiddlewares' => $this->middlewares !== [],
-            'enabledMiddlewares' => $this->getEnabledMiddlewares(),
-            default => throw new InvalidArgumentException('Unknown data key: ' . $key),
-        };
+        return $this->disabledMiddlewares;
     }
 
     /**
      * @return array[]|callable[]|string[]
      * @psalm-return list<array|callable|string>
      */
-    private function getEnabledMiddlewares(): array
+    public function getEnabledMiddlewares(): array
     {
         if ($this->enabledMiddlewaresCache !== null) {
-            /** @infection-ignore-all */
             return $this->enabledMiddlewaresCache;
         }
 
-        $this->enabledMiddlewaresCache = MiddlewareFilter::filter($this->middlewares, $this->disabledMiddlewares);
+        return $this->enabledMiddlewaresCache = MiddlewareFilter::filter(
+            $this->middlewares,
+            $this->disabledMiddlewares,
+        );
+    }
 
-        return $this->enabledMiddlewaresCache;
+    /**
+     * Returns the dispatch pipeline: enabled middlewares with the action appended as the final handler.
+     *
+     * @return array[]|callable[]|string[]
+     * @psalm-return list<array|callable|string>
+     */
+    public function getEnabledMiddlewaresAndAction(): array
+    {
+        $stack = $this->getEnabledMiddlewares();
+        if ($this->action !== null) {
+            $stack[] = $this->action;
+        }
+        return $stack;
+    }
+
+    public function setMethods(array $methods): self
+    {
+        if (empty($methods)) {
+            throw new InvalidArgumentException('$methods cannot be empty.');
+        }
+        $this->methods = [];
+        foreach ($methods as $method) {
+            if (!is_string($method)) {
+                throw new InvalidArgumentException('Invalid $methods provided, list of string expected.');
+            }
+            $this->methods[] = $method;
+        }
+        return $this;
+    }
+
+    public function setHosts(array $hosts): self
+    {
+        $this->hosts = [];
+        foreach ($hosts as $host) {
+            if (!is_string($host)) {
+                throw new InvalidArgumentException('Invalid $hosts provided, list of string expected.');
+            }
+            $host = rtrim($host, '/');
+
+            if ($host !== '' && !in_array($host, $this->hosts, true)) {
+                $this->hosts[] = $host;
+            }
+        }
+
+        return $this;
+    }
+
+    public function setAction(callable|array|string|null $action): self
+    {
+        $this->action = $action;
+        return $this;
+    }
+
+    public function setMiddlewares(array $middlewares): self
+    {
+        $this->assertMiddlewares($middlewares);
+        $this->middlewares = $middlewares;
+        $this->enabledMiddlewaresCache = null;
+        return $this;
+    }
+
+    public function setDefaults(array $defaults): self
+    {
+        $this->defaults = [];
+        /** @var mixed $value */
+        foreach ($defaults as $key => $value) {
+            if (!is_scalar($value) && !($value instanceof Stringable) && null !== $value) {
+                throw new InvalidArgumentException(
+                    'Invalid $defaults provided, indexed array of scalar or `Stringable` or null expected.',
+                );
+            }
+            $this->defaults[$key] = (string) $value;
+        }
+        return $this;
+    }
+
+    public function setPattern(string $pattern): self
+    {
+        $this->pattern = $pattern;
+        return $this;
+    }
+
+    public function setName(?string $name): self
+    {
+        $this->name = $name;
+        return $this;
+    }
+
+    public function setOverride(bool $override): self
+    {
+        $this->override = $override;
+        return $this;
+    }
+
+    public function setDisabledMiddlewares(array $disabledMiddlewares): self
+    {
+        $this->disabledMiddlewares = $disabledMiddlewares;
+        $this->enabledMiddlewaresCache = null;
+        return $this;
+    }
+
+    /**
+     * @psalm-assert list<array|callable|string> $middlewares
+     */
+    private function assertMiddlewares(array $middlewares): void
+    {
+        /** @var mixed $middleware */
+        foreach ($middlewares as $middleware) {
+            if (is_string($middleware)) {
+                continue;
+            }
+
+            if (is_callable($middleware) || is_array($middleware)) {
+                continue;
+            }
+
+            throw new InvalidArgumentException(
+                'Invalid $middlewares provided, list of string or array or callable expected.',
+            );
+        }
     }
 }

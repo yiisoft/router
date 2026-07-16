@@ -16,7 +16,7 @@ use Yiisoft\Hydrator\Result;
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\HydratorAttribute\RouteArgument;
 use Yiisoft\Router\HydratorAttribute\RouteArgumentResolver;
-use Yiisoft\Router\Route as RouterRoute;
+use Yiisoft\Router\Builder\RouteBuilder as RouterRoute;
 use Yiisoft\Test\Support\Container\SimpleContainer;
 
 final class RouteArgumentTest extends TestCase
@@ -80,7 +80,7 @@ final class RouteArgumentTest extends TestCase
     private function createHydrator(array $arguments): Hydrator
     {
         $currentRoute = new CurrentRoute();
-        $currentRoute->setRouteWithArguments(RouterRoute::get('/'), $arguments);
+        $currentRoute->setRouteWithArguments(RouterRoute::get('/')->toRoute(), $arguments);
 
         return new Hydrator(
             attributeResolverFactory: new ContainerAttributeResolverFactory(

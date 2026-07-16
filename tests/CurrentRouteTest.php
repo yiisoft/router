@@ -7,6 +7,7 @@ namespace Yiisoft\Router\Tests;
 use LogicException;
 use Nyholm\Psr7\Uri;
 use PHPUnit\Framework\TestCase;
+use Yiisoft\Http\Method;
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\Route;
 
@@ -17,7 +18,7 @@ class CurrentRouteTest extends TestCase
         $currentRoute = new CurrentRoute();
 
         $this->assertNull($currentRoute->getName());
-        $this->assertNull($currentRoute->getHost());
+        $this->assertNull($currentRoute->getHosts());
         $this->assertNull($currentRoute->getPattern());
         $this->assertNull($currentRoute->getMethods());
         $this->assertNull($currentRoute->getUri());
@@ -28,38 +29,38 @@ class CurrentRouteTest extends TestCase
 
     public function testGetName(): void
     {
-        $route = Route::get('')->name('test');
+        $route = new Route([Method::GET], '', 'test');
         $currentRoute = new CurrentRoute();
         $currentRoute->setRouteWithArguments($route, []);
 
-        $this->assertSame($route->getData('name'), $currentRoute->getName());
+        $this->assertSame($route->getName(), $currentRoute->getName());
     }
 
     public function testGetHost(): void
     {
-        $route = Route::get('')->host('test.com');
+        $route = new Route([Method::GET], '', hosts: ['test.com']);
         $currentRoute = new CurrentRoute();
         $currentRoute->setRouteWithArguments($route, []);
 
-        $this->assertSame($route->getData('host'), $currentRoute->getHost());
+        $this->assertSame($route->getHosts(), $currentRoute->getHosts());
     }
 
     public function testGetPattern(): void
     {
-        $route = Route::get('/home');
+        $route = new Route([Method::GET], '/home');
         $currentRoute = new CurrentRoute();
         $currentRoute->setRouteWithArguments($route, []);
 
-        $this->assertSame($route->getData('pattern'), $currentRoute->getPattern());
+        $this->assertSame($route->getPattern(), $currentRoute->getPattern());
     }
 
     public function testGetMethods(): void
     {
-        $route = Route::get('');
+        $route = new Route([Method::GET], '');
         $currentRoute = new CurrentRoute();
         $currentRoute->setRouteWithArguments($route, []);
 
-        $this->assertSame($route->getData('methods'), $currentRoute->getMethods());
+        $this->assertSame($route->getMethods(), $currentRoute->getMethods());
     }
 
     public function testGetCurrentUri(): void
@@ -78,7 +79,7 @@ class CurrentRouteTest extends TestCase
             'foo' => 'bar',
         ];
         $currentRoute = new CurrentRoute();
-        $currentRoute->setRouteWithArguments(Route::get(''), $parameters);
+        $currentRoute->setRouteWithArguments(new Route([Method::GET], ''), $parameters);
 
         $this->assertSame($parameters, $currentRoute->getArguments());
     }
@@ -90,7 +91,7 @@ class CurrentRouteTest extends TestCase
             'foo' => 'bar',
         ];
         $currentRoute = new CurrentRoute();
-        $currentRoute->setRouteWithArguments(Route::get(''), $parameters);
+        $currentRoute->setRouteWithArguments(new Route([Method::GET], ''), $parameters);
 
         $this->assertSame('bar', $currentRoute->getArgument('foo'));
     }
@@ -98,7 +99,7 @@ class CurrentRouteTest extends TestCase
     public function testGetArgumentWithDefault(): void
     {
         $currentRoute = new CurrentRoute();
-        $currentRoute->setRouteWithArguments(Route::get(''), ['test' => 1]);
+        $currentRoute->setRouteWithArguments(new Route([Method::GET], ''), ['test' => 1]);
 
         $this->assertSame('bar', $currentRoute->getArgument('foo', 'bar'));
     }
@@ -106,7 +107,7 @@ class CurrentRouteTest extends TestCase
     public function testGetArgumentWithNonExist(): void
     {
         $currentRoute = new CurrentRoute();
-        $currentRoute->setRouteWithArguments(Route::get(''), ['test' => 1]);
+        $currentRoute->setRouteWithArguments(new Route([Method::GET], ''), ['test' => 1]);
 
         $this->assertNull($currentRoute->getArgument('foo'));
     }
@@ -117,8 +118,8 @@ class CurrentRouteTest extends TestCase
         $this->expectExceptionMessage('Can not set route/arguments since it was already set.');
 
         $currentRoute = new CurrentRoute();
-        $currentRoute->setRouteWithArguments(Route::get('')->name('test'), []);
-        $currentRoute->setRouteWithArguments(Route::get('/home')->name('home'), []);
+        $currentRoute->setRouteWithArguments(new Route([Method::GET], '', 'test'), []);
+        $currentRoute->setRouteWithArguments(new Route([Method::GET], '/home', 'home'), []);
     }
 
     public function testSetUriTwice(): void
@@ -137,7 +138,7 @@ class CurrentRouteTest extends TestCase
         $this->expectExceptionMessage('Can not set route/arguments since it was already set.');
 
         $currentRoute = new CurrentRoute();
-        $currentRoute->setRouteWithArguments(Route::get(''), ['foo' => 'bar']);
-        $currentRoute->setRouteWithArguments(Route::get(''), ['id' => 1]);
+        $currentRoute->setRouteWithArguments(new Route([Method::GET], ''), ['foo' => 'bar']);
+        $currentRoute->setRouteWithArguments(new Route([Method::GET], ''), ['id' => 1]);
     }
 }

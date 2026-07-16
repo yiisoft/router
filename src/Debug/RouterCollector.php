@@ -21,7 +21,7 @@ final class RouterCollector implements SummaryCollectorInterface
 
     private float $matchTime = 0;
 
-    public function __construct(private ContainerInterface $container) {}
+    public function __construct(private readonly ContainerInterface $container) {}
 
     public function collect(float $matchTime): void
     {
@@ -53,10 +53,10 @@ final class RouterCollector implements SummaryCollectorInterface
         if ($currentRoute !== null && $route !== null) {
             $result['currentRoute'] = [
                 'matchTime' => $this->matchTime,
-                'name' => $route->getData('name'),
-                'pattern' => $route->getData('pattern'),
+                'name' => $route->getName(),
+                'pattern' => $route->getPattern(),
                 'arguments' => $currentRoute->getArguments(),
-                'host' => $route->getData('host'),
+                'hosts' => implode(', ', $route->getHosts()),
                 'uri' => (string) $currentRoute->getUri(),
                 'action' => $action,
                 'middlewares' => $middlewares,
@@ -86,10 +86,10 @@ final class RouterCollector implements SummaryCollectorInterface
 
         return [
             'matchTime' => $this->matchTime,
-            'name' => $route->getData('name'),
-            'pattern' => $route->getData('pattern'),
+            'name' => $route->getName(),
+            'pattern' => $route->getPattern(),
             'arguments' => $currentRoute->getArguments(),
-            'host' => $route->getData('host'),
+            'hosts' => implode(', ', $route->getHosts()),
             'uri' => (string) $currentRoute->getUri(),
             'action' => $action,
             'middlewares' => $middlewares,
@@ -128,9 +128,6 @@ final class RouterCollector implements SummaryCollectorInterface
             return [[], null];
         }
 
-        $middlewares = $route->getData('enabledMiddlewares');
-        $action = array_pop($middlewares);
-
-        return [$middlewares, $action];
+        return [$route->getEnabledMiddlewares(), $route->getAction()];
     }
 }

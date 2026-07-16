@@ -6,6 +6,7 @@ namespace Yiisoft\Router\Tests\Debug;
 
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
+use Yiisoft\Http\Method;
 use ReflectionException;
 use ReflectionProperty;
 use Yiisoft\Router\CurrentRoute;
@@ -42,7 +43,7 @@ final class UrlMatcherInterfaceProxyTest extends TestCase
     public function testBase(): void
     {
         $request = new ServerRequest('GET', '/');
-        $route = Route::get('/');
+        $route = new Route([Method::GET], '/');
         $arguments = ['a' => '19'];
         $result = MatchingResult::fromSuccess($route, $arguments);
 

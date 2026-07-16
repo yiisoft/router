@@ -14,7 +14,7 @@ final class MatchingResultTest extends TestCase
 {
     public function testFromSuccess(): void
     {
-        $route = Route::get('/{name}');
+        $route = new Route([Method::GET], '/{name}');
 
         $result = MatchingResult::fromSuccess($route, ['name' => 'Mehdi']);
         $this->assertTrue($result->isSuccess());
