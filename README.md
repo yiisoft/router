@@ -28,6 +28,7 @@ with an adapter package. Currently, the only adapter available is [FastRoute](ht
 - Ready to use middleware for route matching.
 - Convenient `CurrentRoute` service that holds information about last matched route.
 - Out of the box CORS middleware support.
+- Declaring routes using PHP attributes.
 
 ## Requirements
 
@@ -45,7 +46,7 @@ Additionally, you will need an adapter such as [FastRoute](https://github.com/yi
 
 ## Defining routes and URL matching
 
-Common usage of the router looks like the following:
+#### Common usage of the router looks like the following
 
 ```php
 use Yiisoft\Router\CurrentRoute;
@@ -99,6 +100,36 @@ if (!$result->isSuccess()) {
 
 // Run middleware assigned to a route found.
 $response = $result->process($request, $notFoundHandler);
+```
+
+#### Using attributes is also supported
+
+In controller:
+
+```php
+use Yiisoft\Router\Attribute\Get;
+
+final class SiteController
+{
+    //...
+    
+    #[Get('/')]
+    public function home(ServerRequestInterface $request): ResponseInterface
+    {
+        return $this->responseFactory->createResponse()->withBody(
+            $this->streamFactory->createStream('You are at homepage.')
+        );
+    }
+    
+    #[Get('/test/{id:\w+}')]
+    public function test(CurrentRoute $currentRoute): ResponseInterface
+    {
+        $id = $currentRoute->getArgument('id');
+    
+        return $this->responseFactory->createResponse()->withBody(
+            $this->streamFactory->createStream('You are at test with argument ' . $id)
+        );
+}
 ```
 
 > Note: Despite `UrlGeneratorInterface` and `UrlMatcherInterface` being common for all adapters available, certain

@@ -14,4 +14,9 @@ final class TestController
     {
         return new Response(200, [], $request->getAttribute('content', ''));
     }
+
+    public function attributeAction(): Response
+    {
+        return new Response(200, [], 'test');
+    }
 }

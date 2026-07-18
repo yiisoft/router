@@ -4,6 +4,14 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
+use Yiisoft\Router\Provider\RoutesProviderInterface;
+
+/**
+ * Simple route collector that manages routes, groups, and middleware definitions.
+ *
+ * @deprecated Will be removed in the next major release.
+ * @psalm-suppress DeprecatedInterface. Will be removed in the next major release.
+ */
 final class RouteCollector implements RouteCollectorInterface
 {
     /**
@@ -16,6 +24,19 @@ final class RouteCollector implements RouteCollectorInterface
      */
     private array $middlewareDefinitions = [];
 
+    private bool $providersAreInjected = false;
+
+    /**
+     * @param RoutesProviderInterface[] $providers
+     */
+    public function __construct(private readonly array $providers = []) {}
+
+    /**
+     * Adds routes or groups to the collector.
+     *
+     * @param Route|Group ...$routes Routes or groups to add.
+     * @return RouteCollectorInterface The collector instance.
+     */
     public function addRoute(Route|Group ...$routes): RouteCollectorInterface
     {
         array_push(
@@ -43,11 +64,32 @@ final class RouteCollector implements RouteCollectorInterface
         return $this;
     }
 
+    /**
+     * Returns all registered items (routes and groups).
+     *
+     * @return Group[]|Route[]
+     */
     public function getItems(): array
     {
+        if (!$this->providersAreInjected) {
+            $providerItems = [];
+            foreach ($this->providers as $provider) {
+                array_push(
+                    $providerItems,
+                    ...$provider->getRoutes(),
+                );
+            }
+            array_push($this->items, ...$providerItems);
+            $this->providersAreInjected = true;
+        }
         return $this->items;
     }
 
+    /**
+     * Returns all middleware definitions.
+     *
+     * @return array[]|callable[]|string[]
+     */
     public function getMiddlewareDefinitions(): array
     {
         return $this->middlewareDefinitions;

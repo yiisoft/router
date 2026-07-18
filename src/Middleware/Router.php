@@ -17,10 +17,20 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\UrlMatcherInterface;
 
+/**
+ * Router middleware that matches the request to a route and dispatches to the matched route's middleware.
+ */
 final class Router implements MiddlewareInterface
 {
     private readonly MiddlewareDispatcher $dispatcher;
 
+    /**
+     * @param UrlMatcherInterface $matcher URL matcher to find matching routes.
+     * @param ResponseFactoryInterface $responseFactory Factory for creating responses.
+     * @param MiddlewareFactory $middlewareFactory Factory for creating middleware instances.
+     * @param CurrentRoute $currentRoute Current route container.
+     * @param EventDispatcherInterface|null $eventDispatcher Optional event dispatcher.
+     */
     public function __construct(
         private readonly UrlMatcherInterface $matcher,
         private readonly ResponseFactoryInterface $responseFactory,

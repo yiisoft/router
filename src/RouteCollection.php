@@ -13,7 +13,10 @@ use function in_array;
 use function is_array;
 
 /**
+ * Collection of routes that manages route registration and builds a route tree.
+ *
  * @psalm-type Items = array<array-key,array|string>
+ * @psalm-suppress DeprecatedInterface. Will be removed in the next major release.
  */
 final class RouteCollection implements RouteCollectionInterface
 {
@@ -29,6 +32,9 @@ final class RouteCollection implements RouteCollectionInterface
      */
     private array $routes = [];
 
+    /**
+     * @param RouteCollectorInterface $collector The route collector to use.
+     */
     public function __construct(private readonly RouteCollectorInterface $collector) {}
 
     public function getRoutes(): array
@@ -94,7 +100,7 @@ final class RouteCollection implements RouteCollectionInterface
     }
 
     /**
-     * Inject a Group instance into route and item arrays.
+     * Inject a Group instance into the route and the item arrays.
      *
      * @psalm-param Items $tree
      */
@@ -156,6 +162,7 @@ final class RouteCollection implements RouteCollectionInterface
 
     /**
      * @psalm-param Items $tree
+     * @psalm-suppress DeprecatedMethod. Will be removed in the next major release.
      */
     private function processCors(
         Group $group,

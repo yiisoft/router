@@ -12,28 +12,24 @@ use Yiisoft\Router\Internal\MiddlewareFilter;
 use function array_splice;
 use function count;
 use function in_array;
+use function is_array;
+use function is_callable;
+use function is_string;
+use function strval;
 
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
+ *
+ * @psalm-suppress DeprecatedMethod. Will be removed in the next major release.
  */
 final class Route implements Stringable
 {
-    private ?string $name = null;
-
-    /**
-     * @var string[]
-     */
-    private array $hosts = [];
-    private bool $override = false;
     private bool $actionAdded = false;
-
     /**
      * @var array[]|callable[]|string[]
      * @psalm-var list<array|callable|string>
      */
     private array $middlewares = [];
-
-    private array $disabledMiddlewares = [];
 
     /**
      * @psalm-var list<array|callable|string>|null
@@ -41,18 +37,68 @@ final class Route implements Stringable
     private ?array $enabledMiddlewaresCache = null;
 
     /**
-     * @var array<string,string>
+     * @var string[]
+     */
+    private array $methods;
+    /**
+     * @var string[]
+     */
+    private array $hosts = [];
+    /**
+     * @var array<string,scalar|Stringable|null>
      */
     private array $defaults = [];
 
     /**
-     * @param string[] $methods
+     * @param string|string[] $method HTTP method or list of methods.
+     * @param string $pattern URL pattern.
+     * @param array|callable|string|null $action Action handler. It is a primary middleware definition that
+     * should be invoked last for a matched route.
+     * @param string|null $name Route name.
+     * @param array[]|callable[]|string[] $middlewares Middleware definitions.
+     * @param array<string,scalar|Stringable|null> $defaults Parameter default values indexed by parameter names.
+     * @param string[] $hosts Hosts that the route should match.
+     * @param bool $override Marks route as override. When added it will replace existing route with the same name.
+     * @param array $disabledMiddlewares Excludes middleware from being invoked when action is handled.
+     * It is useful to avoid invoking one of the parent group middleware for
+     * a certain route.
+     *
+     * @psalm-param list<array|callable|string> $middlewares
      */
-    private function __construct(
-        private array $methods,
+    public function __construct(
+        string|array $method,
         private string $pattern,
-    ) {}
+        array|callable|string|null $action = null,
+        private ?string $name = null,
+        array $middlewares = [],
+        array $defaults = [],
+        array $hosts = [],
+        private bool $override = false,
+        private array $disabledMiddlewares = [],
+    ) {
+        $methods = (array) $method;
 
+        if ($methods === []) {
+            throw new InvalidArgumentException('$method cannot be empty.');
+        }
+        $this->assertListOfStrings($methods, 'methods');
+        $this->assertMiddlewares($middlewares);
+        $this->assertListOfStrings($hosts, 'hosts');
+        $this->middlewares = $middlewares;
+        $this->methods = $methods;
+        $this->hosts = $this->normalizeHosts($hosts);
+        $this->defaults = array_map(strval(...), $defaults);
+        if ($action !== null) {
+            $this->middlewares[] = $action;
+            $this->actionAdded = true;
+        }
+    }
+
+    /**
+     * Returns a string representation of the route.
+     *
+     * @return string String representation including name (if set), methods, hosts, and pattern.
+     */
     public function __toString(): string
     {
         $result = $this->name === null
@@ -63,7 +109,7 @@ final class Route implements Stringable
             $result .= implode(',', $this->methods) . ' ';
         }
 
-        if ($this->hosts) {
+        if ($this->hosts !== []) {
             $quoted = array_map(static fn($host) => preg_quote($host, '/'), $this->hosts);
 
             if (!preg_match('/' . implode('|', $quoted) . '/', $this->pattern)) {
@@ -76,6 +122,11 @@ final class Route implements Stringable
         return $result;
     }
 
+    /**
+     * Returns debug information about the route.
+     *
+     * @return array Array with route properties for debugging.
+     */
     public function __debugInfo()
     {
         return [
@@ -92,36 +143,92 @@ final class Route implements Stringable
         ];
     }
 
+    /**
+     * Creates a GET route.
+     *
+     * @param string $pattern URL pattern.
+     * @return self New route instance.
+     *
+     * @deprecated Use `new Route()` instead.
+     */
     public static function get(string $pattern): self
     {
         return self::methods([Method::GET], $pattern);
     }
 
+    /**
+     * Creates a POST route.
+     *
+     * @param string $pattern URL pattern.
+     * @return self New route instance.
+     *
+     * @deprecated Use `new Route()` instead.
+     */
     public static function post(string $pattern): self
     {
         return self::methods([Method::POST], $pattern);
     }
 
+    /**
+     * Creates a PUT route.
+     *
+     * @param string $pattern URL pattern.
+     * @return self New route instance.
+     *
+     * @deprecated Use `new Route()` instead.
+     */
     public static function put(string $pattern): self
     {
         return self::methods([Method::PUT], $pattern);
     }
 
+    /**
+     * Creates a DELETE route.
+     *
+     * @param string $pattern URL pattern.
+     * @return self New route instance.
+     *
+     * @deprecated Use `new Route()` instead.
+     */
     public static function delete(string $pattern): self
     {
         return self::methods([Method::DELETE], $pattern);
     }
 
+    /**
+     * Creates a PATCH route.
+     *
+     * @param string $pattern URL pattern.
+     * @return self New route instance.
+     *
+     * @deprecated Use `new Route()` instead.
+     */
     public static function patch(string $pattern): self
     {
         return self::methods([Method::PATCH], $pattern);
     }
 
+    /**
+     * Creates a HEAD route.
+     *
+     * @param string $pattern URL pattern.
+     * @return self New route instance.
+     *
+     * @deprecated Use `new Route()` instead.
+     */
     public static function head(string $pattern): self
     {
         return self::methods([Method::HEAD], $pattern);
     }
 
+    /**
+     * Creates an OPTIONS route.
+     *
+     * @param string $pattern URL pattern.
+     * @return self New route instance.
+     *
+     * @deprecated Use `new Route()` instead.
+     */
     public static function options(string $pattern): self
     {
         return self::methods([Method::OPTIONS], $pattern);
@@ -129,12 +236,20 @@ final class Route implements Stringable
 
     /**
      * @param string[] $methods
+     *
+     * @deprecated Use `new Route()` instead.
      */
     public static function methods(array $methods, string $pattern): self
     {
         return new self($methods, $pattern);
     }
 
+    /**
+     * Sets the route name.
+     *
+     * @param string $name Route name.
+     * @return self New instance with the specified name.
+     */
     public function name(string $name): self
     {
         $route = clone $this;
@@ -142,6 +257,12 @@ final class Route implements Stringable
         return $route;
     }
 
+    /**
+     * Sets the URL pattern.
+     *
+     * @param string $pattern URL pattern.
+     * @return self New instance with the specified pattern.
+     */
     public function pattern(string $pattern): self
     {
         $new = clone $this;
@@ -149,29 +270,33 @@ final class Route implements Stringable
         return $new;
     }
 
+    /**
+     * Adds a host requirement.
+     *
+     * @param string $host Host name to match.
+     * @return self New instance with the specified host.
+     */
     public function host(string $host): self
     {
         return $this->hosts($host);
     }
 
+    /**
+     * Sets host requirements.
+     *
+     * @param string ...$hosts Host names to match.
+     * @return self New instance with the specified hosts.
+     */
     public function hosts(string ...$hosts): self
     {
         $route = clone $this;
-        $route->hosts = [];
-
-        foreach ($hosts as $host) {
-            $host = rtrim($host, '/');
-
-            if ($host !== '' && !in_array($host, $route->hosts, true)) {
-                $route->hosts[] = $host;
-            }
-        }
+        $route->hosts = $this->normalizeHosts($hosts);
 
         return $route;
     }
 
     /**
-     * Marks route as override. When added it will replace existing route with the same name.
+     * Marks route as override. When added, it will replace existing route with the same name.
      */
     public function override(): self
     {
@@ -188,7 +313,7 @@ final class Route implements Stringable
     public function defaults(array $defaults): self
     {
         $route = clone $this;
-        $route->defaults = array_map(\strval(...), $defaults);
+        $route->defaults = array_map(strval(...), $defaults);
         return $route;
     }
 
@@ -257,6 +382,7 @@ final class Route implements Stringable
         $route = clone $this;
         $route->middlewares[] = $middlewareDefinition;
         $route->actionAdded = true;
+        $route->enabledMiddlewaresCache = null;
         return $route;
     }
 
@@ -279,24 +405,39 @@ final class Route implements Stringable
     }
 
     /**
+     * Returns route data by key.
+     *
+     * @param string $key Data key to retrieve (`name`, `pattern`, `host`, `hosts`, `methods`, `defaults`, `override`,
+     * `hasMiddlewares`, `enabledMiddlewares`).
+     * 1. `name` - route name.
+     * 2. `pattern` - route pattern.
+     * 3. `host` - first host requirement.
+     * 4. `hosts` - all host requirements.
+     * 5. `methods` - all HTTP methods.
+     * 6. `defaults` - all default parameter values.
+     * 7. `override` - whether the route is marked as override.
+     * 8. `hasMiddlewares` - whether the route has any middlewares.
+     * 9. `enabledMiddlewares` - all enabled middlewares.
+     *
      * @psalm-template T as string
      *
      * @psalm-param T $key
-     *
      * @psalm-return (
-     *   T is ('name'|'pattern') ? string :
-     *       (T is 'host' ? string|null :
-     *           (T is 'hosts' ? array<array-key, string> :
-     *               (T is 'methods' ? array<array-key,string> :
-     *                   (T is 'defaults' ? array<string,string> :
-     *                       (T is ('override'|'hasMiddlewares') ? bool :
-     *                           (T is 'enabledMiddlewares' ? array<array-key,array|callable|string> : mixed)
-     *                       )
-     *                   )
-     *               )
-     *           )
-     *       )
-     *    )
+     *    T is ('name'|'pattern') ? string :
+     *        (T is 'host' ? string|null :
+     *            (T is 'hosts' ? array<array-key, string> :
+     *                (T is 'methods' ? array<array-key,string> :
+     *                    (T is 'defaults' ? array<string,string> :
+     *                        (T is ('override'|'hasMiddlewares') ? bool :
+     *                            (T is 'enabledMiddlewares' ? array<array-key,array|callable|string> : mixed)
+     *                        )
+     *                    )
+     *                )
+     *            )
+     *        )
+     *     )
+     * @throws InvalidArgumentException If the key is unknown.
+     * @return mixed The requested data.
      */
     public function getData(string $key): mixed
     {
@@ -313,6 +454,57 @@ final class Route implements Stringable
             'enabledMiddlewares' => $this->getEnabledMiddlewares(),
             default => throw new InvalidArgumentException('Unknown data key: ' . $key),
         };
+    }
+
+    /**
+     * @param string[] $hosts
+     *
+     * @return array<array-key, string>
+     */
+    private function normalizeHosts(array $hosts): array
+    {
+        $normalizedHosts = [];
+        foreach ($hosts as $host) {
+            $host = rtrim($host, '/');
+
+            if ($host !== '' && !in_array($host, $normalizedHosts, true)) {
+                $normalizedHosts[] = $host;
+            }
+        }
+        return $normalizedHosts;
+    }
+
+    /**
+     * @psalm-assert array<string> $items
+     */
+    private function assertListOfStrings(array $items, string $argument): void
+    {
+        foreach ($items as $item) {
+            if (!is_string($item)) {
+                throw new InvalidArgumentException('Invalid $' . $argument . ' provided, list of string expected.');
+            }
+        }
+    }
+
+    /**
+     * @psalm-assert array<array|callable|string> $middlewareDefinitions
+     */
+    private function assertMiddlewares(array $middlewareDefinitions): void
+    {
+        /** @var mixed $middlewareDefinition */
+        foreach ($middlewareDefinitions as $middlewareDefinition) {
+            if (is_string($middlewareDefinition)) {
+                continue;
+            }
+
+            if (is_callable($middlewareDefinition) || is_array($middlewareDefinition)) {
+                continue;
+            }
+
+            throw new InvalidArgumentException(
+                'Invalid $middlewareDefinitions provided, list of string or array or callable expected.',
+            );
+        }
     }
 
     /**
