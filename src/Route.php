@@ -12,6 +12,7 @@ use Yiisoft\Router\Internal\MiddlewareFilter;
 use function array_splice;
 use function count;
 use function in_array;
+use function strval;
 
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
@@ -188,7 +189,7 @@ final class Route implements Stringable
     public function defaults(array $defaults): self
     {
         $route = clone $this;
-        $route->defaults = array_map(\strval(...), $defaults);
+        $route->defaults = array_map(strval(...), $defaults);
         return $route;
     }
 
