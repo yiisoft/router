@@ -42,7 +42,7 @@ final class CurrentRoute
     /**
      * Returns the current route hosts.
      *
-     * @return array|null The current route hosts.
+     * @return string[]|null The current route hosts.
      */
     public function getHosts(): ?array
     {

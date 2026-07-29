@@ -185,7 +185,9 @@ final class RouteTest extends TestCase
     public function testInvalidDefaults(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid $defaults provided, indexed array of scalar or `Stringable` or null expected.');
+        $this->expectExceptionMessage(
+            'Invalid $defaults provided, array of scalar, `Stringable`, or null values expected.',
+        );
 
         new Route([Method::GET], '/', defaults: ['test' => 1, 'foo' => ['bar']]);
     }

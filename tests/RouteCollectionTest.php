@@ -24,6 +24,7 @@ use Yiisoft\Router\Route as RawRoute;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollector;
 use Yiisoft\Router\RouteNotFoundException;
+use Yiisoft\Router\RoutableInterface;
 use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
@@ -119,6 +120,59 @@ final class RouteCollectionTest extends TestCase
 
         $this->assertSame('/posts', $group->getRoutes()[0]->getPattern());
         $this->assertSame('/users', $route->getPattern());
+    }
+
+    public function testCollectorCanBeReusedWithRetainedRoutesFromRoutables(): void
+    {
+        $route = new RawRoute([Method::GET], '/users', 'users');
+        $routeRoutable = new class ($route) implements RoutableInterface {
+            public function __construct(private readonly RawRoute $route) {}
+
+            public function toRoute(): RawRoute
+            {
+                return $this->route;
+            }
+        };
+        $nestedRoute = new RawRoute([Method::GET], '/posts', 'posts');
+        $nestedRouteRoutable = new class ($nestedRoute) implements RoutableInterface {
+            public function __construct(private readonly RawRoute $route) {}
+
+            public function toRoute(): RawRoute
+            {
+                return $this->route;
+            }
+        };
+        $group = new RawGroup(
+            prefix: '/api',
+            namePrefix: 'api/',
+            routes: [$nestedRouteRoutable],
+        );
+        $groupRoutable = new class ($group) implements RoutableInterface {
+            public function __construct(private readonly RawGroup $group) {}
+
+            public function toRoute(): RawGroup
+            {
+                return $this->group;
+            }
+        };
+
+        $collector = new RouteCollector();
+        $collector->middleware(static fn() => new Response());
+        $collector->addRoute($groupRoutable, $routeRoutable);
+
+        $first = new RouteCollection($collector);
+        $second = new RouteCollection($collector);
+
+        $this->assertSame('/api/posts', $first->getRoute('api/posts')->getPattern());
+        $this->assertSame('/users', $first->getRoute('users')->getPattern());
+        $this->assertSame('/api/posts', $second->getRoute('api/posts')->getPattern());
+        $this->assertSame('/users', $second->getRoute('users')->getPattern());
+
+        $this->assertSame('/posts', $nestedRoute->getPattern());
+        $this->assertSame([], $nestedRoute->getMiddlewares());
+        $this->assertSame('/users', $route->getPattern());
+        $this->assertSame([], $route->getMiddlewares());
+        $this->assertSame([], $group->getMiddlewares());
     }
 
     public function testRouteWithoutAction(): void

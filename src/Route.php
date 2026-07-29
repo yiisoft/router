@@ -253,7 +253,7 @@ final class Route implements Stringable
         foreach ($defaults as $key => $value) {
             if (!is_scalar($value) && !($value instanceof Stringable) && null !== $value) {
                 throw new InvalidArgumentException(
-                    'Invalid $defaults provided, indexed array of scalar or `Stringable` or null expected.',
+                    'Invalid $defaults provided, array of scalar, `Stringable`, or null values expected.',
                 );
             }
             $this->defaults[$key] = (string) $value;

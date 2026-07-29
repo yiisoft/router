@@ -68,7 +68,7 @@ final class RouteCollection implements RouteCollectionInterface
     private function injectItems(array $items): void
     {
         foreach ($items as $item) {
-            $item = $item instanceof RoutableInterface ? $item->toRoute() : clone $item;
+            $item = clone ($item instanceof RoutableInterface ? $item->toRoute() : $item);
             if (!$this->isStaticRoute($item)) {
                 $item->setMiddlewares(array_merge($this->collector->getMiddlewares(), $item->getMiddlewares()));
             }
@@ -107,7 +107,7 @@ final class RouteCollection implements RouteCollectionInterface
         $pattern = null;
         $hosts = [];
         foreach ($items as $item) {
-            $item = $item instanceof RoutableInterface ? $item->toRoute() : clone $item;
+            $item = clone ($item instanceof RoutableInterface ? $item->toRoute() : $item);
             if (!$this->isStaticRoute($item)) {
                 $item->setMiddlewares(array_merge($group->getEnabledMiddlewares(), $item->getMiddlewares()));
             }
