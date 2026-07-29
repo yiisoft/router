@@ -179,6 +179,7 @@ final class Route implements Stringable
     public function getEnabledMiddlewares(): array
     {
         if ($this->enabledMiddlewaresCache !== null) {
+            /** @infection-ignore-all Cached and freshly filtered values are indistinguishable by behavior. */
             return $this->enabledMiddlewaresCache;
         }
 

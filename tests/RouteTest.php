@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router\Tests;
 
-use Nyholm\Psr7\Response;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\Http\Method;
@@ -96,7 +95,8 @@ final class RouteTest extends TestCase
 
     public function testMethods(): void
     {
-        $route = new Route([Method::POST, Method::HEAD], '/');
+        $route = new Route([Method::GET], '/');
+        $route->setMethods([Method::POST, Method::HEAD]);
 
         $this->assertSame([Method::POST, Method::HEAD], $route->getMethods());
     }
@@ -144,8 +144,11 @@ final class RouteTest extends TestCase
 
     public function testOverride(): void
     {
-        $route = (new Route([Method::GET], '/'))->setOverride(true);
+        $route = new Route([Method::GET], '/');
 
+        $this->assertFalse($route->isOverride());
+
+        $route->setOverride(true);
         $this->assertTrue($route->isOverride());
     }
 
@@ -174,12 +177,23 @@ final class RouteTest extends TestCase
         $this->assertSame('GET /', (string) $route);
     }
 
-    public function testInvalidMiddlewares(): void
+    public static function invalidMiddlewaresProvider(): array
+    {
+        $invalidMiddleware = (object) ['test' => 1];
+
+        return [
+            'after string' => [[TestMiddleware1::class, $invalidMiddleware]],
+            'after callable' => [[static fn() => null, $invalidMiddleware]],
+        ];
+    }
+
+    #[DataProvider('invalidMiddlewaresProvider')]
+    public function testInvalidMiddlewares(array $middlewares): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid $middlewares provided, list of string or array or callable expected.');
 
-        $route = new Route([Method::GET], '/', middlewares: [static fn() => new Response(), (object) ['test' => 1]]);
+        new Route([Method::GET], '/', middlewares: $middlewares);
     }
 
     public function testInvalidDefaults(): void

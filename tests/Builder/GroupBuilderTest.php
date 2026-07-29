@@ -275,20 +275,25 @@ final class GroupBuilderTest extends TestCase
 
     public function testWithCors(): void
     {
+        $corsMiddleware = static fn() => new Response(204);
         $group = Group::create()
                       ->routes(
-                          Route::get('/info')->action(static fn() => 'info'),
+                          Route::get('/info')
+                               ->middleware(TestMiddleware1::class)
+                               ->action(static fn() => 'info'),
                           Route::post('/info')->action(static fn() => 'info'),
                       )
-                      ->withCors(
-                          static fn() => new Response(204),
-                      );
+                      ->withCors($corsMiddleware);
 
         $collector = new RouteCollector();
         $collector->addRoute($group);
         $routeCollection = new RouteCollection($collector);
 
         $this->assertCount(3, $routeCollection->getRoutes());
+        $this->assertSame(
+            [$corsMiddleware, TestMiddleware1::class],
+            $routeCollection->getRoute('GET /info')->getEnabledMiddlewares(),
+        );
     }
 
     public function testWithCorsWithHostRoutes(): void
@@ -340,6 +345,8 @@ final class GroupBuilderTest extends TestCase
 
     public function testWithCorsWithNestedGroups(): void
     {
+        $corsMiddleware = static fn() => new Response(204);
+        $nestedCorsMiddleware = static fn() => new Response(201);
         $group = Group::create()->routes(
             Route::get('/info')->action(static fn() => 'info'),
             Route::post('/info')->action(static fn() => 'info'),
@@ -349,19 +356,17 @@ final class GroupBuilderTest extends TestCase
                      Route::post('/post')->action(static fn() => 'post'),
                      Route::options('/options')->action(static fn() => 'options'),
                  )
-                 ->withCors(
-                     static fn() => new Response(201),
-                 ),
-        )->withCors(
-            static fn() => new Response(204),
-        );
+                 ->withCors($nestedCorsMiddleware),
+        )->withCors($corsMiddleware);
 
         $collector = new RouteCollector();
         $collector->addRoute($group);
 
         $routeCollection = new RouteCollection($collector);
         $this->assertCount(7, $routeCollection->getRoutes());
-        $this->assertInstanceOf(\Yiisoft\Router\Route::class, $routeCollection->getRoute('OPTIONS /v1/post'));
+        $optionsRoute = $routeCollection->getRoute('OPTIONS /v1/post');
+        $this->assertInstanceOf(\Yiisoft\Router\Route::class, $optionsRoute);
+        $this->assertSame([$corsMiddleware], $optionsRoute->getEnabledMiddlewares());
     }
 
     public function testWithCorsWithNestedGroups2(): void

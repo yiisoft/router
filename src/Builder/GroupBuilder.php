@@ -132,7 +132,7 @@ final class GroupBuilder implements RoutableInterface
     public function hosts(string ...$hosts): self
     {
         $new = clone $this;
-        $new->hosts = array_values($hosts);
+        $new->hosts = $hosts;
 
         return $new;
     }
