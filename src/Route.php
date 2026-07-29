@@ -7,6 +7,7 @@ namespace Yiisoft\Router;
 use InvalidArgumentException;
 use Stringable;
 use Yiisoft\Router\Internal\MiddlewareFilter;
+use Yiisoft\Router\Builder\RouteBuilder;
 
 use function in_array;
 use function is_array;
@@ -17,7 +18,7 @@ use function is_string;
 /**
  * Mutable data object that defines a mapping from URL to callback / name and vice versa.
  *
- * For immutable fluent route definitions, use {@see \Yiisoft\Router\Builder\RouteBuilder}.
+ * For immutable fluent route definitions, use {@see RouteBuilder}.
  */
 final class Route implements Stringable
 {

@@ -6,6 +6,7 @@ namespace Yiisoft\Router;
 
 use InvalidArgumentException;
 use Yiisoft\Router\Internal\MiddlewareFilter;
+use Yiisoft\Router\Builder\GroupBuilder;
 
 use function in_array;
 use function is_array;
@@ -15,7 +16,7 @@ use function is_string;
 /**
  * Mutable data object that groups routes and applies common configuration to them.
  *
- * For immutable fluent group definitions, use {@see \Yiisoft\Router\Builder\GroupBuilder}.
+ * For immutable fluent group definitions, use {@see GroupBuilder}.
  */
 final class Group
 {
