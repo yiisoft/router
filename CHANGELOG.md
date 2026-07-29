@@ -1,5 +1,10 @@
 # Yii Router Change Log
 
+## 5.0.0 under development
+
+- Chg #225: Introduce immutable route and group builders, make `Route` and `Group` mutable data objects, add
+  `RoutableInterface`, and replace generic data accessors with explicit getters (@rustamwin)
+
 ## 4.0.3 under development
 
 - Enh #276, #292: Explicitly import classes, functions, and constants in the "use" section (@rustamwin, @vjik)

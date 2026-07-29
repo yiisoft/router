@@ -12,6 +12,11 @@ use function is_array;
 use function is_callable;
 use function is_string;
 
+/**
+ * Mutable data object that groups routes and applies common configuration to them.
+ *
+ * For immutable fluent group definitions, use {@see \Yiisoft\Router\Builder\GroupBuilder}.
+ */
 final class Group
 {
     /**

@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 /**
- * An interface for denoting classes that represent a route.
+ * Represents a custom route or route-group definition.
+ *
+ * The route collection clones the object returned by {@see toRoute()} before applying collection or group
+ * configuration, so implementations may safely return a retained object.
  */
 interface RoutableInterface
 {

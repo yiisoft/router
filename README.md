@@ -49,8 +49,8 @@ Common usage of the router looks like the following:
 
 ```php
 use Yiisoft\Router\CurrentRoute;
-use Yiisoft\Router\Group;
-use Yiisoft\Router\Route;
+use Yiisoft\Router\Builder\GroupBuilder as Group;
+use Yiisoft\Router\Builder\RouteBuilder as Route;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectorInterface;
 use Yiisoft\Router\UrlMatcherInterface;
@@ -124,12 +124,14 @@ application middleware processes the request.
 
 ### Routes
 
-Route could match for one or more HTTP methods: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`. There are
-corresponding static methods for creating a route for a certain method. If a route is to handle multiple methods at once,
-it could be created using `methods()`.
+Routes are usually defined with `RouteBuilder`. It provides an immutable fluent API and produces the `Route` data object
+used by the router. A route could match one or more HTTP methods: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`,
+`OPTIONS`. There are corresponding static methods for creating a route for a certain method. If a route is to handle
+multiple methods at once, it could be created using `methods()`.
 
 ```php
-use Yiisoft\Router\Route;
+use Yiisoft\Router\Builder\RouteBuilder as Route;
+use Yiisoft\Http\Method;
 
 Route::delete('/post/{id}')
     ->name('post-delete')
@@ -151,7 +153,7 @@ for middleware examples.
 If a route should be applied only to a certain host, it could be defined like the following:
 
 ```php
-use Yiisoft\Router\Route;
+use Yiisoft\Router\Builder\RouteBuilder as Route;
 
 Route::get('/special')
     ->name('special')
@@ -162,7 +164,7 @@ Route::get('/special')
 Defaults for parameters could be provided via `defaults()` method:
 
 ```php
-use Yiisoft\Router\Route;
+use Yiisoft\Router\Builder\RouteBuilder as Route;
 
 Route::get('/api[/v{version}]')
     ->name('api-index')
@@ -175,7 +177,8 @@ In the above we specify that if "version" is not obtained from URL during matchi
 Besides action, additional middleware to execute before the action itself could be defined:
 
 ```php
-use Yiisoft\Router\Route;
+use Yiisoft\Router\Builder\RouteBuilder as Route;
+use Yiisoft\Http\Method;
 
 Route::methods([Method::GET, Method::POST], '/page/add')
     ->middleware(Authentication::class)
@@ -192,7 +195,7 @@ If there is a need to either add middleware to be executed first or remove exist
 If you combine routes from multiple sources and want last route to have priority over existing ones, mark it as "override":
 
 ```php
-use Yiisoft\Router\Route;
+use Yiisoft\Router\Builder\RouteBuilder as Route;
 
 Route::get('/special')
     ->name('special')
@@ -200,14 +203,33 @@ Route::get('/special')
     ->override();
 ```
 
-### Route groups
+`RouteBuilder` is immutable: every configuration method returns a new builder. The collector accepts builders directly
+and converts them to `Route` objects while building the collection.
 
-Routes could be grouped. That is useful for API endpoints and similar cases:
+For configuration generated dynamically, a mutable `Route` data object may be constructed directly:
 
 ```php
-use \Yiisoft\Router\Route;
-use \Yiisoft\Router\Group;
-use \Yiisoft\Router\RouteCollectorInterface;
+use Yiisoft\Http\Method;
+use Yiisoft\Router\Route;
+
+$route = new Route(
+    methods: [Method::GET, Method::POST],
+    pattern: '/page/add',
+    name: 'page-add',
+    action: [PageController::class, 'actionAdd'],
+);
+
+$route->setHosts(['https://example.com']);
+```
+
+### Route groups
+
+Routes could be grouped with `GroupBuilder`. That is useful for API endpoints and similar cases:
+
+```php
+use Yiisoft\Router\Builder\GroupBuilder as Group;
+use Yiisoft\Router\Builder\RouteBuilder as Route;
+use Yiisoft\Router\RouteCollectorInterface;
 
 // for obtaining router see adapter package of choice readme
 $collector = $container->get(RouteCollectorInterface::class);
@@ -233,6 +255,49 @@ and `disableMiddleware()`. These middleware are executed prior to matched route'
 
 If host is specified, all routes in the group would match only if the host match.
 
+Like `RouteBuilder`, `GroupBuilder` is immutable and is accepted directly by the collector. A mutable `Group` data
+object can also be constructed directly:
+
+```php
+use Yiisoft\Router\Group;
+
+$group = new Group(
+    prefix: '/api',
+    namePrefix: 'api/',
+    routes: [$route],
+    middlewares: [ApiAuthentication::class],
+);
+```
+
+### Custom route definitions
+
+`RouteCollectorInterface::addRoute()` accepts `Route`, `Group`, and `RoutableInterface` instances. Implement
+`RoutableInterface` when an application or package needs its own route-definition abstraction:
+
+```php
+use Yiisoft\Http\Method;
+use Yiisoft\Router\RoutableInterface;
+use Yiisoft\Router\Route;
+
+final class HealthCheckRoute implements RoutableInterface
+{
+    public function toRoute(): Route
+    {
+        return new Route(
+            methods: [Method::GET],
+            pattern: '/health',
+            name: 'health',
+            action: HealthCheckAction::class,
+        );
+    }
+}
+
+$collector->addRoute(new HealthCheckRoute());
+```
+
+The route collection clones the `Route` or `Group` returned by `toRoute()` before applying collection and group
+configuration, so implementations may safely return a retained object.
+
 ### Automatic OPTIONS response and CORS
 
 By default, router responds automatically to OPTIONS requests based on the routes defined:
@@ -246,8 +311,8 @@ Generally that is fine unless you need [CORS headers](https://developer.mozilla.
 case, you can add a middleware for handling it such as [tuupola/cors-middleware](https://github.com/tuupola/cors-middleware):
 
 ```php
-use Yiisoft\Router\Group;
-use \Tuupola\Middleware\CorsMiddleware;
+use Tuupola\Middleware\CorsMiddleware;
+use Yiisoft\Router\Builder\GroupBuilder as Group;
 
 return [
     Group::create('/api')
@@ -270,7 +335,7 @@ use Yiisoft\Yii\Http\Handler\NotFoundHandler;
 use Yiisoft\Yii\Runner\Http\SapiEmitter;
 use Yiisoft\Yii\Runner\Http\ServerRequestFactory;
 use Yiisoft\Router\CurrentRoute;
-use Yiisoft\Router\Route;
+use Yiisoft\Router\Builder\RouteBuilder as Route;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectorInterface;
 use Yiisoft\Router\Fastroute\UrlMatcher;
@@ -344,7 +409,7 @@ modifying URLs for filtering and/or sorting.
 For such a route:
 
 ```php
-use \Yiisoft\Router\Route;
+use Yiisoft\Router\Builder\RouteBuilder as Route;
 
 $routes = [
     Route::post('/post/{id:\d+}')
@@ -358,8 +423,6 @@ The information could be obtained as follows:
 use Psr\Http\Message\ResponseInterface
 use Psr\Http\Message\UriInterface;
 use Yiisoft\Router\CurrentRoute;
-use Yiisoft\Router\Route;
-
 final class PostController
 {   
     public function actionEdit(CurrentRoute $currentRoute): ResponseInterface
@@ -379,7 +442,7 @@ In addition to commonly used `getArgument()` method, the following methods are a
 
 - `getArguments()` - To obtain all arguments at once.
 - `getName()` - To get route name.
-- `getHost()` - To get route host.
+- `getHosts()` - To get route hosts.
 - `getPattern()` - To get route pattern.
 - `getMethods()` - To get route methods.
 - `getUri()` - To get current URI.

@@ -15,7 +15,9 @@ use function is_scalar;
 use function is_string;
 
 /**
- * Route defines a mapping from URL to callback / name and vice versa.
+ * Mutable data object that defines a mapping from URL to callback / name and vice versa.
+ *
+ * For immutable fluent route definitions, use {@see \Yiisoft\Router\Builder\RouteBuilder}.
  */
 final class Route implements Stringable
 {
