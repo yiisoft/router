@@ -207,9 +207,9 @@ final class RouteCollectionTest extends TestCase
 
         $routeTree = (new RouteCollection($collector))->getRouteTree(false);
 
-        $this->assertInstanceOf(\Yiisoft\Router\Route::class, $routeTree[0]);
+        $this->assertInstanceOf(RawRoute::class, $routeTree[0]);
         $this->assertSame('/api/posts', $routeTree[0]->getName());
-        $this->assertInstanceOf(\Yiisoft\Router\Route::class, $routeTree['/v1'][0]);
+        $this->assertInstanceOf(RawRoute::class, $routeTree['/v1'][0]);
         $this->assertSame('/api/comments', $routeTree['/v1'][0]->getName());
     }
 
@@ -289,10 +289,10 @@ final class RouteCollectionTest extends TestCase
         $route2 = $routeCollection->getRoute('api/v1/package/downloads');
         $route3 = $routeCollection->getRoute('api/index');
         $route4 = $routeCollection->getRoute('GET api/user/{username}');
-        $this->assertInstanceOf(\Yiisoft\Router\Route::class, $route1);
-        $this->assertInstanceOf(\Yiisoft\Router\Route::class, $route2);
-        $this->assertInstanceOf(\Yiisoft\Router\Route::class, $route3);
-        $this->assertInstanceOf(\Yiisoft\Router\Route::class, $route4);
+        $this->assertInstanceOf(RawRoute::class, $route1);
+        $this->assertInstanceOf(RawRoute::class, $route2);
+        $this->assertInstanceOf(RawRoute::class, $route3);
+        $this->assertInstanceOf(RawRoute::class, $route4);
     }
 
     public function testCollectorMiddlewareFullstackCalled(): void
