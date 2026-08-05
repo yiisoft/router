@@ -40,6 +40,18 @@ final class CurrentRoute
     }
 
     /**
+     * Returns the current route host.
+     *
+     * @deprecated Use {@see getHosts()} instead.
+     *
+     * @return string|null The current route host.
+     */
+    public function getHost(): ?string
+    {
+        return $this->route?->getHosts()[0] ?? null;
+    }
+
+    /**
      * Returns the current route hosts.
      *
      * @return string[]|null The current route hosts.

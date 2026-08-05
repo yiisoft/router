@@ -113,7 +113,10 @@ $collector->getMiddlewares();
 
 ### `CurrentRoute` changes
 
-`CurrentRoute::getHost()` was replaced by `CurrentRoute::getHosts()` and now returns all route hosts:
+`CurrentRoute::getHost()` is deprecated but remains functional and returns the first route host.
+
+- If you only need the first route host, then no changes are required.
+- If you need all route hosts, then use `CurrentRoute::getHosts()`:
 
 ```php
 // Before
