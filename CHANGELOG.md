@@ -3,7 +3,8 @@
 ## 5.0.0 under development
 
 - Chg #225: Introduce immutable route and group builders, make `Route` and `Group` mutable data objects, add
-  `RoutableInterface`, and replace generic data accessors with explicit getters (@rustamwin)
+  `RoutableInterface`, replace generic data accessors with explicit getters, and retain static factories as
+  builder facades (@rustamwin)
 
 ## 4.0.3 under development
 

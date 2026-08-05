@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
-use Yiisoft\Router\Internal\MiddlewareFilter;
 use Yiisoft\Router\Builder\GroupBuilder;
+use Yiisoft\Router\Internal\MiddlewareFilter;
 
 use function in_array;
 use function is_array;
@@ -64,6 +64,11 @@ final class Group
         $this->setMiddlewares($middlewares);
         $this->setHosts($hosts);
         $this->corsMiddleware = $corsMiddleware;
+    }
+
+    public static function create(?string $prefix = null, ?string $namePrefix = null): GroupBuilder
+    {
+        return GroupBuilder::create($prefix, $namePrefix);
     }
 
     /**

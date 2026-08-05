@@ -12,20 +12,28 @@ The immutable fluent APIs were moved from `Yiisoft\Router\Route` and `Yiisoft\Ro
 - `Yiisoft\Router\Builder\RouteBuilder`
 - `Yiisoft\Router\Builder\GroupBuilder`
 
-Update imports while keeping aliases if you want existing route declarations to remain unchanged:
+The static factory methods on `Route` and `Group` are retained as facades. They now return the corresponding builder
+instead of a `Route` or `Group` data object.
+
+- If you only use fluent route declarations such as `Route::get('/')->name('home')` and pass their results to
+  `RouteCollectorInterface::addRoute()`, then no changes are required.
+- If you type a result of `Route::get()`, `Route::post()`, `Route::methods()`, or another route factory as `Route`, then
+  change the type to `RouteBuilder` or call `toRoute()` to obtain a `Route` data object.
+- If you type a result of `Group::create()` as `Group`, then change the type to `GroupBuilder` or call `toRoute()` to
+  obtain a `Group` data object.
+- If you check a fluent factory result with `instanceof Route` or `instanceof Group`, then check for the corresponding
+  builder instead, or call `toRoute()` before the check.
+- If you call `getData()` on a fluent factory result, then call `toRoute()` and use an explicit getter on the resulting
+  data object.
+- If you want imports to reflect the actual types returned by the factories, then import the builders directly. Aliases
+  allow route declarations to keep the familiar short names:
 
 ```php
-// Before
-use Yiisoft\Router\Group;
-use Yiisoft\Router\Route;
-
-// After
 use Yiisoft\Router\Builder\GroupBuilder as Group;
 use Yiisoft\Router\Builder\RouteBuilder as Route;
 ```
 
-Code such as `Route::get('/')->name('home')` and `Group::create('/api')->routes(...)` then continues to use the same
-fluent syntax. Builders are immutable and can be passed directly to `RouteCollectorInterface::addRoute()`.
+Builders are immutable and can be passed directly to `RouteCollectorInterface::addRoute()`.
 
 ### `Route` changes
 
@@ -43,7 +51,8 @@ $route = new Route(
 );
 ```
 
-The static construction and fluent configuration methods moved to `RouteBuilder`.
+The fluent configuration methods moved to `RouteBuilder`. The static construction methods remain available on `Route`
+as facades that return a `RouteBuilder`.
 
 `Route::getData()` was removed. Replace it with the corresponding explicit method:
 
@@ -64,8 +73,9 @@ Mutable configuration is available through `setMethods()`, `setPattern()`, `setN
 
 ### `Group` changes
 
-`Yiisoft\Router\Group` is now a mutable group data object with a public constructor. The static `create()` method and
-fluent configuration methods moved to `GroupBuilder`.
+`Yiisoft\Router\Group` is now a mutable group data object with a public constructor. The fluent configuration methods
+moved to `GroupBuilder`. The static `create()` method remains available on `Group` as a facade that returns a
+`GroupBuilder`.
 
 `Group::getData()` was removed. Replace it with the corresponding explicit method:
 

@@ -6,8 +6,9 @@ namespace Yiisoft\Router;
 
 use InvalidArgumentException;
 use Stringable;
-use Yiisoft\Router\Internal\MiddlewareFilter;
+use Yiisoft\Http\Method;
 use Yiisoft\Router\Builder\RouteBuilder;
+use Yiisoft\Router\Internal\MiddlewareFilter;
 
 use function in_array;
 use function is_array;
@@ -119,6 +120,49 @@ final class Route implements Stringable
             'enabledMiddlewares' => $this->getEnabledMiddlewares(),
             'enabledMiddlewaresAndAction' => $this->getEnabledMiddlewaresAndAction(),
         ];
+    }
+
+    public static function get(string $pattern): RouteBuilder
+    {
+        return RouteBuilder::get($pattern);
+    }
+
+    public static function post(string $pattern): RouteBuilder
+    {
+        return RouteBuilder::post($pattern);
+    }
+
+    public static function put(string $pattern): RouteBuilder
+    {
+        return RouteBuilder::put($pattern);
+    }
+
+    public static function delete(string $pattern): RouteBuilder
+    {
+        return RouteBuilder::delete($pattern);
+    }
+
+    public static function patch(string $pattern): RouteBuilder
+    {
+        return RouteBuilder::patch($pattern);
+    }
+
+    public static function head(string $pattern): RouteBuilder
+    {
+        return RouteBuilder::head($pattern);
+    }
+
+    public static function options(string $pattern): RouteBuilder
+    {
+        return RouteBuilder::options($pattern);
+    }
+
+    /**
+     * @param string[] $methods
+     */
+    public static function methods(array $methods, string $pattern): RouteBuilder
+    {
+        return RouteBuilder::methods($methods, $pattern);
     }
 
     /**
