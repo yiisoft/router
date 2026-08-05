@@ -11,7 +11,6 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use RuntimeException;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Group;
@@ -70,16 +69,13 @@ final class GroupBuilderTest extends TestCase
 
     public function testRoutesAfterMiddleware(): void
     {
-        $group = Group::create();
-
         $middleware1 = static fn() => new Response();
 
-        $group = $group->prependMiddleware($middleware1);
+        $group = Group::create()
+            ->prependMiddleware($middleware1)
+            ->routes(Route::get('/'));
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('routes() can not be used after prependMiddleware().');
-
-        $group->routes(Route::get('/')->toRoute());
+        $this->assertSame([$middleware1], $group->toRoute()->getEnabledMiddlewares());
     }
 
     public function testAddNestedMiddleware(): void
@@ -395,16 +391,17 @@ final class GroupBuilderTest extends TestCase
 
     public function testMiddlewareAfterRoutes(): void
     {
-        $group = Group::create()->routes(Route::get('/info')->action(static fn() => 'info'));
+        $middleware = static fn() => new Response();
+        $group = Group::create()
+            ->routes(Route::get('/info')->action(static fn() => 'info'))
+            ->middleware($middleware);
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('middleware() can not be used after routes().');
-        $group->middleware(static fn() => new Response());
+        $this->assertSame([$middleware], $group->toRoute()->getEnabledMiddlewares());
     }
 
     public function testDuplicateHosts(): void
     {
-        $route = Group::create()->hosts('a.com', 'b.com', 'a.com');
+        $route = Group::create()->host('a.com')->hosts('b.com', 'a.com');
 
         $this->assertSame(['a.com', 'b.com'], $route->toRoute()->getHosts());
     }

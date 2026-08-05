@@ -49,8 +49,8 @@ Common usage of the router looks like the following:
 
 ```php
 use Yiisoft\Router\CurrentRoute;
-use Yiisoft\Router\Builder\GroupBuilder as Group;
-use Yiisoft\Router\Builder\RouteBuilder as Route;
+use Yiisoft\Router\Group;
+use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectorInterface;
 use Yiisoft\Router\UrlMatcherInterface;
@@ -130,7 +130,7 @@ used by the router. A route could match one or more HTTP methods: `GET`, `POST`,
 multiple methods at once, it could be created using `methods()`.
 
 ```php
-use Yiisoft\Router\Builder\RouteBuilder as Route;
+use Yiisoft\Router\Route;
 use Yiisoft\Http\Method;
 
 Route::delete('/post/{id}')
@@ -153,7 +153,7 @@ for middleware examples.
 If a route should be applied only to a certain host, it could be defined like the following:
 
 ```php
-use Yiisoft\Router\Builder\RouteBuilder as Route;
+use Yiisoft\Router\Route;
 
 Route::get('/special')
     ->name('special')
@@ -164,7 +164,7 @@ Route::get('/special')
 Defaults for parameters could be provided via `defaults()` method:
 
 ```php
-use Yiisoft\Router\Builder\RouteBuilder as Route;
+use Yiisoft\Router\Route;
 
 Route::get('/api[/v{version}]')
     ->name('api-index')
@@ -177,7 +177,7 @@ In the above we specify that if "version" is not obtained from URL during matchi
 Besides action, additional middleware to execute before the action itself could be defined:
 
 ```php
-use Yiisoft\Router\Builder\RouteBuilder as Route;
+use Yiisoft\Router\Route;
 use Yiisoft\Http\Method;
 
 Route::methods([Method::GET, Method::POST], '/page/add')
@@ -195,7 +195,7 @@ If there is a need to either add middleware to be executed first or remove exist
 If you combine routes from multiple sources and want last route to have priority over existing ones, mark it as "override":
 
 ```php
-use Yiisoft\Router\Builder\RouteBuilder as Route;
+use Yiisoft\Router\Route;
 
 Route::get('/special')
     ->name('special')
@@ -227,8 +227,8 @@ $route->setHosts(['https://example.com']);
 Routes could be grouped with `GroupBuilder`. That is useful for API endpoints and similar cases:
 
 ```php
-use Yiisoft\Router\Builder\GroupBuilder as Group;
-use Yiisoft\Router\Builder\RouteBuilder as Route;
+use Yiisoft\Router\Group;
+use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollectorInterface;
 
 // for obtaining router see adapter package of choice readme
@@ -312,7 +312,7 @@ case, you can add a middleware for handling it such as [tuupola/cors-middleware]
 
 ```php
 use Tuupola\Middleware\CorsMiddleware;
-use Yiisoft\Router\Builder\GroupBuilder as Group;
+use Yiisoft\Router\Group;
 
 return [
     Group::create('/api')
@@ -335,7 +335,7 @@ use Yiisoft\Yii\Http\Handler\NotFoundHandler;
 use Yiisoft\Yii\Runner\Http\SapiEmitter;
 use Yiisoft\Yii\Runner\Http\ServerRequestFactory;
 use Yiisoft\Router\CurrentRoute;
-use Yiisoft\Router\Builder\RouteBuilder as Route;
+use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectorInterface;
 use Yiisoft\Router\Fastroute\UrlMatcher;
@@ -409,7 +409,7 @@ modifying URLs for filtering and/or sorting.
 For such a route:
 
 ```php
-use Yiisoft\Router\Builder\RouteBuilder as Route;
+use Yiisoft\Router\Route;
 
 $routes = [
     Route::post('/post/{id:\d+}')

@@ -77,7 +77,7 @@ final class GroupTest extends TestCase
 
     public function testHosts(): void
     {
-        $group = (new Group())->setHosts(['https://yiiframework.com/']);
+        $group = (new Group())->setHosts(['https://yiiframework.com/', '']);
 
         $this->assertSame(['https://yiiframework.com'], $group->getHosts());
     }

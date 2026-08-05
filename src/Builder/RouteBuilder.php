@@ -115,7 +115,7 @@ final class RouteBuilder implements RoutableInterface
     public function hosts(string ...$hosts): self
     {
         $route = clone $this;
-        $route->hosts = $hosts;
+        array_push($route->hosts, ...$hosts);
 
         return $route;
     }

@@ -121,6 +121,7 @@ final class RouteBuilderTest extends TestCase
     public function testHosts(): void
     {
         $route = Route::get('/')
+            ->host('https://yiiframework.com/')
             ->hosts(
                 'https://yiiframework.com/',
                 'yf.com',

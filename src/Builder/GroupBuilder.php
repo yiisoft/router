@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router\Builder;
 
-use RuntimeException;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\RoutableInterface;
 use Yiisoft\Router\Route;
@@ -31,8 +30,6 @@ final class GroupBuilder implements RoutableInterface
      * @var string[]
      */
     private array $hosts = [];
-    private bool $routesAdded = false;
-    private bool $middlewareAdded = false;
 
     /**
      * @var array|callable|string|null Middleware definition for CORS requests.
@@ -56,13 +53,8 @@ final class GroupBuilder implements RoutableInterface
 
     public function routes(Group|Route|RoutableInterface ...$routes): self
     {
-        if ($this->middlewareAdded) {
-            throw new RuntimeException('routes() can not be used after prependMiddleware().');
-        }
-
         $new = clone $this;
         $new->routes = $routes;
-        $new->routesAdded = true;
 
         return $new;
     }
@@ -87,10 +79,6 @@ final class GroupBuilder implements RoutableInterface
      */
     public function middleware(array|callable|string ...$definition): self
     {
-        if ($this->routesAdded) {
-            throw new RuntimeException('middleware() can not be used after routes().');
-        }
-
         $new = clone $this;
         array_push(
             $new->middlewares,
@@ -112,8 +100,6 @@ final class GroupBuilder implements RoutableInterface
             ...array_values($definition),
         );
 
-        $new->middlewareAdded = true;
-
         return $new;
     }
 
@@ -132,7 +118,7 @@ final class GroupBuilder implements RoutableInterface
     public function hosts(string ...$hosts): self
     {
         $new = clone $this;
-        $new->hosts = $hosts;
+        array_push($new->hosts, ...$hosts);
 
         return $new;
     }
