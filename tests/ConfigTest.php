@@ -12,7 +12,7 @@ use Yiisoft\Di\StateResetter;
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\Debug\RouterCollector;
 use Yiisoft\Router\Debug\UrlMatcherInterfaceProxy;
-use Yiisoft\Router\Builder\RouteBuilder as Route;
+use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollector;
 use Yiisoft\Router\RouteCollectorInterface;
 use Yiisoft\Router\UrlMatcherInterface;

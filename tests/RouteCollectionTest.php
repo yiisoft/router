@@ -17,10 +17,8 @@ use RuntimeException;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Http\Method;
-use Yiisoft\Router\Builder\GroupBuilder as Group;
-use Yiisoft\Router\Builder\RouteBuilder as Route;
-use Yiisoft\Router\Group as RawGroup;
-use Yiisoft\Router\Route as RawRoute;
+use Yiisoft\Router\Group;
+use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollector;
 use Yiisoft\Router\RouteNotFoundException;
@@ -99,11 +97,11 @@ final class RouteCollectionTest extends TestCase
 
     public function testCollectorCanBeReusedWithRawRouteAndGroupInstances(): void
     {
-        $route = new RawRoute([Method::GET], '/users', 'users');
-        $group = new RawGroup(
+        $route = new Route([Method::GET], '/users', 'users');
+        $group = new Group(
             prefix: '/api',
             namePrefix: 'api/',
-            routes: [new RawRoute([Method::GET], '/posts', 'posts')],
+            routes: [new Route([Method::GET], '/posts', 'posts')],
         );
 
         $collector = new RouteCollector();
@@ -124,33 +122,33 @@ final class RouteCollectionTest extends TestCase
 
     public function testCollectorCanBeReusedWithRetainedRoutesFromRoutables(): void
     {
-        $route = new RawRoute([Method::GET], '/users', 'users');
+        $route = new Route([Method::GET], '/users', 'users');
         $routeRoutable = new class ($route) implements RoutableInterface {
-            public function __construct(private readonly RawRoute $route) {}
+            public function __construct(private readonly Route $route) {}
 
-            public function toRoute(): RawRoute
+            public function toRoute(): Route
             {
                 return $this->route;
             }
         };
-        $nestedRoute = new RawRoute([Method::GET], '/posts', 'posts');
+        $nestedRoute = new Route([Method::GET], '/posts', 'posts');
         $nestedRouteRoutable = new class ($nestedRoute) implements RoutableInterface {
-            public function __construct(private readonly RawRoute $route) {}
+            public function __construct(private readonly Route $route) {}
 
-            public function toRoute(): RawRoute
+            public function toRoute(): Route
             {
                 return $this->route;
             }
         };
-        $group = new RawGroup(
+        $group = new Group(
             prefix: '/api',
             namePrefix: 'api/',
             routes: [$nestedRouteRoutable],
         );
         $groupRoutable = new class ($group) implements RoutableInterface {
-            public function __construct(private readonly RawGroup $group) {}
+            public function __construct(private readonly Group $group) {}
 
-            public function toRoute(): RawGroup
+            public function toRoute(): Group
             {
                 return $this->group;
             }
@@ -261,9 +259,9 @@ final class RouteCollectionTest extends TestCase
 
         $routeTree = (new RouteCollection($collector))->getRouteTree(false);
 
-        $this->assertInstanceOf(RawRoute::class, $routeTree[0]);
+        $this->assertInstanceOf(Route::class, $routeTree[0]);
         $this->assertSame('/api/posts', $routeTree[0]->getName());
-        $this->assertInstanceOf(RawRoute::class, $routeTree['/v1'][0]);
+        $this->assertInstanceOf(Route::class, $routeTree['/v1'][0]);
         $this->assertSame('/api/comments', $routeTree['/v1'][0]->getName());
     }
 
@@ -343,10 +341,10 @@ final class RouteCollectionTest extends TestCase
         $route2 = $routeCollection->getRoute('api/v1/package/downloads');
         $route3 = $routeCollection->getRoute('api/index');
         $route4 = $routeCollection->getRoute('GET api/user/{username}');
-        $this->assertInstanceOf(RawRoute::class, $route1);
-        $this->assertInstanceOf(RawRoute::class, $route2);
-        $this->assertInstanceOf(RawRoute::class, $route3);
-        $this->assertInstanceOf(RawRoute::class, $route4);
+        $this->assertInstanceOf(Route::class, $route1);
+        $this->assertInstanceOf(Route::class, $route2);
+        $this->assertInstanceOf(Route::class, $route3);
+        $this->assertInstanceOf(Route::class, $route4);
     }
 
     public function testCollectorMiddlewareFullstackCalled(): void

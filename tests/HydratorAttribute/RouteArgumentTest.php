@@ -16,7 +16,7 @@ use Yiisoft\Hydrator\Result;
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\HydratorAttribute\RouteArgument;
 use Yiisoft\Router\HydratorAttribute\RouteArgumentResolver;
-use Yiisoft\Router\Builder\RouteBuilder as RouterRoute;
+use Yiisoft\Router\Route as RouterRoute;
 use Yiisoft\Test\Support\Container\SimpleContainer;
 
 final class RouteArgumentTest extends TestCase

@@ -8,10 +8,9 @@ use PHPUnit\Framework\MockObject\MockObject;
 use Yiisoft\Di\Container;
 use Yiisoft\Di\ContainerConfig;
 use Yiisoft\Http\Method;
-use Yiisoft\Router\Builder\GroupBuilder;
-use Yiisoft\Router\Builder\RouteBuilder;
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\Debug\RouterCollector;
+use Yiisoft\Router\Group;
 use Yiisoft\Router\MatchingResult;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
@@ -134,7 +133,7 @@ final class RouterCollectorTest extends AbstractCollectorTestCase
     {
         return [
             new Route([Method::GET], '/'),
-            GroupBuilder::create('/api')->routes(RouteBuilder::get('/v1')),
+            Group::create('/api')->routes(Route::get('/v1')),
         ];
     }
 }

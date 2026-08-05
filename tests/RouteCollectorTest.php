@@ -6,9 +6,10 @@ namespace Yiisoft\Router\Tests;
 
 use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
-use Yiisoft\Router\Builder\GroupBuilder as Group;
-use Yiisoft\Router\Builder\RouteBuilder as Route;
+use Yiisoft\Router\Group;
+use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollector;
+use Yiisoft\Router\RoutableInterface;
 
 final class RouteCollectorTest extends TestCase
 {
@@ -56,7 +57,7 @@ final class RouteCollectorTest extends TestCase
         $collector->addRoute($rootGroup, $postGroup, test: $testGroup);
 
         $this->assertCount(3, $collector->getItems());
-        $this->assertContainsOnlyInstancesOf(Group::class, $collector->getItems());
+        $this->assertContainsOnlyInstancesOf(RoutableInterface::class, $collector->getItems());
     }
 
     public function testAddMiddleware(): void
