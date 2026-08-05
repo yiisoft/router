@@ -60,11 +60,13 @@ as facades that return a `RouteBuilder`.
 |---|---|
 | `getData('name')` | `getName()` |
 | `getData('pattern')` | `getPattern()` |
+| `getData('host')` | `getHosts()[0] ?? null` |
 | `getData('hosts')` | `getHosts()` |
 | `getData('methods')` | `getMethods()` |
 | `getData('defaults')` | `getDefaults()` |
 | `getData('override')` | `isOverride()` |
-| `getData('enabledMiddlewares')` | `getEnabledMiddlewares()` |
+| `getData('hasMiddlewares')` | `getMiddlewares() !== [] || getAction() !== null` |
+| `getData('enabledMiddlewares')` | `getEnabledMiddlewaresAndAction()` |
 
 The action is stored separately from route middleware. Use `getAction()` for the action,
 `getEnabledMiddlewares()` for filtered middleware only, or `getEnabledMiddlewaresAndAction()` for the dispatch pipeline.
@@ -83,8 +85,10 @@ moved to `GroupBuilder`. The static `create()` method remains available on `Grou
 |---|---|
 | `getData('prefix')` | `getPrefix()` |
 | `getData('namePrefix')` | `getNamePrefix()` |
+| `getData('host')` | `getHosts()[0] ?? null` |
 | `getData('hosts')` | `getHosts()` |
 | `getData('routes')` | `getRoutes()` |
+| `getData('hasCorsMiddleware')` | `getCorsMiddleware() !== null` |
 | `getData('corsMiddleware')` | `getCorsMiddleware()` |
 | `getData('enabledMiddlewares')` | `getEnabledMiddlewares()` |
 
@@ -101,7 +105,8 @@ collection clones the returned object before applying collection middleware or g
 
 `RouteCollectorInterface::addRoute()` now also accepts `RoutableInterface` instances.
 
-`RouteCollectorInterface::getMiddlewareDefinitions()` was renamed:
+If you call or implement `RouteCollectorInterface::getMiddlewareDefinitions()`, then rename the method to
+`getMiddlewares()`:
 
 ```php
 // Before

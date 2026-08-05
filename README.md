@@ -124,10 +124,10 @@ application middleware processes the request.
 
 ### Routes
 
-Routes are usually defined with `RouteBuilder`. It provides an immutable fluent API and produces the `Route` data object
-used by the router. A route could match one or more HTTP methods: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`,
-`OPTIONS`. There are corresponding static methods for creating a route for a certain method. If a route is to handle
-multiple methods at once, it could be created using `methods()`.
+Define routes with the static methods on `Route`. They return an immutable builder that the route collector accepts
+directly. A route could match one or more HTTP methods: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`.
+There are corresponding static methods for creating a route for a certain method. If a route is to handle multiple
+methods at once, it could be created using `methods()`.
 
 ```php
 use Yiisoft\Router\Route;
@@ -203,8 +203,8 @@ Route::get('/special')
     ->override();
 ```
 
-`RouteBuilder` is immutable: every configuration method returns a new builder. The collector accepts builders directly
-and converts them to `Route` objects while building the collection.
+Every fluent configuration method returns a new builder. The collector converts route builders to `Route` objects while
+building the collection. Most applications do not need to import or convert builders directly.
 
 For configuration generated dynamically, a mutable `Route` data object may be constructed directly:
 
@@ -224,7 +224,8 @@ $route->setHosts(['https://example.com']);
 
 ### Route groups
 
-Routes could be grouped with `GroupBuilder`. That is useful for API endpoints and similar cases:
+Create route groups with the static `Group::create()` method. It returns an immutable builder and is useful for API
+endpoints and similar cases:
 
 ```php
 use Yiisoft\Router\Group;
@@ -255,8 +256,8 @@ and `disableMiddleware()`. These middleware are executed prior to matched route'
 
 If host is specified, all routes in the group would match only if the host match.
 
-Like `RouteBuilder`, `GroupBuilder` is immutable and is accepted directly by the collector. A mutable `Group` data
-object can also be constructed directly:
+Every fluent group configuration method returns a new builder, which the collector accepts directly. Most applications
+do not need to import or convert group builders. A mutable `Group` data object can also be constructed directly:
 
 ```php
 use Yiisoft\Router\Group;
