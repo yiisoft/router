@@ -240,7 +240,7 @@ final class GroupBuilderTest extends TestCase
         $postGroup = $apiRoute->getRoutes()[1];
         $postGroup = $postGroup->toRoute();
 
-        $this->assertInstanceOf(\Yiisoft\Router\Group::class, $postGroup);
+        $this->assertInstanceOf(Group::class, $postGroup);
         $this->assertCount(2, $apiRoute->getEnabledMiddlewares());
         $this->assertSame($middleware1, $apiRoute->getEnabledMiddlewares()[0]);
         $this->assertSame($middleware2, $apiRoute->getEnabledMiddlewares()[1]);
@@ -365,7 +365,7 @@ final class GroupBuilderTest extends TestCase
         $routeCollection = new RouteCollection($collector);
         $this->assertCount(7, $routeCollection->getRoutes());
         $optionsRoute = $routeCollection->getRoute('OPTIONS /v1/post');
-        $this->assertInstanceOf(\Yiisoft\Router\Route::class, $optionsRoute);
+        $this->assertInstanceOf(Route::class, $optionsRoute);
         $this->assertSame([$corsMiddleware], $optionsRoute->getEnabledMiddlewares());
     }
 
@@ -390,7 +390,7 @@ final class GroupBuilderTest extends TestCase
 
         $routeCollection = new RouteCollection($collector);
         $this->assertCount(8, $routeCollection->getRoutes());
-        $this->assertInstanceOf(\Yiisoft\Router\Route::class, $routeCollection->getRoute('OPTIONS /v1/post'));
+        $this->assertInstanceOf(Route::class, $routeCollection->getRoute('OPTIONS /v1/post'));
     }
 
     public function testMiddlewareAfterRoutes(): void

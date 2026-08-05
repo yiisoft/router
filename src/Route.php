@@ -6,7 +6,6 @@ namespace Yiisoft\Router;
 
 use InvalidArgumentException;
 use Stringable;
-use Yiisoft\Http\Method;
 use Yiisoft\Router\Builder\RouteBuilder;
 use Yiisoft\Router\Internal\MiddlewareFilter;
 
