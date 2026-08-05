@@ -47,6 +47,16 @@ final class Group
     private $corsMiddleware = null;
 
     /**
+     * Create a new group instance.
+     *
+     * @param string|null $prefix URL prefix to prepend to all routes of the group.
+     */
+    public static function create(?string $prefix = null, ?string $namePrefix = null): GroupBuilder
+    {
+        return GroupBuilder::create($prefix, $namePrefix);
+    }
+
+    /**
      * @param array $disabledMiddlewares Excludes middleware from being invoked when action is handled.
      * It is useful to avoid invoking one of the parent group middleware for
      * a certain route.
@@ -64,11 +74,6 @@ final class Group
         $this->setMiddlewares($middlewares);
         $this->setHosts($hosts);
         $this->corsMiddleware = $corsMiddleware;
-    }
-
-    public static function create(?string $prefix = null, ?string $namePrefix = null): GroupBuilder
-    {
-        return GroupBuilder::create($prefix, $namePrefix);
     }
 
     /**

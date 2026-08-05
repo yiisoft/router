@@ -216,23 +216,6 @@ final class Route implements Stringable
     }
 
     /**
-     * @return array[]|callable[]|string[]
-     * @psalm-return list<array|callable|string>
-     */
-    public function getEnabledMiddlewares(): array
-    {
-        if ($this->enabledMiddlewaresCache !== null) {
-            /** @infection-ignore-all Cached and freshly filtered values are indistinguishable by behavior. */
-            return $this->enabledMiddlewaresCache;
-        }
-
-        return $this->enabledMiddlewaresCache = MiddlewareFilter::filter(
-            $this->middlewares,
-            $this->disabledMiddlewares,
-        );
-    }
-
-    /**
      * Returns the dispatch pipeline: enabled middlewares with the action appended as the final handler.
      *
      * @return array[]|callable[]|string[]
@@ -331,6 +314,23 @@ final class Route implements Stringable
         $this->disabledMiddlewares = $disabledMiddlewares;
         $this->enabledMiddlewaresCache = null;
         return $this;
+    }
+
+    /**
+     * @return array[]|callable[]|string[]
+     * @psalm-return list<array|callable|string>
+     */
+    public function getEnabledMiddlewares(): array
+    {
+        if ($this->enabledMiddlewaresCache !== null) {
+            /** @infection-ignore-all Cached and freshly filtered values are indistinguishable by behavior. */
+            return $this->enabledMiddlewaresCache;
+        }
+
+        return $this->enabledMiddlewaresCache = MiddlewareFilter::filter(
+            $this->middlewares,
+            $this->disabledMiddlewares,
+        );
     }
 
     /**
