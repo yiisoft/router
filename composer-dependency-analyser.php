@@ -11,8 +11,10 @@ return (new Configuration())
     ->addPathToScan(__DIR__ . '/config', isDev: false)
     ->addPathToScan(__DIR__ . '/src', isDev: false)
     ->addPathToScan(__DIR__ . '/tests', isDev: true)
-    // Debug module is an optional integration with `yiisoft/yii-debug`, only used when it is installed.
-    ->ignoreErrorsOnPackages(['symfony/console', 'yiisoft/var-dumper'], [ErrorType::SHADOW_DEPENDENCY])
-    ->ignoreErrorsOnPackages(['psr/container', 'yiisoft/hydrator', 'yiisoft/yii-debug'], [ErrorType::DEV_DEPENDENCY_IN_PROD])
+    // Debug module under development, not used in production
+    ->ignoreErrorsOnPath(__DIR__ . '/src/Debug', [ErrorType::DEV_DEPENDENCY_IN_PROD, ErrorType::SHADOW_DEPENDENCY])
+    ->ignoreErrorsOnPath(__DIR__ . '/tests/Debug', [ErrorType::SHADOW_DEPENDENCY])
     // Virtual meta-package that only declares a contract, fulfilled via another package's `provide`.
-    ->ignoreErrorsOnPackages(['yiisoft/router-implementation'], [ErrorType::UNUSED_DEPENDENCY]);
+    ->ignoreErrorsOnPackages(['yiisoft/router-implementation'], [ErrorType::UNUSED_DEPENDENCY])
+    // yiisoft/hydrator is optional (see `suggest` in composer.json), only needed for the `RouteArgument` attribute.
+    ->ignoreErrorsOnPackage('yiisoft/hydrator', [ErrorType::DEV_DEPENDENCY_IN_PROD]);
