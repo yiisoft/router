@@ -44,11 +44,17 @@ class Route implements Stringable
     private array $defaults = [];
 
     /**
-     * @param string[] $methods
-     * @param array|callable|string|null $action
-     * @param array[]|callable[]|string[] $middlewares
-     * @param array<string,null|Stringable|scalar> $defaults
-     * @param string[] $hosts
+     * Creates a route.
+     *
+     * @param string[] $methods HTTP methods to match.
+     * @param string $pattern URL pattern to match.
+     * @param string|null $name Route name.
+     * @param array|callable|string|null $action Primary middleware definition that should be invoked last for a matched route.
+     * @param array[]|callable[]|string[] $middlewares Handler middleware definitions that should be invoked for a matched route.
+     * @param array<string,null|Stringable|scalar> $defaults Parameter default values indexed by parameter names.
+     * @param string[] $hosts Hosts that the route applies to.
+     * @param bool $override Whether the route should replace an existing route with the same name.
+     * @param array[]|callable[]|string[] $disabledMiddlewares Middleware definitions to exclude when the action is handled.
      */
     public function __construct(
         private array $methods,
