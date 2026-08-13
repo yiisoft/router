@@ -65,6 +65,23 @@ final class RouteArgumentTest extends TestCase
         $this->assertSame('', $input->c);
     }
 
+    public function testExplicitArgumentNameTakesPrecedenceOverPropertyName(): void
+    {
+        $hydrator = $this->createHydrator([
+            'argumentName' => 'argument value',
+            'propertyName' => 'property value',
+        ]);
+
+        $input = new class {
+            #[RouteArgument('argumentName')]
+            public string $propertyName = '';
+        };
+
+        $hydrator->hydrate($input);
+
+        $this->assertSame('argument value', $input->propertyName);
+    }
+
     public function testUnexpectedAttributeException(): void
     {
         $resolver = new RouteArgumentResolver(new CurrentRoute());

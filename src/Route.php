@@ -67,8 +67,10 @@ class Route implements Stringable
         private bool $override = false,
         array $disabledMiddlewares = [],
     ) {
+        /** @infection-ignore-all Array keys are discarded by MiddlewareFilter::filter(). */
         $this->middlewares = array_values($middlewares);
         $this->defaults = array_map(strval(...), $defaults);
+        /** @infection-ignore-all Array keys are discarded by MiddlewareFilter::filter(). */
         $this->disabledMiddlewares = array_values($disabledMiddlewares);
 
         foreach ($hosts as $host) {

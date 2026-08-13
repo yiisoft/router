@@ -53,7 +53,9 @@ final class Group
         array $disabledMiddlewares = [],
         array|callable|string|null $corsMiddleware = null,
     ) {
+        /** @infection-ignore-all Array keys are discarded by MiddlewareFilter::filter(). */
         $this->middlewares = array_values($middlewares);
+        /** @infection-ignore-all Array keys are discarded by MiddlewareFilter::filter(). */
         $this->disabledMiddlewares = array_values($disabledMiddlewares);
         $this->corsMiddleware = $corsMiddleware;
 

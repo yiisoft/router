@@ -100,7 +100,9 @@ final class RouteCollection implements RouteCollectionInterface
      */
     private function injectGroup(Group $group, array &$tree, string $prefix = '', string $namePrefix = ''): void
     {
+        /** @infection-ignore-all Concatenating null has the same effect as casting it to an empty string. */
         $prefix .= (string) $group->getData('prefix');
+        /** @infection-ignore-all Concatenating null has the same effect as casting it to an empty string. */
         $namePrefix .= (string) $group->getData('namePrefix');
         $items = $group->getData('routes');
         $pattern = null;

@@ -58,6 +58,10 @@ final class RouteTest extends TestCase
         $this->assertSame(['example.com'], $route->getData('hosts'));
         $this->assertTrue($route->getData('override'));
         $this->assertSame([$action], $route->getData('enabledMiddlewares'));
+
+        $route = $route->middleware(TestMiddleware2::class);
+
+        $this->assertSame([TestMiddleware2::class, $action], $route->getData('enabledMiddlewares'));
     }
 
     public static function methodRouteProvider(): array
@@ -88,6 +92,7 @@ final class RouteTest extends TestCase
         $this->assertInstanceOf(Route::class, $route);
         $this->assertSame([$method], $route->getData('methods'));
         $this->assertSame('index', $route->getData('name'));
+        $this->assertFalse($route->getData('override'));
         $this->assertSame([TestMiddleware1::class], $route->getData('enabledMiddlewares'));
         $this->assertNotSame($route, $route->name('other'));
     }
