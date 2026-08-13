@@ -25,8 +25,26 @@ final class Options extends Route
      * @param bool $override Whether the route should replace an existing route with the same name.
      * @param array[]|callable[]|string[] $disabledMiddlewares Middleware definitions to exclude when the action is handled.
      */
-    public function __construct(string $pattern, ?string $name = null, array|callable|string|null $action = null, array $middlewares = [], array $defaults = [], array $hosts = [], bool $override = false, array $disabledMiddlewares = [])
-    {
-        parent::__construct([Method::OPTIONS], $pattern, $name, $action, $middlewares, $defaults, $hosts, $override, $disabledMiddlewares);
+    public function __construct(
+        string $pattern,
+        ?string $name = null,
+        array|callable|string|null $action = null,
+        array $middlewares = [],
+        array $defaults = [],
+        array $hosts = [],
+        bool $override = false,
+        array $disabledMiddlewares = [],
+    ) {
+        parent::__construct(
+            [Method::OPTIONS],
+            $pattern,
+            $name,
+            $action,
+            $middlewares,
+            $defaults,
+            $hosts,
+            $override,
+            $disabledMiddlewares,
+        );
     }
 }
