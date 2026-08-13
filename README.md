@@ -163,7 +163,7 @@ new Get(
 ```
 
 The other method-specific classes are `Post`, `Put`, `Delete`, `Patch`, `Head`, and `Options` in the
-`Yiisoft\Router\Route` namespace. The static factories and fluent configuration API remain available.
+`Yiisoft\Router\Route` namespace.
 
 If you want to generate a URL based on route and its parameters, give it a name with `name()`. Check "Creating URLs"
 for details.
