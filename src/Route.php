@@ -17,15 +17,12 @@ use function strval;
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
  */
-final class Route implements Stringable
+class Route implements Stringable
 {
-    private ?string $name = null;
-
     /**
      * @var string[]
      */
     private array $hosts = [];
-    private bool $override = false;
     private bool $actionAdded = false;
 
     /**
@@ -48,11 +45,39 @@ final class Route implements Stringable
 
     /**
      * @param string[] $methods
+     * @param array|callable|string|null $action
+     * @param array[]|callable[]|string[] $middlewares
+     * @param array<string,null|Stringable|scalar> $defaults
+     * @param string[] $hosts
      */
-    private function __construct(
+    public function __construct(
         private array $methods,
         private string $pattern,
-    ) {}
+        private ?string $name = null,
+        array|callable|string|null $action = null,
+        array $middlewares = [],
+        array $defaults = [],
+        array $hosts = [],
+        private bool $override = false,
+        array $disabledMiddlewares = [],
+    ) {
+        $this->middlewares = array_values($middlewares);
+        $this->defaults = array_map(strval(...), $defaults);
+        $this->disabledMiddlewares = array_values($disabledMiddlewares);
+
+        foreach ($hosts as $host) {
+            $host = rtrim($host, '/');
+
+            if ($host !== '' && !in_array($host, $this->hosts, true)) {
+                $this->hosts[] = $host;
+            }
+        }
+
+        if ($action !== null) {
+            $this->middlewares[] = $action;
+            $this->actionAdded = true;
+        }
+    }
 
     public function __toString(): string
     {

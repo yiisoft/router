@@ -26,6 +26,29 @@ use Yiisoft\Router\Tests\Support\TestController;
 
 final class GroupTest extends TestCase
 {
+    public function testConstructor(): void
+    {
+        $route = Route::get('/');
+        $corsMiddleware = static fn() => new Response(204);
+        $group = new Group(
+            prefix: '/api',
+            routes: [$route],
+            middlewares: [TestMiddleware1::class, TestMiddleware2::class],
+            hosts: ['example.com/', 'example.com', ''],
+            namePrefix: 'api/',
+            disabledMiddlewares: [TestMiddleware1::class],
+            corsMiddleware: $corsMiddleware,
+        );
+
+        $this->assertSame('/api', $group->getData('prefix'));
+        $this->assertSame([$route], $group->getData('routes'));
+        $this->assertSame([TestMiddleware2::class], $group->getData('enabledMiddlewares'));
+        $this->assertSame(['example.com'], $group->getData('hosts'));
+        $this->assertSame('api/', $group->getData('namePrefix'));
+        $this->assertSame($corsMiddleware, $group->getData('corsMiddleware'));
+        $this->assertNotSame($group, $group->namePrefix('other/'));
+    }
+
     public function testAddMiddleware(): void
     {
         $group = Group::create();

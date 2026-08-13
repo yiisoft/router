@@ -17,6 +17,13 @@ use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Route;
+use Yiisoft\Router\Route\Delete;
+use Yiisoft\Router\Route\Get;
+use Yiisoft\Router\Route\Head;
+use Yiisoft\Router\Route\Options;
+use Yiisoft\Router\Route\Patch;
+use Yiisoft\Router\Route\Post;
+use Yiisoft\Router\Route\Put;
 use Yiisoft\Router\Tests\Support\AssertTrait;
 use Yiisoft\Router\Tests\Support\Container;
 use Yiisoft\Router\Tests\Support\TestMiddleware1;
@@ -28,6 +35,62 @@ use InvalidArgumentException;
 final class RouteTest extends TestCase
 {
     use AssertTrait;
+
+    public function testConstructor(): void
+    {
+        $action = static fn() => new Response();
+        $route = new Route(
+            methods: [Method::GET, Method::POST],
+            pattern: '/post/{id}',
+            name: 'post/view',
+            action: $action,
+            middlewares: [TestMiddleware1::class],
+            defaults: ['id' => 42],
+            hosts: ['example.com/', 'example.com', ''],
+            override: true,
+            disabledMiddlewares: [TestMiddleware1::class],
+        );
+
+        $this->assertSame([Method::GET, Method::POST], $route->getData('methods'));
+        $this->assertSame('/post/{id}', $route->getData('pattern'));
+        $this->assertSame('post/view', $route->getData('name'));
+        $this->assertSame(['id' => '42'], $route->getData('defaults'));
+        $this->assertSame(['example.com'], $route->getData('hosts'));
+        $this->assertTrue($route->getData('override'));
+        $this->assertSame([$action], $route->getData('enabledMiddlewares'));
+    }
+
+    public static function methodRouteProvider(): array
+    {
+        return [
+            [Get::class, Method::GET],
+            [Post::class, Method::POST],
+            [Put::class, Method::PUT],
+            [Delete::class, Method::DELETE],
+            [Patch::class, Method::PATCH],
+            [Head::class, Method::HEAD],
+            [Options::class, Method::OPTIONS],
+        ];
+    }
+
+    /**
+     * @param class-string<Route> $class
+     */
+    #[DataProvider('methodRouteProvider')]
+    public function testMethodRoute(string $class, string $method): void
+    {
+        $route = new $class(
+            pattern: '/',
+            name: 'index',
+            middlewares: [TestMiddleware1::class],
+        );
+
+        $this->assertInstanceOf(Route::class, $route);
+        $this->assertSame([$method], $route->getData('methods'));
+        $this->assertSame('index', $route->getData('name'));
+        $this->assertSame([TestMiddleware1::class], $route->getData('enabledMiddlewares'));
+        $this->assertNotSame($route, $route->name('other'));
+    }
 
     public function testName(): void
     {

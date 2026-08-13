@@ -140,6 +140,31 @@ Route::methods([Method::GET, Method::POST], '/page/add')
     ->action([PageController::class, 'actionAdd']);
 ```
 
+Routes can also be configured directly with named constructor arguments. Method-specific route classes are available
+when only one HTTP method is needed:
+
+```php
+use Yiisoft\Http\Method;
+use Yiisoft\Router\Route;
+use Yiisoft\Router\Route\Get;
+
+new Route(
+    methods: [Method::GET, Method::POST],
+    pattern: '/page/add',
+    name: 'page-add',
+    action: [PageController::class, 'actionAdd'],
+);
+
+new Get(
+    pattern: '/post/{id}',
+    name: 'post-view',
+    action: [PostController::class, 'actionView'],
+);
+```
+
+The other method-specific classes are `Post`, `Put`, `Delete`, `Patch`, `Head`, and `Options` in the
+`Yiisoft\Router\Route` namespace. The static factories and fluent configuration API remain available.
+
 If you want to generate a URL based on route and its parameters, give it a name with `name()`. Check "Creating URLs"
 for details.
 
@@ -232,6 +257,21 @@ Similar to individual routes, a group could have a set of middleware managed usi
 and `disableMiddleware()`. These middleware are executed prior to matched route's own middleware and action.
 
 If host is specified, all routes in the group would match only if the host match.
+
+Groups can likewise be configured with named constructor arguments:
+
+```php
+use Yiisoft\Router\Group;
+use Yiisoft\Router\Route\Get;
+
+new Group(
+    prefix: '/api',
+    routes: [new Get('/comments')],
+    middlewares: [ApiAuthentication::class],
+    hosts: ['https://example.com'],
+    namePrefix: 'api/',
+);
+```
 
 ### Automatic OPTIONS response and CORS
 

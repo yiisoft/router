@@ -2,6 +2,7 @@
 
 ## 4.0.3 under development
 
+- New #193: Add public constructors for routes and groups and method-specific route classes (@samdark)
 - Enh #276, #292: Explicitly import classes, functions, and constants in the "use" section (@rustamwin, @vjik)
 - Enh #277, #281: Remove restrictions from `prependMiddleware()` and `middleware()` methods (@klsoft-web, @vjik)
 

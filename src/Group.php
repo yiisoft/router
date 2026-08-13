@@ -12,11 +12,6 @@ use function in_array;
 final class Group
 {
     /**
-     * @var Group[]|Route[]
-     */
-    private array $routes = [];
-
-    /**
      * @var array[]|callable[]|string[]
      * @psalm-var list<array|callable|string>
      */
@@ -26,7 +21,6 @@ final class Group
      * @var string[]
      */
     private array $hosts = [];
-    private ?string $namePrefix = null;
     private array $disabledMiddlewares = [];
 
     /**
@@ -39,9 +33,33 @@ final class Group
      */
     private $corsMiddleware = null;
 
-    private function __construct(
+    /**
+     * @param Group[]|Route[] $routes
+     * @param array[]|callable[]|string[] $middlewares
+     * @param string[] $hosts
+     * @param array|callable|string|null $corsMiddleware
+     */
+    public function __construct(
         private ?string $prefix = null,
-    ) {}
+        private array $routes = [],
+        array $middlewares = [],
+        array $hosts = [],
+        private ?string $namePrefix = null,
+        array $disabledMiddlewares = [],
+        array|callable|string|null $corsMiddleware = null,
+    ) {
+        $this->middlewares = array_values($middlewares);
+        $this->disabledMiddlewares = array_values($disabledMiddlewares);
+        $this->corsMiddleware = $corsMiddleware;
+
+        foreach ($hosts as $host) {
+            $host = rtrim($host, '/');
+
+            if ($host !== '' && !in_array($host, $this->hosts, true)) {
+                $this->hosts[] = $host;
+            }
+        }
+    }
 
     /**
      * Create a new group instance.
