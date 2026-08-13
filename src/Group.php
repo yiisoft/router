@@ -34,10 +34,15 @@ final class Group
     private $corsMiddleware = null;
 
     /**
-     * @param Group[]|Route[] $routes
-     * @param array[]|callable[]|string[] $middlewares
-     * @param string[] $hosts
-     * @param array|callable|string|null $corsMiddleware
+     * Creates a route group.
+     *
+     * @param string|null $prefix URL prefix to prepend to all routes of the group.
+     * @param Group[]|Route[] $routes Routes and nested groups to include in the group.
+     * @param array[]|callable[]|string[] $middlewares Handler middleware definitions that should be invoked for a matched route.
+     * @param string[] $hosts Hosts that the group applies to.
+     * @param string|null $namePrefix Name prefix to prepend to all routes of the group.
+     * @param array[]|callable[]|string[] $disabledMiddlewares Middleware definitions to exclude when an action is handled.
+     * @param array|callable|string|null $corsMiddleware Middleware definition for CORS requests.
      */
     public function __construct(
         private ?string $prefix = null,
