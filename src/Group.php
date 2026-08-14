@@ -59,13 +59,7 @@ final class Group
         $this->disabledMiddlewares = array_values($disabledMiddlewares);
         $this->corsMiddleware = $corsMiddleware;
 
-        foreach ($hosts as $host) {
-            $host = rtrim($host, '/');
-
-            if ($host !== '' && !in_array($host, $this->hosts, true)) {
-                $this->hosts[] = $host;
-            }
-        }
+        $this->setHosts($hosts);
     }
 
     /**
@@ -149,14 +143,7 @@ final class Group
     public function hosts(string ...$hosts): self
     {
         $new = clone $this;
-
-        foreach ($hosts as $host) {
-            $host = rtrim($host, '/');
-
-            if ($host !== '' && !in_array($host, $new->hosts, true)) {
-                $new->hosts[] = $host;
-            }
-        }
+        $new->setHosts($hosts);
 
         return $new;
     }
@@ -210,6 +197,20 @@ final class Group
             'enabledMiddlewares' => $this->getEnabledMiddlewares(),
             default => throw new InvalidArgumentException('Unknown data key: ' . $key),
         };
+    }
+
+    /**
+     * @param string[] $hosts
+     */
+    private function setHosts(array $hosts): void
+    {
+        foreach ($hosts as $host) {
+            $host = rtrim($host, '/');
+
+            if ($host !== '' && !in_array($host, $this->hosts, true)) {
+                $this->hosts[] = $host;
+            }
+        }
     }
 
     /**

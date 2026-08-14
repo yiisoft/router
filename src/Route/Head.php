@@ -36,8 +36,8 @@ final class Head extends Route
         array $disabledMiddlewares = [],
     ) {
         parent::__construct(
-            [Method::HEAD],
             $pattern,
+            [Method::HEAD],
             $name,
             $action,
             $middlewares,

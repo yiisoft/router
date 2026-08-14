@@ -36,8 +36,8 @@ final class Post extends Route
         array $disabledMiddlewares = [],
     ) {
         parent::__construct(
-            [Method::POST],
             $pattern,
+            [Method::POST],
             $name,
             $action,
             $middlewares,

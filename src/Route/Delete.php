@@ -36,8 +36,8 @@ final class Delete extends Route
         array $disabledMiddlewares = [],
     ) {
         parent::__construct(
-            [Method::DELETE],
             $pattern,
+            [Method::DELETE],
             $name,
             $action,
             $middlewares,

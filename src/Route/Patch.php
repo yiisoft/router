@@ -36,8 +36,8 @@ final class Patch extends Route
         array $disabledMiddlewares = [],
     ) {
         parent::__construct(
-            [Method::PATCH],
             $pattern,
+            [Method::PATCH],
             $name,
             $action,
             $middlewares,

@@ -36,8 +36,8 @@ final class Options extends Route
         array $disabledMiddlewares = [],
     ) {
         parent::__construct(
-            [Method::OPTIONS],
             $pattern,
+            [Method::OPTIONS],
             $name,
             $action,
             $middlewares,

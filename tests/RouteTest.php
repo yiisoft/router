@@ -40,8 +40,8 @@ final class RouteTest extends TestCase
     {
         $action = static fn() => new Response();
         $route = new Route(
-            methods: [Method::GET, Method::POST],
             pattern: '/post/{id}',
+            methods: [Method::GET, Method::POST],
             name: 'post/view',
             action: $action,
             middlewares: [TestMiddleware1::class],

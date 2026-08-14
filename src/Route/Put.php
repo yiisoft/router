@@ -36,8 +36,8 @@ final class Put extends Route
         array $disabledMiddlewares = [],
     ) {
         parent::__construct(
-            [Method::PUT],
             $pattern,
+            [Method::PUT],
             $name,
             $action,
             $middlewares,

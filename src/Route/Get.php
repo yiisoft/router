@@ -36,8 +36,8 @@ final class Get extends Route
         array $disabledMiddlewares = [],
     ) {
         parent::__construct(
-            [Method::GET],
             $pattern,
+            [Method::GET],
             $name,
             $action,
             $middlewares,

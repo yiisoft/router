@@ -29,9 +29,9 @@ class Route implements Stringable
      * @var array[]|callable[]|string[]
      * @psalm-var list<array|callable|string>
      */
-    private array $middlewares = [];
+    private array $middlewares;
 
-    private array $disabledMiddlewares = [];
+    private array $disabledMiddlewares;
 
     /**
      * @psalm-var list<array|callable|string>|null
@@ -41,13 +41,13 @@ class Route implements Stringable
     /**
      * @var array<string,string>
      */
-    private array $defaults = [];
+    private array $defaults;
 
     /**
      * Creates a route.
      *
-     * @param string[] $methods HTTP methods to match.
      * @param string $pattern URL pattern to match.
+     * @param string[] $methods HTTP methods to match.
      * @param string|null $name Route name.
      * @param array|callable|string|null $action Primary middleware definition that should be invoked last for a matched route.
      * @param array[]|callable[]|string[] $middlewares Handler middleware definitions that should be invoked for a matched route.
@@ -57,8 +57,8 @@ class Route implements Stringable
      * @param array[]|callable[]|string[] $disabledMiddlewares Middleware definitions to exclude when the action is handled.
      */
     public function __construct(
-        private array $methods,
         private string $pattern,
+        private array $methods,
         private ?string $name = null,
         array|callable|string|null $action = null,
         array $middlewares = [],
@@ -69,17 +69,11 @@ class Route implements Stringable
     ) {
         /** @infection-ignore-all Array keys are discarded by MiddlewareFilter::filter(). */
         $this->middlewares = array_values($middlewares);
-        $this->defaults = array_map(strval(...), $defaults);
+        $this->setDefaults($defaults);
         /** @infection-ignore-all Array keys are discarded by MiddlewareFilter::filter(). */
         $this->disabledMiddlewares = array_values($disabledMiddlewares);
 
-        foreach ($hosts as $host) {
-            $host = rtrim($host, '/');
-
-            if ($host !== '' && !in_array($host, $this->hosts, true)) {
-                $this->hosts[] = $host;
-            }
-        }
+        $this->setHosts($hosts);
 
         if ($action !== null) {
             $this->middlewares[] = $action;
@@ -166,7 +160,7 @@ class Route implements Stringable
      */
     public static function methods(array $methods, string $pattern): self
     {
-        return new self($methods, $pattern);
+        return new self($pattern, $methods);
     }
 
     public function name(string $name): self
@@ -191,15 +185,7 @@ class Route implements Stringable
     public function hosts(string ...$hosts): self
     {
         $route = clone $this;
-        $route->hosts = [];
-
-        foreach ($hosts as $host) {
-            $host = rtrim($host, '/');
-
-            if ($host !== '' && !in_array($host, $route->hosts, true)) {
-                $route->hosts[] = $host;
-            }
-        }
+        $route->setHosts($hosts);
 
         return $route;
     }
@@ -222,7 +208,7 @@ class Route implements Stringable
     public function defaults(array $defaults): self
     {
         $route = clone $this;
-        $route->defaults = array_map(strval(...), $defaults);
+        $route->setDefaults($defaults);
         return $route;
     }
 
@@ -347,6 +333,30 @@ class Route implements Stringable
             'enabledMiddlewares' => $this->getEnabledMiddlewares(),
             default => throw new InvalidArgumentException('Unknown data key: ' . $key),
         };
+    }
+
+    /**
+     * @param array<string,null|Stringable|scalar> $defaults
+     */
+    private function setDefaults(array $defaults): void
+    {
+        $this->defaults = array_map(strval(...), $defaults);
+    }
+
+    /**
+     * @param string[] $hosts
+     */
+    private function setHosts(array $hosts): void
+    {
+        $this->hosts = [];
+
+        foreach ($hosts as $host) {
+            $host = rtrim($host, '/');
+
+            if ($host !== '' && !in_array($host, $this->hosts, true)) {
+                $this->hosts[] = $host;
+            }
+        }
     }
 
     /**
