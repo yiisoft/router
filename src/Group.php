@@ -204,6 +204,8 @@ final class Group
      */
     private function setHosts(array $hosts): void
     {
+        $this->hosts = [];
+
         foreach ($hosts as $host) {
             $host = rtrim($host, '/');
 

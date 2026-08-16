@@ -317,7 +317,8 @@ final class GroupTest extends TestCase
 
     public function testHosts(): void
     {
-        $group = Group::create()->hosts('https://yiiframework.com/', 'https://yiiframework.ru/');
+        $group = new Group(hosts: ['example.com']);
+        $group = $group->hosts('https://yiiframework.com/', 'https://yiiframework.ru/');
 
         $this->assertSame(['https://yiiframework.com', 'https://yiiframework.ru'], $group->getData('hosts'));
     }
