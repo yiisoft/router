@@ -346,22 +346,6 @@ class Route implements Stringable
     }
 
     /**
-     * @param array<string,null|Stringable|scalar> $defaults
-     */
-    private function setDefaults(array $defaults): void
-    {
-        $this->defaults = array_map(strval(...), $defaults);
-    }
-
-    /**
-     * @param string[] $hosts
-     */
-    private function setHosts(array $hosts): void
-    {
-        $this->hosts = self::normalizeHosts($hosts);
-    }
-
-    /**
      * @param string[] $hosts
      *
      * @return string[]
@@ -379,6 +363,22 @@ class Route implements Stringable
         }
 
         return $result;
+    }
+
+    /**
+     * @param array<string,null|Stringable|scalar> $defaults
+     */
+    private function setDefaults(array $defaults): void
+    {
+        $this->defaults = array_map(strval(...), $defaults);
+    }
+
+    /**
+     * @param string[] $hosts
+     */
+    private function setHosts(array $hosts): void
+    {
+        $this->hosts = self::normalizeHosts($hosts);
     }
 
     /**
