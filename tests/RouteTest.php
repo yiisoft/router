@@ -86,13 +86,15 @@ final class RouteTest extends TestCase
         $route = new $class(
             pattern: '/',
             name: 'index',
-            middlewares: [TestMiddleware1::class],
+            middlewares: [TestMiddleware1::class, TestMiddleware2::class],
+            override: true,
+            disabledMiddlewares: [TestMiddleware2::class],
         );
 
         $this->assertInstanceOf(Route::class, $route);
         $this->assertSame([$method], $route->getData('methods'));
         $this->assertSame('index', $route->getData('name'));
-        $this->assertFalse($route->getData('override'));
+        $this->assertTrue($route->getData('override'));
         $this->assertSame([TestMiddleware1::class], $route->getData('enabledMiddlewares'));
         $this->assertNotSame($route, $route->name('other'));
     }
