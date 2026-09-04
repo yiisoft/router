@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
+use LogicException;
 use Stringable;
 use Yiisoft\Http\Method;
 use Yiisoft\Router\Internal\MiddlewareFilter;
@@ -12,6 +13,7 @@ use Yiisoft\Router\Internal\MiddlewareFilter;
 use function array_splice;
 use function count;
 use function in_array;
+use function sprintf;
 use function strval;
 
 /**
@@ -160,6 +162,14 @@ class Route implements Stringable
      */
     public static function methods(array $methods, string $pattern): self
     {
+        if (static::class !== self::class) {
+            throw new LogicException(sprintf(
+                'Static factory methods are only valid on %s itself, not %s. Use the constructor instead.',
+                self::class,
+                static::class,
+            ));
+        }
+
         return new self($pattern, $methods);
     }
 
@@ -348,15 +358,27 @@ class Route implements Stringable
      */
     private function setHosts(array $hosts): void
     {
-        $this->hosts = [];
+        $this->hosts = self::normalizeHosts($hosts);
+    }
+
+    /**
+     * @param string[] $hosts
+     *
+     * @return string[]
+     */
+    public static function normalizeHosts(array $hosts): array
+    {
+        $result = [];
 
         foreach ($hosts as $host) {
             $host = rtrim($host, '/');
 
-            if ($host !== '' && !in_array($host, $this->hosts, true)) {
-                $this->hosts[] = $host;
+            if ($host !== '' && !in_array($host, $result, true)) {
+                $result[] = $host;
             }
         }
+
+        return $result;
     }
 
     /**

@@ -7,8 +7,6 @@ namespace Yiisoft\Router;
 use InvalidArgumentException;
 use Yiisoft\Router\Internal\MiddlewareFilter;
 
-use function in_array;
-
 final class Group
 {
     /**
@@ -204,15 +202,7 @@ final class Group
      */
     private function setHosts(array $hosts): void
     {
-        $this->hosts = [];
-
-        foreach ($hosts as $host) {
-            $host = rtrim($host, '/');
-
-            if ($host !== '' && !in_array($host, $this->hosts, true)) {
-                $this->hosts[] = $host;
-            }
-        }
+        $this->hosts = Route::normalizeHosts($hosts);
     }
 
     /**
