@@ -19,10 +19,12 @@ use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Route;
 use Yiisoft\Router\Tests\Support\AssertTrait;
 use Yiisoft\Router\Tests\Support\Container;
+use Yiisoft\Router\Tests\Support\IntTestRouteName;
 use Yiisoft\Router\Tests\Support\TestMiddleware1;
 use Yiisoft\Router\Tests\Support\TestMiddleware2;
 use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware3;
+use Yiisoft\Router\Tests\Support\TestRouteName;
 use InvalidArgumentException;
 
 final class RouteTest extends TestCase
@@ -34,6 +36,28 @@ final class RouteTest extends TestCase
         $route = Route::get('/')->name('test.route');
 
         $this->assertSame('test.route', $route->getData('name'));
+    }
+
+    public function testNameFromBackedEnum(): void
+    {
+        $route = Route::get('/')->name(TestRouteName::Home);
+
+        $this->assertSame('home', $route->getData('name'));
+    }
+
+    public function testNameFromIntBackedEnum(): void
+    {
+        $route = Route::get('/')->name(IntTestRouteName::About);
+
+        $this->assertSame('2', $route->getData('name'));
+    }
+
+    public function testNameFromBackedEnumIsInterchangeableWithString(): void
+    {
+        $this->assertSame(
+            Route::get('/')->name('home')->getData('name'),
+            Route::get('/')->name(TestRouteName::Home)->getData('name'),
+        );
     }
 
     public function testNameDefault(): void

@@ -123,9 +123,7 @@ final class RouteCollection implements RouteCollectionInterface
                     continue;
                 }
                 /** @psalm-suppress PossiblyNullArrayOffset Checked group prefix on not empty above. */
-                if (!isset($tree[$item->getData('prefix')])) {
-                    $tree[$item->getData('prefix')] = [];
-                }
+                $tree[$item->getData('prefix')] ??= [];
                 /**
                  * @psalm-suppress MixedArgumentTypeCoercion
                  * @psalm-suppress MixedArgument,PossiblyNullArrayOffset
