@@ -3,27 +3,6 @@
 This file contains the upgrade notes for the Yii Router.
 These notes highlight changes that could break your application when you upgrade it from one major version to another.
 
-## 4.0.3
-
-Static route and group factories are deprecated but remain available. Replace them with constructors:
-
-| Deprecated factory | Replacement |
-| --- | --- |
-| `Route::get($pattern)` | `new Get($pattern)` |
-| `Route::post($pattern)` | `new Post($pattern)` |
-| `Route::put($pattern)` | `new Put($pattern)` |
-| `Route::delete($pattern)` | `new Delete($pattern)` |
-| `Route::patch($pattern)` | `new Patch($pattern)` |
-| `Route::head($pattern)` | `new Head($pattern)` |
-| `Route::options($pattern)` | `new Options($pattern)` |
-| `Route::methods($methods, $pattern)` | `new Route(pattern: $pattern, methods: $methods)` |
-| `Group::create($prefix)` | `new Group($prefix)` |
-
-Import the method-specific classes from `Yiisoft\Router\Route`, and `Route` and `Group` from `Yiisoft\Router`.
-Configuration can be passed as named constructor arguments. Existing immutable configuration methods remain available.
-When chaining methods after a constructor, use parentheses, for example `(new Get('/'))->name('home')`,
-to support PHP 8.1.
-
 ## 4.0.0
 
 ### `Route`, `Group` and `MatchingResult` changes

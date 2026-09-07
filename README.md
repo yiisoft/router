@@ -155,10 +155,10 @@ new Route(
 
 The static factories `Route::get()`, `post()`, `put()`, `delete()`, `patch()`, `head()`, `options()`,
 `methods()`, and `Group::create()` are deprecated. Use constructors instead. The immutable configuration methods
-remain available; when chaining them after `new`, wrap the construction in parentheses for PHP 8.1 compatibility.
+remain available.
 
 If you want to generate a URL based on route and its parameters, provide the `name` constructor argument.
-Check "Creating URLs" for details.
+Check [Creating URLs](#creating-urls) for details.
 
 The `action` argument is a primary middleware definition that is invoked last when matching result `process()`
 method is called. How middleware are executed and what middleware formats are accepted is defined by middleware

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
+use Yiisoft\Router\Internal\HostNormalizer;
 use Yiisoft\Router\Internal\MiddlewareFilter;
 
 final class Group
@@ -204,7 +205,7 @@ final class Group
      */
     private function setHosts(array $hosts): void
     {
-        $this->hosts = Route::normalizeHosts($hosts);
+        $this->hosts = HostNormalizer::normalize($hosts);
     }
 
     /**

@@ -8,11 +8,11 @@ use InvalidArgumentException;
 use LogicException;
 use Stringable;
 use Yiisoft\Http\Method;
+use Yiisoft\Router\Internal\HostNormalizer;
 use Yiisoft\Router\Internal\MiddlewareFilter;
 
 use function array_splice;
 use function count;
-use function in_array;
 use function sprintf;
 use function strval;
 
@@ -376,26 +376,6 @@ class Route implements Stringable
     }
 
     /**
-     * @param string[] $hosts
-     *
-     * @return string[]
-     */
-    public static function normalizeHosts(array $hosts): array
-    {
-        $result = [];
-
-        foreach ($hosts as $host) {
-            $host = rtrim($host, '/');
-
-            if ($host !== '' && !in_array($host, $result, true)) {
-                $result[] = $host;
-            }
-        }
-
-        return $result;
-    }
-
-    /**
      * @param array<string,null|Stringable|scalar> $defaults
      */
     private function setDefaults(array $defaults): void
@@ -408,7 +388,7 @@ class Route implements Stringable
      */
     private function setHosts(array $hosts): void
     {
-        $this->hosts = self::normalizeHosts($hosts);
+        $this->hosts = HostNormalizer::normalize($hosts);
     }
 
     /**

@@ -31,6 +31,7 @@ use Yiisoft\Router\Tests\Support\TestMiddleware2;
 use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware3;
 use InvalidArgumentException;
+use LogicException;
 
 final class RouteTest extends TestCase
 {
@@ -97,6 +98,48 @@ final class RouteTest extends TestCase
         $this->assertTrue($route->getData('override'));
         $this->assertSame([TestMiddleware1::class], $route->getData('enabledMiddlewares'));
         $this->assertNotSame($route, $route->name('other'));
+    }
+
+    /**
+     * @param class-string<Route> $class
+     */
+    #[DataProvider('methodRouteProvider')]
+    public function testMethodRouteDefaults(string $class, string $method): void
+    {
+        $route = new $class('/');
+
+        $this->assertSame([$method], $route->getData('methods'));
+        $this->assertFalse($route->getData('override'));
+    }
+
+    public static function staticFactoryProvider(): array
+    {
+        return [
+            ['get'],
+            ['post'],
+            ['put'],
+            ['delete'],
+            ['patch'],
+            ['head'],
+            ['options'],
+            ['methods'],
+        ];
+    }
+
+    #[DataProvider('staticFactoryProvider')]
+    public function testStaticFactoryRejectsSubclass(string $factory): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage(
+            'Static factory methods are only valid on ' . Route::class . ' itself, not ' . Get::class
+            . '. Use the constructor instead.',
+        );
+
+        if ($factory === 'methods') {
+            Get::methods([Method::GET], '/');
+        } else {
+            Get::$factory('/');
+        }
     }
 
     public function testName(): void
