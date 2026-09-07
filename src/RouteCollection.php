@@ -171,7 +171,7 @@ final class RouteCollection implements RouteCollectionInterface
 
         $pattern = $modifiedItem->getData('pattern');
         $hosts = $modifiedItem->getData('hosts');
-        $optionsRoute = Route::options($pattern);
+        $optionsRoute = new Route\Options($pattern);
         if (!empty($hosts)) {
             $optionsRoute = $optionsRoute->hosts(...$hosts);
         }

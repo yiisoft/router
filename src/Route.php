@@ -122,43 +122,73 @@ class Route implements Stringable
         ];
     }
 
+    /**
+     * @deprecated Use new \Yiisoft\Router\Route\Get() instead.
+     */
     public static function get(string $pattern): self
     {
+        /** @psalm-suppress DeprecatedMethod Retain delegation between deprecated factories for compatibility. */
         return self::methods([Method::GET], $pattern);
     }
 
+    /**
+     * @deprecated Use new \Yiisoft\Router\Route\Post() instead.
+     */
     public static function post(string $pattern): self
     {
+        /** @psalm-suppress DeprecatedMethod Retain delegation between deprecated factories for compatibility. */
         return self::methods([Method::POST], $pattern);
     }
 
+    /**
+     * @deprecated Use new \Yiisoft\Router\Route\Put() instead.
+     */
     public static function put(string $pattern): self
     {
+        /** @psalm-suppress DeprecatedMethod Retain delegation between deprecated factories for compatibility. */
         return self::methods([Method::PUT], $pattern);
     }
 
+    /**
+     * @deprecated Use new \Yiisoft\Router\Route\Delete() instead.
+     */
     public static function delete(string $pattern): self
     {
+        /** @psalm-suppress DeprecatedMethod Retain delegation between deprecated factories for compatibility. */
         return self::methods([Method::DELETE], $pattern);
     }
 
+    /**
+     * @deprecated Use new \Yiisoft\Router\Route\Patch() instead.
+     */
     public static function patch(string $pattern): self
     {
+        /** @psalm-suppress DeprecatedMethod Retain delegation between deprecated factories for compatibility. */
         return self::methods([Method::PATCH], $pattern);
     }
 
+    /**
+     * @deprecated Use new \Yiisoft\Router\Route\Head() instead.
+     */
     public static function head(string $pattern): self
     {
+        /** @psalm-suppress DeprecatedMethod Retain delegation between deprecated factories for compatibility. */
         return self::methods([Method::HEAD], $pattern);
     }
 
+    /**
+     * @deprecated Use new \Yiisoft\Router\Route\Options() instead.
+     */
     public static function options(string $pattern): self
     {
+        /** @psalm-suppress DeprecatedMethod Retain delegation between deprecated factories for compatibility. */
         return self::methods([Method::OPTIONS], $pattern);
     }
 
     /**
      * @param string[] $methods
+     *
+     * @deprecated Use new Route(pattern: $pattern, methods: $methods) instead.
      */
     public static function methods(array $methods, string $pattern): self
     {
@@ -261,7 +291,7 @@ class Route implements Stringable
      *
      * ```php
      * // Resulting middleware stack order: Middleware1, Middleware2, Middleware3
-     * Route::get('/')
+     * (new \Yiisoft\Router\Route\Get('/'))
      *   ->middleware(Middleware3::class)
      *   ->prependMiddleware(Middleware1::class, Middleware2::class)
      * ```
