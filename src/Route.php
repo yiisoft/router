@@ -5,36 +5,35 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
+use LogicException;
 use Stringable;
 use Yiisoft\Http\Method;
+use Yiisoft\Router\Internal\HostNormalizer;
 use Yiisoft\Router\Internal\MiddlewareFilter;
 
 use function array_splice;
 use function count;
-use function in_array;
+use function sprintf;
 use function strval;
 
 /**
  * Route defines a mapping from URL to callback / name and vice versa.
  */
-final class Route implements Stringable
+class Route implements Stringable
 {
-    private ?string $name = null;
-
     /**
      * @var string[]
      */
     private array $hosts = [];
-    private bool $override = false;
     private bool $actionAdded = false;
 
     /**
      * @var array[]|callable[]|string[]
      * @psalm-var list<array|callable|string>
      */
-    private array $middlewares = [];
+    private array $middlewares;
 
-    private array $disabledMiddlewares = [];
+    private array $disabledMiddlewares;
 
     /**
      * @psalm-var list<array|callable|string>|null
@@ -44,15 +43,45 @@ final class Route implements Stringable
     /**
      * @var array<string,string>
      */
-    private array $defaults = [];
+    private array $defaults;
 
     /**
-     * @param string[] $methods
+     * Creates a route.
+     *
+     * @param string $pattern URL pattern to match.
+     * @param string[] $methods HTTP methods to match.
+     * @param string|null $name Route name.
+     * @param array|callable|string|null $action Primary middleware definition that should be invoked last for a matched route.
+     * @param array[]|callable[]|string[] $middlewares Handler middleware definitions that should be invoked for a matched route.
+     * @param array<string,null|Stringable|scalar> $defaults Parameter default values indexed by parameter names.
+     * @param string[] $hosts Hosts that the route applies to.
+     * @param bool $override Whether the route should replace an existing route with the same name.
+     * @param array[]|callable[]|string[] $disabledMiddlewares Middleware definitions to exclude when the action is handled.
      */
-    private function __construct(
-        private array $methods,
+    public function __construct(
         private string $pattern,
-    ) {}
+        private array $methods,
+        private ?string $name = null,
+        array|callable|string|null $action = null,
+        array $middlewares = [],
+        array $defaults = [],
+        array $hosts = [],
+        private bool $override = false,
+        array $disabledMiddlewares = [],
+    ) {
+        /** @infection-ignore-all Array keys are discarded by MiddlewareFilter::filter(). */
+        $this->middlewares = array_values($middlewares);
+        $this->setDefaults($defaults);
+        /** @infection-ignore-all Array keys are discarded by MiddlewareFilter::filter(). */
+        $this->disabledMiddlewares = array_values($disabledMiddlewares);
+
+        $this->setHosts($hosts);
+
+        if ($action !== null) {
+            $this->middlewares[] = $action;
+            $this->actionAdded = true;
+        }
+    }
 
     public function __toString(): string
     {
@@ -93,47 +122,85 @@ final class Route implements Stringable
         ];
     }
 
+    /**
+     * @deprecated Use new \Yiisoft\Router\Route\Get() instead.
+     */
     public static function get(string $pattern): self
     {
+        /** @psalm-suppress DeprecatedMethod Retain delegation between deprecated factories for compatibility. */
         return self::methods([Method::GET], $pattern);
     }
 
+    /**
+     * @deprecated Use new \Yiisoft\Router\Route\Post() instead.
+     */
     public static function post(string $pattern): self
     {
+        /** @psalm-suppress DeprecatedMethod Retain delegation between deprecated factories for compatibility. */
         return self::methods([Method::POST], $pattern);
     }
 
+    /**
+     * @deprecated Use new \Yiisoft\Router\Route\Put() instead.
+     */
     public static function put(string $pattern): self
     {
+        /** @psalm-suppress DeprecatedMethod Retain delegation between deprecated factories for compatibility. */
         return self::methods([Method::PUT], $pattern);
     }
 
+    /**
+     * @deprecated Use new \Yiisoft\Router\Route\Delete() instead.
+     */
     public static function delete(string $pattern): self
     {
+        /** @psalm-suppress DeprecatedMethod Retain delegation between deprecated factories for compatibility. */
         return self::methods([Method::DELETE], $pattern);
     }
 
+    /**
+     * @deprecated Use new \Yiisoft\Router\Route\Patch() instead.
+     */
     public static function patch(string $pattern): self
     {
+        /** @psalm-suppress DeprecatedMethod Retain delegation between deprecated factories for compatibility. */
         return self::methods([Method::PATCH], $pattern);
     }
 
+    /**
+     * @deprecated Use new \Yiisoft\Router\Route\Head() instead.
+     */
     public static function head(string $pattern): self
     {
+        /** @psalm-suppress DeprecatedMethod Retain delegation between deprecated factories for compatibility. */
         return self::methods([Method::HEAD], $pattern);
     }
 
+    /**
+     * @deprecated Use new \Yiisoft\Router\Route\Options() instead.
+     */
     public static function options(string $pattern): self
     {
+        /** @psalm-suppress DeprecatedMethod Retain delegation between deprecated factories for compatibility. */
         return self::methods([Method::OPTIONS], $pattern);
     }
 
     /**
      * @param string[] $methods
+     *
+     * @deprecated Use new Route(pattern: $pattern, methods: $methods) instead.
      */
     public static function methods(array $methods, string $pattern): self
     {
-        return new self($methods, $pattern);
+        if (static::class !== self::class) {
+            throw new LogicException(sprintf(
+                'Static factory methods are only valid on %s itself, not %s. Use the constructor instead.',
+                self::class,
+                static::class,
+            ));
+        }
+
+        return new self($pattern, $methods);
     }
 
     public function name(string $name): self
@@ -158,15 +225,7 @@ final class Route implements Stringable
     public function hosts(string ...$hosts): self
     {
         $route = clone $this;
-        $route->hosts = [];
-
-        foreach ($hosts as $host) {
-            $host = rtrim($host, '/');
-
-            if ($host !== '' && !in_array($host, $route->hosts, true)) {
-                $route->hosts[] = $host;
-            }
-        }
+        $route->setHosts($hosts);
 
         return $route;
     }
@@ -189,7 +248,7 @@ final class Route implements Stringable
     public function defaults(array $defaults): self
     {
         $route = clone $this;
-        $route->defaults = array_map(strval(...), $defaults);
+        $route->setDefaults($defaults);
         return $route;
     }
 
@@ -232,7 +291,7 @@ final class Route implements Stringable
      *
      * ```php
      * // Resulting middleware stack order: Middleware1, Middleware2, Middleware3
-     * Route::get('/')
+     * (new \Yiisoft\Router\Route\Get('/'))
      *   ->middleware(Middleware3::class)
      *   ->prependMiddleware(Middleware1::class, Middleware2::class)
      * ```
@@ -314,6 +373,22 @@ final class Route implements Stringable
             'enabledMiddlewares' => $this->getEnabledMiddlewares(),
             default => throw new InvalidArgumentException('Unknown data key: ' . $key),
         };
+    }
+
+    /**
+     * @param array<string,null|Stringable|scalar> $defaults
+     */
+    private function setDefaults(array $defaults): void
+    {
+        $this->defaults = array_map(strval(...), $defaults);
+    }
+
+    /**
+     * @param string[] $hosts
+     */
+    private function setHosts(array $hosts): void
+    {
+        $this->hosts = HostNormalizer::normalize($hosts);
     }
 
     /**

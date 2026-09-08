@@ -5,17 +5,11 @@ declare(strict_types=1);
 namespace Yiisoft\Router;
 
 use InvalidArgumentException;
+use Yiisoft\Router\Internal\HostNormalizer;
 use Yiisoft\Router\Internal\MiddlewareFilter;
-
-use function in_array;
 
 final class Group
 {
-    /**
-     * @var Group[]|Route[]
-     */
-    private array $routes = [];
-
     /**
      * @var array[]|callable[]|string[]
      * @psalm-var list<array|callable|string>
@@ -26,7 +20,6 @@ final class Group
      * @var string[]
      */
     private array $hosts = [];
-    private ?string $namePrefix = null;
     private array $disabledMiddlewares = [];
 
     /**
@@ -39,14 +32,41 @@ final class Group
      */
     private $corsMiddleware = null;
 
-    private function __construct(
+    /**
+     * Creates a route group.
+     *
+     * @param string|null $prefix URL prefix to prepend to all routes of the group.
+     * @param Group[]|Route[] $routes Routes and nested groups to include in the group.
+     * @param array[]|callable[]|string[] $middlewares Handler middleware definitions that should be invoked for a matched route.
+     * @param string[] $hosts Hosts that the group applies to.
+     * @param string|null $namePrefix Name prefix to prepend to all routes of the group.
+     * @param array[]|callable[]|string[] $disabledMiddlewares Middleware definitions to exclude when an action is handled.
+     * @param array|callable|string|null $corsMiddleware Middleware definition for CORS requests.
+     */
+    public function __construct(
         private ?string $prefix = null,
-    ) {}
+        private array $routes = [],
+        array $middlewares = [],
+        array $hosts = [],
+        private ?string $namePrefix = null,
+        array $disabledMiddlewares = [],
+        array|callable|string|null $corsMiddleware = null,
+    ) {
+        /** @infection-ignore-all Array keys are discarded by MiddlewareFilter::filter(). */
+        $this->middlewares = array_values($middlewares);
+        /** @infection-ignore-all Array keys are discarded by MiddlewareFilter::filter(). */
+        $this->disabledMiddlewares = array_values($disabledMiddlewares);
+        $this->corsMiddleware = $corsMiddleware;
+
+        $this->setHosts($hosts);
+    }
 
     /**
      * Create a new group instance.
      *
      * @param string|null $prefix URL prefix to prepend to all routes of the group.
+     *
+     * @deprecated Use new Group() instead.
      */
     public static function create(?string $prefix = null): self
     {
@@ -124,14 +144,7 @@ final class Group
     public function hosts(string ...$hosts): self
     {
         $new = clone $this;
-
-        foreach ($hosts as $host) {
-            $host = rtrim($host, '/');
-
-            if ($host !== '' && !in_array($host, $new->hosts, true)) {
-                $new->hosts[] = $host;
-            }
-        }
+        $new->setHosts($hosts);
 
         return $new;
     }
@@ -185,6 +198,14 @@ final class Group
             'enabledMiddlewares' => $this->getEnabledMiddlewares(),
             default => throw new InvalidArgumentException('Unknown data key: ' . $key),
         };
+    }
+
+    /**
+     * @param string[] $hosts
+     */
+    private function setHosts(array $hosts): void
+    {
+        $this->hosts = HostNormalizer::normalize($hosts);
     }
 
     /**

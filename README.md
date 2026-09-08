@@ -50,7 +50,7 @@ Common usage of the router looks like the following:
 ```php
 use Yiisoft\Router\CurrentRoute;
 use Yiisoft\Router\Group;
-use Yiisoft\Router\Route;
+use Yiisoft\Router\Route\Get;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectorInterface;
 use Yiisoft\Router\UrlMatcherInterface;
@@ -60,16 +60,19 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 // Define routes
 $routes = [
-    Route::get('/')
-        ->action(static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+    new Get(
+        pattern: '/',
+        action: static function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
             $response = $responseFactory->createResponse();
             $response
                 ->getBody()
                 ->write('You are at homepage.');
             return $response;
-        }),
-    Route::get('/test/{id:\w+}')
-        ->action(static function (CurrentRoute $currentRoute, RequestHandlerInterface $next) use ($responseFactory) {
+        },
+    ),
+    new Get(
+        pattern: '/test/{id:\w+}',
+        action: static function (CurrentRoute $currentRoute, RequestHandlerInterface $next) use ($responseFactory) {
             $id = $currentRoute->getArgument('id');
     
             $response = $responseFactory->createResponse();
@@ -77,7 +80,8 @@ $routes = [
                 ->getBody()
                 ->write('You are at test with argument ' . $id);
             return $response;
-        })
+        },
+    ),
 ];
 
 // Add routes defined to route collector
@@ -124,50 +128,67 @@ application middleware processes the request.
 
 ### Routes
 
-Route could match for one or more HTTP methods: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`. There are
-corresponding static methods for creating a route for a certain method. If a route is to handle multiple methods at once,
-it could be created using `methods()`.
+Routes can match one or more HTTP methods. Use `new Get()`, `new Post()`, `new Put()`, `new Delete()`,
+`new Patch()`, `new Head()`, or `new Options()` from the `Yiisoft\Router\Route` namespace for a single method.
+For multiple methods, use `new Route()` with the `methods` argument.
+
+Configure routes directly with named constructor arguments:
 
 ```php
+use Yiisoft\Http\Method;
 use Yiisoft\Router\Route;
+use Yiisoft\Router\Route\Delete;
 
-Route::delete('/post/{id}')
-    ->name('post-delete')
-    ->action([PostController::class, 'actionDelete']);
-    
-Route::methods([Method::GET, Method::POST], '/page/add')
-    ->name('page-add')
-    ->action([PageController::class, 'actionAdd']);
+new Delete(
+    pattern: '/post/{id}',
+    name: 'post-delete',
+    action: [PostController::class, 'actionDelete'],
+);
+
+new Route(
+    pattern: '/page/add',
+    methods: [Method::GET, Method::POST],
+    name: 'page-add',
+    action: [PageController::class, 'actionAdd'],
+);
 ```
 
-If you want to generate a URL based on route and its parameters, give it a name with `name()`. Check "Creating URLs"
-for details.
+The static factories `Route::get()`, `post()`, `put()`, `delete()`, `patch()`, `head()`, `options()`,
+`methods()`, and `Group::create()` are deprecated. Use constructors instead. The immutable configuration methods
+remain available.
 
-`action()` in the above is a primary middleware definition that is invoked last when matching result `process()`
+If you want to generate a URL based on route and its parameters, provide the `name` constructor argument.
+Check [Creating URLs](#creating-urls) for details.
+
+The `action` argument is a primary middleware definition that is invoked last when matching result `process()`
 method is called. How middleware are executed and what middleware formats are accepted is defined by middleware
 dispatcher used. See [readme of yiisoft/middleware-dispatcher](https://github.com/yiisoft/middleware-dispatcher)
-for middleware examples.  
+for middleware examples.
 
 If a route should be applied only to a certain host, it could be defined like the following:
 
 ```php
-use Yiisoft\Router\Route;
+use Yiisoft\Router\Route\Get;
 
-Route::get('/special')
-    ->name('special')
-    ->action(SpecialAction::class)
-    ->host('https://www.yiiframework.com');
+new Get(
+    pattern: '/special',
+    name: 'special',
+    action: SpecialAction::class,
+    hosts: ['https://www.yiiframework.com'],
+);
 ```
 
-Defaults for parameters could be provided via `defaults()` method:
+Defaults for parameters can be provided via the `defaults` constructor argument:
 
 ```php
-use Yiisoft\Router\Route;
+use Yiisoft\Router\Route\Get;
 
-Route::get('/api[/v{version}]')
-    ->name('api-index')
-    ->action(ApiAction::class)
-    ->defaults(['version' => 1]);
+new Get(
+    pattern: '/api[/v{version}]',
+    name: 'api-index',
+    action: ApiAction::class,
+    defaults: ['version' => 1],
+);
 ```
 
 In the above we specify that if "version" is not obtained from URL during matching then it will be `1`.
@@ -175,13 +196,16 @@ In the above we specify that if "version" is not obtained from URL during matchi
 Besides action, additional middleware to execute before the action itself could be defined:
 
 ```php
+use Yiisoft\Http\Method;
 use Yiisoft\Router\Route;
 
-Route::methods([Method::GET, Method::POST], '/page/add')
-    ->middleware(Authentication::class)
-    ->middleware(ExtraHeaders::class)
-    ->action([PostController::class, 'add'])
-    ->name('blog/add');
+new Route(
+    pattern: '/page/add',
+    methods: [Method::GET, Method::POST],
+    name: 'blog/add',
+    action: [PostController::class, 'add'],
+    middlewares: [Authentication::class, ExtraHeaders::class],
+);
 ```
 
 It is typically used for a certain actions that could be reused for multiple routes such as authentication.
@@ -192,12 +216,14 @@ If there is a need to either add middleware to be executed first or remove exist
 If you combine routes from multiple sources and want last route to have priority over existing ones, mark it as "override":
 
 ```php
-use Yiisoft\Router\Route;
+use Yiisoft\Router\Route\Get;
 
-Route::get('/special')
-    ->name('special')
-    ->action(SpecialAction::class)
-    ->override();
+new Get(
+    pattern: '/special',
+    name: 'special',
+    action: SpecialAction::class,
+    override: true,
+);
 ```
 
 ### Route groups
@@ -205,23 +231,25 @@ Route::get('/special')
 Routes could be grouped. That is useful for API endpoints and similar cases:
 
 ```php
-use \Yiisoft\Router\Route;
-use \Yiisoft\Router\Group;
-use \Yiisoft\Router\RouteCollectorInterface;
+use Yiisoft\Router\Group;
+use Yiisoft\Router\Route\Get;
+use Yiisoft\Router\RouteCollectorInterface;
 
 // for obtaining router see adapter package of choice readme
 $collector = $container->get(RouteCollectorInterface::class);
     
 $collector->addRoute(
-    Group::create('/api')
-        ->middleware(ApiAuthentication::class)
-        ->host('https://example.com')
-        ->routes(
-            Route::get('/comments'),
-            Group::create('/posts')->routes(
-                Route::get('/list'),
-            ),
-        )
+    new Group(
+        prefix: '/api',
+        middlewares: [ApiAuthentication::class],
+        hosts: ['https://example.com'],
+        routes: [
+            new Get('/comments'),
+            new Group('/posts', routes: [
+                new Get('/list'),
+            ]),
+        ],
+    ),
 );
 ```
 
@@ -250,11 +278,13 @@ use Yiisoft\Router\Group;
 use \Tuupola\Middleware\CorsMiddleware;
 
 return [
-    Group::create('/api')
-        ->withCors(CorsMiddleware::class)
-        ->routes(
-          // ...
-        );
+    new Group(
+        prefix: '/api',
+        corsMiddleware: CorsMiddleware::class,
+        routes: [
+            // ...
+        ],
+    ),
 ];
 ```
 
@@ -263,6 +293,8 @@ return [
 URLs could be created using `UrlGeneratorInterface::generate()`. Let's assume a route is defined like the following:
 
 ```php
+use Yiisoft\Http\Method;
+use Yiisoft\Router\Route\Get;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -270,7 +302,6 @@ use Yiisoft\Yii\Http\Handler\NotFoundHandler;
 use Yiisoft\Yii\Runner\Http\SapiEmitter;
 use Yiisoft\Yii\Runner\Http\ServerRequestFactory;
 use Yiisoft\Router\CurrentRoute;
-use Yiisoft\Router\Route;
 use Yiisoft\Router\RouteCollection;
 use Yiisoft\Router\RouteCollectorInterface;
 use Yiisoft\Router\Fastroute\UrlMatcher;
@@ -283,8 +314,9 @@ $responseFactory = $container->get(ResponseFactoryInterface::class);
 $notFoundHandler = new NotFoundHandler($responseFactory);
 $collector = $container->get(RouteCollectorInterface::class);
 $collector->addRoute(
-    Route::get('/test/{id:\w+}')
-        ->action(static function (CurrentRoute $currentRoute, RequestHandlerInterface $next) use ($responseFactory) {
+    new Get(
+        pattern: '/test/{id:\w+}',
+        action: static function (CurrentRoute $currentRoute, RequestHandlerInterface $next) use ($responseFactory) {
             $id = $currentRoute->getArgument('id');
             $response = $responseFactory->createResponse();
             $response
@@ -292,8 +324,9 @@ $collector->addRoute(
                 ->write('You are at test with argument ' . $id);
 
            return $response;
-        })
-        ->name('test')
+        },
+        name: 'test',
+    )
 );
 $router = new UrlMatcher(new RouteCollection($collector));
 $route = $router->match($request);
@@ -344,21 +377,22 @@ modifying URLs for filtering and/or sorting.
 For such a route:
 
 ```php
-use \Yiisoft\Router\Route;
+use Yiisoft\Router\Route\Post;
 
 $routes = [
-    Route::post('/post/{id:\d+}')
-        ->action([PostController::class, 'actionEdit']),
+    new Post(
+        pattern: '/post/{id:\d+}',
+        action: [PostController::class, 'actionEdit'],
+    ),
 ];
 ```
 
 The information could be obtained as follows:
 
 ```php
-use Psr\Http\Message\ResponseInterface
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 use Yiisoft\Router\CurrentRoute;
-use Yiisoft\Router\Route;
 
 final class PostController
 {   

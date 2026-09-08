@@ -100,7 +100,9 @@ final class RouteCollection implements RouteCollectionInterface
      */
     private function injectGroup(Group $group, array &$tree, string $prefix = '', string $namePrefix = ''): void
     {
+        /** @infection-ignore-all Concatenating null has the same effect as casting it to an empty string. */
         $prefix .= (string) $group->getData('prefix');
+        /** @infection-ignore-all Concatenating null has the same effect as casting it to an empty string. */
         $namePrefix .= (string) $group->getData('namePrefix');
         $items = $group->getData('routes');
         $pattern = null;
@@ -123,9 +125,7 @@ final class RouteCollection implements RouteCollectionInterface
                     continue;
                 }
                 /** @psalm-suppress PossiblyNullArrayOffset Checked group prefix on not empty above. */
-                if (!isset($tree[$item->getData('prefix')])) {
-                    $tree[$item->getData('prefix')] = [];
-                }
+                $tree[$item->getData('prefix')] ??= [];
                 /**
                  * @psalm-suppress MixedArgumentTypeCoercion
                  * @psalm-suppress MixedArgument,PossiblyNullArrayOffset
@@ -171,7 +171,7 @@ final class RouteCollection implements RouteCollectionInterface
 
         $pattern = $modifiedItem->getData('pattern');
         $hosts = $modifiedItem->getData('hosts');
-        $optionsRoute = Route::options($pattern);
+        $optionsRoute = new Route\Options($pattern);
         if (!empty($hosts)) {
             $optionsRoute = $optionsRoute->hosts(...$hosts);
         }
