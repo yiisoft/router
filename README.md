@@ -261,21 +261,6 @@ and `disableMiddleware()`. These middleware are executed prior to matched route'
 
 If host is specified, all routes in the group would match only if the host match.
 
-Groups can likewise be configured with named constructor arguments:
-
-```php
-use Yiisoft\Router\Group;
-use Yiisoft\Router\Route\Get;
-
-new Group(
-    prefix: '/api',
-    routes: [new Get('/comments')],
-    middlewares: [ApiAuthentication::class],
-    hosts: ['https://example.com'],
-    namePrefix: 'api/',
-);
-```
-
 ### Automatic OPTIONS response and CORS
 
 By default, router responds automatically to OPTIONS requests based on the routes defined:
