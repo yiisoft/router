@@ -160,6 +160,25 @@ remain available.
 If you want to generate a URL based on route and its parameters, provide the `name` constructor argument.
 Check [Creating URLs](#creating-urls) for details.
 
+Besides a string, `name()` also accepts a backed enumeration. That lets you keep route names in a single place and
+refer to them in a type-safe way:
+
+```php
+use Yiisoft\Router\Route;
+
+enum RouteName: string
+{
+    case PageAdd = 'page-add';
+}
+
+Route::methods([Method::GET, Method::POST], '/page/add')
+    ->name(RouteName::PageAdd)
+    ->action([PageController::class, 'actionAdd']);
+```
+
+The enumeration is resolved to its backing value right away, so the route name is still the string `page-add`. Pass
+that string where a route name is expected, for example `$urlGenerator->generate(RouteName::PageAdd->value)`.
+
 The `action` argument is a primary middleware definition that is invoked last when matching result `process()`
 method is called. How middleware are executed and what middleware formats are accepted is defined by middleware
 dispatcher used. See [readme of yiisoft/middleware-dispatcher](https://github.com/yiisoft/middleware-dispatcher)

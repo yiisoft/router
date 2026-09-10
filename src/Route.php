@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\Router;
 
+use BackedEnum;
 use InvalidArgumentException;
 use LogicException;
 use Stringable;
@@ -203,10 +204,14 @@ class Route implements Stringable
         return new self($pattern, $methods);
     }
 
-    public function name(string $name): self
+    /**
+     * @param string|BackedEnum $name Name of the route. A backed enumeration is resolved to its backing value, so
+     * the route name is still a string afterwards.
+     */
+    public function name(string|BackedEnum $name): self
     {
         $route = clone $this;
-        $route->name = $name;
+        $route->name = $name instanceof BackedEnum ? (string) $name->value : $name;
         return $route;
     }
 

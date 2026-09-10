@@ -2,6 +2,7 @@
 
 ## 4.0.3 under development
 
+- New #280: Allow to use backed enumerations as route name in `Route::name()` (@KalimeroMK)
 - Chg #295: Deprecate static route and group factories in favor of constructors (@samdark)
 - New #193: Add public constructors for routes and groups and method-specific route classes (@samdark)
 - Enh #276, #292: Explicitly import classes, functions, and constants in the "use" section (@rustamwin, @vjik)
