@@ -17,6 +17,13 @@ use Yiisoft\Http\Method;
 use Yiisoft\Middleware\Dispatcher\MiddlewareDispatcher;
 use Yiisoft\Middleware\Dispatcher\MiddlewareFactory;
 use Yiisoft\Router\Route;
+use Yiisoft\Router\Route\Delete;
+use Yiisoft\Router\Route\Get;
+use Yiisoft\Router\Route\Head;
+use Yiisoft\Router\Route\Options;
+use Yiisoft\Router\Route\Patch;
+use Yiisoft\Router\Route\Post;
+use Yiisoft\Router\Route\Put;
 use Yiisoft\Router\Tests\Support\AssertTrait;
 use Yiisoft\Router\Tests\Support\Container;
 use Yiisoft\Router\Tests\Support\IntTestRouteName;
@@ -26,10 +33,116 @@ use Yiisoft\Router\Tests\Support\TestController;
 use Yiisoft\Router\Tests\Support\TestMiddleware3;
 use Yiisoft\Router\Tests\Support\TestRouteName;
 use InvalidArgumentException;
+use LogicException;
 
 final class RouteTest extends TestCase
 {
     use AssertTrait;
+
+    public function testConstructor(): void
+    {
+        $action = static fn() => new Response();
+        $route = new Route(
+            pattern: '/post/{id}',
+            methods: [Method::GET, Method::POST],
+            name: 'post/view',
+            action: $action,
+            middlewares: [TestMiddleware1::class],
+            defaults: ['id' => 42],
+            hosts: ['example.com/', 'example.com', ''],
+            override: true,
+            disabledMiddlewares: [TestMiddleware1::class],
+        );
+
+        $this->assertSame([Method::GET, Method::POST], $route->getData('methods'));
+        $this->assertSame('/post/{id}', $route->getData('pattern'));
+        $this->assertSame('post/view', $route->getData('name'));
+        $this->assertSame(['id' => '42'], $route->getData('defaults'));
+        $this->assertSame(['example.com'], $route->getData('hosts'));
+        $this->assertTrue($route->getData('override'));
+        $this->assertSame([$action], $route->getData('enabledMiddlewares'));
+
+        $route = $route->middleware(TestMiddleware2::class);
+
+        $this->assertSame([TestMiddleware2::class, $action], $route->getData('enabledMiddlewares'));
+    }
+
+    public static function methodRouteProvider(): array
+    {
+        return [
+            [Get::class, Method::GET],
+            [Post::class, Method::POST],
+            [Put::class, Method::PUT],
+            [Delete::class, Method::DELETE],
+            [Patch::class, Method::PATCH],
+            [Head::class, Method::HEAD],
+            [Options::class, Method::OPTIONS],
+        ];
+    }
+
+    /**
+     * @param class-string<Route> $class
+     */
+    #[DataProvider('methodRouteProvider')]
+    public function testMethodRoute(string $class, string $method): void
+    {
+        $route = new $class(
+            pattern: '/',
+            name: 'index',
+            middlewares: [TestMiddleware1::class, TestMiddleware2::class],
+            override: true,
+            disabledMiddlewares: [TestMiddleware2::class],
+        );
+
+        $this->assertInstanceOf(Route::class, $route);
+        $this->assertSame([$method], $route->getData('methods'));
+        $this->assertSame('index', $route->getData('name'));
+        $this->assertTrue($route->getData('override'));
+        $this->assertSame([TestMiddleware1::class], $route->getData('enabledMiddlewares'));
+        $this->assertNotSame($route, $route->name('other'));
+    }
+
+    /**
+     * @param class-string<Route> $class
+     */
+    #[DataProvider('methodRouteProvider')]
+    public function testMethodRouteDefaults(string $class, string $method): void
+    {
+        $route = new $class('/');
+
+        $this->assertSame([$method], $route->getData('methods'));
+        $this->assertFalse($route->getData('override'));
+    }
+
+    public static function staticFactoryProvider(): array
+    {
+        return [
+            ['get'],
+            ['post'],
+            ['put'],
+            ['delete'],
+            ['patch'],
+            ['head'],
+            ['options'],
+            ['methods'],
+        ];
+    }
+
+    #[DataProvider('staticFactoryProvider')]
+    public function testStaticFactoryRejectsSubclass(string $factory): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage(
+            'Static factory methods are only valid on ' . Route::class . ' itself, not ' . Get::class
+            . '. Use the constructor instead.',
+        );
+
+        if ($factory === 'methods') {
+            Get::methods([Method::GET], '/');
+        } else {
+            Get::$factory('/');
+        }
+    }
 
     public function testName(): void
     {
