@@ -179,7 +179,6 @@ Route::methods([Method::GET, Method::POST], '/page/add')
 The enumeration is resolved to its backing value right away, so the route name is still the string `page-add`. Pass
 that string where a route name is expected, for example `$urlGenerator->generate(RouteName::PageAdd->value)`.
 
-`action()` in the above is a primary middleware definition that is invoked last when matching result `process()`
 The `action` argument is a primary middleware definition that is invoked last when matching result `process()`
 method is called. How middleware are executed and what middleware formats are accepted is defined by middleware
 dispatcher used. See [readme of yiisoft/middleware-dispatcher](https://github.com/yiisoft/middleware-dispatcher)
