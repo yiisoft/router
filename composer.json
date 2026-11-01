@@ -40,11 +40,11 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.89.1",
+        "infection/infection": "^0.29.8 || ^0.35.8",
         "nyholm/psr7": "^1.8.2",
         "phpunit/phpunit": "^10.5.45",
         "psr/container": "^1.1 || ^2.0.2",
         "rector/rector": "^2.0.9",
-        "roave/infection-static-analysis-plugin": "^1.35",
         "shipmonk/composer-dependency-analyser": "^1.8",
         "spatie/phpunit-watcher": "^1.24",
         "vimeo/psalm": "^5.26.1 || ^6.8.6",
@@ -88,7 +88,7 @@
     "scripts": {
         "cs-fix": "php-cs-fixer fix",
         "dependency-analyser": "composer-dependency-analyser",
-        "infection": "roave-infection-static-analysis-plugin --threads=max",
+        "infection": "infection --threads=max",
         "psalm": "psalm",
         "rector": "rector",
         "test": "phpunit --testdox",
